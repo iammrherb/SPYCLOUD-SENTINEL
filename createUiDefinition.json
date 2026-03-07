@@ -1,0 +1,320 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": true,
+            "basics": {
+                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel \u2014 Unified Threat Intelligence\n\nDeploy SpyCloud's darknet intelligence into Microsoft Sentinel with automated remediation, 17 analytics rules, and Security Copilot integration.\n\n**What gets deployed:**\n- Log Analytics Workspace + Microsoft Sentinel\n- SpyCloud CCF data connector (3 API pollers)\n- 4 custom log tables (73+ columns)\n- Logic App playbooks (MDE + Conditional Access)\n- Azure Key Vault for API key storage\n- Up to 17 analytics rules (all disabled by default)\n\n[Learn more](https://github.com/iammrherb/SPYCLOUD-SENTINEL)",
+                "location": {
+                    "label": "Deployment Region",
+                    "allowedValues": [
+                        "eastus",
+                        "eastus2",
+                        "westus2",
+                        "centralus",
+                        "northeurope",
+                        "westeurope",
+                        "uksouth",
+                        "australiaeast",
+                        "southeastasia",
+                        "japaneast"
+                    ],
+                    "visible": true
+                }
+            }
+        },
+        "basics": [
+            {
+                "name": "infoBox",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                    "icon": "Info",
+                    "text": "You need a SpyCloud Enterprise API key. Get yours at portal.spycloud.com \u2192 Settings \u2192 API Keys."
+                }
+            }
+        ],
+        "steps": [
+            {
+                "name": "workspaceConfig",
+                "label": "Workspace & Connector",
+                "elements": [
+                    {
+                        "name": "sectionWorkspace",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Log Analytics Workspace",
+                        "elements": [
+                            {
+                                "name": "createNewWorkspace",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Workspace",
+                                "defaultValue": "Create new workspace",
+                                "toolTip": "Create a new workspace or use an existing one with Sentinel enabled.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Create new workspace",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "Use existing workspace",
+                                            "value": false
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "workspace",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Workspace Name",
+                                "defaultValue": "",
+                                "placeholder": "e.g., spycloud-sentinel-ws",
+                                "toolTip": "Name for new workspace, or exact name of existing workspace.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-zA-Z][a-zA-Z0-9-]{2,62}$",
+                                    "validationMessage": "Must be 3-63 characters: letters, numbers, hyphens. Must start with a letter."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "retentionInDays",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 30,
+                                "max": 730,
+                                "label": "Data Retention (days)",
+                                "defaultValue": 90,
+                                "showStepMarkers": false,
+                                "toolTip": "How long to retain SpyCloud data in Log Analytics. 90 days recommended.",
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionSpyCloud",
+                        "type": "Microsoft.Common.Section",
+                        "label": "SpyCloud API Configuration",
+                        "elements": [
+                            {
+                                "name": "spycloudApiKey",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "SpyCloud API Key",
+                                    "confirmPassword": "Confirm API Key"
+                                },
+                                "toolTip": "Your SpyCloud Enterprise API key from portal.spycloud.com",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "options": {
+                                    "hideConfirmation": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "spycloudApiRegion",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "SpyCloud API Region",
+                                "defaultValue": "US (api.spycloud.io)",
+                                "toolTip": "Select the SpyCloud API endpoint region.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "US (api.spycloud.io)",
+                                            "value": "us"
+                                        },
+                                        {
+                                            "label": "EU (api.eu.spycloud.io)",
+                                            "value": "eu"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "automationConfig",
+                "label": "Automation & Security",
+                "elements": [
+                    {
+                        "name": "sectionPlaybooks",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Automated Remediation Playbooks",
+                        "elements": [
+                            {
+                                "name": "playbookInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Playbooks use Logic Apps with managed identity to automatically respond to SpyCloud-detected threats. API permissions are assigned after deployment via the post-deploy script."
+                                }
+                            },
+                            {
+                                "name": "enableMdePlaybook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable MDE Device Isolation Playbook",
+                                "toolTip": "Automatically isolates infected devices in Microsoft Defender for Endpoint and tags them for investigation. Requires MDE license.",
+                                "constraints": {
+                                    "required": false
+                                }
+                            },
+                            {
+                                "name": "enableCaPlaybook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Conditional Access Remediation Playbook",
+                                "toolTip": "Automatically resets passwords, revokes sessions, and adds users to CA exclusion groups when compromised credentials are detected. Requires Entra ID P1+.",
+                                "constraints": {
+                                    "required": false
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionSecurity",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Security & Key Management",
+                        "elements": [
+                            {
+                                "name": "enableKeyVault",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Store API key in Azure Key Vault",
+                                "toolTip": "Creates an Azure Key Vault and stores the SpyCloud API key as a secret. Recommended for production deployments.",
+                                "constraints": {
+                                    "required": false
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionRules",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Analytics Rules & Automation",
+                        "elements": [
+                            {
+                                "name": "enableAnalyticsRule",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable primary infostealer detection rule",
+                                "toolTip": "Creates the primary analytics rule that detects severity 20+ infostealer exposures and creates Sentinel incidents."
+                            },
+                            {
+                                "name": "enableAutomationRule",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable automation rule (auto-trigger playbooks)",
+                                "toolTip": "Creates an automation rule that automatically triggers the MDE and CA playbooks when incidents are created."
+                            },
+                            {
+                                "name": "enableAnalyticsRulesLibrary",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Deploy full analytics rules library (17 rules, ALL disabled by default)",
+                                "toolTip": "Deploys the complete library of 17 SpyCloud analytics rules including: plaintext password detection, PII exposure, session cookie theft, device re-infection, multi-domain exposure, geographic anomaly, remediation gap, AV bypass, and 4 identity provider correlation rules (Okta, Duo, Ping, Entra). ALL rules deploy DISABLED \u2014 you must review and enable each one individually."
+                            },
+                            {
+                                "name": "enablePostDeployScript",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Run automated post-deployment script (resolves DCE/DCR + assigns RBAC)",
+                                "toolTip": "Automatically runs a deployment script after all resources are created. It waits for the Sentinel content template, resolves the DCE Logs Ingestion URI and DCR Immutable ID, and assigns the Monitoring Metrics Publisher role to both Logic Apps. This eliminates the need to run scripts/post-deploy.sh manually for basic setup. MDE and Graph API permissions still require manual steps."
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "monitoringConfig",
+                "label": "Monitoring & Notifications",
+                "elements": [
+                    {
+                        "name": "sectionNotifications",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Alert Notifications",
+                        "elements": [
+                            {
+                                "name": "enableNotifications",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable email/Teams notifications",
+                                "toolTip": "Creates an Action Group and health alert that notifies you when SpyCloud data ingestion stops for more than 3 hours."
+                            },
+                            {
+                                "name": "notificationEmail",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Notification Email",
+                                "placeholder": "security-ops@company.com",
+                                "toolTip": "Email address for alert notifications.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                                    "validationMessage": "Enter a valid email address."
+                                },
+                                "visible": "[steps('monitoringConfig').sectionNotifications.enableNotifications]"
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionIdp",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Identity Provider Integration (Optional)",
+                        "elements": [
+                            {
+                                "name": "idpInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "If you use Okta, Duo, Ping Identity, or CyberArk, enable the analytics rules library above. The IdP correlation rules will detect compromised SpyCloud credentials being used in those providers' sign-in logs. You must install the IdP connectors from Sentinel Content Hub separately."
+                                }
+                            },
+                            {
+                                "name": "enableSessionCookieDetection",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable session cookie theft detection rules",
+                                "toolTip": "Deploys rules specifically for severity 25 exposures \u2014 stolen cookies and session tokens that enable MFA bypass."
+                            },
+                            {
+                                "name": "enableIdentityProviderAlerts",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable identity provider correlation rules (Okta, Duo, Ping, Entra)",
+                                "toolTip": "Deploys rules that correlate SpyCloud data with Okta, Duo, Ping, and Entra sign-in logs. Requires those providers' logs to be ingested into Sentinel."
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "workspace": "[steps('workspaceConfig').sectionWorkspace.workspace]",
+            "createNewWorkspace": "[steps('workspaceConfig').sectionWorkspace.createNewWorkspace]",
+            "retentionInDays": "[steps('workspaceConfig').sectionWorkspace.retentionInDays]",
+            "spycloudApiKey": "[steps('workspaceConfig').sectionSpyCloud.spycloudApiKey]",
+            "spycloudApiRegion": "[steps('workspaceConfig').sectionSpyCloud.spycloudApiRegion]",
+            "deploymentRegion": "[location()]",
+            "resourceGroupName": "[resourceGroup().name]",
+            "subscription": "[subscription().subscriptionId]",
+            "enableMdePlaybook": "[steps('automationConfig').sectionPlaybooks.enableMdePlaybook]",
+            "enableCaPlaybook": "[steps('automationConfig').sectionPlaybooks.enableCaPlaybook]",
+            "enableKeyVault": "[steps('automationConfig').sectionSecurity.enableKeyVault]",
+            "enableAnalyticsRule": "[steps('automationConfig').sectionRules.enableAnalyticsRule]",
+            "enableAutomationRule": "[steps('automationConfig').sectionRules.enableAutomationRule]",
+            "enableAnalyticsRulesLibrary": "[steps('automationConfig').sectionRules.enableAnalyticsRulesLibrary]",
+            "enableNotifications": "[steps('monitoringConfig').sectionNotifications.enableNotifications]",
+            "notificationEmail": "[steps('monitoringConfig').sectionNotifications.notificationEmail]",
+            "enableSessionCookieDetection": "[steps('monitoringConfig').sectionIdp.enableSessionCookieDetection]",
+            "enableIdentityProviderAlerts": "[steps('monitoringConfig').sectionIdp.enableIdentityProviderAlerts]",
+            "enablePostDeployScript": "[steps('automationConfig').sectionRules.enablePostDeployScript]"
+        }
+    }
+}

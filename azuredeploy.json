@@ -431,6 +431,13 @@
             "metadata": {
                 "description": "LEAVE BLANK on first deploy. Get after deployment via post-deploy.sh or Azure Portal."
             }
+        },
+        "enablePostDeployScript": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Run the automated post-deployment script that resolves DCE/DCR values and assigns RBAC. Requires the deploying user to have Contributor + User Access Administrator roles on the resource group."
+            }
         }
     },
     "variables": {
@@ -4506,6 +4513,89 @@
             "dependsOn": [
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
             ]
+        },
+        {
+            "condition": "[parameters('enablePostDeployScript')]",
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2023-01-31",
+            "name": "[concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id))]",
+            "location": "[variables('_effectiveWorkspaceLocation')]",
+            "tags": "[parameters('resourceTags')]"
+        },
+        {
+            "condition": "[parameters('enablePostDeployScript')]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)), 'contributor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id))), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "condition": "[parameters('enablePostDeployScript')]",
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2023-08-01",
+            "name": "spycloud-post-deploy",
+            "location": "[variables('_effectiveWorkspaceLocation')]",
+            "kind": "AzureCLI",
+            "tags": "[parameters('resourceTags')]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)))]": {}
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/roleAssignments', guid(concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)), 'contributor'))]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
+            ],
+            "properties": {
+                "azCliVersion": "2.60.0",
+                "timeout": "PT30M",
+                "retentionInterval": "PT1H",
+                "cleanupPreference": "OnSuccess",
+                "environmentVariables": [
+                    {
+                        "name": "RG",
+                        "value": "[resourceGroup().name]"
+                    },
+                    {
+                        "name": "WS",
+                        "value": "[parameters('workspace')]"
+                    },
+                    {
+                        "name": "DCE_NAME",
+                        "value": "[parameters('dataCollectionEndpointName')]"
+                    },
+                    {
+                        "name": "DCR_NAME",
+                        "value": "[parameters('dataCollectionRuleName')]"
+                    },
+                    {
+                        "name": "ENABLE_MDE",
+                        "value": "[string(parameters('enableMdePlaybook'))]"
+                    },
+                    {
+                        "name": "ENABLE_CA",
+                        "value": "[string(parameters('enableCaPlaybook'))]"
+                    },
+                    {
+                        "name": "MDE_PLAYBOOK",
+                        "value": "[concat('SpyCloud-MDE-Remediation-', parameters('workspace'))]"
+                    },
+                    {
+                        "name": "CA_PLAYBOOK",
+                        "value": "[concat('SpyCloud-CA-Remediation-', parameters('workspace'))]"
+                    }
+                ],
+                "scriptContent": "\n#!/bin/bash\nset -e\n\necho \"\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\"\necho \"\u2551  SpyCloud Sentinel \u2014 Automated Post-Deployment          \u2551\"\necho \"\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\"\n\nMON_ROLE=\"3913510d-42f4-4e42-8a64-420c390055eb\"\nDCE_URI=\"\"\nDCR_ID=\"\"\nDCR_RID=\"\"\n\necho \"\"\necho \"Phase 1: Waiting for content template resources (90s)...\"\nsleep 90\n\necho \"\"\necho \"Phase 2: Resolving DCE Logs Ingestion URI...\"\nfor i in 1 2 3 4 5; do\n    DCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" \\\n        --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null || echo \"\")\n    [ -n \"$DCE_URI\" ] && break\n    echo \"  Attempt $i/5 \u2014 waiting 30s...\"\n    sleep 30\ndone\necho \"  DCE URI: ${DCE_URI:-NOT RESOLVED}\"\n\necho \"\"\necho \"Phase 3: Resolving DCR Immutable ID...\"\nfor i in 1 2 3 4 5; do\n    DCR_ID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" \\\n        --query \"immutableId\" -o tsv 2>/dev/null || echo \"\")\n    DCR_RID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" \\\n        --query \"id\" -o tsv 2>/dev/null || echo \"\")\n    [ -n \"$DCR_ID\" ] && break\n    echo \"  Attempt $i/5 \u2014 waiting 30s...\"\n    sleep 30\ndone\necho \"  DCR ID: ${DCR_ID:-NOT RESOLVED}\"\n\necho \"\"\necho \"Phase 4: Assigning Monitoring Metrics Publisher on DCR...\"\nif [ -n \"$DCR_RID\" ]; then\n    for PB in \"$MDE_PLAYBOOK\" \"$CA_PLAYBOOK\"; do\n        PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" \\\n            --query \"identity.principalId\" -o tsv 2>/dev/null || echo \"\")\n        if [ -n \"$PID\" ]; then\n            az role assignment create \\\n                --assignee-object-id \"$PID\" \\\n                --assignee-principal-type ServicePrincipal \\\n                --role \"$MON_ROLE\" \\\n                --scope \"$DCR_RID\" 2>/dev/null \\\n                && echo \"  RBAC assigned: $PB\" \\\n                || echo \"  RBAC may already exist: $PB\"\n        else\n            echo \"  Logic App $PB not found \u2014 skipping\"\n        fi\n    done\nelse\n    echo \"  DCR not available \u2014 skipping RBAC\"\nfi\n\necho \"\"\necho \"Phase 5: Setting script outputs...\"\n\n# Output values for ARM template consumption\nOUTPUT_JSON=\"{\\\"dceLogsIngestionUri\\\":\\\"${DCE_URI}\\\",\\\"dcrImmutableId\\\":\\\"${DCR_ID}\\\"}\"\necho \"$OUTPUT_JSON\" > $AZ_SCRIPTS_OUTPUT_DIRECTORY/result.json\n\necho \"\"\necho \"\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\"\necho \"\u2551  Post-Deployment Complete                               \u2551\"\necho \"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\"\necho \"\u2551  DCE URI:  $DCE_URI\"\necho \"\u2551  DCR ID:   $DCR_ID\"\necho \"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\"\necho \"\u2551  REMAINING (requires Graph API \u2014 run post-deploy.sh):   \u2551\"\necho \"\u2551  \u2022 MDE: Machine.Isolate, Machine.ReadWrite.All          \u2551\"\necho \"\u2551  \u2022 Graph: User.ReadWrite.All, Directory.ReadWrite.All   \u2551\"\necho \"\u2551  \u2022 Admin consent in Azure Portal                        \u2551\"\necho \"\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\"\n"
+            }
         }
     ],
     "outputs": {
@@ -4662,6 +4752,16 @@
                 "signInLogs": "Entra ID \u2192 Monitoring \u2192 Diagnostic settings \u2192 Add diagnostic setting \u2192 check SignInLogs, NonInteractiveUserSignInLogs \u2192 Send to Log Analytics workspace \u2192 select your workspace",
                 "auditLogs": "Entra ID \u2192 Monitoring \u2192 Diagnostic settings \u2192 Add diagnostic setting \u2192 check AuditLogs \u2192 Send to Log Analytics workspace \u2192 select your workspace",
                 "riskySignIns": "Entra ID \u2192 Monitoring \u2192 Diagnostic settings \u2192 Add diagnostic setting \u2192 check RiskyUsers, UserRiskEvents \u2192 Send to Log Analytics workspace"
+            }
+        },
+        "postDeployResults": {
+            "condition": "[parameters('enablePostDeployScript')]",
+            "type": "object",
+            "value": {
+                "scriptStatus": "Deployment script executed automatically",
+                "dceUri": "[if(parameters('enablePostDeployScript'), reference('spycloud-post-deploy').outputs.dceLogsIngestionUri, 'Run scripts/post-deploy.sh manually')]",
+                "dcrId": "[if(parameters('enablePostDeployScript'), reference('spycloud-post-deploy').outputs.dcrImmutableId, 'Run scripts/post-deploy.sh manually')]",
+                "remainingManualSteps": "MDE API permissions (Machine.Isolate) and Graph API permissions (User.ReadWrite.All) require running scripts/post-deploy.sh or granting manually in the Azure Portal"
             }
         }
     }

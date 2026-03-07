@@ -23,11 +23,11 @@
 
 ### ☁️ Deploy to Azure (One Click)
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" target="_blank">
   <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure"/>
 </a>
 
-> Opens the Azure Portal deployment wizard. Enter your workspace name, SpyCloud API key, toggle features → click Create.
+> Opens a **custom 3-step wizard** in the Azure Portal with dropdowns, toggles, and validation — not the default parameter list. Select your subscription, resource group, region, then configure SpyCloud API, playbooks, Key Vault, analytics rules, and notifications through guided steps.
 
 ### 🐚 Launch in Azure Cloud Shell (Guided Interactive Setup)
 
