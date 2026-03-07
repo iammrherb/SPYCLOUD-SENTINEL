@@ -280,6 +280,18 @@
                                 "constraints": {
                                     "required": false
                                 }
+                            },
+                            {
+                                "name": "enableCredResponsePlaybook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Credential Exposure \u2192 Automated Identity Response Playbook",
+                                "toolTip": "Deploys an advanced Logic App that responds to credential exposures with a multi-step workflow:\n\n1. Triggered by Sentinel incident from SpyCloud alert\n2. Checks user's recent sign-in activity in Entra ID\n3. Forces password reset on next sign-in\n4. Revokes all active user sessions\n5. Sends real-time alert to Microsoft Teams SOC channel\n6. Adds investigation comments to the Sentinel incident\n\nRequires: Security Administrator, Graph IdentityRisk.ReadWrite.All"
+                            },
+                            {
+                                "name": "enableMdeBlocklistPlaybook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable SpyCloud Threat Feed \u2192 MDE Blocklist Playbook (Scheduled)",
+                                "toolTip": "Deploys a scheduled Logic App that runs every 2-4 hours to:\n\n1. Query severity 25 (CRITICAL) infostealer records from SpyCloud\n2. Match infected_machine_id and user_hostname against Microsoft Defender for Endpoint\n3. If device found in MDE: automatically isolate and tag with 'SpyCloud-Sev25-Infostealer'\n4. Create enriched correlation table with both SpyCloud and MDE data\n\nRequires: MDE license with API enabled, Machine.Isolate + Machine.ReadWrite.All"
                             }
                         ],
                         "visible": true
@@ -339,6 +351,79 @@
                 "name": "monitoringConfig",
                 "label": "Monitoring & Notifications",
                 "elements": [
+                    {
+                        "name": "sectionIntegrations",
+                        "type": "Microsoft.Common.Section",
+                        "label": "SOC Integrations",
+                        "elements": [
+                            {
+                                "name": "teamsChannelWebhook",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Microsoft Teams Webhook URL (Optional)",
+                                "placeholder": "https://outlook.office.com/webhook/...",
+                                "toolTip": "Incoming webhook URL for your SOC Microsoft Teams channel. The Credential Response playbook sends real-time alerts here when compromised credentials trigger automated remediation. Get the webhook URL from Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook \u2192 Configure.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^https://.*webhook.*$",
+                                    "validationMessage": "Enter a valid Teams webhook URL or leave blank."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "serviceNowInstance",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "ServiceNow Instance URL (Optional)",
+                                "placeholder": "https://your-instance.service-now.com",
+                                "toolTip": "Your ServiceNow instance URL for automatic incident ticket creation. Leave blank if you don't use ServiceNow.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "mdeBlocklistScheduleHours",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "MDE Blocklist Scan Frequency",
+                                "defaultValue": "Every 4 hours",
+                                "toolTip": "How often the MDE Blocklist playbook scans for new severity 25 infostealer matches against Defender for Endpoint.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Every 1 hour",
+                                            "value": 1
+                                        },
+                                        {
+                                            "label": "Every 2 hours",
+                                            "value": 2
+                                        },
+                                        {
+                                            "label": "Every 4 hours (recommended)",
+                                            "value": 4
+                                        },
+                                        {
+                                            "label": "Every 6 hours",
+                                            "value": 6
+                                        },
+                                        {
+                                            "label": "Every 8 hours",
+                                            "value": 8
+                                        },
+                                        {
+                                            "label": "Every 12 hours",
+                                            "value": 12
+                                        },
+                                        {
+                                            "label": "Every 24 hours",
+                                            "value": 24
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    },
                     {
                         "name": "sectionNotifications",
                         "type": "Microsoft.Common.Section",
@@ -421,7 +506,12 @@
             "severityFilter": "[steps('workspaceConfig').sectionDataConfig.severityFilter]",
             "showPlainPassword": "[steps('workspaceConfig').sectionDataConfig.showPlainPassword]",
             "queryWindowInMin": "[steps('workspaceConfig').sectionDataConfig.queryWindowInMin]",
-            "initialLookbackDays": "[steps('workspaceConfig').sectionDataConfig.initialLookbackDays]"
+            "initialLookbackDays": "[steps('workspaceConfig').sectionDataConfig.initialLookbackDays]",
+            "enableCredResponsePlaybook": "[steps('automationConfig').sectionPlaybooks.enableCredResponsePlaybook]",
+            "enableMdeBlocklistPlaybook": "[steps('automationConfig').sectionPlaybooks.enableMdeBlocklistPlaybook]",
+            "teamsChannelWebhook": "[steps('monitoringConfig').sectionIntegrations.teamsChannelWebhook]",
+            "serviceNowInstance": "[steps('monitoringConfig').sectionIntegrations.serviceNowInstance]",
+            "mdeBlocklistScheduleHours": "[steps('monitoringConfig').sectionIntegrations.mdeBlocklistScheduleHours]"
         }
     }
 }
