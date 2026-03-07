@@ -6,7 +6,7 @@
         "config": {
             "isWizard": true,
             "basics": {
-                "description": "## 🛡️ SpyCloud Sentinel — Unified Threat Intelligence\n\nDeploy SpyCloud's darknet intelligence into Microsoft Sentinel with automated remediation, 17 analytics rules, and Security Copilot integration.\n\n**What gets deployed:**\n- Log Analytics Workspace + Microsoft Sentinel\n- SpyCloud CCF data connector (3 API pollers)\n- 4 custom log tables (73+ columns)\n- Logic App playbooks (MDE + Conditional Access)\n- Azure Key Vault for API key storage\n- Up to 17 analytics rules (all disabled by default)\n\n[Learn more](https://github.com/iammrherb/SPYCLOUD-SENTINEL)",
+                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel \u2014 Unified Threat Intelligence\n\nDeploy SpyCloud's darknet intelligence into Microsoft Sentinel with automated remediation, 17 analytics rules, and Security Copilot integration.\n\n**What gets deployed:**\n- Log Analytics Workspace + Microsoft Sentinel\n- SpyCloud CCF data connector (3 API pollers)\n- 4 custom log tables (73+ columns)\n- Logic App playbooks (MDE + Conditional Access)\n- Azure Key Vault for API key storage\n- Up to 17 analytics rules (all disabled by default)\n\n[Learn more](https://github.com/iammrherb/SPYCLOUD-SENTINEL)",
                 "location": {
                     "label": "Deployment Region",
                     "allowedValues": [
@@ -32,7 +32,7 @@
                 "visible": true,
                 "options": {
                     "icon": "Info",
-                    "text": "You need a SpyCloud Enterprise API key. Get yours at portal.spycloud.com → Settings → API Keys."
+                    "text": "You need a SpyCloud Enterprise API key. Get yours at portal.spycloud.com \u2192 Settings \u2192 API Keys."
                 }
             }
         ],
@@ -54,8 +54,14 @@
                                 "toolTip": "Create a new workspace or use an existing one with Sentinel enabled.",
                                 "constraints": {
                                     "allowedValues": [
-                                        { "label": "Create new workspace", "value": true },
-                                        { "label": "Use existing workspace", "value": false }
+                                        {
+                                            "label": "Create new workspace",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "Use existing workspace",
+                                            "value": false
+                                        }
                                     ],
                                     "required": true
                                 },
@@ -118,8 +124,14 @@
                                 "toolTip": "Select the SpyCloud API endpoint region.",
                                 "constraints": {
                                     "allowedValues": [
-                                        { "label": "US (api.spycloud.io)", "value": "us" },
-                                        { "label": "EU (api.eu.spycloud.io)", "value": "eu" }
+                                        {
+                                            "label": "US (api.spycloud.io)",
+                                            "value": "us"
+                                        },
+                                        {
+                                            "label": "EU (api.eu.spycloud.io)",
+                                            "value": "eu"
+                                        }
                                     ],
                                     "required": true
                                 },
@@ -207,7 +219,13 @@
                                 "name": "enableAnalyticsRulesLibrary",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Deploy full analytics rules library (17 rules, ALL disabled by default)",
-                                "toolTip": "Deploys the complete library of 17 SpyCloud analytics rules including: plaintext password detection, PII exposure, session cookie theft, device re-infection, multi-domain exposure, geographic anomaly, remediation gap, AV bypass, and 4 identity provider correlation rules (Okta, Duo, Ping, Entra). ALL rules deploy DISABLED — you must review and enable each one individually."
+                                "toolTip": "Deploys the complete library of 17 SpyCloud analytics rules including: plaintext password detection, PII exposure, session cookie theft, device re-infection, multi-domain exposure, geographic anomaly, remediation gap, AV bypass, and 4 identity provider correlation rules (Okta, Duo, Ping, Entra). ALL rules deploy DISABLED \u2014 you must review and enable each one individually."
+                            },
+                            {
+                                "name": "enablePostDeployScript",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Run automated post-deployment script (resolves DCE/DCR + assigns RBAC)",
+                                "toolTip": "Automatically runs a deployment script after all resources are created. It waits for the Sentinel content template, resolves the DCE Logs Ingestion URI and DCR Immutable ID, and assigns the Monitoring Metrics Publisher role to both Logic Apps. This eliminates the need to run scripts/post-deploy.sh manually for basic setup. MDE and Graph API permissions still require manual steps."
                             }
                         ],
                         "visible": true
@@ -263,7 +281,7 @@
                                 "name": "enableSessionCookieDetection",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Enable session cookie theft detection rules",
-                                "toolTip": "Deploys rules specifically for severity 25 exposures — stolen cookies and session tokens that enable MFA bypass."
+                                "toolTip": "Deploys rules specifically for severity 25 exposures \u2014 stolen cookies and session tokens that enable MFA bypass."
                             },
                             {
                                 "name": "enableIdentityProviderAlerts",
@@ -295,7 +313,8 @@
             "enableNotifications": "[steps('monitoringConfig').sectionNotifications.enableNotifications]",
             "notificationEmail": "[steps('monitoringConfig').sectionNotifications.notificationEmail]",
             "enableSessionCookieDetection": "[steps('monitoringConfig').sectionIdp.enableSessionCookieDetection]",
-            "enableIdentityProviderAlerts": "[steps('monitoringConfig').sectionIdp.enableIdentityProviderAlerts]"
+            "enableIdentityProviderAlerts": "[steps('monitoringConfig').sectionIdp.enableIdentityProviderAlerts]",
+            "enablePostDeployScript": "[steps('automationConfig').sectionRules.enablePostDeployScript]"
         }
     }
 }
