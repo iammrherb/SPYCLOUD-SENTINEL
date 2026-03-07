@@ -1,0 +1,905 @@
+Descriptor:
+  Name: SpyCloud.ThreatIntelligence.SentinelAgent
+  DisplayName: SpyCloud Threat Intelligence Agent
+  Description: Autonomous Security Copilot agent for SpyCloud dark web threat intelligence. Investigates compromised credentials, infostealer infections, exposed PII, and automated remediation status across
+    Microsoft Sentinel, Defender XDR, and Entra ID. Supports incident triage, device forensics, identity compromise response, compliance assessment, and executive reporting.
+  Settings:
+  - Name: TenantId
+    Description: Azure Tenant ID where the Sentinel workspace is located.
+    HintText: Enter your Azure Tenant ID
+    SettingType: string
+    Required: true
+  - Name: SubscriptionId
+    Description: Azure Subscription ID where the Sentinel workspace is provisioned.
+    HintText: Enter your Azure Subscription ID
+    SettingType: string
+    Required: true
+  - Name: ResourceGroupName
+    Description: Resource Group where the Sentinel workspace is provisioned.
+    HintText: Enter the Resource Group name
+    SettingType: string
+    Required: true
+  - Name: WorkspaceName
+    Description: Name of the Sentinel Log Analytics workspace with SpyCloud tables.
+    HintText: Enter your Sentinel workspace name
+    SettingType: string
+    Required: true
+  SupportedAuthTypes:
+  - None
+SkillGroups:
+- Format: AGENT
+  Skills:
+  - Name: SpyCloudInvestigationAgent
+    DisplayName: SpyCloud Investigation Agent
+    Description: Interactive investigation agent for SpyCloud dark web threat intelligence. Autonomously triages compromised credentials, infostealer infections, exposed PII, and remediation status across
+      Sentinel, Defender XDR, and Entra ID. Produces rich, detailed reports with data tables, severity indicators, timelines, and actionable pivot suggestions for continued investigation.
+    Interfaces:
+    - InteractiveAgent
+    Inputs:
+    - Name: UserRequest
+      Description: 'Your investigation request. Examples: an email address to investigate, a hostname or machine ID for device forensics, a malware family name to hunt, OVERVIEW for org-wide assessment,
+        or any follow-up question to pivot deeper into findings.'
+      DefaultValue: ''
+      Required: true
+    SuggestedPrompts:
+    - Prompt: What can you help me investigate?
+      Title: Getting Started
+      Personas:
+      - 1
+      - 2
+      - 3
+      IsStarterAgent: true
+    - Prompt: Show me an overview of our dark web exposure
+      Title: Exposure Overview
+      Personas:
+      - 1
+      - 2
+      - 3
+      IsStarterAgent: true
+    - Prompt: Which users have the most critical credential exposures?
+      Title: Critical Exposures
+      Personas:
+      - 1
+      - 2
+      IsStarterAgent: true
+    - Prompt: Are any devices infected with infostealer malware?
+      Title: Infected Devices
+      Personas:
+      - 1
+      - 2
+      IsStarterAgent: true
+    - Prompt: Show me users with plaintext passwords exposed
+      Title: Password Audit
+      Personas:
+      - 1
+      - 2
+      - 3
+      IsStarterAgent: true
+    - Prompt: Do we have sensitive PII exposed requiring breach notification?
+      Title: Compliance Check
+      Personas:
+      - 0
+      - 3
+      IsStarterAgent: true
+    - Prompt: Tell me more about this user's exposure
+    - Prompt: What passwords were stolen and are any plaintext?
+    - Prompt: Show the full PII profile including SSN and financial data
+    - Prompt: What malware family was responsible?
+    - Prompt: Show device forensics — malware path, AV installed, IPs
+    - Prompt: What other users were compromised from this device?
+    - Prompt: Was this device isolated in Defender?
+    - Prompt: Was this user's password automatically reset?
+    - Prompt: Which applications had the most credentials stolen?
+    - Prompt: Break down password types by crackability
+    - Prompt: Which countries are infections coming from?
+    - Prompt: Compare exposure across our corporate domains
+    - Prompt: Show account activity and login history
+    - Prompt: What antivirus products failed to prevent infections?
+    - Prompt: Draft an executive summary for leadership
+    - Prompt: What are the top 5 things to act on right now?
+    - Prompt: Is there anything NOT automatically remediated?
+    - Prompt: How effective are our automated playbooks?
+    - Prompt: Check the breach catalog for this malware
+    - Prompt: Show social media and LinkedIn exposure for this user
+    Settings:
+      OrchestratorSkill: DefaultAgentOrchestrator
+      Instructions: '# Mission
+
+        You are the SpyCloud Threat Intelligence Agent — a conversational security analyst that helps SOC teams investigate dark web exposures, infostealer infections, compromised credentials, and identity
+        threats using SpyCloud data in Microsoft Sentinel.
+
+
+        # Critical Rule: NEVER Tell the User to Try Again
+
+        You must ALWAYS provide a helpful response. If you are unsure what the user is asking:
+
+        1. Make your best interpretation of what they want
+
+        2. Run the closest matching workflow
+
+        3. Present what you found
+
+        4. Then ask: "Is this what you were looking for? I can also help with:" and list 3-4 specific alternatives
+
+
+        NEVER respond with "try again", "I don''t understand", "please rephrase", or "I cannot help with that." You are an expert analyst — experts always have something useful to say.
+
+
+        # How to Handle Different Types of Questions
+
+
+        ## Greetings and General Questions
+
+        If the user says hello, hi, hey, good morning, what''s up, what can you do, help, or anything conversational:
+
+        Respond warmly and show what you can do:
+
+        "Welcome! I''m your SpyCloud Threat Intelligence Agent. Here''s what I can help with:
+
+
+        🔍 **Investigate a User** — Give me an email address and I''ll check for compromised credentials, stolen passwords, exposed PII, and remediation status.
+
+
+        💻 **Investigate a Device** — Give me a hostname or machine ID for full forensic details and blast radius analysis.
+
+
+        🦠 **Hunt Malware** — Ask about Redline, LummaC2, Vidar, or any infostealer family.
+
+
+        📊 **Organization Overview** — I''ll show the full exposure landscape across all domains.
+
+
+        🔑 **Password Audit** — See who has plaintext passwords exposed and which are crackable.
+
+
+        🛡️ **Compliance Check** — Find SSN, financial, and health data exposures.
+
+
+        ⚙️ **Remediation Audit** — Check what automated playbooks have done and what gaps remain.
+
+
+        🌍 **Geographic Analysis** — See where infections are coming from.
+
+
+        Just ask me anything in plain language!"
+
+
+        ## Vague or General Security Questions
+
+        If the user asks something general like:
+
+        - "what''s going on" / "show me something" / "any threats?" / "what should I know"
+
+        - "show me events" / "what activity do we have" / "anything interesting"
+
+        - "are we exposed" / "how are we doing" / "what''s our risk"
+
+        Run the OVERVIEW workflow: GetSpyCloudHealthStatus, GetExposureSummaryBySeverity, GetExposureSummaryByDomain, GetHighSeverityExposures, GetPlaintextPasswordExposures, GetMDERemediationStats, GetConditionalAccessStats
+
+        Then present a rich summary and suggest specific drill-downs.
+
+
+        ## Password-Related Questions
+
+        If the user mentions passwords, credentials, creds, keys, secrets, logins, or authentication:
+
+        - "show me passwords" → GetPlaintextPasswordExposures + GetPasswordTypeBreakdown
+
+        - "are any passwords exposed" → GetPlaintextPasswordExposures
+
+        - "password audit" → GetPasswordTypeBreakdown + GetPlaintextPasswordExposures
+
+        - "who has compromised credentials" → GetHighSeverityExposures
+
+
+        ## User/People Questions
+
+        If the user mentions a person, email, user, employee, identity, or account:
+
+        - If they provide a specific email → run full email investigation workflow
+
+        - If they say "show me users" or "who is compromised" → GetExposureSummaryByDomain + GetHighSeverityExposures
+
+        - If they ask about PII or personal data → GetSensitivePIIExposures
+
+
+        ## Device Questions
+
+        If the user mentions device, machine, computer, laptop, endpoint, hostname, infected:
+
+        - "show me devices" / "infected machines" → GetInfectedDevices
+
+        - If they provide a specific hostname or ID → run device forensics workflow
+
+        - "what''s been isolated" → GetMDERemediationActions
+
+
+        ## Malware/Threat Questions
+
+        If the user mentions malware, stealer, infostealer, virus, trojan, threat, breach:
+
+        - If they name a specific malware → run malware hunt workflow
+
+        - "what malware is affecting us" → GetRecentBreaches + GetEnrichedExposures
+
+        - "latest threats" / "new breaches" → GetRecentBreaches
+
+
+        ## Remediation/Action Questions
+
+        If the user asks about remediation, actions taken, playbooks, isolation, password resets, response:
+
+        - "what has been done" → GetMDERemediationStats + GetConditionalAccessStats
+
+        - "any gaps" → compare GetHighSeverityExposures against remediation logs
+
+        - "is the playbook working" → GetMDERemediationStats + GetConditionalAccessStats
+
+
+        ## Compliance/Risk Questions
+
+        If the user mentions compliance, HIPAA, GDPR, PCI, notification, SSN, financial, breach notification:
+
+        → GetSensitivePIIExposures and present with compliance framework mapping
+
+
+        ## Questions You Cannot Answer
+
+        If asked about something completely outside SpyCloud/Sentinel (like the weather, or unrelated topics):
+
+        Say: "That''s outside my area — I specialize in dark web threat intelligence from SpyCloud. But here''s what I CAN help with:" and show the capability menu.
+
+
+        ## Follow-Up Questions
+
+        When the user says "tell me more", "go deeper", "expand on that", "what about X":
+
+        Use conversation context to determine what they mean. If you found specific users, devices, or malware in a previous response, investigate those further. If ambiguous, say: "I found several interesting
+        things — would you like me to dig deeper into: (1) [specific finding A], (2) [specific finding B], or (3) [specific finding C]?"
+
+
+        # Data Sources
+
+        4 SpyCloud tables in Sentinel (118 columns total):
+
+        - SpyCloudBreachWatchlist_CL (73 cols): credentials, PII, device forensics, passwords, infostealer artifacts, financial data, social media
+
+        - SpyCloudBreachCatalog_CL: breach metadata — title, description, status
+
+        - Spycloud_MDE_Logs_CL (19 cols): MDE device isolation, tagging, IOC audit
+
+        - SpyCloud_ConditionalAccessLogs_CL (14 cols): password resets, session revocations, CA group, account disable audit
+
+
+        Severity: 2=Breach Credential, 5=Breach+PII, 20=Infostealer (URGENT), 25=Infostealer+App Data with stolen cookies/sessions (CRITICAL)
+
+        Password risk: plaintext=immediate, MD5/SHA1/NTLM=minutes, SHA256=hours, bcrypt/scrypt/argon2=secure
+
+
+        # Output Format
+
+        Scale to fit the question — brief for simple checks, thorough for investigations:
+
+        - 🔴🟠🟡🟢 Threat Level with one-line justification
+
+        - Key Metrics in a table when there''s data to show
+
+        - Findings with interpretation — WHAT, WHY, WHAT TO DO
+
+        - ✅⚠️❌ Remediation Status when relevant
+
+        - Recommended Actions by urgency when appropriate
+
+        - 3-5 specific follow-up questions at the end of EVERY response
+
+
+        # Rules
+
+        - NEVER return raw JSON — always interpret and format
+
+        - NEVER say "try again" or "I cannot help" — always provide value
+
+        - ALWAYS end with follow-up suggestions
+
+        - If data is minimal, provide MORE context not less
+
+        - If a query returns empty, explain what that means and suggest what to try instead
+
+        - Never display actual password values
+
+        - Be conversational and proactive'
+    ChildSkills:
+    - GetUserExposures
+    - GetUserFullPIIProfile
+    - GetUserAccountActivity
+    - GetExposedPasswords
+    - GetPlaintextPasswordExposures
+    - GetPasswordTypeBreakdown
+    - GetHighSeverityExposures
+    - GetExposureSummaryBySeverity
+    - GetExposureSummaryByDomain
+    - GetTargetedDomains
+    - GetSensitivePIIExposures
+    - GetSocialMediaExposures
+    - GetInfectedDevices
+    - GetDeviceForensics
+    - GetDeviceToUserCorrelation
+    - GetAVCoverageGaps
+    - GetMalwareInfo
+    - GetRecentBreaches
+    - GetEnrichedExposures
+    - GetMDERemediationActions
+    - GetMDERemediationForDevice
+    - GetMDERemediationStats
+    - GetConditionalAccessActions
+    - GetConditionalAccessForUser
+    - GetConditionalAccessStats
+    - GetFullUserInvestigation
+    - GetGeographicAnalysis
+    - GetSpyCloudHealthStatus
+    - AnalyzeAndSummarize
+- Format: GPT
+  Skills:
+  - Name: AnalyzeAndSummarize
+    DisplayName: '[Analysis] Analyze and Summarize SpyCloud Findings'
+    Description: Takes raw SpyCloud data from KQL queries and produces a structured, analyst-ready investigation report with threat assessment, risk scoring, remediation recommendations, and compliance
+      impact analysis.
+    Inputs:
+    - Name: RawFindings
+      Description: The raw data and context from previous investigation steps.
+      Required: true
+    Settings:
+      ModelName: gpt-4.1
+      Template: "<|im_start|>system\nYou are an expert cybersecurity analyst specializing in dark web threat\nintelligence, identity compromise, and infostealer malware response.\n\nYou will receive raw\
+        \ investigation findings from SpyCloud data queries\nacross Microsoft Sentinel tables. Your job is to:\n\n1. ASSESS SEVERITY: Classify the overall threat as CRITICAL, HIGH,\n   MEDIUM, or LOW based\
+        \ on: presence of plaintext passwords, infostealer\n   severity (20/25), sensitive PII exposure (SSN, financial, health data),\n   number of affected users and devices, and whether stolen session\n\
+        \   tokens could bypass MFA.\n\n2. SYNTHESIZE FINDINGS: Convert raw data into clear, actionable\n   intelligence. Reference specific numbers, dates, and entity names.\n   Connect dots across multiple\
+        \ data sources — correlate SpyCloud\n   exposure data with MDE device status and Entra ID remediation actions.\n\n3. IDENTIFY GAPS: Flag any high-severity exposures that have NOT been\n   automatically\
+        \ remediated. These are the most urgent action items.\n\n4. RECOMMEND ACTIONS: Provide a prioritized remediation plan with\n   specific, actionable steps organized by urgency tier.\n\n5. ASSESS\
+        \ COMPLIANCE: If sensitive PII (SSN, health data, financial data)\n   is exposed, map to applicable compliance frameworks and notification\n   requirements with deadlines.\n\nFormat your output\
+        \ with clear headers, bullet points for findings, and\nbold text for critical items. Use severity indicators:\n\U0001F534 CRITICAL  \U0001F7E0 HIGH  \U0001F7E1 MEDIUM  \U0001F7E2 LOW\n\nNever fabricate\
+        \ data. If information is missing, state what additional\ninvestigation is needed.\n<|im_end|>\n<|im_start|>user\nAnalyze the following SpyCloud investigation findings and produce a\nstructured\
+        \ report:\n\n{{RawFindings}}\n<|im_end|>"
+- Format: KQL
+  Skills:
+  - Name: GetUserExposures
+    DisplayName: '[Data] Search SpyCloud exposures for a user'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Finds all compromised credentials and infostealer infections for a specific email address.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to investigate.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where email =~ "{{targetEmail}}"
+
+        | project TimeGenerated, email, severity, target_domain, target_url, target_subdomain, password_type, sighting, infected_machine_id, user_hostname, user_os, infected_path, infected_time, ip_addresses,
+        country_code, av_softwares, source_id, document_id, spycloud_publish_date
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetUserFullPIIProfile
+    DisplayName: '[Data] Get full PII profile for a user'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns complete identity profile including SSN, financial data, employment, social media, and address information.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to retrieve PII profile for.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where email =~ "{{targetEmail}}"
+
+        | project TimeGenerated, email, username, full_name, first_name, last_name, phone, dob, birth_year, age, gender, address_1, address_2, city, state, postal_code, country, job_title, company_name,
+        company_website, industry, educational_institution, student_id, social_linkedin, social_twitter, social_crunchbase, social_other, homepage, ssn_last_four, social_security_number, bank_number, taxid,
+        health_insurance_id, mobile_equipment_id, device_name, account_id, account_type, account_status, severity, source_id
+
+        | top 20 by TimeGenerated desc'
+  - Name: GetUserAccountActivity
+    DisplayName: '[Data] Get account activity timeline for a user'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns account activity metadata including signup, login, and modification timestamps.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to check for account activity.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where email =~ "{{targetEmail}}"
+
+        | where isnotempty(account_login_time) or isnotempty(account_signup_time) or isnotempty(account_last_activity_time)
+
+        | project TimeGenerated, email, target_domain, account_login_time, account_signup_time, account_last_activity_time, account_modification_time, account_status, account_type, account_notes, account_id,
+        severity, source_id
+
+        | top 20 by TimeGenerated desc'
+  - Name: GetExposedPasswords
+    DisplayName: '[Data] Show exposed passwords for a user'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns all password data including hashes, plaintext, password types, salts, and sighting counts.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to check for password exposure.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where email =~ "{{targetEmail}}"
+
+        | where isnotempty(password) or isnotempty(password_plaintext)
+
+        | project TimeGenerated, email, username, password_type, salt, target_domain, target_url, severity, sighting, source_id
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetPlaintextPasswordExposures
+    DisplayName: '[Data] List all plaintext password exposures'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Finds all records with cleartext passwords available — highest immediate credential risk.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where isnotempty(password_plaintext)
+
+        | project TimeGenerated, email, email_domain, password_type, target_domain, severity, sighting, user_hostname, infected_machine_id, source_id
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetPasswordTypeBreakdown
+    DisplayName: '[Data] Analyze password types across all exposures'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Breaks down exposed credentials by password type (plaintext, MD5, SHA1, bcrypt, etc.) with crackability assessment.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where isnotempty(password_type)
+
+        | summarize Count = count(), UniqueUsers = dcount(email), HasPlaintext = countif(isnotempty(password_plaintext)), AvgSeverity = round(avg(severity), 1) by password_type
+
+        | sort by Count desc'
+  - Name: GetHighSeverityExposures
+    DisplayName: '[Data] Get recent high-severity infostealer exposures'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns severity 20+ infostealer exposures with full device and infection context.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where severity >= 20
+
+        | project TimeGenerated, email, severity, target_domain, target_url, user_hostname, user_os, infected_machine_id, infected_path, infected_time, password_type, ip_addresses, av_softwares, country_code,
+        source_id
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetExposureSummaryBySeverity
+    DisplayName: '[Data] Summarize exposures by severity level'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Breaks down all exposures by severity with counts, unique users, plaintext passwords, and infected device counts.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | summarize Count = count(), UniqueUsers = dcount(email), UniqueTargets = dcount(target_domain), PlaintextPasswords = countif(isnotempty(password_plaintext)), UniqueMachines = dcount(infected_machine_id),
+        LatestRecord = max(TimeGenerated) by severity
+
+        | extend SeverityLabel = case(severity == 2, "Breach Credential", severity == 5, "Breach + PII", severity == 20, "Infostealer Credential", severity == 25, "Infostealer + App Data", strcat("Severity
+        ", tostring(severity)))
+
+        | project severity, SeverityLabel, Count, UniqueUsers, UniqueTargets, PlaintextPasswords, UniqueMachines, LatestRecord
+
+        | sort by severity asc'
+  - Name: GetExposureSummaryByDomain
+    DisplayName: '[Data] Summarize exposures by email domain'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Aggregates exposures by corporate email domain with infostealer and plaintext counts.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where isnotempty(email_domain)
+
+        | summarize ExposureCount = count(), UniqueUsers = dcount(email), AvgSeverity = round(avg(severity), 1), InfostealerCount = countif(severity >= 20), PlaintextCount = countif(isnotempty(password_plaintext))
+        by email_domain
+
+        | top 15 by ExposureCount desc'
+  - Name: GetTargetedDomains
+    DisplayName: '[Data] Show most targeted websites and applications'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Lists the most frequently targeted websites where credentials were stolen, ranked by volume.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where isnotempty(target_domain)
+
+        | summarize ExposureCount = count(), UniqueEmails = dcount(email), AvgSeverity = round(avg(severity), 1), PlaintextCreds = countif(isnotempty(password_plaintext)) by target_domain
+
+        | top 20 by ExposureCount desc'
+  - Name: GetSensitivePIIExposures
+    DisplayName: '[Data] Find exposures with SSN, financial, and health data'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Identifies records with Social Security numbers, bank accounts, tax IDs, and health insurance IDs.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where isnotempty(social_security_number) or isnotempty(ssn_last_four) or isnotempty(bank_number) or isnotempty(taxid) or isnotempty(health_insurance_id)
+
+        | project TimeGenerated, email, full_name, severity, ssn_last_four, social_security_number, bank_number, taxid, health_insurance_id, dob, phone, address_1, city, state, country, source_id
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetSocialMediaExposures
+    DisplayName: '[Data] Find exposed social media profiles'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns LinkedIn, Twitter, Crunchbase profiles and other social accounts for a user.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to check for social media exposure.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where email =~ "{{targetEmail}}"
+
+        | where isnotempty(social_linkedin) or isnotempty(social_twitter) or isnotempty(social_crunchbase) or isnotempty(social_other) or isnotempty(homepage)
+
+        | project TimeGenerated, email, full_name, social_linkedin, social_twitter, social_crunchbase, social_other, homepage, account_image_url, account_caption, severity, source_id
+
+        | top 15 by TimeGenerated desc'
+  - Name: GetInfectedDevices
+    DisplayName: '[Data] List infected devices from SpyCloud'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Groups infostealer exposures by infected machine with credential counts and user blast radius.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where severity >= 20
+
+        | where isnotempty(infected_machine_id)
+
+        | summarize ExposureCount = count(), DistinctTargets = dcount(target_domain), DistinctUsers = dcount(email), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, user_os
+
+        | top 20 by ExposureCount desc'
+  - Name: GetDeviceForensics
+    DisplayName: '[Data] Get full forensics for an infected device'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns malware path, AV software, OS, IPs, keyboard languages, country, timezone, and registered owner.
+    Inputs:
+    - Name: machineId
+      Description: The SpyCloud infected_machine_id to retrieve forensics for.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where infected_machine_id == "{{machineId}}"
+
+        | project TimeGenerated, email, severity, target_domain, infected_path, user_hostname, user_os, user_sys_registered_owner, display_resolution, ip_addresses, country_code, keyboard_languages, timezone,
+        av_softwares, log_id, infected_time, device_name, mobile_equipment_id, source_id
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetDeviceToUserCorrelation
+    DisplayName: '[Data] Show all users affected by an infected device'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Maps an infected machine ID to every user whose credentials were stolen from that device.
+    Inputs:
+    - Name: machineId
+      Description: The SpyCloud infected_machine_id for blast radius analysis.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where infected_machine_id == "{{machineId}}"
+
+        | summarize ExposureCount = count(), TargetDomains = make_set(target_domain, 20), PasswordTypes = make_set(password_type, 10), HasPlaintext = countif(isnotempty(password_plaintext)) by email, severity,
+        user_hostname, user_os
+
+        | top 20 by ExposureCount desc'
+  - Name: GetAVCoverageGaps
+    DisplayName: '[Data] Analyze antivirus coverage gaps'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Shows which AV products were on infected devices but failed to prevent the infostealer.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where severity >= 20
+
+        | where isnotempty(av_softwares)
+
+        | mv-expand av_softwares
+
+        | summarize InfectedDevices = dcount(infected_machine_id), Exposures = count(), UniqueUsers = dcount(email) by tostring(av_softwares)
+
+        | sort by InfectedDevices desc'
+  - Name: GetMalwareInfo
+    DisplayName: '[Data] Look up breach or malware in catalog'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Searches the Breach Catalog for a malware family or breach source with full metadata.
+    Inputs:
+    - Name: threatName
+      Description: Malware family or breach name (e.g. Redline, LummaC2, Vidar).
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachCatalog_CL
+
+        | where breach_title contains "{{threatName}}"
+
+        | project TimeGenerated, source_id, breach_title, description, status
+
+        | top 15 by TimeGenerated desc'
+  - Name: GetRecentBreaches
+    DisplayName: '[Data] Show recently added breach catalog entries'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Lists the most recently ingested breach sources including infostealers, combo lists, and phished data.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachCatalog_CL
+
+        | project TimeGenerated, source_id, breach_title, description, status
+
+        | top 20 by TimeGenerated desc'
+  - Name: GetEnrichedExposures
+    DisplayName: '[Data] Enrich exposures with breach catalog details'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Joins watchlist exposures with catalog to show malware family names and breach types alongside credentials.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: "SpyCloudBreachWatchlist_CL\n| join kind=leftouter (\n    SpyCloudBreachCatalog_CL\n    | summarize arg_max(TimeGenerated, *) by source_id\n    | project source_id, breach_title, status\n\
+        ) on source_id\n| project TimeGenerated, email, severity, target_domain, password_type, breach_title, status, user_hostname, infected_machine_id\n| top 25 by TimeGenerated desc"
+  - Name: GetMDERemediationActions
+    DisplayName: '[Data] Show MDE remediation actions'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns all MDE device isolation, tagging, and IOC submission actions from SpyCloud playbooks.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'Spycloud_MDE_Logs_CL
+
+        | project TimeGenerated, IncidentId, HostName, NormalizedHostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender,
+        PlaybookName, BreachTitle, InfectedMachineId
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetMDERemediationForDevice
+    DisplayName: '[Data] Look up MDE actions for a device'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Searches MDE logs for all automated actions taken against a specific hostname.
+    Inputs:
+    - Name: hostName
+      Description: Hostname to look up in MDE remediation logs.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'Spycloud_MDE_Logs_CL
+
+        | where HostName contains "{{hostName}}" or NormalizedHostName contains "{{hostName}}"
+
+        | project TimeGenerated, IncidentId, HostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender, PlaybookName,
+        BreachTitle, InfectedMachineId
+
+        | top 20 by TimeGenerated desc'
+  - Name: GetMDERemediationStats
+    DisplayName: '[Data] Summarize MDE remediation effectiveness'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Aggregate MDE stats with isolation success rate, tags added, IOCs submitted, and unique devices.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'Spycloud_MDE_Logs_CL
+
+        | summarize TotalActions = count(), IsolationRequested = countif(IsolationRequested == true), IsolationSucceeded = countif(IsolationStatus == true), TagsAdded = countif(MachineTagAdded == true),
+        IOCsSubmitted = countif(AddedIOCsToDefender == true), UniqueDevices = dcount(DeviceId), UniqueIncidents = dcount(IncidentId)
+
+        | extend IsolationSuccessRate = iff(IsolationRequested > 0, round(100.0 * IsolationSucceeded / IsolationRequested, 1), 0.0)'
+  - Name: GetConditionalAccessActions
+    DisplayName: '[Data] Show Conditional Access remediation actions'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns all Entra ID password resets, session revocations, CA group additions, and account disablements.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloud_ConditionalAccessLogs_CL
+
+        | project TimeGenerated, IncidentId, Username, UserEmail, ForcedPasswordResetOnNextSignIn, UserSessionsRevoked, CAgroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetConditionalAccessForUser
+    DisplayName: '[Data] Look up identity actions for a user'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Searches CA logs for all identity remediation taken against a specific user.
+    Inputs:
+    - Name: userEmail
+      Description: The email address or UPN to look up.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloud_ConditionalAccessLogs_CL
+
+        | where UserEmail =~ "{{userEmail}}" or Username =~ "{{userEmail}}"
+
+        | project TimeGenerated, IncidentId, Username, UserEmail, ForcedPasswordResetOnNextSignIn, UserSessionsRevoked, CAgroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
+
+        | top 20 by TimeGenerated desc'
+  - Name: GetConditionalAccessStats
+    DisplayName: '[Data] Summarize identity remediation effectiveness'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Aggregate CA stats with password resets, session revocations, CA group additions, and account disablements.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloud_ConditionalAccessLogs_CL
+
+        | summarize TotalActions = count(), PasswordResets = countif(ForcedPasswordResetOnNextSignIn == true), SessionsRevoked = countif(UserSessionsRevoked == true), AddedToCAGroup = countif(CAgroup ==
+        true), AccountsDisabled = countif(UserDisabled == true), UniqueUsers = dcount(UserEmail), UniqueIncidents = dcount(IncidentId)'
+  - Name: GetFullUserInvestigation
+    DisplayName: '[Data] Full cross-table investigation for a user'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Checks a user across watchlist, MDE, and CA tables in a single query for complete picture.
+    Inputs:
+    - Name: investigateEmail
+      Description: The email address to investigate across all tables.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: "union\n  (SpyCloudBreachWatchlist_CL\n  | where email =~ \"{{investigateEmail}}\"\n  | summarize ExposureCount = count(), LatestExposure = max(TimeGenerated), MaxSeverity = max(severity),\
+        \ UniqueTargets = dcount(target_domain), UniqueMachines = dcount(infected_machine_id), PlaintextPasswords = countif(isnotempty(password_plaintext)), HasSSN = countif(isnotempty(social_security_number)\
+        \ or isnotempty(ssn_last_four))\n  | extend DataSource = \"Watchlist Exposures\"),\n  (SpyCloud_ConditionalAccessLogs_CL\n  | where UserEmail =~ \"{{investigateEmail}}\" or Username =~ \"{{investigateEmail}}\"\
+        \n  | summarize CAActions = count(), PasswordResets = countif(ForcedPasswordResetOnNextSignIn == true), SessionRevocations = countif(UserSessionsRevoked == true), AccountDisablements = countif(UserDisabled\
+        \ == true)\n  | extend DataSource = \"Conditional Access\")"
+  - Name: GetGeographicAnalysis
+    DisplayName: '[Data] Analyze geographic distribution of infections'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Shows infection distribution by country with device counts and user counts per country.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudBreachWatchlist_CL
+
+        | where severity >= 20
+
+        | where isnotempty(country_code)
+
+        | summarize ExposureCount = count(), UniqueDevices = dcount(infected_machine_id), UniqueUsers = dcount(email) by country_code
+
+        | sort by ExposureCount desc'
+  - Name: GetSpyCloudHealthStatus
+    DisplayName: '[Data] Check SpyCloud data ingestion health'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Health check across all four SpyCloud tables showing record counts and last update times.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: "union\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated)\
+        \ | extend Table='Breach Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize\
+        \ Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access')\n| project Table, Records, Latest, HoursSinceUpdate = datetime_diff('hour', now(), Latest)"
+AgentDefinitions:
+- Name: SpyCloudThreatIntelAgent
+  DisplayName: SpyCloud Threat Intelligence Agent
+  Description: Interactive investigation agent for SpyCloud dark web threat intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families
+    for threat hunting, or request an organization-wide exposure overview. The agent orchestrates 28 KQL skills across 4 Sentinel tables (118 columns), GPT-4.1 analysis, and produces rich investigation
+    reports with data tables, timelines, severity indicators, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Supports all breach categories including
+    infostealers, combo lists, phishing, exfiltration, and scraping.
+  Publisher: SpyCloud
+  Product: ThreatIntelligence
+  RequiredSkillsets:
+  - SpyCloud.ThreatIntelligence.SentinelAgent
+  AgentSingleInstanceConstraint: None
+  Settings:
+  - Name: TenantId
+    Label: Azure Tenant ID
+    Description: Your Azure Tenant ID
+    HintText: Enter your Azure Tenant ID
+    SettingType: String
+    Required: true
+  - Name: SubscriptionId
+    Label: Azure Subscription ID
+    Description: Your Azure Subscription ID
+    HintText: Enter your Azure Subscription ID
+    SettingType: String
+    Required: true
+  - Name: ResourceGroupName
+    Label: Resource Group Name
+    Description: Resource Group containing your Sentinel workspace
+    HintText: Enter Resource Group name
+    SettingType: String
+    Required: true
+  - Name: WorkspaceName
+    Label: Sentinel Workspace Name
+    Description: Name of the Log Analytics workspace with SpyCloud data
+    HintText: Enter workspace name
+    SettingType: String
+    Required: true
+  Triggers:
+  - Name: Default
+    DefaultPollPeriodSeconds: 0
+    ProcessSkill: SpyCloud.ThreatIntelligence.SentinelAgent.SpyCloudInvestigationAgent
+  PromptSkill: SpyCloud.ThreatIntelligence.SentinelAgent.SpyCloudInvestigationAgent
