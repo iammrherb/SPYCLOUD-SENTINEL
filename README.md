@@ -91,6 +91,28 @@ chmod +x scripts/post-deploy.sh
 ./scripts/post-deploy.sh -g spycloud-sentinel -w spycloud-ws
 ```
 
+### Option 5: One-Command Deploy (Cloud Shell / Bash)
+
+Open [Azure Cloud Shell](https://shell.azure.com) (or any bash terminal) and run a single command:
+
+```bash
+curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/deploy-all.sh | bash -s -- \
+  --resource-group spycloud-sentinel \
+  --workspace spycloud-ws \
+  --api-key YOUR-SPYCLOUD-API-KEY \
+  --location eastus
+```
+
+This single command does **everything** — creates the resource group, deploys the ARM template, waits for content template resources, resolves DCE/DCR values, assigns all RBAC roles, grants MDE and Graph API permissions, provides admin consent URLs, and verifies the entire deployment. Zero cloning, zero PowerShell.
+
+Or clone first for offline/modified deployment:
+
+```bash
+git clone https://github.com/iammrherb/SPYCLOUD-SENTINEL.git && cd SPYCLOUD-SENTINEL
+chmod +x scripts/deploy-all.sh
+./scripts/deploy-all.sh -g spycloud-sentinel -w spycloud-ws -k YOUR-KEY
+```
+
 ---
 
 ## 📦 What Gets Deployed
