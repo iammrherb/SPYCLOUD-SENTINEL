@@ -35,38 +35,11 @@
         "enableAnalyticsRulesLibrary": {
             "value": false
         },
-        "enableSessionCookieDetection": {
-            "value": false
-        },
-        "enableIdentityProviderAlerts": {
-            "value": false
-        },
         "enableNotifications": {
             "value": false
         },
-        "notificationEmail": {
-            "value": ""
-        },
-        "severityFilter": {
-            "value": ["2", "5", "20", "25"]
-        },
-        "watchlistType": {
-            "value": ["corporate", "infected", "compass"]
-        },
-        "showPlainPassword": {
-            "value": "False"
-        },
-        "queryWindowInMin": {
-            "value": 40
-        },
-        "rateLimitQPS": {
-            "value": 2
-        },
         "retentionInDays": {
             "value": 90
-        },
-        "initialLookbackDays": {
-            "value": 30
         }
     }
 }

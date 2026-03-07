@@ -1,10 +1,10 @@
-name: Deploy SpyCloud Sentinel Integration
+name: "🛡️ Deploy SpyCloud Sentinel Integration"
 
 on:
   workflow_dispatch:
     inputs:
       resource_group:
-        description: 'Azure Resource Group name'
+        description: 'Azure Resource Group'
         required: true
         default: 'spycloud-sentinel'
       workspace:
@@ -16,15 +16,11 @@ on:
         required: true
         default: 'eastus'
         type: choice
-        options:
-          - eastus
-          - eastus2
-          - westus2
-          - centralus
-          - northeurope
-          - westeurope
-          - uksouth
-          - australiaeast
+        options: [eastus, eastus2, westus2, centralus, northeurope, westeurope, uksouth, australiaeast]
+      create_workspace:
+        description: 'Create new workspace (true) or use existing (false)'
+        type: boolean
+        default: true
       enable_mde_playbook:
         description: 'Deploy MDE device isolation playbook'
         type: boolean
@@ -34,21 +30,13 @@ on:
         type: boolean
         default: true
       enable_key_vault:
-        description: 'Create Key Vault for API key storage'
+        description: 'Create Key Vault for API key'
         type: boolean
         default: true
-      enable_analytics_rules:
-        description: 'Deploy full analytics rules library (all disabled)'
+      enable_rules_library:
+        description: 'Deploy full analytics rules library (all disabled by default)'
         type: boolean
         default: false
-      enable_notifications:
-        description: 'Create action group for alert notifications'
-        type: boolean
-        default: false
-      notification_email:
-        description: 'Email for alert notifications (if enabled)'
-        required: false
-        default: ''
 
 permissions:
   id-token: write
@@ -56,17 +44,20 @@ permissions:
 
 jobs:
   validate:
-    name: Validate Template
+    name: "✅ Validate Template"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Validate ARM Template
+      - name: Create Resource Group
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az group create --name ${{ inputs.resource_group }} --location ${{ inputs.location }}
+      - name: Validate
         uses: azure/arm-deploy@v2
         with:
           scope: resourcegroup
@@ -74,37 +65,23 @@ jobs:
           template: ./azuredeploy.json
           parameters: >-
             workspace=${{ inputs.workspace }}
+            createNewWorkspace=${{ inputs.create_workspace }}
             spycloudApiKey=${{ secrets.SPYCLOUD_API_KEY }}
             deploymentRegion=${{ inputs.location }}
           deploymentMode: Validate
 
   deploy:
-    name: Deploy Infrastructure
+    name: "🚀 Deploy Infrastructure"
     needs: validate
     runs-on: ubuntu-latest
     environment: production
-    outputs:
-      dce_name: ${{ steps.deploy.outputs.dce_name }}
-      dcr_name: ${{ steps.deploy.outputs.dcr_name }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Create Resource Group
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az group create \
-              --name ${{ inputs.resource_group }} \
-              --location ${{ inputs.location }} \
-              --tags solution=SpyCloud-ThreatIntel-Sentinel managedBy=GitHub-Actions
-
       - name: Deploy ARM Template
-        id: deploy
         uses: azure/arm-deploy@v2
         with:
           scope: resourcegroup
@@ -112,7 +89,7 @@ jobs:
           template: ./azuredeploy.json
           parameters: >-
             workspace=${{ inputs.workspace }}
-            createNewWorkspace=true
+            createNewWorkspace=${{ inputs.create_workspace }}
             spycloudApiKey=${{ secrets.SPYCLOUD_API_KEY }}
             deploymentRegion=${{ inputs.location }}
             resourceGroupName=${{ inputs.resource_group }}
@@ -121,108 +98,59 @@ jobs:
             enableKeyVault=${{ inputs.enable_key_vault }}
             enableAnalyticsRule=true
             enableAutomationRule=true
-            enableAnalyticsRulesLibrary=${{ inputs.enable_analytics_rules }}
-            enableNotifications=${{ inputs.enable_notifications }}
-            notificationEmail=${{ inputs.notification_email }}
+            enableAnalyticsRulesLibrary=${{ inputs.enable_rules_library }}
           deploymentName: spycloud-${{ github.run_number }}
           failOnStdErr: false
 
-      - name: Set DCE/DCR names
-        id: names
-        run: |
-          echo "dce_name=dce-spycloud-${{ inputs.workspace }}" >> $GITHUB_OUTPUT
-          echo "dcr_name=dcr-spycloud-${{ inputs.workspace }}" >> $GITHUB_OUTPUT
-
-  post-deploy:
-    name: Post-Deployment Configuration
+  configure:
+    name: "⚙️ Post-Deploy Configuration"
     needs: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Resolve DCE URI and DCR Immutable ID
-        id: resolve
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            echo "🔍 Resolving DCE and DCR values..."
-            
-            DCE_NAME="dce-spycloud-${{ inputs.workspace }}"
-            DCR_NAME="dcr-spycloud-${{ inputs.workspace }}"
-            RG="${{ inputs.resource_group }}"
-            
-            # Wait for resources to be available (content template may still be deploying)
-            echo "⏳ Waiting 60 seconds for content template resources..."
-            sleep 60
-            
-            # Get DCE URI
-            DCE_URI=$(az monitor data-collection endpoint show \
-              --name "$DCE_NAME" \
-              --resource-group "$RG" \
-              --query "logsIngestion.endpoint" \
-              -o tsv 2>/dev/null || echo "")
-            
-            if [ -n "$DCE_URI" ]; then
-              echo "✅ DCE URI: $DCE_URI"
-              echo "dce_uri=$DCE_URI" >> $GITHUB_OUTPUT
-            else
-              echo "⚠️ DCE URI not yet available"
-            fi
-            
-            # Get DCR Immutable ID
-            DCR_ID=$(az monitor data-collection rule show \
-              --name "$DCR_NAME" \
-              --resource-group "$RG" \
-              --query "immutableId" \
-              -o tsv 2>/dev/null || echo "")
-            
-            if [ -n "$DCR_ID" ]; then
-              echo "✅ DCR Immutable ID: $DCR_ID"
-              echo "dcr_id=$DCR_ID" >> $GITHUB_OUTPUT
-            else
-              echo "⚠️ DCR Immutable ID not yet available"
-            fi
-
-      - name: Assign Monitoring Metrics Publisher to Logic Apps
-        if: inputs.enable_mde_playbook || inputs.enable_ca_playbook
+      - name: Resolve DCE/DCR and Assign Permissions
         uses: azure/cli@v2
         with:
           inlineScript: |
             RG="${{ inputs.resource_group }}"
             WS="${{ inputs.workspace }}"
-            DCR_NAME="dcr-spycloud-$WS"
-            ROLE_ID="3913510d-42f4-4e42-8a64-420c390055eb"
             
-            # Get DCR resource ID
-            DCR_RESOURCE_ID=$(az monitor data-collection rule show \
-              --name "$DCR_NAME" --resource-group "$RG" \
-              --query id -o tsv 2>/dev/null || echo "")
+            echo "⏳ Waiting 90s for content template resources to finalize..."
+            sleep 90
             
-            if [ -z "$DCR_RESOURCE_ID" ]; then
-              echo "⚠️ DCR not found, skipping RBAC assignment"
-              exit 0
-            fi
+            # Resolve DCE
+            DCE_URI=$(az monitor data-collection endpoint show \
+              --name "dce-spycloud-${WS}" --resource-group "$RG" \
+              --query "logsIngestion.endpoint" -o tsv 2>/dev/null || echo "pending")
+            echo "📡 DCE URI: $DCE_URI"
             
-            # Get Logic App principal IDs and assign roles
-            for LA_NAME in "SpyCloud-MDE-Remediation-$WS" "SpyCloud-CA-Remediation-$WS"; do
-              PRINCIPAL_ID=$(az logic workflow show \
-                --name "$LA_NAME" --resource-group "$RG" \
+            # Resolve DCR
+            DCR_ID=$(az monitor data-collection rule show \
+              --name "dcr-spycloud-${WS}" --resource-group "$RG" \
+              --query "immutableId" -o tsv 2>/dev/null || echo "pending")
+            echo "📋 DCR ID: $DCR_ID"
+            
+            # Get DCR resource ID for RBAC
+            DCR_RID=$(az monitor data-collection rule show \
+              --name "dcr-spycloud-${WS}" --resource-group "$RG" \
+              --query "id" -o tsv 2>/dev/null || echo "")
+            
+            # Assign Monitoring Metrics Publisher (3913510d-...)
+            ROLE="3913510d-42f4-4e42-8a64-420c390055eb"
+            for LA in "SpyCloud-MDE-Remediation-${WS}" "SpyCloud-CA-Remediation-${WS}"; do
+              PID=$(az logic workflow show --name "$LA" -g "$RG" \
                 --query "identity.principalId" -o tsv 2>/dev/null || echo "")
-              
-              if [ -n "$PRINCIPAL_ID" ]; then
-                echo "📋 Assigning Monitoring Metrics Publisher to $LA_NAME ($PRINCIPAL_ID)"
-                az role assignment create \
-                  --assignee-object-id "$PRINCIPAL_ID" \
+              if [ -n "$PID" ] && [ -n "$DCR_RID" ]; then
+                az role assignment create --assignee-object-id "$PID" \
                   --assignee-principal-type ServicePrincipal \
-                  --role "$ROLE_ID" \
-                  --scope "$DCR_RESOURCE_ID" \
-                  2>/dev/null || echo "  (may already exist)"
-                echo "✅ Done"
+                  --role "$ROLE" --scope "$DCR_RID" 2>/dev/null \
+                  && echo "✅ RBAC assigned: $LA" \
+                  || echo "ℹ️  RBAC may already exist: $LA"
               fi
             done
 
@@ -230,30 +158,17 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
-            RG="${{ inputs.resource_group }}"
-            WS="${{ inputs.workspace }}"
-            
             echo ""
-            echo "╔══════════════════════════════════════════════════╗"
-            echo "║  SpyCloud Sentinel — Deployment Complete        ║"
-            echo "╠══════════════════════════════════════════════════╣"
-            echo "║  Resource Group: $RG"
-            echo "║  Workspace: $WS"
+            echo "╔═══════════════════════════════════════════════╗"
+            echo "║  🛡️  SpyCloud Sentinel — Deploy Complete     ║"
+            echo "╠═══════════════════════════════════════════════╣"
+            echo "║  RG: ${{ inputs.resource_group }}"
+            echo "║  WS: ${{ inputs.workspace }}"
             echo "║  Region: ${{ inputs.location }}"
-            echo "╠══════════════════════════════════════════════════╣"
-            echo "║  RESOURCES DEPLOYED:"
-            echo "║"
-            
-            # List deployed resources
-            az resource list --resource-group "$RG" \
-              --query "[].{Type:type, Name:name}" \
-              -o table
-            
-            echo "║"
-            echo "╠══════════════════════════════════════════════════╣"
-            echo "║  NEXT STEPS:"
-            echo "║  1. Check data flow: Sentinel → Data Connectors"
-            echo "║  2. Review rules: Sentinel → Analytics"
-            echo "║  3. Upload Copilot files from copilot/ directory"
-            echo "║  4. Configure Entra ID diagnostics manually"
-            echo "╚══════════════════════════════════════════════════╝"
+            echo "╠═══════════════════════════════════════════════╣"
+            echo "║  Next: Review rules in Sentinel → Analytics   ║"
+            echo "║  Next: Upload Copilot files from copilot/     ║"
+            echo "╚═══════════════════════════════════════════════╝"
+            echo ""
+            az resource list -g "${{ inputs.resource_group }}" \
+              --query "[].{Type:type,Name:name}" -o table
