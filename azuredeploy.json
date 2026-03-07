@@ -417,6 +417,20 @@
             "metadata": {
                 "description": "Set to TRUE to create a new Log Analytics workspace AND enable Microsoft Sentinel on it. Set to FALSE if you already have a workspace with Sentinel enabled. When TRUE, a new workspace is created using the name in the 'workspace' parameter."
             }
+        },
+        "dceLogsIngestionUri": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "LEAVE BLANK on first deploy. Get after deployment via post-deploy.sh or Azure Portal."
+            }
+        },
+        "dcrImmutableId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "LEAVE BLANK on first deploy. Get after deployment via post-deploy.sh or Azure Portal."
+            }
         }
     },
     "variables": {
@@ -2838,57 +2852,6 @@
             ]
         },
         {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
-            "name": "spycloud-resolve-dcr-dce",
-            "dependsOn": [
-                "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "expressionEvaluationOptions": {
-                    "scope": "inner"
-                },
-                "parameters": {
-                    "dceId": {
-                        "value": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
-                    },
-                    "dcrName": {
-                        "value": "[parameters('dataCollectionRuleName')]"
-                    },
-                    "rgName": {
-                        "value": "[resourceGroup().name]"
-                    }
-                },
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {
-                        "dceId": {
-                            "type": "string"
-                        },
-                        "dcrName": {
-                            "type": "string"
-                        },
-                        "rgName": {
-                            "type": "string"
-                        }
-                    },
-                    "resources": [],
-                    "outputs": {
-                        "dceLogsIngestionUri": {
-                            "type": "string",
-                            "value": "[reference(parameters('dceId'), '2022-06-01').logsIngestion.endpoint]"
-                        },
-                        "dcrImmutableId": {
-                            "type": "string",
-                            "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', parameters('dcrName')), '2022-06-01').immutableId]"
-                        }
-                    }
-                }
-            }
-        },
-        {
             "condition": "[parameters('enableMdePlaybook')]",
             "type": "Microsoft.Logic/workflows",
             "apiVersion": "2019-05-01",
@@ -2905,8 +2868,7 @@
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
-                "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
-                "[resourceId('Microsoft.Resources/deployments', 'spycloud-resolve-dcr-dce')]"
+                "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
             ],
             "properties": {
                 "state": "Enabled",
@@ -2919,11 +2881,11 @@
                             "type": "Object"
                         },
                         "dceUri": {
-                            "defaultValue": "[reference('spycloud-resolve-dcr-dce').outputs.dceLogsIngestionUri.value]",
+                            "defaultValue": "[parameters('dceLogsIngestionUri')]",
                             "type": "String"
                         },
                         "dcrImmutableId": {
-                            "defaultValue": "[reference('spycloud-resolve-dcr-dce').outputs.dcrImmutableId.value]",
+                            "defaultValue": "[parameters('dcrImmutableId')]",
                             "type": "String"
                         },
                         "mdeIsolationType": {
@@ -3169,8 +3131,7 @@
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
-                "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
-                "[resourceId('Microsoft.Resources/deployments', 'spycloud-resolve-dcr-dce')]"
+                "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
             ],
             "properties": {
                 "state": "Enabled",
@@ -3183,11 +3144,11 @@
                             "type": "Object"
                         },
                         "dceUri": {
-                            "defaultValue": "[reference('spycloud-resolve-dcr-dce').outputs.dceLogsIngestionUri.value]",
+                            "defaultValue": "[parameters('dceLogsIngestionUri')]",
                             "type": "String"
                         },
                         "dcrImmutableId": {
-                            "defaultValue": "[reference('spycloud-resolve-dcr-dce').outputs.dcrImmutableId.value]",
+                            "defaultValue": "[parameters('dcrImmutableId')]",
                             "type": "String"
                         },
                         "caSecurityGroupId": {
@@ -3464,7 +3425,7 @@
                 "enabled": false,
                 "query": "[concat('SpyCloudBreachWatchlist_CL\n| where severity >= ', string(parameters('spycloudSeverityThreshold')), '\n| where isnotempty(infected_machine_id)\n| summarize\n    ExposureCount = count(),\n    Emails = make_set(email, 10),\n    TargetDomains = make_set(target_domain, 10),\n    MaxSeverity = max(severity),\n    LatestExposure = max(TimeGenerated)\n  by infected_machine_id, user_hostname, source_id\n| extend\n    HostCustomEntity = user_hostname,\n    AccountCustomEntity = tostring(Emails[0])')]",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -3704,7 +3665,7 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where isnotempty(infected_machine_id)\n| summarize ExposureCount = count(), Emails = make_set(email, 10), TargetDomains = make_set(target_domain, 10), MaxSeverity = max(severity) by infected_machine_id, user_hostname, source_id\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = tostring(Emails[0])",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -3767,7 +3728,7 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(password_plaintext)\n| summarize ExposureCount = count(), TargetDomains = make_set(target_domain, 10), LatestExposure = max(TimeGenerated) by email, email_domain\n| extend AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -3819,7 +3780,7 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(social_security_number) or isnotempty(ssn_last_four) or isnotempty(bank_number) or isnotempty(taxid) or isnotempty(health_insurance_id)\n| summarize PIITypes = make_set(case(isnotempty(social_security_number), 'SSN-Full', isnotempty(ssn_last_four), 'SSN-Last4', isnotempty(bank_number), 'BankAccount', isnotempty(taxid), 'TaxID', isnotempty(health_insurance_id), 'HealthInsurance', 'Other'), 10), ExposureCount = count() by email, full_name\n| extend AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -3871,13 +3832,14 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| where severity == 25\n| summarize ExposureCount = count(), TargetDomains = make_set(target_domain, 15), Devices = make_set(infected_machine_id, 5) by email, user_hostname\n| extend AccountCustomEntity = email, HostCustomEntity = user_hostname",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": false,
                 "tactics": [
                     "CredentialAccess",
+                    "LateralMovement",
                     "DefenseEvasion"
                 ],
                 "techniques": [
@@ -3934,14 +3896,15 @@
                 "enabled": false,
                 "query": "let remediated_devices = Spycloud_MDE_Logs_CL | where IsolationStatus == true | distinct InfectedMachineId;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where infected_machine_id in (remediated_devices)\n| summarize NewExposures = count(), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, email\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": false,
                 "tactics": [
                     "Persistence",
-                    "CredentialAccess"
+                    "CredentialAccess",
+                    "PrivilegeEscalation"
                 ],
                 "techniques": [
                     "T1547",
@@ -3997,13 +3960,14 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| summarize TargetDomainCount = dcount(target_domain), TargetDomains = make_set(target_domain, 20), MaxSeverity = max(severity), HasPlaintext = countif(isnotempty(password_plaintext)) by email\n| where TargetDomainCount >= 5\n| extend AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": false,
                 "tactics": [
-                    "CredentialAccess"
+                    "CredentialAccess",
+                    "InitialAccess"
                 ],
                 "techniques": [
                     "T1078"
@@ -4049,12 +4013,13 @@
                 "enabled": false,
                 "query": "let country_baseline = SpyCloudBreachWatchlist_CL | where severity >= 20 | summarize DeviceCount = dcount(infected_machine_id) by country_code | where DeviceCount >= 3 | distinct country_code;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where isnotempty(country_code)\n| where country_code !in (country_baseline)\n| summarize ExposureCount = count(), Emails = make_set(email, 10) by country_code, user_hostname, infected_machine_id\n| extend HostCustomEntity = user_hostname",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": false,
                 "tactics": [
+                    "CredentialAccess",
                     "InitialAccess"
                 ],
                 "techniques": [
@@ -4101,7 +4066,7 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| where sighting >= 3\n| summarize MaxSighting = max(sighting), TargetDomains = make_set(target_domain, 10), PasswordTypes = make_set(password_type, 5), LatestExposure = max(TimeGenerated) by email\n| extend AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4153,13 +4118,14 @@
                 "enabled": false,
                 "query": "let remediated_users = SpyCloud_ConditionalAccessLogs_CL | distinct UserEmail;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(2h)\n| where email !in (remediated_users)\n| summarize ExposureCount = count(), MaxSeverity = max(severity), TargetDomains = make_set(target_domain, 10) by email, infected_machine_id\n| extend AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": false,
                 "tactics": [
-                    "CredentialAccess"
+                    "CredentialAccess",
+                    "InitialAccess"
                 ],
                 "techniques": [
                     "T1078"
@@ -4205,7 +4171,7 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where isnotempty(av_softwares)\n| mv-expand av_softwares\n| summarize InfectedDevices = dcount(infected_machine_id), AffectedUsers = dcount(email) by tostring(av_softwares)\n| where InfectedDevices >= 2",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4222,13 +4188,9 @@
                         "enabled": true,
                         "reopenClosedIncident": false,
                         "lookbackDuration": "PT5H",
-                        "matchingMethod": "AllEntities",
-                        "groupByEntities": [
-                            "Account"
-                        ]
+                        "matchingMethod": "AnyAlert"
                     }
-                },
-                "entityMappings": []
+                }
             },
             "dependsOn": [
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
@@ -4247,7 +4209,7 @@
                 "enabled": false,
                 "query": "SpyCloudBreachCatalog_CL\n| where status == 'pending'\n| where TimeGenerated > ago(24h)\n| project TimeGenerated, source_id, breach_title, description, status",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4264,13 +4226,9 @@
                         "enabled": true,
                         "reopenClosedIncident": false,
                         "lookbackDuration": "PT5H",
-                        "matchingMethod": "AllEntities",
-                        "groupByEntities": [
-                            "Account"
-                        ]
+                        "matchingMethod": "AnyAlert"
                     }
-                },
-                "entityMappings": []
+                }
             },
             "dependsOn": [
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
@@ -4289,7 +4247,7 @@
                 "enabled": false,
                 "query": "SpyCloudBreachWatchlist_CL\n| summarize LastRecord = max(TimeGenerated)\n| where LastRecord < ago(3h) or isnull(LastRecord)\n| extend AlertMessage = strcat('Last SpyCloud data received: ', tostring(LastRecord))",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4302,13 +4260,9 @@
                         "enabled": true,
                         "reopenClosedIncident": false,
                         "lookbackDuration": "PT5H",
-                        "matchingMethod": "AllEntities",
-                        "groupByEntities": [
-                            "Account"
-                        ]
+                        "matchingMethod": "AnyAlert"
                     }
-                },
-                "entityMappings": []
+                }
             },
             "dependsOn": [
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
@@ -4327,7 +4281,7 @@
                 "enabled": false,
                 "query": "let compromised_users = SpyCloudBreachWatchlist_CL | where severity >= 20 | distinct email;\nOkta_CL\n| where eventType_s == 'user.session.start' and outcome_result_s == 'SUCCESS'\n| where actor_alternateId_s in (compromised_users)\n| extend AccountCustomEntity = actor_alternateId_s, IPCustomEntity = client_ipAddress_s",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4389,7 +4343,7 @@
                 "enabled": false,
                 "query": "let compromised_users = SpyCloudBreachWatchlist_CL | where severity >= 20 | distinct email;\nDuo_CL\n| where result_s == 'SUCCESS'\n| where email_s in (compromised_users)\n| extend AccountCustomEntity = email_s, IPCustomEntity = access_device_ip_s",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4451,7 +4405,7 @@
                 "enabled": false,
                 "query": "let compromised_users = SpyCloudBreachWatchlist_CL | where severity >= 20 | distinct email;\nPingFederate_CL\n| where status_s == 'success'\n| where subject_s in (compromised_users)\n| extend AccountCustomEntity = subject_s, IPCustomEntity = ip_s",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4513,7 +4467,7 @@
                 "enabled": false,
                 "query": "let compromised_users = SpyCloudBreachWatchlist_CL | where severity >= 20 | distinct email;\nSigninLogs\n| where ResultType == 0\n| where UserPrincipalName in (compromised_users)\n| summarize SignInCount = count(), Locations = make_set(Location, 5), IPs = make_set(IPAddress, 5) by UserPrincipalName, AppDisplayName\n| extend AccountCustomEntity = UserPrincipalName",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-                "queryPeriod": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
                 "triggerThreshold": 0,
                 "suppressionDuration": "PT1H",
@@ -4672,9 +4626,9 @@
         "autoResolvedValues": {
             "type": "object",
             "value": {
-                "dceLogsIngestionUri": "[reference('spycloud-resolve-dcr-dce').outputs.dceLogsIngestionUri.value]",
-                "dcrImmutableId": "[reference('spycloud-resolve-dcr-dce').outputs.dcrImmutableId.value]",
-                "note": "These values were automatically resolved from deployed resources. No manual lookup needed."
+                "dceResourceName": "[parameters('dataCollectionEndpointName')]",
+                "dcrResourceName": "[parameters('dataCollectionRuleName')]",
+                "note": "Run scripts/post-deploy.sh to auto-resolve DCE URI and DCR Immutable ID"
             }
         },
         "analyticsRulesDeployed": {
