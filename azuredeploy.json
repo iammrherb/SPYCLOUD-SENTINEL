@@ -1947,7 +1947,7 @@
                     "id": "SpyCloudCCFDefinition",
                     "title": "SpyCloud Breach Watchlist/Catalog",
                     "publisher": "SpyCloud",
-                    "descriptionMarkdown": "The **SpyCloud Threat Intelligence Connector** ingests breach and infostealer exposure data from SpyCloud's Enterprise API into Microsoft Sentinel, enabling automated identity protection and endpoint remediation workflows.\n\n**Data streams include:**\n- **Watchlist Exposures** \u2014 Compromised credentials, PII, and infected device records associated with your organization's monitored email domains, IP ranges, and assets\n- **Breach Catalog** \u2014 Metadata for all breach sources in SpyCloud's database, enabling contextual enrichment and correlation\n- **MDE Remediation Logs** \u2014 Audit trail of automated Microsoft Defender for Endpoint actions (device isolation, tagging, IOC submission)\n- **Conditional Access Logs** \u2014 Audit trail of automated Azure AD / Entra ID identity protection actions (password resets, session revocations, account disablement)\n\n**Use cases:** Compromised credential detection, infostealer infection response, automated password reset enforcement, post-infection device isolation, breach impact assessment, darknet exposure monitoring, compliance evidence collection, third-party/supply chain risk assessment, VIP/executive exposure monitoring.",
+                    "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/Logos/SpyCloud_Enterprise_Protection.svg)\n\nThe **SpyCloud Threat Intelligence Connector** ingests breach and infostealer exposure data from SpyCloud's Enterprise API into Microsoft Sentinel, enabling automated identity protection and endpoint remediation workflows.\n\n**Data streams include:**\n- **Watchlist Exposures** \u2014 Compromised credentials, PII, and infected device records associated with your organization's monitored email domains, IP ranges, and assets\n- **Breach Catalog** \u2014 Metadata for all breach sources in SpyCloud's database, enabling contextual enrichment and correlation\n- **MDE Remediation Logs** \u2014 Audit trail of automated Microsoft Defender for Endpoint actions (device isolation, tagging, IOC submission)\n- **Conditional Access Logs** \u2014 Audit trail of automated Azure AD / Entra ID identity protection actions (password resets, session revocations, account disablement)\n\n**Use cases:** Compromised credential detection, infostealer infection response, automated password reset enforcement, post-infection device isolation, breach impact assessment, darknet exposure monitoring, compliance evidence collection, third-party/supply chain risk assessment, VIP/executive exposure monitoring.",
                     "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
                     "graphQueries": [
                         {
@@ -5110,7 +5110,8 @@
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": false,
                 "tactics": [
-                    "CredentialAccess"
+                    "CredentialAccess",
+                    "Reconnaissance"
                 ],
                 "techniques": [
                     "T1589"
