@@ -5166,7 +5166,7 @@
             "condition": "[parameters('enablePostDeployScript')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceGroup().id, 'spycloud-deploy-contributor')]",
+            "name": "[guid(resourceGroup().id, deployment().name, 'spycloud-contributor')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]"
             ],
@@ -5241,7 +5241,7 @@
             "condition": "[parameters('enablePostDeployScript')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceGroup().id, 'spycloud-deploy-uaa')]",
+            "name": "[guid(resourceGroup().id, deployment().name, 'spycloud-uaa')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]"
             ],
