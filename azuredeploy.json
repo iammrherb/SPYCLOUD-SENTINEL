@@ -2944,12 +2944,7 @@
             "apiVersion": "2019-05-01",
             "name": "[variables('mdePlaybookName')]",
             "location": "[variables('_effectiveWorkspaceLocation')]",
-            "tags": {
-                "solution": "SpyCloud-ThreatIntel-Sentinel",
-                "playbookType": "MDE-Remediation",
-                "vendor": "SpyCloud",
-                "hidden-SentinelTemplateVersion": "1.0.0"
-            },
+            "tags": "[variables('allTags')]",
             "identity": {
                 "type": "SystemAssigned"
             },
@@ -3207,12 +3202,7 @@
             "apiVersion": "2019-05-01",
             "name": "[variables('caPlaybookName')]",
             "location": "[variables('_effectiveWorkspaceLocation')]",
-            "tags": {
-                "solution": "SpyCloud-ThreatIntel-Sentinel",
-                "playbookType": "CA-Remediation",
-                "vendor": "SpyCloud",
-                "hidden-SentinelTemplateVersion": "1.0.0"
-            },
+            "tags": "[variables('allTags')]",
             "identity": {
                 "type": "SystemAssigned"
             },
@@ -5331,7 +5321,7 @@
             "apiVersion": "2022-04-01",
             "name": "[guid(concat('SpyCloud-Dashboard-', parameters('workspace')))]",
             "location": "[variables('_effectiveWorkspaceLocation')]",
-            "tags": "[union(parameters('resourceTags'), createObject('hidden-title', 'SpyCloud Threat Intelligence Dashboard'))]",
+            "tags": "[union(variables('allTags'), createObject('hidden-title', 'SpyCloud Threat Intelligence Dashboard'))]",
             "kind": "shared",
             "properties": {
                 "displayName": "SpyCloud Threat Intelligence Dashboard",
