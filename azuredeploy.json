@@ -1993,375 +1993,110 @@
                     },
                     "instructionSteps": [
                         {
-                            "title": "Prerequisites \u2014 Read Before Configuring",
-                            "description": "**Complete ALL prerequisites below before clicking Connect.**\n\n---\n\n### A. Log Analytics Workspace & Microsoft Sentinel\n\nYou need a Log Analytics workspace with Microsoft Sentinel enabled. You need an existing Log Analytics workspace with Microsoft Sentinel enabled.\n\n**How to find your workspace:**\n1. Azure Portal \u2192 **Microsoft Sentinel** \u2192 your workspace name appears in the header bar\n2. Or: Azure Portal \u2192 **Log Analytics workspaces** \u2192 copy the Name column value\n3. Enter the exact workspace name in the deployment parameters\n\n**To list existing workspaces via CLI:**\n```\naz monitor log-analytics workspace list --query '[].{Name:name, ResourceGroup:resourceGroup, Location:location}' -o table\n```\n\n### B. SpyCloud Account & API Key\n\n| Requirement | Details |\n|------------|----------|\n| Subscription | Active SpyCloud Enterprise or Enterprise+ API plan |\n| API Key | Generate from [portal.spycloud.com](https://portal.spycloud.com) \u2192 **Settings** \u2192 **API Keys** |\n| API Region | Confirm US (`api.spycloud.io`) or EU (`api.eu.spycloud.io`) from your contract |\n| Products | Employee ATO, Consumer ATO, Compass, Third-Party Insight, Ransomware Prevention |\n\n### C. Azure Permissions (assign to deploying user or Service Principal)\n\n| Role | Scope | Purpose |\n|------|-------|----------|\n| Microsoft Sentinel Contributor | Resource Group | Create/manage connectors, rules, workbooks |\n| Log Analytics Contributor | Workspace | Create custom tables, manage retention |\n| Monitoring Metrics Publisher | Data Collection Rule | Authorize data ingestion via DCE |\n\n### D. Network Requirements\n\n| Direction | Protocol | Destination | Port |\n|-----------|----------|-------------|------|\n| Outbound | HTTPS | `api.spycloud.io` (US) or `api.eu.spycloud.io` (EU) | 443 |\n| Outbound | HTTPS | `*.ingest.monitor.azure.com` (DCE) | 443 |\n\nNo inbound rules are required \u2014 this is a pull-based connector.\n\n### E. Capacity Planning\n\n| Environment Size | Monitored Assets | Expected Daily Ingestion | Recommended Polling |\n|-----------------|------------------|--------------------------|---------------------|\n| Small/POC | < 1,000 | 1-10 MB/day | 60 min, 1-2 QPS |\n| Medium | 1,000-10,000 | 10-100 MB/day | 40 min, 2-3 QPS |\n| Large Enterprise | 10,000-100,000 | 100-500 MB/day | 20 min, 3-5 QPS |\n| Very Large | 100,000+ | 500+ MB/day | 10 min, 5-10 QPS |",
-                            "instructions": [
-                                {
-                                    "type": "InfoMessage",
-                                    "parameters": {
-                                        "text": "TIP: You can find your SpyCloud API key at portal.spycloud.com \u2192 Settings \u2192 API Keys. For Azure role assignments, go to your resource group \u2192 Access Control (IAM) \u2192 Add role assignment. Need a SpyCloud account? Contact support@spycloud.com or your account manager."
-                                    }
-                                }
-                            ]
-                        },
-                        {
                             "title": "Step 1 \u2014 SpyCloud API Authentication",
-                            "description": "Enter your SpyCloud Enterprise API key and select your API hosting region. The API key is sent in the `Authorization: Bearer <key>` header on every API request. It is stored as a secure string and never exposed in deployment logs, ARM outputs, or the Azure Activity Log.\n\n**Where to find your API key:**\n1. Open [portal.spycloud.com](https://portal.spycloud.com)\n2. Click **Settings** (gear icon) \u2192 **API Keys**\n3. Copy the key labeled **Enterprise API** or **Enterprise+ API**\n4. Paste it in the field below\n\n**Important:** Your SpyCloud API key is used as a Bearer token. Do NOT add 'Bearer' prefix yourself \u2014 the connector adds it automatically.",
+                            "description": "Enter your SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com) \u2192 **Settings** \u2192 **API Keys**.\n\nThe key is stored securely and sent as `Authorization: Bearer <key>` on every API request.",
                             "instructions": [
                                 {
                                     "type": "Textbox",
                                     "parameters": {
-                                        "label": "SpyCloud Enterprise API Key",
+                                        "label": "SpyCloud API Key",
                                         "name": "apiKey",
                                         "type": "password",
-                                        "placeholder": "Paste your API key from portal.spycloud.com \u2192 Settings \u2192 API Keys",
+                                        "placeholder": "Paste your API key from portal.spycloud.com",
                                         "validations": {
                                             "required": true
                                         }
                                     }
-                                },
-                                {
-                                    "parameters": {
-                                        "label": "SpyCloud API Hosting Region",
-                                        "name": "apiRegion",
-                                        "options": [
-                                            {
-                                                "key": "us",
-                                                "text": "US \u2014 api.spycloud.io (default for most SpyCloud customers)"
-                                            },
-                                            {
-                                                "key": "eu",
-                                                "text": "EU \u2014 api.eu.spycloud.io (European Union data residency)"
-                                            }
-                                        ],
-                                        "placeholder": "Select your SpyCloud API region (check your SpyCloud contract if unsure)",
-                                        "isMultiSelect": false,
-                                        "required": true,
-                                        "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
                                 }
                             ]
                         },
                         {
-                            "title": "Step 2 \u2014 Data Filtering & Exposure Scope",
-                            "description": "Control **what data** flows into Sentinel. These filters determine which SpyCloud exposure records are ingested based on severity, exposure type, and content sensitivity.\n\n### Severity Level Reference\n\n| Severity | Category | What It Contains | Action Required |\n|----------|----------|------------------|-----------------|\n| **2** | Breach Credential | Email + password from a third-party data breach | Monitor, reset if active |\n| **5** | Breach + PII | Above + name, phone, DOB, address, SSN | Monitor, notify affected users |\n| **20** | Infostealer | Credential stolen by malware from infected device | URGENT: Isolate device, force reset |\n| **25** | Infostealer + App | Above + stolen cookies, sessions, autofill, browser data | CRITICAL: Full remediation needed |\n\n### Exposure Type Reference (Multi-Select \u2014 choose one or more)\n\n| Type | Description | SpyCloud Product |\n|------|-------------|------------------|\n| **Corporate** | Credentials matching your monitored corporate email domains & IP ranges | Employee ATO Prevention |\n| **Infected** | Credentials stolen by infostealer malware from compromised devices | Session Identity Protection, Ransomware Prevention |\n| **Compass** | Consumer identity exposures for monitored consumer accounts | Consumer ATO Prevention, Compass |\n\n**Recommendations:**\n- **Maximum protection:** Select ALL severity levels AND ALL exposure types\n- **Infostealer focus:** Severity 20+25, select only Infected type\n- **Corporate only:** All severity levels, select only Corporate type",
+                            "title": "Step 2 \u2014 Data Filtering",
+                            "description": "**Severity Levels:** 2=Breach Credential, 5=Breach+PII, 20=Infostealer (HIGH), 25=Infostealer+App (CRITICAL)\n\n**Exposure Types:** Corporate=your domains, Infected=malware-stolen, Compass=consumer monitoring",
                             "instructions": [
                                 {
+                                    "type": "Dropdown",
                                     "parameters": {
-                                        "label": "Severity Levels to Ingest",
+                                        "label": "Severity Levels",
                                         "name": "severity",
                                         "options": [
                                             {
                                                 "key": "2",
-                                                "text": "2 \u2014 Breach Credential (email + password from third-party breach)"
+                                                "text": "2 \u2014 Breach Credential"
                                             },
                                             {
                                                 "key": "5",
-                                                "text": "5 \u2014 Breach + PII (credential + personal data: name, phone, DOB, address)"
+                                                "text": "5 \u2014 Breach + PII"
                                             },
                                             {
                                                 "key": "20",
-                                                "text": "20 \u2014 Infostealer Credential (malware-exfiltrated from infected device)"
+                                                "text": "20 \u2014 Infostealer (HIGH)"
                                             },
                                             {
                                                 "key": "25",
-                                                "text": "25 \u2014 Infostealer + App Data (stolen cookies, sessions, autofill, browser)"
+                                                "text": "25 \u2014 Infostealer + App Data (CRITICAL)"
                                             }
                                         ],
-                                        "placeholder": "Select one or more severity levels (multi-select recommended: all 4)",
                                         "isMultiSelect": true,
                                         "required": true,
                                         "defaultAllSelected": true
-                                    },
-                                    "type": "Dropdown"
+                                    }
                                 },
                                 {
+                                    "type": "Dropdown",
                                     "parameters": {
-                                        "label": "Exposure Category Filter",
+                                        "label": "Exposure Types",
                                         "name": "watchlistType",
                                         "options": [
                                             {
                                                 "key": "corporate",
-                                                "text": "Corporate \u2014 Credentials matching your monitored corporate email domains & IP assets"
+                                                "text": "Corporate \u2014 Your monitored email domains"
                                             },
                                             {
                                                 "key": "infected",
-                                                "text": "Infected Devices \u2014 Credentials stolen by infostealer malware from compromised machines"
+                                                "text": "Infected Devices \u2014 Infostealer malware"
                                             },
                                             {
                                                 "key": "compass",
-                                                "text": "Compass/Consumer \u2014 Consumer identity exposures (requires SpyCloud Compass license)"
+                                                "text": "Compass \u2014 Consumer identity monitoring"
                                             }
                                         ],
-                                        "placeholder": "Select one or more exposure types (all selected = ingest everything)",
                                         "isMultiSelect": true,
                                         "required": true,
                                         "defaultAllSelected": true
-                                    },
-                                    "type": "Dropdown"
+                                    }
                                 },
                                 {
+                                    "type": "Dropdown",
                                     "parameters": {
-                                        "label": "Include Plaintext Passwords in Ingestion",
+                                        "label": "Include Plaintext Passwords",
                                         "name": "show_plain_password",
                                         "options": [
                                             {
                                                 "key": "False",
-                                                "text": "No \u2014 Exclude cleartext passwords (RECOMMENDED \u2014 most secure)"
+                                                "text": "No \u2014 Exclude (recommended)"
                                             },
                                             {
                                                 "key": "True",
-                                                "text": "Yes \u2014 Include cleartext passwords (requires data handling policy + table RBAC)"
+                                                "text": "Yes \u2014 Include (requires data handling policy)"
                                             }
                                         ],
-                                        "placeholder": "Select password handling preference",
                                         "isMultiSelect": false,
                                         "required": true,
                                         "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
+                                    }
                                 }
                             ]
                         },
                         {
-                            "title": "Step 3 \u2014 Connector Modules & Data Streams",
-                            "description": "Choose which SpyCloud data feeds to activate. Each module maps to a specific SpyCloud API endpoint and a dedicated Log Analytics table in your workspace.\n\n### Connector Module Reference\n\n| Module | API Endpoint | Destination Table | Purpose |\n|--------|-------------|-------------------|---------|\n| Watchlist (New) | `/breach/data/watchlist` | SpyCloudBreachWatchlist_CL | Primary credential/PII exposure feed |\n| Watchlist (Modified) | `/breach/data/watchlist` + modification dates | SpyCloudBreachWatchlist_CL | Updated records (re-sighted, severity upgraded) |\n| Breach Catalog | `/breach/catalog` | SpyCloudBreachCatalog_CL | Breach source metadata for enrichment |\n\n**Automatic tables (no connector needed):**\n- `Spycloud_MDE_Logs_CL` \u2014 Populated by SpyCloud's MDE remediation playbook when it isolates devices, adds tags, or submits IOCs\n- `SpyCloud_ConditionalAccessLogs_CL` \u2014 Populated by SpyCloud's identity playbook when it forces password resets, revokes sessions, or disables users\n\n**Recommendation:** Enable ALL three connector modules for comprehensive coverage. The exposure type filter you configured in Step 2 (Corporate, Infected, Compass) controls which records flow through the Watchlist connectors.",
-                            "instructions": [
-                                {
-                                    "parameters": {
-                                        "label": "Activate Connector Modules",
-                                        "name": "enabledConnectors",
-                                        "options": [
-                                            {
-                                                "key": "watchlist_new",
-                                                "text": "Watchlist \u2014 New Exposures (PRIMARY feed \u2014 always enable this)"
-                                            },
-                                            {
-                                                "key": "watchlist_modified",
-                                                "text": "Watchlist \u2014 Modified/Updated Records (catches re-sighted & upgraded records)"
-                                            },
-                                            {
-                                                "key": "breach_catalog",
-                                                "text": "Breach Catalog (breach source metadata for enrichment & correlation)"
-                                            }
-                                        ],
-                                        "placeholder": "Select connector modules to activate (multi-select)",
-                                        "isMultiSelect": true,
-                                        "required": true,
-                                        "defaultAllSelected": true
-                                    },
-                                    "type": "Dropdown"
-                                },
-                                {
-                                    "parameters": {
-                                        "label": "Historical Lookback (Initial Backfill)",
-                                        "name": "initialLookbackDays",
-                                        "options": [
-                                            {
-                                                "key": "7",
-                                                "text": "7 days \u2014 Quick start, see data fastest"
-                                            },
-                                            {
-                                                "key": "14",
-                                                "text": "14 days \u2014 Two weeks of recent exposures"
-                                            },
-                                            {
-                                                "key": "30",
-                                                "text": "30 days \u2014 One month baseline (RECOMMENDED)"
-                                            },
-                                            {
-                                                "key": "90",
-                                                "text": "90 days \u2014 Three-month history for trend analysis"
-                                            }
-                                        ],
-                                        "placeholder": "How far back to pull on first connection",
-                                        "isMultiSelect": false,
-                                        "required": true,
-                                        "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Step 4 \u2014 Polling Frequency & API Performance",
-                            "description": "Fine-tune how the connector communicates with SpyCloud's API. These settings balance data freshness against API quota consumption and network reliability.\n\n### Quick-Select Profiles\n\n| Profile | Polling | QPS | Timeout | Retries | Best For |\n|---------|---------|-----|---------|---------|----------|\n| **Real-Time SOC** | 10 min | 5 | 120s | 5 | Active SOC, large enterprise |\n| **Standard** | 40 min | 2 | 60s | 3 | Most organizations (default) |\n| **Cost-Optimized** | 120 min | 1 | 60s | 3 | Low-volume, budget-conscious |\n| **Daily Digest** | 1440 min | 1 | 300s | 5 | Compliance scanning, reports |",
-                            "instructions": [
-                                {
-                                    "parameters": {
-                                        "label": "Polling Interval (how often to check for new data)",
-                                        "name": "queryWindowInMin",
-                                        "options": [
-                                            {
-                                                "key": "10",
-                                                "text": "10 min \u2014 Near real-time monitoring"
-                                            },
-                                            {
-                                                "key": "20",
-                                                "text": "20 min \u2014 High frequency (large environments)"
-                                            },
-                                            {
-                                                "key": "40",
-                                                "text": "40 min \u2014 Standard (RECOMMENDED for most environments)"
-                                            },
-                                            {
-                                                "key": "60",
-                                                "text": "60 min \u2014 Hourly polling"
-                                            }
-                                        ],
-                                        "placeholder": "Select polling frequency",
-                                        "isMultiSelect": false,
-                                        "required": true,
-                                        "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
-                                },
-                                {
-                                    "parameters": {
-                                        "label": "API Rate Limit (requests per second to SpyCloud)",
-                                        "name": "rateLimitQPS",
-                                        "options": [
-                                            {
-                                                "key": "1",
-                                                "text": "1 QPS \u2014 Conservative (POC, trial, small watchlist)"
-                                            },
-                                            {
-                                                "key": "2",
-                                                "text": "2 QPS \u2014 Standard (RECOMMENDED \u2014 most Enterprise plans)"
-                                            },
-                                            {
-                                                "key": "5",
-                                                "text": "5 QPS \u2014 High throughput (Enterprise+, 10K+ assets)"
-                                            },
-                                            {
-                                                "key": "10",
-                                                "text": "10 QPS \u2014 Maximum (verify with SpyCloud support first)"
-                                            }
-                                        ],
-                                        "placeholder": "Select API rate limit",
-                                        "isMultiSelect": false,
-                                        "required": true,
-                                        "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
-                                },
-                                {
-                                    "parameters": {
-                                        "label": "Request Timeout (seconds per API call)",
-                                        "name": "timeoutInSeconds",
-                                        "options": [
-                                            {
-                                                "key": "30",
-                                                "text": "30s \u2014 Fast (small watchlists < 1K assets)"
-                                            },
-                                            {
-                                                "key": "60",
-                                                "text": "60s \u2014 Default (RECOMMENDED)"
-                                            },
-                                            {
-                                                "key": "120",
-                                                "text": "120s \u2014 Extended (10K-50K assets)"
-                                            },
-                                            {
-                                                "key": "300",
-                                                "text": "300s \u2014 Maximum (50K+ assets or high-latency networks)"
-                                            }
-                                        ],
-                                        "placeholder": "Select timeout duration",
-                                        "isMultiSelect": false,
-                                        "required": true,
-                                        "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
-                                },
-                                {
-                                    "parameters": {
-                                        "label": "Retry Attempts on Failed Requests",
-                                        "name": "retryCount",
-                                        "options": [
-                                            {
-                                                "key": "0",
-                                                "text": "0 \u2014 No retries (debugging only)"
-                                            },
-                                            {
-                                                "key": "3",
-                                                "text": "3 \u2014 Standard (RECOMMENDED)"
-                                            },
-                                            {
-                                                "key": "5",
-                                                "text": "5 \u2014 Resilient (unreliable network)"
-                                            },
-                                            {
-                                                "key": "10",
-                                                "text": "10 \u2014 Maximum resilience (air-gapped / heavy proxy)"
-                                            }
-                                        ],
-                                        "placeholder": "Select retry count",
-                                        "isMultiSelect": false,
-                                        "required": true,
-                                        "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Step 5 \u2014 Data Retention & Compliance",
-                            "description": "Set how long SpyCloud exposure data is retained in your Log Analytics workspace. This setting applies to ALL four SpyCloud custom tables.\n\n### Compliance Quick Reference\n\n| Framework | Minimum Retention | Recommended Setting |\n|-----------|-------------------|---------------------|\n| GDPR | Minimize (data minimization principle) | 30-90 days |\n| SOC 2 Type II | 90 days (audit period) | 90-365 days |\n| PCI DSS v4.0 | 12 months (Req. 10.7) | 365 days |\n| NIST 800-53 | 90 days online (AU-11) | 90 days + archive |\n| HIPAA | 6 years (45 CFR 164.530) | 730 days + archive |\n| Cyber Insurance | Varies by policy | 180-365 days |\n| SEC Rule 10b-5 | 3 years (securities fraud) | 730 days |\n\n**Cost Note:** Retention beyond 90 days is billed at the Log Analytics archive rate. See Azure Monitor pricing for your region.",
-                            "instructions": [
-                                {
-                                    "parameters": {
-                                        "label": "Data Retention Period (all SpyCloud tables)",
-                                        "name": "retentionInDays",
-                                        "options": [
-                                            {
-                                                "key": "30",
-                                                "text": "30 days \u2014 Minimum (GDPR-aligned, lowest cost)"
-                                            },
-                                            {
-                                                "key": "90",
-                                                "text": "90 days \u2014 Standard (RECOMMENDED \u2014 SOC2, NIST baseline)"
-                                            },
-                                            {
-                                                "key": "180",
-                                                "text": "180 days \u2014 Extended investigation & trend analysis"
-                                            },
-                                            {
-                                                "key": "365",
-                                                "text": "365 days \u2014 Full year (PCI DSS, annual audit, cyber insurance)"
-                                            }
-                                        ],
-                                        "placeholder": "Select data retention period",
-                                        "isMultiSelect": false,
-                                        "required": true,
-                                        "defaultAllSelected": false
-                                    },
-                                    "type": "Dropdown"
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Step 6 \u2014 Review & Connect",
-                            "description": "**Review your configuration above, then click Connect to activate.**\n\n### What Happens When You Click Connect\n\n1. **Authentication** \u2014 The connector validates your SpyCloud API key against the selected region endpoint\n2. **Historical Backfill** \u2014 Initial data pull begins based on your lookback setting (may take 5-30 minutes)\n3. **Incremental Polling** \u2014 Ongoing polling activates at your configured interval\n4. **Data Transform** \u2014 Raw API responses are normalized via KQL transforms in the DCR\n5. **Table Ingestion** \u2014 Transformed data flows into your Log Analytics custom tables\n6. **Status Update** \u2014 The connector status tile above will show 'Connected' within 5-10 minutes\n\n### Configuration Summary Checklist\n\n- [ ] API key pasted from portal.spycloud.com \u2192 Settings \u2192 API Keys\n- [ ] API region matches your SpyCloud contract (US or EU)\n- [ ] Severity levels selected (recommend: all 4 selected)\n- [ ] Exposure types selected (recommend: all 3 \u2014 Corporate, Infected, Compass)\n- [ ] Password handling preference set (recommend: No / exclude)\n- [ ] Connector modules enabled (recommend: all 3 \u2014 New, Modified, Catalog)\n- [ ] Historical lookback depth chosen\n- [ ] Polling interval appropriate for your environment size\n- [ ] Retention period meets your compliance requirements\n\n### Sentinel Resources Created After Connection\n\n| Resource | Name Pattern | Purpose |\n|----------|-------------|----------|\n| Data Collection Endpoint | `dce-spycloud-{workspace}` | HTTPS ingestion endpoint |\n| Data Collection Rule | `dcr-spycloud-{workspace}` | KQL transforms + table routing |\n| Custom Table | `SpyCloudBreachWatchlist_CL` | Compromised credentials & PII |\n| Custom Table | `SpyCloudBreachCatalog_CL` | Breach source metadata |\n| Custom Table | `Spycloud_MDE_Logs_CL` | MDE remediation audit trail |\n| Custom Table | `SpyCloud_ConditionalAccessLogs_CL` | Identity protection audit trail |",
+                            "title": "Step 3 \u2014 Connect",
+                            "description": "Click **Connect** to activate. Data appears within 5-10 minutes.\n\n**Default settings:** US API region, 40-minute polling, 2 QPS rate limit, 30-day lookback.\n\nTo verify: `SpyCloudBreachWatchlist_CL | count`",
                             "instructions": [
                                 {
                                     "type": "ConnectionToggleButton",
                                     "parameters": {
                                         "connectLabel": "Connect to SpyCloud",
                                         "name": "toggle"
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Step 7 \u2014 Post-Deployment Validation & Troubleshooting",
-                            "description": "After connecting, verify data flow with these KQL queries.\n\n### Quick Health Check (run 5-10 minutes after connecting)\n\n```kusto\nSpyCloudBreachWatchlist_CL\n| summarize \n    TotalRecords = count(), \n    NewestRecord = max(TimeGenerated), \n    OldestRecord = min(TimeGenerated),\n    UniqueDomains = dcount(email_domain),\n    UniqueBreaches = dcount(source_id)\n| extend Status = iff(TotalRecords > 0, '\u2705 RECEIVING DATA', '\u23f3 WAITING FOR DATA')\n```\n\n### Full 4-Table Health Dashboard\n\n```kusto\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Breach Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access')\n| project Table, Records, Latest, \n    HoursSinceUpdate = datetime_diff('hour', now(), Latest),\n    Status = case(Records == 0, '\u23f3 No Data', datetime_diff('hour', now(), Latest) > 24, '\u26a0\ufe0f Stale', '\u2705 Active')\n```\n\n### Troubleshooting Guide\n\n| Symptom | Likely Cause | Fix |\n|---------|-------------|-----|\n| No data after 30 min | Invalid API key | Regenerate key in portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| No data after 30 min | DCE not healthy | Azure Portal \u2192 Monitor \u2192 Data Collection Endpoints \u2192 check status |\n| No data after 30 min | Wrong API region | Verify US vs EU in your SpyCloud contract |\n| Partial/intermittent data | Rate limited (429) | Reduce API Rate Limit QPS setting above |\n| Timeouts (504 errors) | Large watchlist | Increase Request Timeout to 120-300s |\n| Missing modified records | until_modification_date bug | Ensure template v3.3.0+ (this bug is fixed) |\n| Watchlist data but no Catalog | Catalog connector not enabled | Enable Breach Catalog module in Step 3 |\n| No MDE/CA logs | Playbooks not configured | MDE & CA logs require SpyCloud playbook deployment (separate) |\n| HTTP 401 Unauthorized | API key expired/invalid | Regenerate in SpyCloud Portal |\n| HTTP 403 Forbidden | Insufficient API permissions | Contact SpyCloud to verify API tier |\n| HTTP 429 Too Many Requests | Rate limit exceeded | Lower QPS setting or increase polling interval |\n\n### Support Contacts\n\n| Issue Type | Contact |\n|-----------|----------|\n| SpyCloud API / Data | support@spycloud.com or portal.spycloud.com \u2192 Support |\n| Azure / Sentinel | Azure Portal \u2192 Help + Support \u2192 New Support Request |\n| This Connector Template | support@spycloud.com (reference: Sentinel CCF Connector v3.3.0) |",
-                            "instructions": [
-                                {
-                                    "type": "InfoMessage",
-                                    "parameters": {
-                                        "text": "Need help? SpyCloud Support: support@spycloud.com | SpyCloud Portal: portal.spycloud.com | Azure Support: Azure Portal \u2192 Help + Support. Reference connector version 3.3.0 in all support requests."
                                     }
                                 }
                             ]
@@ -2483,13 +2218,6 @@
                                 "description": "Data Collection Rule configuration (DCE endpoint + DCR immutable ID). Auto-populated by the Sentinel CCF framework."
                             }
                         },
-                        "apiRegion": {
-                            "defaultValue": "us",
-                            "type": "string",
-                            "metadata": {
-                                "description": "SpyCloud API hosting region: 'us' (api.spycloud.io) or 'eu' (api.eu.spycloud.io). Must match your SpyCloud contract."
-                            }
-                        },
                         "watchlistType": {
                             "defaultValue": [
                                 "corporate",
@@ -2499,59 +2227,6 @@
                             "type": "array",
                             "metadata": {
                                 "description": "Watchlist exposure types to ingest. Array of: 'corporate', 'infected', 'compass'. Joined with comma for API query parameter."
-                            }
-                        },
-                        "queryWindowInMin": {
-                            "defaultValue": 40,
-                            "type": "int",
-                            "metadata": {
-                                "description": "Polling interval in minutes. 10=near real-time, 40=default, 1440=daily. Smaller values use more API quota."
-                            }
-                        },
-                        "rateLimitQPS": {
-                            "defaultValue": 2,
-                            "type": "int",
-                            "metadata": {
-                                "description": "Maximum API requests per second. 1=conservative, 2=default, 5-10=high throughput (Enterprise+ tier)."
-                            }
-                        },
-                        "retryCount": {
-                            "defaultValue": 3,
-                            "type": "int",
-                            "metadata": {
-                                "description": "Retry attempts on API failure. 0=none, 3=default, 5-10=high resilience. Uses exponential backoff."
-                            }
-                        },
-                        "timeoutInSeconds": {
-                            "defaultValue": 60,
-                            "type": "int",
-                            "metadata": {
-                                "description": "Per-request timeout. 30s=small datasets, 60s=default, 120-300s=large watchlists."
-                            }
-                        },
-                        "initialLookbackDays": {
-                            "defaultValue": 30,
-                            "type": "int",
-                            "metadata": {
-                                "description": "Historical data backfill depth on first activation. 7=quick start, 30=default, 90-365=comprehensive history."
-                            }
-                        },
-                        "enabledConnectors": {
-                            "defaultValue": [
-                                "watchlist_new",
-                                "watchlist_modified",
-                                "breach_catalog"
-                            ],
-                            "type": "array",
-                            "metadata": {
-                                "description": "Active connector modules: watchlist_new, watchlist_modified, breach_catalog. Multi-select."
-                            }
-                        },
-                        "retentionInDays": {
-                            "defaultValue": 90,
-                            "type": "int",
-                            "metadata": {
-                                "description": "Data retention in days. 30=min, 90=recommended, 365=compliance, 730=max."
                             }
                         }
                     },
@@ -2600,22 +2275,22 @@
                                     "ApiKeyIdentifier": "Bearer"
                                 },
                                 "request": {
-                                    "apiEndpoint": "[[concat(if(equals(parameters('apiRegion'), 'eu'), 'https://api.eu.spycloud.io', 'https://api.spycloud.io'), '/enterprise-v2/breach/data/watchlist')]",
+                                    "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/data/watchlist",
                                     "httpMethod": "GET",
-                                    "rateLimitQPS": "[[parameters('rateLimitQPS')]",
+                                    "rateLimitQPS": 2,
                                     "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                                     "startTimeAttributeName": "since",
-                                    "queryWindowInMin": "[[parameters('queryWindowInMin')]",
+                                    "queryWindowInMin": 40,
                                     "headers": {
                                         "Accept": "application/json"
                                     },
                                     "queryParameters": {
                                         "severity": "[[join(parameters('severity'), ',')]",
                                         "type": "[[join(parameters('watchlistType'), ',')]",
-                                        "show_plain_password": "[[parameters('show_plain_password')]"
+                                        "show_plain_password": "[[join(parameters('show_plain_password'), ',')]"
                                     },
-                                    "retryCount": "[[parameters('retryCount')]",
-                                    "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
+                                    "retryCount": 3,
+                                    "timeoutInSeconds": 60
                                 },
                                 "response": {
                                     "eventsJsonPaths": [
@@ -2653,9 +2328,9 @@
                                     "ApiKeyIdentifier": "Bearer"
                                 },
                                 "request": {
-                                    "apiEndpoint": "[[concat(if(equals(parameters('apiRegion'), 'eu'), 'https://api.eu.spycloud.io', 'https://api.spycloud.io'), '/enterprise-v2/breach/data/watchlist')]",
+                                    "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/data/watchlist",
                                     "httpMethod": "GET",
-                                    "rateLimitQPS": "[[parameters('rateLimitQPS')]",
+                                    "rateLimitQPS": 2,
                                     "queryTimeFormat": "yyyy-MM-dd",
                                     "queryWindowInMin": 1440,
                                     "headers": {
@@ -2666,10 +2341,10 @@
                                         "until_modification_date": "{_QueryWindowEndTime}",
                                         "severity": "[[join(parameters('severity'), ',')]",
                                         "type": "[[join(parameters('watchlistType'), ',')]",
-                                        "show_plain_password": "[[parameters('show_plain_password')]"
+                                        "show_plain_password": "[[join(parameters('show_plain_password'), ',')]"
                                     },
-                                    "retryCount": "[[parameters('retryCount')]",
-                                    "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
+                                    "retryCount": 3,
+                                    "timeoutInSeconds": 60
                                 },
                                 "response": {
                                     "eventsJsonPaths": [
@@ -2707,17 +2382,17 @@
                                     "ApiKeyIdentifier": "Bearer"
                                 },
                                 "request": {
-                                    "apiEndpoint": "[[concat(if(equals(parameters('apiRegion'), 'eu'), 'https://api.eu.spycloud.io', 'https://api.spycloud.io'), '/enterprise-v2/breach/catalog')]",
+                                    "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/catalog",
                                     "httpMethod": "GET",
-                                    "rateLimitQPS": "[[parameters('rateLimitQPS')]",
+                                    "rateLimitQPS": 2,
                                     "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                                     "startTimeAttributeName": "since",
-                                    "queryWindowInMin": "[[parameters('queryWindowInMin')]",
+                                    "queryWindowInMin": 40,
                                     "headers": {
                                         "Accept": "application/json"
                                     },
-                                    "retryCount": "[[parameters('retryCount')]",
-                                    "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
+                                    "retryCount": 3,
+                                    "timeoutInSeconds": 60
                                 },
                                 "response": {
                                     "eventsJsonPaths": [
