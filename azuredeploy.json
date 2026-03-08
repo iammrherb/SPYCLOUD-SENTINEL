@@ -57,130 +57,6 @@
                 "description": "Name for the Data Collection Rule (DCR) that transforms and routes SpyCloud data to the correct tables. Default: 'dcr-spycloud-{workspaceName}' \u2014 follows Azure naming best practices. The DCR contains KQL transforms that normalize incoming SpyCloud API data and route it to the appropriate custom table (Watchlist, Breach Catalog, MDE Logs, or Conditional Access Logs). Example: If workspace is 'law-sentinel-prod', DCR will be 'dcr-spycloud-law-sentinel-prod'."
             }
         },
-        "spycloudApiKey": {
-            "type": "securestring",
-            "defaultValue": "",
-            "metadata": {
-                "description": "REQUIRED \u2014 Your SpyCloud Enterprise API key for authenticating with the SpyCloud Threat Intelligence API. The key is sent as 'Authorization: Bearer <your-key>' on every API request. HOW TO GET YOUR API KEY: 1. Log in to https://portal.spycloud.com 2. Navigate to Settings \u2192 API Keys (or Admin \u2192 API Configuration) 3. Copy your Enterprise API key 4. Paste it here \u2014 do NOT include 'Bearer' prefix, the connector adds it automatically. It is stored as a SecureString and never displayed in logs, outputs, or the Activity Log. If you don't have an API key, contact your SpyCloud account manager or email support@spycloud.com."
-            }
-        },
-        "spycloudApiRegion": {
-            "type": "string",
-            "defaultValue": "us",
-            "allowedValues": [
-                "us",
-                "eu"
-            ],
-            "metadata": {
-                "description": "SpyCloud API hosting region \u2014 determines which API endpoint the connector calls. \u2022 'us' \u2192 https://api.spycloud.io (United States \u2014 default for most customers) \u2022 'eu' \u2192 https://api.eu.spycloud.io (European Union \u2014 for EU data residency requirements) Select 'eu' if your SpyCloud contract specifies EU data residency, or if your organization requires that API calls originate from/terminate in EU-hosted infrastructure. Check your SpyCloud Portal \u2192 Settings \u2192 API Configuration to confirm your assigned region."
-            }
-        },
-        "spycloudApiVersion": {
-            "type": "string",
-            "defaultValue": "enterprise-v2",
-            "allowedValues": [
-                "enterprise-v2"
-            ],
-            "metadata": {
-                "description": "SpyCloud API version to use. Currently only 'enterprise-v2' is supported. This parameter is included for forward compatibility \u2014 when SpyCloud releases v3 of their API, this parameter will allow seamless migration without template redeployment."
-            }
-        },
-        "severityFilter": {
-            "type": "array",
-            "defaultValue": [
-                "2",
-                "5",
-                "20",
-                "25"
-            ],
-            "metadata": {
-                "description": "SpyCloud severity levels to ingest (multi-select). Each level represents a different exposure type: \u2022 2 = Breach Credential \u2014 email/password pair found in a third-party data breach \u2022 5 = Breach Credential + PII \u2014 includes personal data (name, phone, address, DOB) \u2022 20 = Infostealer Credential \u2014 stolen by malware from an infected device (most actionable) \u2022 25 = Infostealer + Application \u2014 includes stolen cookies, session tokens, autofill data, browser data RECOMMENDATIONS: - For MAXIMUM PROTECTION: Select all levels [2, 5, 20, 25] - For INFOSTEALER FOCUS: Select [20, 25] only \u2014 most actionable, lowest volume - For CREDENTIAL MONITORING: Select [2, 5] \u2014 breach-sourced credentials without device context"
-            }
-        },
-        "watchlistType": {
-            "type": "array",
-            "defaultValue": [
-                "corporate",
-                "infected",
-                "compass"
-            ],
-            "metadata": {
-                "description": "SpyCloud watchlist exposure types to ingest (MULTI-SELECT). Select one or more categories: \u2022 'corporate' = Corporate credentials \u2014 exposures matching your monitored email domains and IP assets \u2022 'infected' = Infected device records \u2014 credentials stolen by infostealer malware from compromised machines \u2022 'compass' = Consumer/Compass records \u2014 consumer identity exposures (requires SpyCloud Compass license) Default: ALL three types selected for comprehensive coverage. Deselect types you don't need to reduce ingestion volume and cost. NOTE: This maps to the 'type' query parameter on SpyCloud's Enterprise API /breach/data/watchlist endpoint."
-            }
-        },
-        "showPlainPassword": {
-            "type": "string",
-            "defaultValue": "False",
-            "allowedValues": [
-                "True",
-                "False"
-            ],
-            "metadata": {
-                "description": "Controls whether plaintext passwords are included in SpyCloud data ingested into Sentinel. Set to 'False' to redact passwords for compliance. Set to 'True' to include them for investigation. Default: False (passwords hidden)."
-            }
-        },
-        "queryWindowInMin": {
-            "type": "int",
-            "defaultValue": 40,
-            "allowedValues": [
-                10,
-                20,
-                30,
-                40,
-                60,
-                120,
-                360,
-                720,
-                1440
-            ],
-            "metadata": {
-                "description": "How often (in minutes) the connector polls SpyCloud's API for new exposure data. \u2022 10 min = Near real-time (highest API consumption, best for SOC with active monitoring) \u2022 20 min = High frequency (large enterprise environments) \u2022 40 min = DEFAULT \u2014 balanced freshness and API efficiency for most organizations \u2022 60 min = Standard hourly polling \u2022 120-360 min = Low frequency (cost-sensitive or low-volume environments) \u2022 1440 min = Daily sync (once per 24 hours, minimal API consumption) SIZING GUIDE: <1K assets\u219260min, 1-10K assets\u219240min, 10K+ assets\u219220min, SOC real-time\u219210min."
-            }
-        },
-        "rateLimitQPS": {
-            "type": "int",
-            "defaultValue": 2,
-            "allowedValues": [
-                1,
-                2,
-                3,
-                5,
-                10
-            ],
-            "metadata": {
-                "description": "Maximum API requests per second sent to the SpyCloud API. Controls ingestion throughput. \u2022 1 QPS = Conservative \u2014 minimal API impact, suitable for trial/POC deployments \u2022 2 QPS = DEFAULT \u2014 recommended for standard Enterprise subscriptions \u2022 3-5 QPS = High throughput \u2014 for Enterprise+ customers with large watchlists (10K+ assets) \u2022 10 QPS = Maximum \u2014 verify this rate is permitted under your SpyCloud contract before selecting If you receive HTTP 429 (Too Many Requests) errors, reduce this value. Check your SpyCloud Portal \u2192 Settings \u2192 API Usage to view your current rate limit allocation."
-            }
-        },
-        "retryCount": {
-            "type": "int",
-            "defaultValue": 3,
-            "allowedValues": [
-                0,
-                1,
-                2,
-                3,
-                5,
-                10
-            ],
-            "metadata": {
-                "description": "Number of automatic retry attempts when an API request to SpyCloud fails. \u2022 0 = No retries \u2014 fail immediately (use for debugging) \u2022 3 = DEFAULT \u2014 handles transient network issues, DNS hiccups, brief API outages \u2022 5 = Resilient \u2014 for environments with unreliable network connectivity \u2022 10 = Maximum resilience \u2014 for air-gapped or proxy-heavy environments Retries use exponential backoff. Each retry adds latency but improves data completeness."
-            }
-        },
-        "timeoutInSeconds": {
-            "type": "int",
-            "defaultValue": 60,
-            "allowedValues": [
-                30,
-                60,
-                90,
-                120,
-                180,
-                300
-            ],
-            "metadata": {
-                "description": "Maximum wait time (in seconds) for each API request to SpyCloud before timing out. \u2022 30s = Fast timeout \u2014 use for small watchlists (<1K assets) \u2022 60s = DEFAULT \u2014 works for most deployments \u2022 120s = Extended \u2014 for watchlists with 10K-50K assets \u2022 300s = Maximum \u2014 for very large watchlists (50K+ assets) or high-latency connections If you see frequent timeout errors (HTTP 504), increase this value."
-            }
-        },
         "retentionInDays": {
             "type": "int",
             "defaultValue": 90,
@@ -194,22 +70,6 @@
             ],
             "metadata": {
                 "description": "Number of days to retain SpyCloud data in Log Analytics custom tables. Applies to ALL four SpyCloud tables. \u2022 30 days = Minimum retention (GDPR-friendly, lowest storage cost) \u2022 60 days = Short-term investigation window \u2022 90 days = RECOMMENDED \u2014 supports most SOC investigation workflows and SOC2/NIST baselines \u2022 180 days = Extended \u2014 trend analysis, recurring breach pattern detection \u2022 365 days = Full year \u2014 required for PCI DSS, annual SOC2 audits, some cyber insurance policies \u2022 730 days = Maximum (2 years) \u2014 legal hold, regulatory investigations, litigation support COST IMPACT: Each additional 30 days adds ~1x your monthly ingestion volume to storage costs. For HIPAA (6-year requirement), use 730 days here plus Azure Log Analytics archive/export for long-term."
-            }
-        },
-        "initialLookbackDays": {
-            "type": "int",
-            "defaultValue": 30,
-            "allowedValues": [
-                7,
-                14,
-                30,
-                60,
-                90,
-                180,
-                365
-            ],
-            "metadata": {
-                "description": "Number of days of HISTORICAL data to pull when the connector first activates. This is a one-time backfill \u2014 after the initial pull, the connector switches to incremental polling. \u2022 7 days = Quick start \u2014 minimal backfill, see data fastest \u2022 30 days = DEFAULT \u2014 one month of recent exposures for baseline analysis \u2022 90 days = Comprehensive \u2014 three months of history for trend analysis \u2022 365 days = Full year \u2014 complete historical view (WARNING: may take hours for large watchlists   and will consume significant API quota on first run) TIP: Start with 30 days, then if you need deeper history, re-deploy with a larger value."
             }
         },
         "resourceTags": {
@@ -350,20 +210,6 @@
             ],
             "metadata": {
                 "description": "Minimum SpyCloud severity to trigger remediation. 20 = infostealer credentials (recommended). 2 = all breaches (high volume). 25 = infostealer + stolen sessions only."
-            }
-        },
-        "enableKeyVault": {
-            "type": "bool",
-            "defaultValue": true,
-            "metadata": {
-                "description": "Create an Azure Key Vault to securely store the SpyCloud API key. Recommended for production deployments. The Key Vault secret is referenced by Logic App playbooks at runtime."
-            }
-        },
-        "keyVaultName": {
-            "type": "string",
-            "defaultValue": "[concat('kvsc', take(uniqueString(resourceGroup().id, parameters('workspace')), 20))]",
-            "metadata": {
-                "description": "Name for the Azure Key Vault. Must be globally unique, 3-24 characters, alphanumeric and hyphens only, start with a letter. Default auto-generates a unique name based on your resource group and workspace."
             }
         },
         "enableNotifications": {
@@ -530,6 +376,13 @@
             "metadata": {
                 "description": "Pricing tier for new Log Analytics workspace (only when createNewWorkspace=TRUE). PerGB2018=Pay-As-You-Go, CapacityReservation=committed discounts."
             }
+        },
+        "slackWebhookUrl": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Slack Incoming Webhook URL for SOC notifications. Logic Apps will send alerts here when incidents are created. Leave blank to skip Slack integration. Create at: api.slack.com/apps \u2192 Incoming Webhooks."
+            }
         }
     },
     "variables": {
@@ -553,9 +406,6 @@
         "_logAnalyticsTableId4": "SpyCloud_ConditionalAccessLogs_CL",
         "dataCollectionEndpointId1": "[concat('/subscriptions/',parameters('subscription'),'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Insights/dataCollectionEndpoints/',parameters('dataCollectionEndpointName'))]",
         "_logAnalyticsTableId5": "SpyCloudCompassExposures_CL",
-        "_apiBaseUrl": "[if(equals(parameters('spycloudApiRegion'), 'eu'), 'https://api.eu.spycloud.io', 'https://api.spycloud.io')]",
-        "_watchlistApiEndpoint": "[concat(variables('_apiBaseUrl'), '/', parameters('spycloudApiVersion'), '/breach/data/watchlist')]",
-        "_catalogApiEndpoint": "[concat(variables('_apiBaseUrl'), '/', parameters('spycloudApiVersion'), '/breach/catalog')]",
         "_effectiveWorkspaceLocation": "[if(empty(parameters('workspaceRegionOverride')), parameters('deploymentRegion'), parameters('workspaceRegionOverride'))]",
         "_dcrDisplayName": "[concat('SpyCloud ThreatIntel DCR for ', parameters('workspace'))]",
         "_dceDisplayName": "[concat('SpyCloud ThreatIntel DCE for ', parameters('workspace'))]",
@@ -569,7 +419,6 @@
         "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb",
         "sentinelResponderRoleId": "3e150fc0-dc56-4d73-b22a-05e7c05ab4b7",
         "sentinelAutomationContributorRoleId": "f4c81013-99ee-4d62-a7ee-b3f1f648599a",
-        "keyVaultResourceId": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
         "spycloudApiKeySecretName": "spycloud-api-key",
         "actionGroupName": "[concat('ag-spycloud-', parameters('workspace'))]",
         "healthAlertName": "[concat('SpyCloud-DataHealth-', parameters('workspace'))]",
@@ -2612,7 +2461,7 @@
                         },
                         "show_plain_password": {
                             "defaultValue": "False",
-                            "type": "string",
+                            "type": "array",
                             "metadata": {
                                 "description": "Include cleartext passwords in ingested data. 'False' (recommended) omits passwords. 'True' requires data handling policy and table-level RBAC."
                             }
@@ -3579,44 +3428,6 @@
                         ]
                     }
                 ]
-            }
-        },
-        {
-            "condition": "[parameters('enableKeyVault')]",
-            "type": "Microsoft.KeyVault/vaults",
-            "apiVersion": "2023-07-01",
-            "name": "[parameters('keyVaultName')]",
-            "location": "[variables('_effectiveWorkspaceLocation')]",
-            "tags": "[variables('allTags')]",
-            "properties": {
-                "sku": {
-                    "family": "A",
-                    "name": "standard"
-                },
-                "tenantId": "[subscription().tenantId]",
-                "accessPolicies": [],
-                "enabledForDeployment": false,
-                "enabledForTemplateDeployment": true,
-                "enableSoftDelete": true,
-                "softDeleteRetentionInDays": 90,
-                "enableRbacAuthorization": true
-            }
-        },
-        {
-            "condition": "[parameters('enableKeyVault')]",
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "2023-07-01",
-            "name": "[concat(parameters('keyVaultName'), '/', variables('spycloudApiKeySecretName'))]",
-            "location": "[variables('_effectiveWorkspaceLocation')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
-            ],
-            "properties": {
-                "value": "[parameters('spycloudApiKey')]",
-                "contentType": "application/x-api-key",
-                "attributes": {
-                    "enabled": true
-                }
             }
         },
         {
@@ -5210,7 +5021,7 @@
                 "description": "Real-time visibility into darknet exposure, credential compromise, device infections, and automated remediation status from SpyCloud data.",
                 "category": "sentinel",
                 "sourceId": "[variables('workspaceResourceId')]",
-                "serializedData": "{\"version\": \"Notebook/1.0\", \"items\": [{\"type\": 1, \"content\": {\"json\": \"# \\ud83d\\udee1\\ufe0f SpyCloud Sentinel \\u2014 Threat Intelligence Dashboard\\n\\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\\n\\nReal-time visibility into darknet exposure, automated remediation status, and identity threat posture.\"}, \"name\": \"header\"}, {\"type\": 9, \"content\": {\"version\": \"KqlParameterItem/1.0\", \"parameters\": [{\"id\": \"t1\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"TimeRange\", \"type\": 4, \"isRequired\": true, \"value\": {\"durationMs\": 604800000}, \"typeSettings\": {\"selectableValues\": [{\"durationMs\": 3600000}, {\"durationMs\": 86400000}, {\"durationMs\": 604800000}, {\"durationMs\": 2592000000}]}}]}, \"name\": \"timerange\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udcca Exposure Overview\"}, \"name\": \"overviewHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize\\n    TotalExposures = count(),\\n    UniqueUsers = dcount(email),\\n    UniqueDevices = dcount(infected_machine_id),\\n    CriticalSev25 = countif(severity == 25),\\n    HighSev20 = countif(severity == 20),\\n    MedSev5 = countif(severity == 5),\\n    LowSev2 = countif(severity == 2),\\n    PlaintextPasswords = countif(isnotempty(password_plaintext)),\\n    UniqueDomains = dcount(target_domain))\", \"size\": 4, \"title\": \"Exposure Summary\", \"queryType\": 0, \"visualization\": \"tiles\", \"tileSettings\": {\"titleContent\": {\"columnMatch\": \"Column1\", \"formatter\": 1}, \"leftContent\": {\"columnMatch\": \"TotalExposures\", \"formatter\": 12, \"numberFormat\": {\"unit\": 17, \"options\": {\"style\": \"decimal\"}}}}}, \"name\": \"exposureTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Count = count() by bin(TimeGenerated, 1d), tostring(severity)\\n| render timechart)\", \"size\": 0, \"title\": \"Exposures Over Time by Severity\", \"queryType\": 0, \"visualization\": \"timechart\"}, \"customWidth\": \"50\", \"name\": \"exposureTimechart\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Count = count() by Severity = case(severity == 25, '\\ud83d\\udd34 P1 Critical (Sev 25)', severity == 20, '\\ud83d\\udd34 P1 High (Sev 20)', severity == 5, '\\ud83d\\udfe0 P3 Standard (Sev 5)', severity == 2, '\\u26aa P4 Low (Sev 2)', 'Other')\\n| render piechart)\", \"size\": 0, \"title\": \"Severity Distribution\", \"queryType\": 0, \"visualization\": \"piechart\"}, \"customWidth\": \"50\", \"name\": \"severityPie\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udd11 Credential Exposure Analysis\"}, \"name\": \"credHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(email:string, ExposureCount:long, MaxSeverity:long, HasPlaintext:long, TargetDomains:long, Latest:string)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where isnotempty(email)\\n| summarize ExposureCount=count(), MaxSeverity=max(severity), HasPlaintext=countif(isnotempty(password_plaintext)), TargetDomains=dcount(target_domain), LatestExposure=max(TimeGenerated) by email\\n| top 20 by MaxSeverity desc, ExposureCount desc\\n| project email, ExposureCount, MaxSeverity, HasPlaintext, TargetDomains, Latest=format_datetime(LatestExposure, 'yyyy-MM-dd HH:mm'))\", \"size\": 0, \"title\": \"Top 20 Most Exposed Users\", \"queryType\": 0, \"visualization\": \"table\", \"gridSettings\": {\"formatters\": [{\"columnMatch\": \"Max Severity\", \"formatter\": 18, \"formatOptions\": {\"thresholdsOptions\": \"colors\", \"thresholdsGrid\": [{\"operator\": \">=\", \"thresholdValue\": \"25\", \"representation\": \"redBright\"}, {\"operator\": \">=\", \"thresholdValue\": \"20\", \"representation\": \"orange\"}, {\"operator\": \">=\", \"thresholdValue\": \"5\", \"representation\": \"yellow\"}, {\"operator\": \"Default\", \"representation\": \"lightBlue\"}]}}]}}, \"name\": \"topUsers\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| where isnotempty(password_type)\\n| summarize Count = count() by password_type\\n| top 10 by Count desc\\n| render barchart)\", \"size\": 0, \"title\": \"Password Type Distribution\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"customWidth\": \"50\", \"name\": \"passwordTypes\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| where isnotempty(target_domain)\\n| summarize Count = count() by target_domain\\n| top 15 by Count desc\\n| render barchart)\", \"size\": 0, \"title\": \"Top Targeted Domains\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"customWidth\": \"50\", \"name\": \"targetDomains\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udda5\\ufe0f Infostealer / Device Forensics\"}, \"name\": \"deviceHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(infected_machine_id:string, user_hostname:string, Users:long, MaxSeverity:long, Domains:long, Latest:string)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where severity >= 20 and isnotempty(infected_machine_id)\\n| summarize Users=dcount(email), MaxSeverity=max(severity), Domains=dcount(target_domain), LatestInfection=max(TimeGenerated) by infected_machine_id, user_hostname\\n| top 20 by MaxSeverity desc, Users desc\\n| project infected_machine_id, user_hostname, Users, MaxSeverity, Domains, Latest=format_datetime(LatestInfection, 'yyyy-MM-dd'))\", \"size\": 0, \"title\": \"Top 20 Infected Devices\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"infectedDevices\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| where severity >= 20\\n| where isnotempty(country_code)\\n| summarize Devices = dcount(infected_machine_id), Users = dcount(email) by country_code\\n| top 20 by Devices desc\\n| render barchart)\", \"size\": 0, \"title\": \"Infections by Country\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"geoChart\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udd27 Remediation Status\"}, \"name\": \"remediationHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(Metric:string, Value:long)[]),\\n(union\\n  (Spycloud_MDE_Logs_CL | summarize Value=count() | extend Metric=\\\"MDE Actions\\\"),\\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Value=count() | extend Metric=\\\"CA Actions\\\"),\\n  (SpyCloudBreachWatchlist_CL | where severity >= 20 | summarize Value=dcount(email) | extend Metric=\\\"High-Sev Users\\\")\\n| project Metric, Value)\", \"size\": 4, \"title\": \"Remediation Dashboard\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"remediationTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(Spycloud_MDE_Logs_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Actions = count() by bin(TimeGenerated, 1d), PlaybookName\\n| render timechart)\", \"size\": 0, \"title\": \"MDE Remediation Actions Over Time\", \"queryType\": 0, \"visualization\": \"timechart\"}, \"customWidth\": \"50\", \"name\": \"mdeTimechart\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[] | where 1==0),\\n(SpyCloud_ConditionalAccessLogs_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Actions = count() by bin(TimeGenerated, 1d), PlaybookName\\n| render timechart)\", \"size\": 0, \"title\": \"CA Remediation Actions Over Time\", \"queryType\": 0, \"visualization\": \"timechart\"}, \"customWidth\": \"50\", \"name\": \"caTimechart\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udccb Breach Catalog\"}, \"name\": \"catalogHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime)[]),\\n(SpyCloudBreachCatalog_CL\\n| where TimeGenerated {TimeRange}\\n| project ['Source ID'] = source_id, ['Breach Title'] = breach_title, ['Status'] = status, ['Description'] = description, ['Ingested'] = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm')\\n| top 25 by Ingested desc)\", \"size\": 0, \"title\": \"Recent Breach Catalog Entries\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"catalogTable\"}, {\"type\": 1, \"content\": {\"json\": \"---\\n\\n*SpyCloud Sentinel Supreme v5.2 \\u2014 Dashboard auto-refreshes with time range selector above.*\"}, \"name\": \"footer\"}], \"styleSettings\": {}, \"$schema\": \"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\"}"
+                "serializedData": "{\"version\": \"Notebook/1.0\", \"items\": [{\"type\": 1, \"content\": {\"json\": \"# \\ud83d\\udee1\\ufe0f SpyCloud Sentinel \\u2014 Threat Intelligence Dashboard\\n\\nReal-time darknet exposure visibility, credential compromise analysis, and automated remediation tracking.\"}, \"name\": \"header\"}, {\"type\": 9, \"content\": {\"version\": \"KqlParameterItem/1.0\", \"parameters\": [{\"id\": \"t1\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"TimeRange\", \"type\": 4, \"isRequired\": true, \"value\": {\"durationMs\": 604800000}, \"typeSettings\": {\"selectableValues\": [{\"durationMs\": 3600000}, {\"durationMs\": 86400000}, {\"durationMs\": 604800000}, {\"durationMs\": 2592000000}]}}]}, \"name\": \"timerange\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udcca Exposure Overview\"}, \"name\": \"overviewHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(Metric:string, Value:long)[\\\"Total Exposures\\\", 0, \\\"Unique Users\\\", 0, \\\"Unique Devices\\\", 0, \\\"Sev 25 Critical\\\", 0, \\\"Sev 20 High\\\", 0, \\\"Plaintext Passwords\\\", 0]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize TotalExposures=count(), UniqueUsers=dcount(email), UniqueDevices=dcount(infected_machine_id), Sev25=countif(severity==25), Sev20=countif(severity==20), Plaintext=countif(isnotempty(password_plaintext))\\n| project pack_array(\\n    pack(\\\"Metric\\\", \\\"Total Exposures\\\", \\\"Value\\\", TotalExposures),\\n    pack(\\\"Metric\\\", \\\"Unique Users\\\", \\\"Value\\\", UniqueUsers),\\n    pack(\\\"Metric\\\", \\\"Unique Devices\\\", \\\"Value\\\", UniqueDevices),\\n    pack(\\\"Metric\\\", \\\"Sev 25 Critical\\\", \\\"Value\\\", Sev25),\\n    pack(\\\"Metric\\\", \\\"Sev 20 High\\\", \\\"Value\\\", Sev20),\\n    pack(\\\"Metric\\\", \\\"Plaintext PWs\\\", \\\"Value\\\", Plaintext))\\n| mv-expand Column1\\n| evaluate bag_unpack(Column1))\", \"size\": 4, \"title\": \"Exposure Summary\", \"queryType\": 0, \"visualization\": \"tiles\", \"tileSettings\": {\"titleContent\": {\"columnMatch\": \"Metric\"}, \"leftContent\": {\"columnMatch\": \"Value\", \"formatter\": 12, \"numberFormat\": {\"unit\": 17, \"options\": {\"style\": \"decimal\"}}}}}, \"name\": \"exposureTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime, severity:string, Count:long)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Count=count() by bin(TimeGenerated, 1d), tostring(severity)\\n| order by TimeGenerated asc)\", \"size\": 0, \"title\": \"Exposures Over Time by Severity\", \"queryType\": 0, \"visualization\": \"timechart\"}, \"customWidth\": \"50\", \"name\": \"exposureTimechart\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(Severity:string, Count:long)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Count=count() by Severity=case(severity==25, \\\"P1 Critical (25)\\\", severity==20, \\\"P1 High (20)\\\", severity==5, \\\"P3 Standard (5)\\\", severity==2, \\\"P4 Low (2)\\\", \\\"Other\\\"))\", \"size\": 0, \"title\": \"Severity Distribution\", \"queryType\": 0, \"visualization\": \"piechart\"}, \"customWidth\": \"50\", \"name\": \"severityPie\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udd11 Credential Exposure Analysis\"}, \"name\": \"credHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(email:string, Exposures:long, MaxSev:long, PlaintextPWs:long, Domains:long, Latest:datetime)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and isnotempty(email)\\n| summarize Exposures=count(), MaxSev=max(severity), PlaintextPWs=countif(isnotempty(password_plaintext)), Domains=dcount(target_domain), Latest=max(TimeGenerated) by email\\n| top 25 by MaxSev desc, Exposures desc)\", \"size\": 0, \"title\": \"Top 25 Most Exposed Users\", \"queryType\": 0, \"visualization\": \"table\", \"gridSettings\": {\"formatters\": [{\"columnMatch\": \"MaxSev\", \"formatter\": 18, \"formatOptions\": {\"thresholdsOptions\": \"colors\", \"thresholdsGrid\": [{\"operator\": \">=\", \"thresholdValue\": \"25\", \"representation\": \"redBright\"}, {\"operator\": \">=\", \"thresholdValue\": \"20\", \"representation\": \"orange\"}, {\"operator\": \">=\", \"thresholdValue\": \"5\", \"representation\": \"yellow\"}, {\"operator\": \"Default\", \"representation\": \"lightBlue\"}]}}]}}, \"name\": \"topUsers\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(password_type:string, Count:long)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and isnotempty(password_type)\\n| summarize Count=count() by password_type\\n| top 10 by Count desc)\", \"size\": 0, \"title\": \"Password Type Distribution\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"customWidth\": \"50\", \"name\": \"passwordTypes\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(target_domain:string, Count:long)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and isnotempty(target_domain)\\n| summarize Count=count() by target_domain\\n| top 15 by Count desc)\", \"size\": 0, \"title\": \"Top Targeted Domains\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"customWidth\": \"50\", \"name\": \"targetDomains\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udda5\\ufe0f Infostealer / Device Forensics\"}, \"name\": \"deviceHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(infected_machine_id:string, user_hostname:string, Users:long, MaxSev:long, Domains:long, Latest:datetime)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and severity >= 20 and isnotempty(infected_machine_id)\\n| summarize Users=dcount(email), MaxSev=max(severity), Domains=dcount(target_domain), Latest=max(TimeGenerated) by infected_machine_id, user_hostname\\n| top 25 by MaxSev desc, Users desc)\", \"size\": 0, \"title\": \"Top 25 Infected Devices\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"infectedDevices\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(country_code:string, Devices:long, Users:long)[]),\\n(SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and severity >= 20 and isnotempty(country_code)\\n| summarize Devices=dcount(infected_machine_id), Users=dcount(email) by country_code\\n| top 20 by Devices desc)\", \"size\": 0, \"title\": \"Infections by Country\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"geoChart\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udd27 Remediation Status\"}, \"name\": \"remediationHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(Metric:string, Value:long)[\\\"MDE Actions\\\", 0, \\\"CA Actions\\\", 0, \\\"High-Sev Users\\\", 0]),\\n(union\\n  (Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize Value=count() | extend Metric=\\\"MDE Actions\\\"),\\n  (SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize Value=count() | extend Metric=\\\"CA Actions\\\"),\\n  (SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | summarize Value=dcount(email) | extend Metric=\\\"High-Sev Users\\\")\\n| project Metric, Value)\", \"size\": 4, \"title\": \"Remediation Dashboard\", \"queryType\": 0, \"visualization\": \"tiles\", \"tileSettings\": {\"titleContent\": {\"columnMatch\": \"Metric\"}, \"leftContent\": {\"columnMatch\": \"Value\", \"formatter\": 12, \"numberFormat\": {\"unit\": 17, \"options\": {\"style\": \"decimal\"}}}}}, \"name\": \"remediationTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime, Actions:long, PlaybookName:string)[]),\\n(Spycloud_MDE_Logs_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Actions=count() by bin(TimeGenerated, 1d), PlaybookName)\", \"size\": 0, \"title\": \"MDE Remediation Over Time\", \"queryType\": 0, \"visualization\": \"timechart\"}, \"customWidth\": \"50\", \"name\": \"mdeTimechart\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(TimeGenerated:datetime, Actions:long, PlaybookName:string)[]),\\n(SpyCloud_ConditionalAccessLogs_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Actions=count() by bin(TimeGenerated, 1d), PlaybookName)\", \"size\": 0, \"title\": \"CA Remediation Over Time\", \"queryType\": 0, \"visualization\": \"timechart\"}, \"customWidth\": \"50\", \"name\": \"caTimechart\"}, {\"type\": 1, \"content\": {\"json\": \"## \\ud83d\\udccb Breach Catalog\"}, \"name\": \"catalogHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(source_id:long, breach_title:string, status:string, description:string, TimeGenerated:datetime)[]),\\n(SpyCloudBreachCatalog_CL\\n| where TimeGenerated {TimeRange}\\n| top 25 by TimeGenerated desc\\n| project source_id, breach_title, status, description, TimeGenerated)\", \"size\": 0, \"title\": \"Recent Breach Catalog Entries\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"catalogTable\"}, {\"type\": 1, \"content\": {\"json\": \"---\\n*SpyCloud Sentinel Supreme \\u2014 Dashboard refreshes with time range selector.*\"}, \"name\": \"footer\"}], \"styleSettings\": {}, \"$schema\": \"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\"}"
             },
             "dependsOn": [
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
@@ -5317,27 +5128,6 @@
                 "dcrName": "[parameters('dataCollectionRuleName')]"
             }
         },
-        "spycloudApiConfig": {
-            "type": "object",
-            "value": {
-                "apiRegion": "[parameters('spycloudApiRegion')]",
-                "apiBaseUrl": "[variables('_apiBaseUrl')]",
-                "watchlistEndpoint": "[variables('_watchlistApiEndpoint')]",
-                "catalogEndpoint": "[variables('_catalogApiEndpoint')]",
-                "apiVersion": "[parameters('spycloudApiVersion')]"
-            }
-        },
-        "connectorConfig": {
-            "type": "object",
-            "value": {
-                "pollingIntervalMin": "[parameters('queryWindowInMin')]",
-                "rateLimitQPS": "[parameters('rateLimitQPS')]",
-                "retryCount": "[parameters('retryCount')]",
-                "timeoutSeconds": "[parameters('timeoutInSeconds')]",
-                "retentionDays": "[parameters('retentionInDays')]",
-                "initialLookbackDays": "[parameters('initialLookbackDays')]"
-            }
-        },
         "tableNames": {
             "type": "object",
             "value": {
@@ -5386,15 +5176,6 @@
                 "step7_copilot_plugin": "OPTIONAL: Upload SpyCloud_Copilot_Plugin_Ultimate.yaml to Security Copilot \u2192 Sources \u2192 Custom",
                 "step8_copilot_agent": "OPTIONAL: Upload SpyCloud_Agent_Manifest.yaml via Security Copilot \u2192 Build \u2192 Upload YAML manifest",
                 "step0_dcr_dce": "REQUIRED (if playbooks enabled): Get the DCE Logs Ingestion URI and DCR Immutable ID. Go to Azure Portal \u2192 Monitor \u2192 Data Collection Endpoints \u2192 copy Logs Ingestion URI. Then Monitor \u2192 Data Collection Rules \u2192 JSON View \u2192 copy immutableId. Update the Logic App parameters with these values, or redeploy the template with them filled in."
-            }
-        },
-        "keyVaultInfo": {
-            "condition": "[parameters('enableKeyVault')]",
-            "type": "object",
-            "value": {
-                "keyVaultName": "[parameters('keyVaultName')]",
-                "keyVaultUri": "[if(parameters('enableKeyVault'), reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2023-07-01').vaultUri, 'not-deployed')]",
-                "secretName": "[variables('spycloudApiKeySecretName')]"
             }
         },
         "notificationInfo": {

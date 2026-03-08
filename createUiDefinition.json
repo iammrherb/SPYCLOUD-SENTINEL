@@ -136,192 +136,6 @@
                             }
                         ],
                         "visible": true
-                    },
-                    {
-                        "name": "sectionApi",
-                        "type": "Microsoft.Common.Section",
-                        "label": "SpyCloud API Configuration",
-                        "elements": [
-                            {
-                                "name": "spycloudApiKey",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "SpyCloud API Key *",
-                                    "confirmPassword": "Confirm API Key"
-                                },
-                                "toolTip": "Your SpyCloud Enterprise API key. Get it from portal.spycloud.com \u2192 Settings \u2192 API Keys.",
-                                "constraints": {
-                                    "required": true
-                                },
-                                "options": {
-                                    "hideConfirmation": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "spycloudApiRegion",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "API Region",
-                                "defaultValue": "US (api.spycloud.io)",
-                                "toolTip": "Select the SpyCloud API endpoint closest to your Azure region.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "US (api.spycloud.io)",
-                                            "value": "us"
-                                        },
-                                        {
-                                            "label": "EU (api.eu.spycloud.io)",
-                                            "value": "eu"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            }
-                        ],
-                        "visible": true
-                    },
-                    {
-                        "name": "sectionDataIngestion",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Data Ingestion Settings",
-                        "elements": [
-                            {
-                                "name": "severityFilter",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "Severity Levels to Ingest",
-                                "multiselect": true,
-                                "defaultValue": [
-                                    {
-                                        "value": "2"
-                                    },
-                                    {
-                                        "value": "5"
-                                    },
-                                    {
-                                        "value": "20"
-                                    },
-                                    {
-                                        "value": "25"
-                                    }
-                                ],
-                                "toolTip": "Select which SpyCloud severity levels to ingest into Sentinel.\n\n\u2022 2: Email + password from third-party breach (lowest)\n\u2022 5: Breach credential + PII (name, phone, DOB)\n\u2022 20: Infostealer credential \u2014 malware-stolen (HIGH)\n\u2022 25: Infostealer + app data \u2014 cookies/sessions/autofill (CRITICAL)",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "2 \u2014 Breach Credential (email + password)",
-                                            "value": "2"
-                                        },
-                                        {
-                                            "label": "5 \u2014 Breach + PII (credential + name/phone/DOB)",
-                                            "value": "5"
-                                        },
-                                        {
-                                            "label": "20 \u2014 Infostealer Credential (malware-stolen, HIGH)",
-                                            "value": "20"
-                                        },
-                                        {
-                                            "label": "25 \u2014 Infostealer + App Data (cookies/sessions, CRITICAL)",
-                                            "value": "25"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "watchlistType",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "Watchlist Types",
-                                "multiselect": true,
-                                "defaultValue": [
-                                    {
-                                        "value": "corporate"
-                                    },
-                                    {
-                                        "value": "infected"
-                                    },
-                                    {
-                                        "value": "compass"
-                                    }
-                                ],
-                                "toolTip": "Types of SpyCloud watchlists to monitor.\n\n\u2022 corporate: Email domains owned by your organization\n\u2022 infected: Devices infected with infostealer malware\n\u2022 compass: Third-party/supply chain exposure monitoring",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Corporate \u2014 Your organization's email domains",
-                                            "value": "corporate"
-                                        },
-                                        {
-                                            "label": "Infected \u2014 Infostealer-compromised devices",
-                                            "value": "infected"
-                                        },
-                                        {
-                                            "label": "Compass \u2014 Third-party/supply chain monitoring",
-                                            "value": "compass"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "showPlainPassword",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Include Plaintext Passwords",
-                                "defaultValue": "No \u2014 Redact passwords (recommended for compliance)",
-                                "toolTip": "Controls whether plaintext passwords appear in Sentinel data.\n\nNo (recommended): Passwords are redacted before reaching your SIEM. Required by PCI DSS, SOC 2, HIPAA.\n\nYes: Passwords visible for SOC investigation. Only enable if your data handling policies permit it.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "No \u2014 Redact passwords (recommended for compliance)",
-                                            "value": "False"
-                                        },
-                                        {
-                                            "label": "Yes \u2014 Include plaintext passwords (for investigation)",
-                                            "value": "True"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "queryWindowInMin",
-                                "type": "Microsoft.Common.Slider",
-                                "min": 10,
-                                "max": 120,
-                                "label": "Polling Interval (minutes)",
-                                "defaultValue": 40,
-                                "showStepMarkers": false,
-                                "toolTip": "How often the CCF connector polls the SpyCloud API. Lower = fresher data but more API calls. Default: 40 min.",
-                                "visible": true
-                            },
-                            {
-                                "name": "initialLookbackDays",
-                                "type": "Microsoft.Common.Slider",
-                                "min": 1,
-                                "max": 365,
-                                "label": "Initial Lookback (days)",
-                                "defaultValue": 30,
-                                "showStepMarkers": false,
-                                "toolTip": "How many days of historical SpyCloud data to pull on first sync. Higher = more historical data but longer initial load.",
-                                "visible": true
-                            },
-                            {
-                                "name": "rateLimitQPS",
-                                "type": "Microsoft.Common.Slider",
-                                "min": 1,
-                                "max": 10,
-                                "label": "API Rate Limit (queries/sec)",
-                                "defaultValue": 2,
-                                "showStepMarkers": false,
-                                "toolTip": "Maximum API requests per second to SpyCloud. Increase if you have a high-volume API plan. Default: 2 QPS.",
-                                "visible": true
-                            }
-                        ],
-                        "visible": true
                     }
                 ]
             },
@@ -512,33 +326,6 @@
                         "visible": true
                     },
                     {
-                        "name": "sectionKeyVault",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Key Vault & Secrets",
-                        "elements": [
-                            {
-                                "name": "enableKeyVault",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Create Azure Key Vault for API key storage",
-                                "toolTip": "Creates a Key Vault with RBAC authorization, soft delete, and purge protection. Stores the SpyCloud API key as a secret. Recommended for production deployments."
-                            },
-                            {
-                                "name": "keyVaultName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Key Vault Name (optional \u2014 auto-generated if blank)",
-                                "placeholder": "Leave blank for auto-generated name",
-                                "toolTip": "Custom Key Vault name (3-24 chars, alphanumeric, start with letter). Leave blank to auto-generate a unique name based on your resource group.",
-                                "constraints": {
-                                    "required": false,
-                                    "regex": "^$|^[a-zA-Z][a-zA-Z0-9]{2,23}$",
-                                    "validationMessage": "3-24 alphanumeric chars, must start with a letter. Or leave blank."
-                                },
-                                "visible": "[steps('securityConfig').sectionKeyVault.enableKeyVault]"
-                            }
-                        ],
-                        "visible": true
-                    },
-                    {
                         "name": "sectionTags",
                         "type": "Microsoft.Common.Section",
                         "label": "Resource Tags",
@@ -638,6 +425,17 @@
                                     "required": false
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "slackWebhookUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Slack Incoming Webhook URL (optional)",
+                                "placeholder": "https://hooks.slack.com/services/...",
+                                "toolTip": "Incoming Webhook URL for Slack SOC channel notifications. The Credential Response playbook sends alerts here. Create at: api.slack.com/apps \u2192 Incoming Webhooks.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
                             }
                         ],
                         "visible": true
@@ -716,14 +514,6 @@
             "workspace": "[if(steps('workspaceConfig').sectionWorkspace.createNewWorkspace, steps('workspaceConfig').sectionWorkspace.newWorkspaceName, steps('workspaceConfig').sectionWorkspace.existingWorkspaceSelector)]",
             "createNewWorkspace": "[steps('workspaceConfig').sectionWorkspace.createNewWorkspace]",
             "retentionInDays": "[steps('workspaceConfig').sectionWorkspace.retentionInDays]",
-            "spycloudApiKey": "[steps('workspaceConfig').sectionApi.spycloudApiKey]",
-            "spycloudApiRegion": "[steps('workspaceConfig').sectionApi.spycloudApiRegion]",
-            "severityFilter": "[steps('workspaceConfig').sectionDataIngestion.severityFilter]",
-            "watchlistType": "[steps('workspaceConfig').sectionDataIngestion.watchlistType]",
-            "showPlainPassword": "[steps('workspaceConfig').sectionDataIngestion.showPlainPassword]",
-            "queryWindowInMin": "[steps('workspaceConfig').sectionDataIngestion.queryWindowInMin]",
-            "initialLookbackDays": "[steps('workspaceConfig').sectionDataIngestion.initialLookbackDays]",
-            "rateLimitQPS": "[steps('workspaceConfig').sectionDataIngestion.rateLimitQPS]",
             "deploymentRegion": "[location()]",
             "resourceGroupName": "[resourceGroup().name]",
             "subscription": "[subscription().subscriptionId]",
@@ -739,8 +529,6 @@
             "enableAutomationRule": "[steps('automationConfig').sectionRules.enableAutomationRule]",
             "enableAnalyticsRulesLibrary": "[steps('automationConfig').sectionRules.enableAnalyticsRulesLibrary]",
             "enablePostDeployScript": "[steps('automationConfig').sectionRules.enablePostDeployScript]",
-            "enableKeyVault": "[steps('securityConfig').sectionKeyVault.enableKeyVault]",
-            "keyVaultName": "[steps('securityConfig').sectionKeyVault.keyVaultName]",
             "teamsChannelWebhook": "[steps('securityConfig').sectionIntegrations.teamsChannelWebhook]",
             "serviceNowInstance": "[steps('securityConfig').sectionIntegrations.serviceNowInstance]",
             "enableNotifications": "[steps('securityConfig').sectionNotifications.enableNotifications]",
@@ -751,7 +539,8 @@
             "enableWorkbook": "[steps('securityConfig').sectionDashboard.enableWorkbook]",
             "tagEnvironment": "[steps('securityConfig').sectionTags.tagEnvironment]",
             "tagOwner": "[steps('securityConfig').sectionTags.tagOwner]",
-            "tagCostCenter": "[steps('securityConfig').sectionTags.tagCostCenter]"
+            "tagCostCenter": "[steps('securityConfig').sectionTags.tagCostCenter]",
+            "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]"
         }
     }
 }
