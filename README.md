@@ -188,11 +188,108 @@ The deployment script attempts to grant MDE + Graph API permissions. If it shows
 
 ---
 
+## 4 Automated Playbooks
+
+### PB1: MDE Device Isolation
+
+> **Use case:** Employee laptop infected with RedLine Stealer. SpyCloud detects stolen credentials. Playbook auto-isolates the device in Defender before the attacker uses them.
+
+```
+Sentinel Incident (sev 20+) → Extract machine ID → Search MDE
+  ├── FOUND → Isolate (Full/Selective) → Tag → Comment → Log to MDE_Logs_CL
+  └── NOT FOUND → Log for manual review
+```
+
+### PB2: CA Identity Protection
+
+> **Use case:** Corporate password appears in darknet breach. Playbook forces password reset and kills all sessions before attacker can use the credential.
+
+```
+Sentinel Incident (email) → Lookup user in Entra ID
+  ├── FOUND → Reset password → Revoke sessions → Add to CA group → Log to CA_Logs_CL
+  └── NOT FOUND → Log as external user
+```
+
+### PB3: Credential Response + SOC Alerts
+
+> **Use case:** SOC wants real-time Teams and Slack notifications with automated sign-in analysis when credentials are exposed.
+
+```
+Sentinel Incident → For each account:
+  → Check last 10 Entra sign-ins → Reset password → Revoke sessions
+  → Send Teams MessageCard + Slack webhook → Add incident comment
+```
+
+### PB4: MDE Blocklist (Scheduled)
+
+> **Use case:** Every 4 hours, scan for CRITICAL severity 25 infections (stolen cookies, sessions, autofill) and isolate matched devices before MFA bypass.
+
+```
+Schedule (1-24h) → Query sev 25 → Match against MDE inventory
+  ├── FOUND → Full isolation → Tag "SpyCloud-Sev25-Infostealer"
+  └── NOT FOUND → Skip (unmanaged device)
+```
+
+---
+
+## Sentinel Workbook — 12 Charts
+
+Find at: **Sentinel → Workbooks → SpyCloud Threat Intelligence Dashboard**
+
+| Chart | Type | Shows |
+|-------|------|-------|
+| Exposure Summary | Tiles | Total, unique users, devices, sev 25, sev 20, plaintext passwords |
+| Exposures Over Time | Timechart | Daily count by severity |
+| Severity Distribution | Pie | P1 Critical / P1 High / P3 Standard / P4 Low |
+| Top 25 Exposed Users | Table | Email, exposures, max severity (heatmap), plaintext count, domains |
+| Password Types | Bar | MD5, SHA1, bcrypt, plaintext distribution |
+| Top Targeted Domains | Bar | Most-attacked domains |
+| Top 25 Infected Devices | Table | Machine ID, hostname, users, severity, domains |
+| Infections by Country | Bar | Geographic distribution |
+| Remediation Dashboard | Tiles | MDE actions, CA actions, high-severity user count |
+| MDE Remediation Trend | Timechart | Isolation actions over time |
+| CA Remediation Trend | Timechart | Password reset/revoke actions over time |
+| Breach Catalog | Table | Recent breach sources with titles, status, descriptions |
+
+> Charts show "no results" until data flows. Activate the connector (Step 2) and wait 5-10 minutes.
+
+---
+
+## Severity Reference
+
+| Sev | Priority | Category | Response |
+|-----|----------|----------|----------|
+| **25** | 🔴 P1 Critical | Infostealer + App (cookies, sessions, autofill) | Immediate: revoke sessions, reset pw, isolate device |
+| **20** | 🔴 P1 High | Infostealer Credential (malware-stolen) | Urgent: reset password, check device health |
+| **5** | 🟠 P3 Standard | Breach + PII (name, phone, DOB, address) | Monitor: review scope, check reuse |
+| **2** | ⚪ P4 Low | Breach Credential (email + password) | Awareness: check credential reuse patterns |
+
+---
+
 ## Security Copilot
 
-**Plugin (28 skills):** User investigation, password analysis, severity/domain analysis, PII scanning, device forensics, breach catalog, MDE/CA remediation tracking, cross-table health.
+### Plugin — 28 KQL Skills
 
-**Agent (30 skills):** Natural language investigation — "Investigate john@company.com", "Show our dark web exposure", "Which devices are infected?", "Do we have plaintext passwords exposed?"
+| Category | Skills | What They Do |
+|----------|--------|-------------|
+| User Investigation | 4 | Credential lookup by email, full PII profile, activity timeline, exposed passwords |
+| Password Analysis | 3 | Plaintext scan, type breakdown, crackability assessment |
+| Severity & Domain | 3 | High-severity filter, distribution, domain-level exposure map |
+| PII & Social | 3 | SSN/financial/health scan, social media accounts, targeted domains |
+| Device Forensics | 4 | Infected device inventory, malware details, user mapping, AV gaps |
+| Breach Catalog | 2 | Recent breaches, enriched exposure with catalog metadata |
+| MDE Remediation | 3 | All MDE actions, per-device status, remediation statistics |
+| CA Remediation | 3 | All CA actions, per-user status, remediation statistics |
+| Cross-Table | 3 | Full investigation, geographic analysis, health dashboard |
+
+### Agent — 30 Interactive Skills
+
+**Example prompts:**
+- *"Show our dark web exposure"* → Org-wide summary with severity breakdown
+- *"Investigate john@company.com"* → Full credential + PII + device + remediation report
+- *"Which devices are infected?"* → Device forensics with AV analysis
+- *"Do we have plaintext passwords exposed?"* → Critical risk list with domains
+- *"What users have credentials in 3+ breaches?"* → High-sighting credential report
 
 ---
 
