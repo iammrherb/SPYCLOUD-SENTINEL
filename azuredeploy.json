@@ -598,13 +598,23 @@
             }
         },
         {
+            "type": "Microsoft.OperationalInsights/workspaces/providers/onboardingStates",
+            "apiVersion": "2024-03-01",
+            "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+            ],
+            "properties": {}
+        },
+        {
             "type": "Microsoft.OperationsManagement/solutions",
             "apiVersion": "2015-11-01-preview",
             "name": "[concat('SecurityInsights(', parameters('workspace'), ')')]",
             "location": "[variables('_effectiveWorkspaceLocation')]",
             "tags": "[variables('allTags')]",
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ],
             "plan": {
                 "name": "[concat('SecurityInsights(', parameters('workspace'), ')')]",
@@ -640,7 +650,8 @@
             "location": "[variables('_effectiveWorkspaceLocation')]",
             "dependsOn": [
                 "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]",
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ],
             "properties": {
                 "contentId": "[variables('_dataConnectorContentIdConnectorDefinition')]",
@@ -2511,7 +2522,8 @@
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -2548,7 +2560,8 @@
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -2558,7 +2571,8 @@
             "location": "[variables('_effectiveWorkspaceLocation')]",
             "dependsOn": [
                 "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]",
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ],
             "properties": {
                 "contentId": "[variables('_dataConnectorContentIdConnections')]",
@@ -2933,7 +2947,8 @@
                 "descriptionHtml": "<p>The <strong>SpyCloud Threat Intelligence Connector</strong> integrates SpyCloud's comprehensive breach and infostealer exposure data with Microsoft Sentinel, enabling security teams to detect compromised credentials, investigate infected devices, and automate identity protection responses.</p><h4>Data Tables</h4><ul><li><strong>SpyCloudBreachWatchlist_CL</strong> \u2014 Compromised credentials, PII, and infostealer-stolen data from your organization's monitored assets (email domains, IP ranges, executive watchlists)</li><li><strong>SpyCloudBreachCatalog_CL</strong> \u2014 Breach source metadata for contextual enrichment, correlation, and impact assessment</li><li><strong>Spycloud_MDE_Logs_CL</strong> \u2014 Audit log of automated Microsoft Defender for Endpoint remediation actions (device isolation, tagging, IOC submission)</li><li><strong>SpyCloud_ConditionalAccessLogs_CL</strong> \u2014 Audit log of automated Azure AD / Entra ID actions (forced password resets, session revocations, Conditional Access group assignments, account disablement)</li></ul><h4>Key Use Cases</h4><ul><li><strong>Compromised Credential Detection</strong> \u2014 Identify employee and customer credentials exposed in breaches or stolen by infostealer malware</li><li><strong>Post-Infection Remediation</strong> \u2014 Automatically isolate infected devices and force credential resets when infostealer activity is detected</li><li><strong>Darknet Exposure Monitoring</strong> \u2014 Continuously monitor for new exposures of corporate assets across SpyCloud's 600B+ recaptured data records</li><li><strong>Account Takeover Prevention</strong> \u2014 Detect and block credential stuffing attempts using real-time exposure intelligence</li><li><strong>Third-Party Risk Assessment</strong> \u2014 Monitor vendor and supply chain credential exposures for risk scoring</li><li><strong>Compliance &amp; Audit</strong> \u2014 Maintain evidence of credential exposure detection and automated remediation for regulatory requirements</li><li><strong>VIP/Executive Protection</strong> \u2014 Prioritized monitoring of high-value targets for both credential and PII exposure</li></ul><p><strong>Requirements:</strong> SpyCloud Enterprise or Enterprise+ API subscription. Contact <a href='mailto:support@spycloud.com'>support@spycloud.com</a> or visit <a href='https://portal.spycloud.com'>portal.spycloud.com</a>.</p>"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -3507,7 +3522,8 @@
             "apiVersion": "2023-02-01-preview",
             "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', variables('analyticsRuleName'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ],
             "kind": "Scheduled",
             "properties": {
@@ -3721,7 +3737,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -3773,7 +3790,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -3825,7 +3843,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -3889,7 +3908,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -3953,7 +3973,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4006,7 +4027,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4059,7 +4081,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4111,7 +4134,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4164,7 +4188,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4202,7 +4227,8 @@
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4240,7 +4266,8 @@
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4274,7 +4301,8 @@
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4336,7 +4364,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4398,7 +4427,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4460,7 +4490,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4513,7 +4544,8 @@
                 ]
             },
             "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
             ]
         },
         {
@@ -4945,7 +4977,10 @@
                         ]
                     }
                 ]
-            }
+            },
+            "dependsOn": [
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+            ]
         },
         {
             "condition": "[parameters('enableAnalyticsRulesLibrary')]",
@@ -4995,7 +5030,10 @@
                         ]
                     }
                 ]
-            }
+            },
+            "dependsOn": [
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+            ]
         },
         {
             "condition": "[parameters('enableAnalyticsRulesLibrary')]",
@@ -5047,7 +5085,10 @@
                         ]
                     }
                 ]
-            }
+            },
+            "dependsOn": [
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+            ]
         },
         {
             "condition": "[parameters('enableAnalyticsRulesLibrary')]",
@@ -5098,7 +5139,10 @@
                         ]
                     }
                 ]
-            }
+            },
+            "dependsOn": [
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+            ]
         },
         {
             "condition": "[parameters('enableAnalyticsRulesLibrary')]",
@@ -5148,7 +5192,10 @@
                         ]
                     }
                 ]
-            }
+            },
+            "dependsOn": [
+                "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+            ]
         },
         {
             "condition": "[parameters('enableWorkbook')]",
