@@ -383,6 +383,20 @@
       "metadata": {
         "description": "Slack Incoming Webhook URL for SOC notifications. Logic Apps will send alerts here when incidents are created. Leave blank to skip Slack integration. Create at: api.slack.com/apps \u2192 Incoming Webhooks."
       }
+    },
+    "jiraWebhookUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Jira Automation webhook URL for auto-creating issues on credential exposure. Leave blank to skip."
+      }
+    },
+    "azureDevOpsWebhookUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps Service Hook URL for auto-creating work items. Leave blank to skip."
+      }
     }
   },
   "variables": {
@@ -2118,6 +2132,12 @@
                   "parameters": {
                     "text": "All three connector modules activate automatically when you click Connect. No additional configuration needed for data streams."
                   }
+                },
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "### Polling & Retrieval Configuration\\n\\n| Setting | Default | Range | Description |\\n|---------|---------|-------|-------------|\\n| **Polling Interval** | 30 min | 5\u20131440 min | How often new records are fetched from SpyCloud API |\\n| **Retry Count** | 5 | 1\u201310 | Number of retries on API call failure |\\n| **Timeout** | 120 sec | 30\u2013300 sec | Per-request timeout before retry |\\n| **Lookback** | 365 days | 1\u2013365 days | Historical depth on first data pull |\\n\\nThe Modified Records poller always uses a 24-hour window. All settings are passed to the CCF poller configuration and take effect immediately on next polling cycle."
+                  }
                 }
               ]
             },
@@ -2290,14 +2310,28 @@
               "type": "int",
               "defaultValue": 365,
               "metadata": {
-                "description": "Number of days to look back on initial data pull. Max 365."
+                "description": "Days to look back on initial data pull (1-365)."
               }
             },
             "pollingIntervalMin": {
               "type": "int",
               "defaultValue": 30,
               "metadata": {
-                "description": "Polling interval in minutes. Minimum 5, default 30."
+                "description": "Polling interval in minutes (5-1440). How often the connector fetches new records."
+              }
+            },
+            "retryCount": {
+              "type": "int",
+              "defaultValue": 5,
+              "metadata": {
+                "description": "Number of retry attempts for failed API calls (1-10)."
+              }
+            },
+            "timeoutInSeconds": {
+              "type": "int",
+              "defaultValue": 120,
+              "metadata": {
+                "description": "API request timeout in seconds (30-300)."
               }
             }
           },
@@ -2350,7 +2384,7 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": 30,
+                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
                   "headers": {
                     "Accept": "application/json"
                   },
@@ -2360,8 +2394,8 @@
                     "show_plain_password": "[[join(parameters('show_plain_password'), ',')]",
                     "cursor": "start"
                   },
-                  "retryCount": 5,
-                  "timeoutInSeconds": 120
+                  "retryCount": "[[parameters('retryCount')]",
+                  "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2413,8 +2447,8 @@
                     "type": "[[join(parameters('watchlistType'), ',')]",
                     "show_plain_password": "[[join(parameters('show_plain_password'), ',')]"
                   },
-                  "retryCount": 5,
-                  "timeoutInSeconds": 120
+                  "retryCount": "[[parameters('retryCount')]",
+                  "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2456,12 +2490,12 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": 30,
+                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
                   "headers": {
                     "Accept": "application/json"
                   },
-                  "retryCount": 5,
-                  "timeoutInSeconds": 120
+                  "retryCount": "[[parameters('retryCount')]",
+                  "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2857,8 +2891,8 @@
                               "Content-Type": "application/json"
                             },
                             "body": {
-                              "@type": "MessageCard",
-                              "@context": "http://schema.org/extensions",
+                              "@@type": "MessageCard",
+                              "@@context": "http://schema.org/extensions",
                               "themeColor": "d63384",
                               "summary": "SpyCloud MDE \u2014 Device Isolated",
                               "sections": [
@@ -3329,8 +3363,8 @@
                               "Content-Type": "application/json"
                             },
                             "body": {
-                              "@type": "MessageCard",
-                              "@context": "http://schema.org/extensions",
+                              "@@type": "MessageCard",
+                              "@@context": "http://schema.org/extensions",
                               "themeColor": "d63384",
                               "summary": "SpyCloud CA \u2014 Identity Protected",
                               "sections": [
@@ -4516,6 +4550,14 @@
             "serviceNowUrl": {
               "type": "String",
               "defaultValue": ""
+            },
+            "jiraWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "azureDevOpsWebhook": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -4630,10 +4672,8 @@
                     "path": "/Incidents/Comment"
                   },
                   "runAfter": {
-                    "Send_Teams_alert": [
-                      "Succeeded",
-                      "Failed",
-                      "Skipped"
+                    "Revoke_all_sessions": [
+                      "Succeeded"
                     ]
                   }
                 },
@@ -4702,8 +4742,8 @@
                           "Content-Type": "application/json"
                         },
                         "body": {
-                          "@type": "MessageCard",
-                          "@context": "http://schema.org/extensions",
+                          "@@type": "MessageCard",
+                          "@@context": "http://schema.org/extensions",
                           "themeColor": "d63384",
                           "summary": "SpyCloud Credential Response",
                           "sections": [
@@ -4831,6 +4871,114 @@
                       "Skipped"
                     ]
                   }
+                },
+                "Create_Jira_Issue": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('jiraWebhook')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "HTTP_Jira": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@parameters('jiraWebhook')",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "issues": [
+                            {
+                              "fields": {
+                                "summary": "SpyCloud: Credential exposure - @{items('For_each_account')?['Name']}@@{items('For_each_account')?['UPNSuffix']}",
+                                "description": "SpyCloud detected compromised credentials.\\nUser: @{items('For_each_account')?['Name']}@@{items('For_each_account')?['UPNSuffix']}\\nIncident: @{triggerBody()?['object']?['properties']?['title']}\\nSeverity: @{triggerBody()?['object']?['properties']?['severity']}\\nActions taken: Password reset, sessions revoked",
+                                "issuetype": {
+                                  "name": "Bug"
+                                },
+                                "priority": {
+                                  "name": "High"
+                                },
+                                "labels": [
+                                  "spycloud",
+                                  "credential-exposure",
+                                  "security"
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Create_ServiceNow_Incident": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
+                },
+                "Create_DevOps_WorkItem": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('azureDevOpsWebhook')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "HTTP_DevOps": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@parameters('azureDevOpsWebhook')",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "resource": {
+                            "fields": {
+                              "System.Title": "SpyCloud: Credential exposure - @{items('For_each_account')?['Name']}@@{items('For_each_account')?['UPNSuffix']}",
+                              "System.Description": "Compromised credentials detected for @{items('For_each_account')?['Name']}@@{items('For_each_account')?['UPNSuffix']}. Auto-remediated: password reset, session revocation.",
+                              "System.WorkItemType": "Bug",
+                              "Microsoft.VSTS.Common.Priority": 2,
+                              "System.Tags": "SpyCloud;Security;Credential-Exposure"
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Create_Jira_Issue": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
                 }
               },
               "runAfter": {
@@ -4870,6 +5018,12 @@
           },
           "serviceNowUrl": {
             "value": "[parameters('serviceNowInstance')]"
+          },
+          "jiraWebhook": {
+            "value": "[parameters('jiraWebhookUrl')]"
+          },
+          "azureDevOpsWebhook": {
+            "value": "[parameters('azureDevOpsWebhookUrl')]"
           }
         }
       }
@@ -5083,8 +5237,8 @@
                               "Content-Type": "application/json"
                             },
                             "body": {
-                              "@type": "MessageCard",
-                              "@context": "http://schema.org/extensions",
+                              "@@type": "MessageCard",
+                              "@@context": "http://schema.org/extensions",
                               "themeColor": "d63384",
                               "summary": "SpyCloud Blocklist \u2014 Sev25 Isolation",
                               "sections": [
@@ -5479,10 +5633,12 @@
       "apiVersion": "2022-04-01",
       "name": "[guid(concat('SpyCloud-Dashboard-', parameters('workspace')))]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": "[union(variables('allTags'), createObject('hidden-title', 'SpyCloud Threat Intelligence Dashboard'))]",
+      "tags": {
+        "hidden-title": "SpyCloud Threat Intelligence Dashboard"
+      },
       "kind": "shared",
       "properties": {
-        "displayName": "SpyCloud Threat Intelligence Dashboard v2",
+        "displayName": "SpyCloud Threat Intelligence Dashboard",
         "description": "Real-time visibility into darknet exposure, credential compromise, device infections, and automated remediation status from SpyCloud data.",
         "category": "sentinel",
         "sourceId": "[variables('workspaceResourceId')]",

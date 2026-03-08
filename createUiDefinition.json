@@ -436,6 +436,28 @@
                                     "required": false
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "jiraWebhookUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Jira Automation Webhook URL (optional)",
+                                "placeholder": "https://automation.atlassian.com/pro/hooks/...",
+                                "toolTip": "Creates Jira issues for credential exposures via Automation webhook.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "azureDevOpsWebhookUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Azure DevOps Service Hook URL (optional)",
+                                "placeholder": "https://dev.azure.com/...",
+                                "toolTip": "Creates work items in Azure DevOps via Service Hook.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
                             }
                         ],
                         "visible": true
@@ -474,6 +496,15 @@
                                     "required": false
                                 },
                                 "visible": "[steps('securityConfig').sectionNotifications.enableNotifications]"
+                            },
+                            {
+                                "name": "slackMonitoringNote",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "text": "Slack webhook (configured in SOC Integrations above) also receives health alerts when the connector stops ingesting data.",
+                                    "style": "Info"
+                                },
+                                "visible": true
                             }
                         ],
                         "visible": true
@@ -540,7 +571,9 @@
             "tagEnvironment": "[steps('securityConfig').sectionTags.tagEnvironment]",
             "tagOwner": "[steps('securityConfig').sectionTags.tagOwner]",
             "tagCostCenter": "[steps('securityConfig').sectionTags.tagCostCenter]",
-            "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]"
+            "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]",
+            "jiraWebhookUrl": "[steps('securityConfig').sectionIntegrations.jiraWebhookUrl]",
+            "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]"
         }
     }
 }
