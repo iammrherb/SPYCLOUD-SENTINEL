@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/SpyCloud-Logo-white.png" alt="SpyCloud" width="340" style="background:#0D1B2A;padding:24px;border-radius:10px"/>
+  <img src="docs/images/SpyCloud_wordmark-black.png" alt="SpyCloud" width="360"/>
 </p>
 
 <h1 align="center">SpyCloud Sentinel Supreme</h1>
@@ -179,6 +179,10 @@ SpyCloud API  ──▶  CCF Pollers  ──▶  DCE  ──▶  DCR (KQL transf
 ### Method 1: Azure Portal (Recommended)
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a>
+
+<a href="https://shell.azure.com/bash#src/github.com/iammrherb/SPYCLOUD-SENTINEL" target="_blank"><img src="https://img.shields.io/badge/launch-Azure%20Cloud%20Shell-blue?style=for-the-badge&logo=microsoftazure" alt="Open in Cloud Shell"/></a>
+
+<a href="https://github.com/iammrherb/SPYCLOUD-SENTINEL/actions/workflows/deploy.yml" target="_blank"><img src="https://img.shields.io/badge/deploy-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions"/></a>
 
 The portal wizard has **3 pages**:
 
@@ -739,7 +743,7 @@ SPYCLOUD-SENTINEL/
 ---
 
 <p align="center">
-  <img src="docs/images/SpyCloud-Logo-white.png" width="140" style="background:#0D1B2A;padding:10px;border-radius:6px"/>
+  <img src="docs/images/SpyCloud_wordmark-black.png" width="180"/>
   <br/><br/>
   <sub>© 2026 SpyCloud, Inc. All rights reserved.</sub><br/>
   <sub><em>SpyCloud transforms recaptured darknet data to disrupt cybercrime.</em></sub><br/>
