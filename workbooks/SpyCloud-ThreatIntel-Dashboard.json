@@ -4,7 +4,7 @@
     {
       "type": 1,
       "content": {
-        "json": "<img src=\"https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud_wordmark-black.png\" width=\"200\" alt=\"SpyCloud\"/>\n\n# \ud83d\udee1\ufe0f SpyCloud Threat Intelligence Dashboard\n**Darknet exposure monitoring** \u2014 breach credentials, infostealer infections, phished accounts, and automated remediation.\n\n> Charts show *no data* until the SpyCloud connector is activated and data begins flowing (5\u201310 min after Connect).\n\n---"
+        "json": "# \ud83d\udee1\ufe0f SpyCloud Threat Intelligence Dashboard\n**Darknet exposure monitoring** \u2014 breach credentials, infostealer infections, phished accounts, and automated remediation.\n\n> Charts show *no data* until the SpyCloud connector is activated and data begins flowing (5\u201310 min after Connect).\n\n---"
       },
       "name": "title"
     },
