@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/SpyCloud_wordmark-black.png" alt="SpyCloud" width="360"/>
+  <img src="docs/images/SpyCloud-Logo-white.png" alt="SpyCloud" width="340" style="background:#0D1B2A;padding:24px;border-radius:10px"/>
 </p>
 
 <h1 align="center">SpyCloud Sentinel Supreme</h1>
@@ -743,7 +743,7 @@ SPYCLOUD-SENTINEL/
 ---
 
 <p align="center">
-  <img src="docs/images/SpyCloud_wordmark-black.png" width="180"/>
+  <img src="docs/images/SpyCloud-Logo-white.png" width="140" style="background:#0D1B2A;padding:10px;border-radius:6px"/>
   <br/><br/>
   <sub>© 2026 SpyCloud, Inc. All rights reserved.</sub><br/>
   <sub><em>SpyCloud transforms recaptured darknet data to disrupt cybercrime.</em></sub><br/>
