@@ -61,6 +61,15 @@
                         "label": "Log Analytics Workspace",
                         "elements": [
                             {
+                                "name": "wsInfoBox",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "In Azure, the Log Analytics workspace and Sentinel workspace are the SAME resource. Microsoft Sentinel is a solution installed ON TOP of a Log Analytics workspace. When you select or create a workspace here, ALL SpyCloud resources (DCE, DCR, tables, connector, playbooks, rules, workbook) will be deployed into that workspace. If creating new, Sentinel will be automatically enabled."
+                                }
+                            },
+                            {
                                 "name": "createNewWorkspace",
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Workspace Mode",

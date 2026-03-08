@@ -115,7 +115,7 @@
             "type": 3,
             "content": {
                 "version": "KqlItem/1.0",
-                "query": "union isfuzzy=true\n(datatable(TimeGenerated:datetime)[] | where 1==0),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where isnotempty(email)\n| summarize ExposureCount = count(), MaxSeverity = max(severity), HasPlaintext = countif(isnotempty(password_plaintext)), TargetDomains = dcount(target_domain), LatestExposure = max(TimeGenerated) by email\n| top 20 by MaxSeverity desc, ExposureCount desc\n| project ['User Email'] = email, ['Exposures'] = ExposureCount, ['Max Severity'] = MaxSeverity, ['Plaintext PWs'] = HasPlaintext, ['Target Domains'] = TargetDomains, ['Latest'] = format_datetime(LatestExposure, 'yyyy-MM-dd HH:mm'))",
+                "query": "union isfuzzy=true\n(datatable(email:string, ExposureCount:long, MaxSeverity:long, HasPlaintext:long, TargetDomains:long, Latest:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where isnotempty(email)\n| summarize ExposureCount=count(), MaxSeverity=max(severity), HasPlaintext=countif(isnotempty(password_plaintext)), TargetDomains=dcount(target_domain), LatestExposure=max(TimeGenerated) by email\n| top 20 by MaxSeverity desc, ExposureCount desc\n| project email, ExposureCount, MaxSeverity, HasPlaintext, TargetDomains, Latest=format_datetime(LatestExposure, 'yyyy-MM-dd HH:mm'))",
                 "size": 0,
                 "title": "Top 20 Most Exposed Users",
                 "queryType": 0,
@@ -192,7 +192,7 @@
             "type": 3,
             "content": {
                 "version": "KqlItem/1.0",
-                "query": "union isfuzzy=true\n(datatable(TimeGenerated:datetime)[] | where 1==0),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where severity >= 20\n| where isnotempty(infected_machine_id)\n| summarize Users = dcount(email), Emails = make_set(email, 5), MaxSeverity = max(severity), TargetDomains = dcount(target_domain), LatestInfection = max(TimeGenerated) by infected_machine_id, user_hostname\n| top 20 by MaxSeverity desc, Users desc\n| project ['Machine ID'] = infected_machine_id, ['Hostname'] = user_hostname, ['Users'] = Users, ['Severity'] = MaxSeverity, ['Domains'] = TargetDomains, ['Latest'] = format_datetime(LatestInfection, 'yyyy-MM-dd'))",
+                "query": "union isfuzzy=true\n(datatable(infected_machine_id:string, user_hostname:string, Users:long, MaxSeverity:long, Domains:long, Latest:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where severity >= 20 and isnotempty(infected_machine_id)\n| summarize Users=dcount(email), MaxSeverity=max(severity), Domains=dcount(target_domain), LatestInfection=max(TimeGenerated) by infected_machine_id, user_hostname\n| top 20 by MaxSeverity desc, Users desc\n| project infected_machine_id, user_hostname, Users, MaxSeverity, Domains, Latest=format_datetime(LatestInfection, 'yyyy-MM-dd'))",
                 "size": 0,
                 "title": "Top 20 Infected Devices",
                 "queryType": 0,
@@ -223,11 +223,11 @@
             "type": 3,
             "content": {
                 "version": "KqlItem/1.0",
-                "query": "let mde_count = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize count());\nlet ca_count = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize count());\nlet total_sev20 = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | where severity >= 20 | summarize dcount(email));\nlet ca_remediated = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize dcount(UserEmail));\nlet mde_remediated = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize dcount(InfectedMachineId));\nprint MDE_Actions = mde_count, CA_Actions = ca_count, Total_HighSev_Users = total_sev20, Users_Remediated = ca_remediated, Devices_Remediated = mde_remediated, Remediation_Rate = iff(total_sev20 > 0, round(todouble(ca_remediated) / todouble(total_sev20) * 100, 1), 0.0)",
+                "query": "union isfuzzy=true\n(datatable(Metric:string, Value:long)[]),\n(union\n  (Spycloud_MDE_Logs_CL | summarize Value=count() | extend Metric=\"MDE Actions\"),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Value=count() | extend Metric=\"CA Actions\"),\n  (SpyCloudBreachWatchlist_CL | where severity >= 20 | summarize Value=dcount(email) | extend Metric=\"High-Sev Users\")\n| project Metric, Value)",
                 "size": 4,
                 "title": "Remediation Dashboard",
                 "queryType": 0,
-                "visualization": "tiles"
+                "visualization": "table"
             },
             "name": "remediationTiles"
         },
@@ -268,7 +268,7 @@
             "type": 3,
             "content": {
                 "version": "KqlItem/1.0",
-                "query": "SpyCloudBreachCatalog_CL\n| where TimeGenerated {TimeRange}\n| project ['Source ID'] = source_id, ['Breach Title'] = breach_title, ['Status'] = status, ['Description'] = description, ['Ingested'] = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm')\n| top 25 by Ingested desc",
+                "query": "union isfuzzy=true\n(datatable(TimeGenerated:datetime)[]),\n(SpyCloudBreachCatalog_CL\n| where TimeGenerated {TimeRange}\n| project ['Source ID'] = source_id, ['Breach Title'] = breach_title, ['Status'] = status, ['Description'] = description, ['Ingested'] = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm')\n| top 25 by Ingested desc)",
                 "size": 0,
                 "title": "Recent Breach Catalog Entries",
                 "queryType": 0,
