@@ -547,6 +547,8 @@ All integrations are **conditional** — only fire when the corresponding URL or
 
 **19 visualizations** across **8 sections**. Find at: Sentinel → Workbooks → **SpyCloud Threat Intelligence Dashboard**
 
+> **All charts render gracefully before data flows.** Every query uses `union isfuzzy=true` with typed `datatable()` fallbacks — tiles show zeros, tables show empty, health shows "🔴 No Data" status. Once the connector is activated, real data replaces the defaults within 5–10 minutes.
+
 ### Executive Summary
 - **Exposure Tiles** — 8 KPIs: total exposures, unique users, infected devices, sev 25, sev 20, plaintext passwords, MDE actions, CA actions
 - **Exposure Trend** — Area chart showing daily exposure count by severity (color-coded)
