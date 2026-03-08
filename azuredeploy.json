@@ -581,7 +581,6 @@
     },
     "resources": [
         {
-            "condition": "[parameters('createNewWorkspace')]",
             "type": "Microsoft.OperationalInsights/workspaces",
             "apiVersion": "2022-10-01",
             "name": "[parameters('workspace')]",
@@ -5182,7 +5181,7 @@
             "condition": "[parameters('enablePostDeployScript')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceGroup().id, deployment().name, 'spycloud-contributor')]",
+            "name": "[guid(resourceGroup().id, 'spycloud-contributor-static')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]"
             ],
@@ -5257,7 +5256,7 @@
             "condition": "[parameters('enablePostDeployScript')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceGroup().id, deployment().name, 'spycloud-uaa')]",
+            "name": "[guid(resourceGroup().id, 'spycloud-uaa-static')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]"
             ],
