@@ -6,20 +6,34 @@
         "config": {
             "isWizard": true,
             "basics": {
-                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel \u2014 Unified Threat Intelligence\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nDeploy SpyCloud's breach, malware, and phishing intelligence into Microsoft Sentinel with:\n\n- **CCF Data Connector** \u2014 3 REST API pollers (Watchlist New + Modified + Catalog)\n- **4 Custom Tables** \u2014 73+ columns covering credentials, PII, device forensics, account metadata\n- **2 Logic App Playbooks** \u2014 MDE device isolation + Conditional Access identity protection\n- **17 Analytics Rules** \u2014 Infostealer, plaintext passwords, PII, session cookies, device re-infection, IdP correlation (all deploy DISABLED for review)\n- **Azure Key Vault** \u2014 Secure API key storage\n- **Automated Post-Deploy** \u2014 DCE/DCR resolution and RBAC assignment runs inside the deployment\n\n**Prerequisites:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com) \u2192 Settings \u2192 API Keys\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture Guide](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
+                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel Supreme\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 3 REST API pollers\n- 4 custom log tables (73+ columns)\n- 4 Logic App playbooks (MDE, CA, Credential Response, MDE Blocklist)\n- 22 analytics rules (all deploy disabled for review)\n- Azure Key Vault for secure API key storage\n- Automated post-deployment configuration\n- Security Copilot plugin + interactive agent (upload separately)\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
                 "location": {
                     "label": "Deployment Region",
                     "allowedValues": [
                         "eastus",
                         "eastus2",
                         "westus2",
+                        "westus3",
                         "centralus",
+                        "northcentralus",
+                        "southcentralus",
                         "northeurope",
                         "westeurope",
                         "uksouth",
+                        "ukwest",
                         "australiaeast",
+                        "australiasoutheast",
                         "southeastasia",
-                        "japaneast"
+                        "japaneast",
+                        "koreacentral",
+                        "canadacentral",
+                        "brazilsouth",
+                        "switzerlandnorth",
+                        "norwayeast",
+                        "germanywestcentral",
+                        "francecentral",
+                        "uaenorth",
+                        "southafricanorth"
                     ],
                     "visible": true
                 }
@@ -32,14 +46,14 @@
                 "visible": true,
                 "options": {
                     "icon": "Info",
-                    "text": "You need a SpyCloud Enterprise API key. Get yours at portal.spycloud.com \u2192 Settings \u2192 API Keys."
+                    "text": "This wizard guides you through every configuration option. Required fields are marked with *. All playbooks and analytics rules are optional and can be toggled individually."
                 }
             }
         ],
         "steps": [
             {
                 "name": "workspaceConfig",
-                "label": "Workspace & Connector",
+                "label": "Workspace & SpyCloud API",
                 "elements": [
                     {
                         "name": "sectionWorkspace",
@@ -49,17 +63,17 @@
                             {
                                 "name": "createNewWorkspace",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Workspace",
-                                "defaultValue": "Create new workspace",
-                                "toolTip": "Create a new workspace or use an existing one with Sentinel enabled.",
+                                "label": "Workspace Mode",
+                                "defaultValue": "Create new workspace + enable Sentinel",
+                                "toolTip": "Create a new Log Analytics workspace with Microsoft Sentinel enabled, or use an existing workspace that already has Sentinel.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "Create new workspace",
+                                            "label": "Create new workspace + enable Sentinel",
                                             "value": true
                                         },
                                         {
-                                            "label": "Use existing workspace",
+                                            "label": "Use existing workspace (Sentinel must be enabled)",
                                             "value": false
                                         }
                                     ],
@@ -70,14 +84,13 @@
                             {
                                 "name": "workspace",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Workspace Name",
-                                "defaultValue": "",
+                                "label": "Workspace Name *",
                                 "placeholder": "e.g., spycloud-sentinel-ws",
-                                "toolTip": "Name for new workspace, or exact name of existing workspace.",
+                                "toolTip": "Name for the Log Analytics workspace. For new workspaces, this will be created. For existing, enter the exact name.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^[a-zA-Z][a-zA-Z0-9-]{2,62}$",
-                                    "validationMessage": "Must be 3-63 characters: letters, numbers, hyphens. Must start with a letter."
+                                    "validationMessage": "3-63 characters: letters, numbers, hyphens. Must start with a letter."
                                 },
                                 "visible": true
                             },
@@ -89,14 +102,14 @@
                                 "label": "Data Retention (days)",
                                 "defaultValue": 90,
                                 "showStepMarkers": false,
-                                "toolTip": "How long to retain SpyCloud data in Log Analytics. 90 days recommended.",
+                                "toolTip": "How long to retain data in Log Analytics. 90 days is included free. Longer retention incurs additional cost.",
                                 "visible": true
                             }
                         ],
                         "visible": true
                     },
                     {
-                        "name": "sectionSpyCloud",
+                        "name": "sectionApi",
                         "type": "Microsoft.Common.Section",
                         "label": "SpyCloud API Configuration",
                         "elements": [
@@ -104,10 +117,10 @@
                                 "name": "spycloudApiKey",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
-                                    "password": "SpyCloud API Key",
+                                    "password": "SpyCloud API Key *",
                                     "confirmPassword": "Confirm API Key"
                                 },
-                                "toolTip": "Your SpyCloud Enterprise API key from portal.spycloud.com",
+                                "toolTip": "Your SpyCloud Enterprise API key. Get it from portal.spycloud.com \u2192 Settings \u2192 API Keys.",
                                 "constraints": {
                                     "required": true
                                 },
@@ -119,9 +132,9 @@
                             {
                                 "name": "spycloudApiRegion",
                                 "type": "Microsoft.Common.DropDown",
-                                "label": "SpyCloud API Region",
+                                "label": "API Region",
                                 "defaultValue": "US (api.spycloud.io)",
-                                "toolTip": "Select the SpyCloud API endpoint region.",
+                                "toolTip": "Select the SpyCloud API endpoint closest to your Azure region.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -141,19 +154,10 @@
                         "visible": true
                     },
                     {
-                        "name": "sectionDataConfig",
+                        "name": "sectionDataIngestion",
                         "type": "Microsoft.Common.Section",
                         "label": "Data Ingestion Settings",
                         "elements": [
-                            {
-                                "name": "dataConfigInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": true,
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "Configure which SpyCloud exposure data to ingest. Severity levels determine the type and urgency of exposed data. Higher severity = more critical exposure."
-                                }
-                            },
                             {
                                 "name": "severityFilter",
                                 "type": "Microsoft.Common.DropDown",
@@ -173,19 +177,19 @@
                                         "value": "25"
                                     }
                                 ],
-                                "toolTip": "Select which SpyCloud severity levels to ingest.\n\n\u2022 Severity 2: Email + password from third-party breach (lowest risk)\n\u2022 Severity 5: Breach credential + PII (name, phone, DOB, address)\n\u2022 Severity 20: Infostealer credential \u2014 malware stole this from an infected device (HIGH risk)\n\u2022 Severity 25: Infostealer + application data \u2014 stolen cookies, sessions, autofill enabling MFA bypass (CRITICAL)",
+                                "toolTip": "Select which SpyCloud severity levels to ingest into Sentinel.\n\n\u2022 2: Email + password from third-party breach (lowest)\n\u2022 5: Breach credential + PII (name, phone, DOB)\n\u2022 20: Infostealer credential \u2014 malware-stolen (HIGH)\n\u2022 25: Infostealer + app data \u2014 cookies/sessions/autofill (CRITICAL)",
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "2 \u2014 Breach Credential (email + password from breach)",
+                                            "label": "2 \u2014 Breach Credential (email + password)",
                                             "value": "2"
                                         },
                                         {
-                                            "label": "5 \u2014 Breach + PII (credential + name, phone, DOB)",
+                                            "label": "5 \u2014 Breach + PII (credential + name/phone/DOB)",
                                             "value": "5"
                                         },
                                         {
-                                            "label": "20 \u2014 Infostealer Credential (malware-stolen, HIGH risk)",
+                                            "label": "20 \u2014 Infostealer Credential (malware-stolen, HIGH)",
                                             "value": "20"
                                         },
                                         {
@@ -198,11 +202,47 @@
                                 "visible": true
                             },
                             {
+                                "name": "watchlistType",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Watchlist Types",
+                                "multiselect": true,
+                                "defaultValue": [
+                                    {
+                                        "value": "corporate"
+                                    },
+                                    {
+                                        "value": "infected"
+                                    },
+                                    {
+                                        "value": "compass"
+                                    }
+                                ],
+                                "toolTip": "Types of SpyCloud watchlists to monitor.\n\n\u2022 corporate: Email domains owned by your organization\n\u2022 infected: Devices infected with infostealer malware\n\u2022 compass: Third-party/supply chain exposure monitoring",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Corporate \u2014 Your organization's email domains",
+                                            "value": "corporate"
+                                        },
+                                        {
+                                            "label": "Infected \u2014 Infostealer-compromised devices",
+                                            "value": "infected"
+                                        },
+                                        {
+                                            "label": "Compass \u2014 Third-party/supply chain monitoring",
+                                            "value": "compass"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
                                 "name": "showPlainPassword",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Include Plaintext Passwords in Data",
+                                "label": "Include Plaintext Passwords",
                                 "defaultValue": "No \u2014 Redact passwords (recommended for compliance)",
-                                "toolTip": "Controls whether plaintext passwords are included in SpyCloud data ingested into Sentinel.\n\nSet to 'No' (recommended) to redact all plaintext passwords before they reach your SIEM. This is required by many compliance frameworks (PCI DSS, SOC 2, HIPAA).\n\nSet to 'Yes' only if your SOC team needs to see exposed passwords for investigation purposes and your organization's data handling policies permit it.",
+                                "toolTip": "Controls whether plaintext passwords appear in Sentinel data.\n\nNo (recommended): Passwords are redacted before reaching your SIEM. Required by PCI DSS, SOC 2, HIPAA.\n\nYes: Passwords visible for SOC investigation. Only enable if your data handling policies permit it.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -226,7 +266,7 @@
                                 "label": "Polling Interval (minutes)",
                                 "defaultValue": 40,
                                 "showStepMarkers": false,
-                                "toolTip": "How often the CCF connector polls the SpyCloud API for new data. Default: 40 minutes. Lower values increase freshness but may hit API rate limits.",
+                                "toolTip": "How often the CCF connector polls the SpyCloud API. Lower = fresher data but more API calls. Default: 40 min.",
                                 "visible": true
                             },
                             {
@@ -234,10 +274,21 @@
                                 "type": "Microsoft.Common.Slider",
                                 "min": 1,
                                 "max": 365,
-                                "label": "Initial Data Lookback (days)",
+                                "label": "Initial Lookback (days)",
                                 "defaultValue": 30,
                                 "showStepMarkers": false,
-                                "toolTip": "How many days of historical SpyCloud data to pull on first connection. Default: 30 days. Higher values pull more historical data but take longer on initial sync.",
+                                "toolTip": "How many days of historical SpyCloud data to pull on first sync. Higher = more historical data but longer initial load.",
+                                "visible": true
+                            },
+                            {
+                                "name": "rateLimitQPS",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 1,
+                                "max": 10,
+                                "label": "API Rate Limit (queries/sec)",
+                                "defaultValue": 2,
+                                "showStepMarkers": false,
+                                "toolTip": "Maximum API requests per second to SpyCloud. Increase if you have a high-volume API plan. Default: 2 QPS.",
                                 "visible": true
                             }
                         ],
@@ -247,7 +298,7 @@
             },
             {
                 "name": "automationConfig",
-                "label": "Automation & Security",
+                "label": "Playbooks & Automation",
                 "elements": [
                     {
                         "name": "sectionPlaybooks",
@@ -260,55 +311,112 @@
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Playbooks are Logic Apps that automatically respond to SpyCloud-detected threats. They use Sentinel automation rules with the 'Microsoft Sentinel Incident' trigger to fire when incidents are created. Each playbook uses a system-assigned managed identity \u2014 no credentials are stored in the workflow. API permissions (MDE Machine.Isolate, Graph User.ReadWrite.All) are assigned by the automated post-deploy script or can be granted manually in Azure Portal \u2192 Enterprise Applications."
+                                    "text": "Each playbook is a Logic App with a system-assigned managed identity. API permissions (MDE Machine.Isolate, Graph User.ReadWrite.All) are assigned by the automated post-deploy script or can be granted manually in Azure Portal \u2192 Enterprise Applications."
                                 }
                             },
                             {
                                 "name": "enableMdePlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable MDE Device Isolation Playbook",
-                                "toolTip": "Deploys a Logic App that automatically responds to infostealer infections detected by SpyCloud:\n\n1. Triggered by Sentinel incident (severity 20+)\n2. Extracts infected_machine_id and user_hostname from SpyCloud data\n3. Searches Microsoft Defender for Endpoint for matching devices\n4. If match found: isolates the device to prevent lateral movement\n5. Tags the device with 'SpyCloud-Infostealer' for SOC tracking\n6. Adds investigation comments to the Sentinel incident\n7. Logs all actions to Spycloud_MDE_Logs_CL audit table\n\nRequires: Microsoft Defender for Endpoint license, Machine.Isolate + Machine.ReadWrite.All API permissions.",
+                                "label": "Playbook 1: MDE Device Isolation (incident-triggered)",
+                                "toolTip": "Searches MDE for infected devices, isolates them, tags with SpyCloud identifier, logs to audit table. Requires: MDE license + Machine.Isolate permission."
+                            },
+                            {
+                                "name": "mdeIsolationType",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "MDE Isolation Type",
+                                "defaultValue": "Full (recommended)",
+                                "toolTip": "Full: Completely disconnects device from network (except MDE agent). Selective: Limits connections but allows some traffic.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Full (recommended \u2014 complete network isolation)",
+                                            "value": "Full"
+                                        },
+                                        {
+                                            "label": "Selective (limited connectivity maintained)",
+                                            "value": "Selective"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[steps('automationConfig').sectionPlaybooks.enableMdePlaybook]"
+                            },
+                            {
+                                "name": "mdeTagName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "MDE Device Tag",
+                                "defaultValue": "SpyCloud-Compromised",
+                                "toolTip": "Tag applied to isolated devices in MDE for tracking and filtering.",
                                 "constraints": {
                                     "required": false
-                                }
+                                },
+                                "visible": "[steps('automationConfig').sectionPlaybooks.enableMdePlaybook]"
                             },
                             {
                                 "name": "enableCaPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable Conditional Access Remediation Playbook",
-                                "toolTip": "Deploys a Logic App that protects compromised identities when SpyCloud detects credential exposure:\n\n1. Triggered by Sentinel incident (any severity with email field)\n2. Extracts compromised email addresses from SpyCloud data\n3. Looks up user in Entra ID (Azure AD) via Microsoft Graph\n4. Forces password reset on next sign-in\n5. Revokes all active sessions and refresh tokens\n6. Optionally adds user to a Conditional Access exclusion group\n7. Adds remediation comments to the Sentinel incident\n8. Logs all actions to SpyCloud_ConditionalAccessLogs_CL audit table\n\nRequires: Entra ID P1+, User.ReadWrite.All + Directory.ReadWrite.All Graph API permissions.",
+                                "label": "Playbook 2: Conditional Access Identity Protection (incident-triggered)",
+                                "toolTip": "Resets passwords, revokes sessions, adds users to CA exclusion group. Requires: Entra ID P1+ and User.ReadWrite.All."
+                            },
+                            {
+                                "name": "caSecurityGroupId",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "CA Security Group Object ID (optional)",
+                                "placeholder": "e.g., 12345678-abcd-efgh-ijkl-123456789012",
+                                "toolTip": "Entra ID security group Object ID for the Conditional Access exclusion group. Compromised users are added to this group to trigger CA policies (e.g., block sign-in, require MFA). Leave blank to skip group assignment.",
                                 "constraints": {
                                     "required": false
-                                }
+                                },
+                                "visible": "[steps('automationConfig').sectionPlaybooks.enableCaPlaybook]"
                             },
                             {
                                 "name": "enableCredResponsePlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable Credential Exposure \u2192 Automated Identity Response Playbook",
-                                "toolTip": "Deploys an advanced Logic App that responds to credential exposures with a multi-step workflow:\n\n1. Triggered by Sentinel incident from SpyCloud alert\n2. Checks user's recent sign-in activity in Entra ID\n3. Forces password reset on next sign-in\n4. Revokes all active user sessions\n5. Sends real-time alert to Microsoft Teams SOC channel\n6. Adds investigation comments to the Sentinel incident\n\nRequires: Security Administrator, Graph IdentityRisk.ReadWrite.All"
+                                "label": "Playbook 3: Credential Response + Teams Alert (incident-triggered)",
+                                "toolTip": "Checks recent sign-ins, forces password reset, revokes sessions, sends real-time Teams MessageCard to SOC. Requires: Security Administrator + Graph IdentityRisk.ReadWrite.All."
                             },
                             {
                                 "name": "enableMdeBlocklistPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable SpyCloud Threat Feed \u2192 MDE Blocklist Playbook (Scheduled)",
-                                "toolTip": "Deploys a scheduled Logic App that runs every 2-4 hours to:\n\n1. Query severity 25 (CRITICAL) infostealer records from SpyCloud\n2. Match infected_machine_id and user_hostname against Microsoft Defender for Endpoint\n3. If device found in MDE: automatically isolate and tag with 'SpyCloud-Sev25-Infostealer'\n4. Create enriched correlation table with both SpyCloud and MDE data\n\nRequires: MDE license with API enabled, Machine.Isolate + Machine.ReadWrite.All"
-                            }
-                        ],
-                        "visible": true
-                    },
-                    {
-                        "name": "sectionSecurity",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Security & Key Management",
-                        "elements": [
+                                "label": "Playbook 4: MDE Blocklist \u2014 Scheduled Severity 25 Scan",
+                                "toolTip": "Runs on a schedule to scan severity 25 (CRITICAL) infostealer records against MDE device inventory. Auto-isolates matched devices. Requires: MDE with API enabled."
+                            },
                             {
-                                "name": "enableKeyVault",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Store API key in Azure Key Vault",
-                                "toolTip": "Creates an Azure Key Vault and stores the SpyCloud API key as a secret. Recommended for production deployments.",
+                                "name": "mdeBlocklistScheduleHours",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "MDE Blocklist Scan Frequency",
+                                "defaultValue": "Every 4 hours (recommended)",
+                                "toolTip": "How often Playbook 4 scans for new severity 25 matches.",
                                 "constraints": {
-                                    "required": false
-                                }
+                                    "allowedValues": [
+                                        {
+                                            "label": "Every 1 hour (aggressive)",
+                                            "value": 1
+                                        },
+                                        {
+                                            "label": "Every 2 hours",
+                                            "value": 2
+                                        },
+                                        {
+                                            "label": "Every 4 hours (recommended)",
+                                            "value": 4
+                                        },
+                                        {
+                                            "label": "Every 8 hours",
+                                            "value": 8
+                                        },
+                                        {
+                                            "label": "Every 12 hours",
+                                            "value": 12
+                                        },
+                                        {
+                                            "label": "Every 24 hours (conservative)",
+                                            "value": 24
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[steps('automationConfig').sectionPlaybooks.enableMdeBlocklistPlaybook]"
                             }
                         ],
                         "visible": true
@@ -321,26 +429,26 @@
                             {
                                 "name": "enableAnalyticsRule",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable primary infostealer detection rule",
-                                "toolTip": "Creates the primary analytics rule that detects severity 20+ infostealer exposures and creates Sentinel incidents."
+                                "label": "Create primary infostealer detection rule",
+                                "toolTip": "Creates the primary analytics rule that detects severity 20+ exposures and generates Sentinel incidents."
                             },
                             {
                                 "name": "enableAutomationRule",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable automation rule (auto-trigger playbooks)",
-                                "toolTip": "Creates an automation rule that automatically triggers the MDE and CA playbooks when incidents are created."
+                                "label": "Create automation rule (auto-trigger playbooks on incidents)",
+                                "toolTip": "Creates an automation rule that fires the enabled playbooks when SpyCloud incidents are created."
                             },
                             {
                                 "name": "enableAnalyticsRulesLibrary",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Deploy full analytics rules library (17 rules, ALL disabled by default)",
-                                "toolTip": "Deploys the complete library of 17 SpyCloud analytics rules including: plaintext password detection, PII exposure, session cookie theft, device re-infection, multi-domain exposure, geographic anomaly, remediation gap, AV bypass, and 4 identity provider correlation rules (Okta, Duo, Ping, Entra). ALL rules deploy DISABLED \u2014 you must review and enable each one individually."
+                                "label": "Deploy FULL analytics rules library (22 rules, ALL disabled by default)",
+                                "toolTip": "Deploys all 22 SpyCloud detection rules: plaintext passwords, PII exposure, session cookies, device re-infection, multi-domain exposure, geographic anomaly, executive/VIP, password reuse, remediation gaps, IdP correlation (Okta/Duo/Ping/Entra), and more. Every rule deploys DISABLED \u2014 you review and enable individually."
                             },
                             {
                                 "name": "enablePostDeployScript",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Run automated post-deployment script (resolves DCE/DCR + assigns RBAC)",
-                                "toolTip": "Automatically runs a deployment script after all resources are created. It waits for the Sentinel content template, resolves the DCE Logs Ingestion URI and DCR Immutable ID, and assigns the Monitoring Metrics Publisher role to both Logic Apps. This eliminates the need to run scripts/post-deploy.sh manually for basic setup. MDE and Graph API permissions still require manual steps."
+                                "toolTip": "Runs a deployment script inside the ARM deployment that waits for content template resources, resolves DCE Logs Ingestion URI and DCR Immutable ID, and assigns Monitoring Metrics Publisher to all Logic Apps. Eliminates manual post-deploy steps for core setup."
                             }
                         ],
                         "visible": true
@@ -348,9 +456,87 @@
                 ]
             },
             {
-                "name": "monitoringConfig",
-                "label": "Monitoring & Notifications",
+                "name": "securityConfig",
+                "label": "Security & Integrations",
                 "elements": [
+                    {
+                        "name": "sectionDashboard",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Dashboard & Visualization",
+                        "elements": [
+                            {
+                                "name": "dashboardInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "The SpyCloud Threat Intelligence Dashboard is a Sentinel Workbook with real-time charts and tables. It deploys directly into your Sentinel workspace and is accessible from Sentinel \u2192 Workbooks."
+                                }
+                            },
+                            {
+                                "name": "enableWorkbook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Deploy SpyCloud Threat Intelligence Dashboard (Sentinel Workbook)",
+                                "toolTip": "Deploys a comprehensive dashboard workbook with 10 visualizations:\n\n\u2022 Exposure Overview tiles (total, unique users, devices, plaintext passwords)\n\u2022 Exposure Trend over time by severity (timechart)\n\u2022 Severity Distribution (pie chart)\n\u2022 Top 20 Most Exposed Users (sortable table with severity heatmap)\n\u2022 Password Type Distribution (bar chart)\n\u2022 Top Targeted Domains (bar chart)\n\u2022 Top 20 Infected Devices (table)\n\u2022 Infections by Country (bar chart)\n\u2022 Remediation Dashboard (MDE + CA action counts, remediation rate)\n\u2022 Breach Catalog entries (table)"
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionKeyVault",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Key Vault & Secrets",
+                        "elements": [
+                            {
+                                "name": "enableKeyVault",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Create Azure Key Vault for API key storage",
+                                "toolTip": "Creates a Key Vault with RBAC authorization, soft delete, and purge protection. Stores the SpyCloud API key as a secret. Recommended for production deployments."
+                            },
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Key Vault Name (optional \u2014 auto-generated if blank)",
+                                "placeholder": "Leave blank for auto-generated name",
+                                "toolTip": "Custom Key Vault name (3-24 chars, alphanumeric, start with letter). Leave blank to auto-generate a unique name based on your resource group.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^[a-zA-Z][a-zA-Z0-9]{2,23}$",
+                                    "validationMessage": "3-24 alphanumeric chars, must start with a letter. Or leave blank."
+                                },
+                                "visible": "[steps('securityConfig').sectionKeyVault.enableKeyVault]"
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionTags",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Resource Tags",
+                        "elements": [
+                            {
+                                "name": "tagsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Tags are applied to all deployed resources for cost tracking, ownership, and governance. The 'solution' tag is always set to 'SpyCloud-ThreatIntel-Sentinel'."
+                                }
+                            },
+                            {
+                                "name": "resourceTags",
+                                "type": "Microsoft.Common.TagsByResource",
+                                "resources": [
+                                    "Microsoft.OperationalInsights/workspaces",
+                                    "Microsoft.Logic/workflows",
+                                    "Microsoft.KeyVault/vaults",
+                                    "Microsoft.Insights/dataCollectionEndpoints"
+                                ],
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    },
                     {
                         "name": "sectionIntegrations",
                         "type": "Microsoft.Common.Section",
@@ -359,65 +545,22 @@
                             {
                                 "name": "teamsChannelWebhook",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Microsoft Teams Webhook URL (Optional)",
+                                "label": "Microsoft Teams Webhook URL (optional)",
                                 "placeholder": "https://outlook.office.com/webhook/...",
-                                "toolTip": "Incoming webhook URL for your SOC Microsoft Teams channel. The Credential Response playbook sends real-time alerts here when compromised credentials trigger automated remediation. Get the webhook URL from Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook \u2192 Configure.",
-                                "constraints": {
-                                    "required": false,
-                                    "regex": "^$|^https://.*webhook.*$",
-                                    "validationMessage": "Enter a valid Teams webhook URL or leave blank."
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "serviceNowInstance",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "ServiceNow Instance URL (Optional)",
-                                "placeholder": "https://your-instance.service-now.com",
-                                "toolTip": "Your ServiceNow instance URL for automatic incident ticket creation. Leave blank if you don't use ServiceNow.",
+                                "toolTip": "Incoming webhook for your SOC Teams channel. Used by the Credential Response playbook for real-time alerts. Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook \u2192 Configure.",
                                 "constraints": {
                                     "required": false
                                 },
                                 "visible": true
                             },
                             {
-                                "name": "mdeBlocklistScheduleHours",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "MDE Blocklist Scan Frequency",
-                                "defaultValue": "Every 4 hours",
-                                "toolTip": "How often the MDE Blocklist playbook scans for new severity 25 infostealer matches against Defender for Endpoint.",
+                                "name": "serviceNowInstance",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "ServiceNow Instance URL (optional)",
+                                "placeholder": "https://your-instance.service-now.com",
+                                "toolTip": "ServiceNow instance for automatic ticket creation. Leave blank if not using ServiceNow.",
                                 "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Every 1 hour",
-                                            "value": 1
-                                        },
-                                        {
-                                            "label": "Every 2 hours",
-                                            "value": 2
-                                        },
-                                        {
-                                            "label": "Every 4 hours (recommended)",
-                                            "value": 4
-                                        },
-                                        {
-                                            "label": "Every 6 hours",
-                                            "value": 6
-                                        },
-                                        {
-                                            "label": "Every 8 hours",
-                                            "value": 8
-                                        },
-                                        {
-                                            "label": "Every 12 hours",
-                                            "value": 12
-                                        },
-                                        {
-                                            "label": "Every 24 hours",
-                                            "value": 24
-                                        }
-                                    ],
-                                    "required": true
+                                    "required": false
                                 },
                                 "visible": true
                             }
@@ -427,26 +570,37 @@
                     {
                         "name": "sectionNotifications",
                         "type": "Microsoft.Common.Section",
-                        "label": "Alert Notifications",
+                        "label": "Notifications & Monitoring",
                         "elements": [
                             {
                                 "name": "enableNotifications",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable email/Teams notifications",
-                                "toolTip": "Creates an Action Group and health alert that notifies you when SpyCloud data ingestion stops for more than 3 hours."
+                                "label": "Enable email/Teams alert notifications",
+                                "toolTip": "Creates an Action Group and health alert that notifies when SpyCloud data ingestion stops for 3+ hours."
                             },
                             {
                                 "name": "notificationEmail",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Notification Email",
                                 "placeholder": "security-ops@company.com",
-                                "toolTip": "Email address for alert notifications.",
+                                "toolTip": "Email for alert notifications.",
                                 "constraints": {
                                     "required": false,
                                     "regex": "^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-                                    "validationMessage": "Enter a valid email address."
+                                    "validationMessage": "Enter a valid email or leave blank."
                                 },
-                                "visible": "[steps('monitoringConfig').sectionNotifications.enableNotifications]"
+                                "visible": "[steps('securityConfig').sectionNotifications.enableNotifications]"
+                            },
+                            {
+                                "name": "teamsWebhookUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Teams Webhook for Health Alerts (optional)",
+                                "placeholder": "https://outlook.office.com/webhook/...",
+                                "toolTip": "Teams webhook for the health monitoring Action Group. Different from the SOC webhook above \u2014 this is for infrastructure alerts.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": "[steps('securityConfig').sectionNotifications.enableNotifications]"
                             }
                         ],
                         "visible": true
@@ -454,7 +608,7 @@
                     {
                         "name": "sectionIdp",
                         "type": "Microsoft.Common.Section",
-                        "label": "Identity Provider Integration (Optional)",
+                        "label": "Identity Provider Correlation",
                         "elements": [
                             {
                                 "name": "idpInfo",
@@ -462,20 +616,20 @@
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Identity Provider correlation rules detect when credentials compromised in SpyCloud data are actively used to sign in through your identity providers. This catches account takeover in real-time.\n\n**Supported providers (must be ingested into Sentinel separately):**\n\u2022 Okta SSO \u2192 Content Hub \u2192 'Okta Single Sign-On' connector \u2192 Table: Okta_CL\n\u2022 Cisco Duo \u2192 Content Hub \u2192 'Cisco Duo Security' connector \u2192 Table: Duo_CL\n\u2022 Ping Identity \u2192 Syslog/API via AMA agent \u2192 Table: PingFederate_CL\n\u2022 Entra ID \u2192 Diagnostic Settings \u2192 SignInLogs table (built-in)\n\u2022 CyberArk \u2192 Content Hub \u2192 'CyberArk EPM' connector \u2192 Table: CyberArk_CL"
+                                    "text": "These rules detect compromised SpyCloud credentials in your identity provider sign-in logs. Requires the IdP connector installed from Sentinel Content Hub.\n\n\u2022 Okta: Content Hub \u2192 'Okta Single Sign-On'\n\u2022 Duo: Content Hub \u2192 'Cisco Duo Security'\n\u2022 Ping: Syslog/API via AMA agent\n\u2022 Entra ID: Diagnostic Settings \u2192 SignInLogs"
                                 }
                             },
                             {
                                 "name": "enableSessionCookieDetection",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable session cookie theft detection rules",
-                                "toolTip": "Deploys rules specifically for severity 25 exposures \u2014 stolen cookies and session tokens that enable MFA bypass."
+                                "label": "Enable session cookie / token theft detection",
+                                "toolTip": "Rules for severity 25 exposures \u2014 stolen browser cookies and session tokens that allow MFA bypass."
                             },
                             {
                                 "name": "enableIdentityProviderAlerts",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable identity provider correlation rules (Okta, Duo, Ping, Entra)",
-                                "toolTip": "Deploys rules that correlate SpyCloud data with Okta, Duo, Ping, and Entra sign-in logs. Requires those providers' logs to be ingested into Sentinel."
+                                "label": "Enable identity provider correlation rules (Okta/Duo/Ping/Entra)",
+                                "toolTip": "Deploys 4 rules that cross-reference SpyCloud exposure data with IdP sign-in logs."
                             }
                         ],
                         "visible": true
@@ -487,31 +641,39 @@
             "workspace": "[steps('workspaceConfig').sectionWorkspace.workspace]",
             "createNewWorkspace": "[steps('workspaceConfig').sectionWorkspace.createNewWorkspace]",
             "retentionInDays": "[steps('workspaceConfig').sectionWorkspace.retentionInDays]",
-            "spycloudApiKey": "[steps('workspaceConfig').sectionSpyCloud.spycloudApiKey]",
-            "spycloudApiRegion": "[steps('workspaceConfig').sectionSpyCloud.spycloudApiRegion]",
+            "spycloudApiKey": "[steps('workspaceConfig').sectionApi.spycloudApiKey]",
+            "spycloudApiRegion": "[steps('workspaceConfig').sectionApi.spycloudApiRegion]",
+            "severityFilter": "[steps('workspaceConfig').sectionDataIngestion.severityFilter]",
+            "watchlistType": "[steps('workspaceConfig').sectionDataIngestion.watchlistType]",
+            "showPlainPassword": "[steps('workspaceConfig').sectionDataIngestion.showPlainPassword]",
+            "queryWindowInMin": "[steps('workspaceConfig').sectionDataIngestion.queryWindowInMin]",
+            "initialLookbackDays": "[steps('workspaceConfig').sectionDataIngestion.initialLookbackDays]",
+            "rateLimitQPS": "[steps('workspaceConfig').sectionDataIngestion.rateLimitQPS]",
             "deploymentRegion": "[location()]",
             "resourceGroupName": "[resourceGroup().name]",
             "subscription": "[subscription().subscriptionId]",
             "enableMdePlaybook": "[steps('automationConfig').sectionPlaybooks.enableMdePlaybook]",
+            "mdeIsolationType": "[steps('automationConfig').sectionPlaybooks.mdeIsolationType]",
+            "mdeTagName": "[steps('automationConfig').sectionPlaybooks.mdeTagName]",
             "enableCaPlaybook": "[steps('automationConfig').sectionPlaybooks.enableCaPlaybook]",
-            "enableKeyVault": "[steps('automationConfig').sectionSecurity.enableKeyVault]",
+            "caSecurityGroupId": "[steps('automationConfig').sectionPlaybooks.caSecurityGroupId]",
+            "enableCredResponsePlaybook": "[steps('automationConfig').sectionPlaybooks.enableCredResponsePlaybook]",
+            "enableMdeBlocklistPlaybook": "[steps('automationConfig').sectionPlaybooks.enableMdeBlocklistPlaybook]",
+            "mdeBlocklistScheduleHours": "[steps('automationConfig').sectionPlaybooks.mdeBlocklistScheduleHours]",
             "enableAnalyticsRule": "[steps('automationConfig').sectionRules.enableAnalyticsRule]",
             "enableAutomationRule": "[steps('automationConfig').sectionRules.enableAutomationRule]",
             "enableAnalyticsRulesLibrary": "[steps('automationConfig').sectionRules.enableAnalyticsRulesLibrary]",
-            "enableNotifications": "[steps('monitoringConfig').sectionNotifications.enableNotifications]",
-            "notificationEmail": "[steps('monitoringConfig').sectionNotifications.notificationEmail]",
-            "enableSessionCookieDetection": "[steps('monitoringConfig').sectionIdp.enableSessionCookieDetection]",
-            "enableIdentityProviderAlerts": "[steps('monitoringConfig').sectionIdp.enableIdentityProviderAlerts]",
             "enablePostDeployScript": "[steps('automationConfig').sectionRules.enablePostDeployScript]",
-            "severityFilter": "[steps('workspaceConfig').sectionDataConfig.severityFilter]",
-            "showPlainPassword": "[steps('workspaceConfig').sectionDataConfig.showPlainPassword]",
-            "queryWindowInMin": "[steps('workspaceConfig').sectionDataConfig.queryWindowInMin]",
-            "initialLookbackDays": "[steps('workspaceConfig').sectionDataConfig.initialLookbackDays]",
-            "enableCredResponsePlaybook": "[steps('automationConfig').sectionPlaybooks.enableCredResponsePlaybook]",
-            "enableMdeBlocklistPlaybook": "[steps('automationConfig').sectionPlaybooks.enableMdeBlocklistPlaybook]",
-            "teamsChannelWebhook": "[steps('monitoringConfig').sectionIntegrations.teamsChannelWebhook]",
-            "serviceNowInstance": "[steps('monitoringConfig').sectionIntegrations.serviceNowInstance]",
-            "mdeBlocklistScheduleHours": "[steps('monitoringConfig').sectionIntegrations.mdeBlocklistScheduleHours]"
+            "enableKeyVault": "[steps('securityConfig').sectionKeyVault.enableKeyVault]",
+            "keyVaultName": "[steps('securityConfig').sectionKeyVault.keyVaultName]",
+            "teamsChannelWebhook": "[steps('securityConfig').sectionIntegrations.teamsChannelWebhook]",
+            "serviceNowInstance": "[steps('securityConfig').sectionIntegrations.serviceNowInstance]",
+            "enableNotifications": "[steps('securityConfig').sectionNotifications.enableNotifications]",
+            "notificationEmail": "[steps('securityConfig').sectionNotifications.notificationEmail]",
+            "teamsWebhookUrl": "[steps('securityConfig').sectionNotifications.teamsWebhookUrl]",
+            "enableSessionCookieDetection": "[steps('securityConfig').sectionIdp.enableSessionCookieDetection]",
+            "enableIdentityProviderAlerts": "[steps('securityConfig').sectionIdp.enableIdentityProviderAlerts]",
+            "enableWorkbook": "[steps('securityConfig').sectionDashboard.enableWorkbook]"
         }
     }
 }

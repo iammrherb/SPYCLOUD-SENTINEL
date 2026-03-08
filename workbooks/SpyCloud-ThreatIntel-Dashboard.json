@@ -1,0 +1,289 @@
+{
+    "version": "Notebook/1.0",
+    "items": [
+        {
+            "type": 1,
+            "content": {
+                "json": "# \ud83d\udee1\ufe0f SpyCloud Sentinel \u2014 Threat Intelligence Dashboard\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\nReal-time visibility into darknet exposure, automated remediation status, and identity threat posture."
+            },
+            "name": "header"
+        },
+        {
+            "type": 9,
+            "content": {
+                "version": "KqlParameterItem/1.0",
+                "parameters": [
+                    {
+                        "id": "t1",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeRange",
+                        "type": 4,
+                        "isRequired": true,
+                        "value": {
+                            "durationMs": 604800000
+                        },
+                        "typeSettings": {
+                            "selectableValues": [
+                                {
+                                    "durationMs": 3600000
+                                },
+                                {
+                                    "durationMs": 86400000
+                                },
+                                {
+                                    "durationMs": 604800000
+                                },
+                                {
+                                    "durationMs": 2592000000
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "name": "timerange"
+        },
+        {
+            "type": 1,
+            "content": {
+                "json": "## \ud83d\udcca Exposure Overview"
+            },
+            "name": "overviewHeader"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| summarize\n    TotalExposures = count(),\n    UniqueUsers = dcount(email),\n    UniqueDevices = dcount(infected_machine_id),\n    CriticalSev25 = countif(severity == 25),\n    HighSev20 = countif(severity == 20),\n    MedSev5 = countif(severity == 5),\n    LowSev2 = countif(severity == 2),\n    PlaintextPasswords = countif(isnotempty(password_plaintext)),\n    UniqueDomains = dcount(target_domain)",
+                "size": 4,
+                "title": "Exposure Summary",
+                "queryType": 0,
+                "visualization": "tiles",
+                "tileSettings": {
+                    "titleContent": {
+                        "columnMatch": "Column1",
+                        "formatter": 1
+                    },
+                    "leftContent": {
+                        "columnMatch": "TotalExposures",
+                        "formatter": 12,
+                        "numberFormat": {
+                            "unit": 17,
+                            "options": {
+                                "style": "decimal"
+                            }
+                        }
+                    }
+                }
+            },
+            "name": "exposureTiles"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| summarize Count = count() by bin(TimeGenerated, 1d), tostring(severity)\n| render timechart",
+                "size": 0,
+                "title": "Exposures Over Time by Severity",
+                "queryType": 0,
+                "visualization": "timechart"
+            },
+            "customWidth": "50",
+            "name": "exposureTimechart"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| summarize Count = count() by Severity = case(severity == 25, '\ud83d\udd34 P1 Critical (Sev 25)', severity == 20, '\ud83d\udd34 P1 High (Sev 20)', severity == 5, '\ud83d\udfe0 P3 Standard (Sev 5)', severity == 2, '\u26aa P4 Low (Sev 2)', 'Other')\n| render piechart",
+                "size": 0,
+                "title": "Severity Distribution",
+                "queryType": 0,
+                "visualization": "piechart"
+            },
+            "customWidth": "50",
+            "name": "severityPie"
+        },
+        {
+            "type": 1,
+            "content": {
+                "json": "## \ud83d\udd11 Credential Exposure Analysis"
+            },
+            "name": "credHeader"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where isnotempty(email)\n| summarize ExposureCount = count(), MaxSeverity = max(severity), HasPlaintext = countif(isnotempty(password_plaintext)), TargetDomains = dcount(target_domain), LatestExposure = max(TimeGenerated) by email\n| top 20 by MaxSeverity desc, ExposureCount desc\n| project ['User Email'] = email, ['Exposures'] = ExposureCount, ['Max Severity'] = MaxSeverity, ['Plaintext PWs'] = HasPlaintext, ['Target Domains'] = TargetDomains, ['Latest'] = format_datetime(LatestExposure, 'yyyy-MM-dd HH:mm')",
+                "size": 0,
+                "title": "Top 20 Most Exposed Users",
+                "queryType": 0,
+                "visualization": "table",
+                "gridSettings": {
+                    "formatters": [
+                        {
+                            "columnMatch": "Max Severity",
+                            "formatter": 18,
+                            "formatOptions": {
+                                "thresholdsOptions": "colors",
+                                "thresholdsGrid": [
+                                    {
+                                        "operator": ">=",
+                                        "thresholdValue": "25",
+                                        "representation": "redBright"
+                                    },
+                                    {
+                                        "operator": ">=",
+                                        "thresholdValue": "20",
+                                        "representation": "orange"
+                                    },
+                                    {
+                                        "operator": ">=",
+                                        "thresholdValue": "5",
+                                        "representation": "yellow"
+                                    },
+                                    {
+                                        "operator": "Default",
+                                        "representation": "lightBlue"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "name": "topUsers"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where isnotempty(password_type)\n| summarize Count = count() by password_type\n| top 10 by Count desc\n| render barchart",
+                "size": 0,
+                "title": "Password Type Distribution",
+                "queryType": 0,
+                "visualization": "barchart"
+            },
+            "customWidth": "50",
+            "name": "passwordTypes"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where isnotempty(target_domain)\n| summarize Count = count() by target_domain\n| top 15 by Count desc\n| render barchart",
+                "size": 0,
+                "title": "Top Targeted Domains",
+                "queryType": 0,
+                "visualization": "barchart"
+            },
+            "customWidth": "50",
+            "name": "targetDomains"
+        },
+        {
+            "type": 1,
+            "content": {
+                "json": "## \ud83d\udda5\ufe0f Infostealer / Device Forensics"
+            },
+            "name": "deviceHeader"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where severity >= 20\n| where isnotempty(infected_machine_id)\n| summarize Users = dcount(email), Emails = make_set(email, 5), MaxSeverity = max(severity), TargetDomains = dcount(target_domain), LatestInfection = max(TimeGenerated) by infected_machine_id, user_hostname\n| top 20 by MaxSeverity desc, Users desc\n| project ['Machine ID'] = infected_machine_id, ['Hostname'] = user_hostname, ['Users'] = Users, ['Severity'] = MaxSeverity, ['Domains'] = TargetDomains, ['Latest'] = format_datetime(LatestInfection, 'yyyy-MM-dd')",
+                "size": 0,
+                "title": "Top 20 Infected Devices",
+                "queryType": 0,
+                "visualization": "table"
+            },
+            "name": "infectedDevices"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where severity >= 20\n| where isnotempty(country_code)\n| summarize Devices = dcount(infected_machine_id), Users = dcount(email) by country_code\n| top 20 by Devices desc\n| render barchart",
+                "size": 0,
+                "title": "Infections by Country",
+                "queryType": 0,
+                "visualization": "barchart"
+            },
+            "name": "geoChart"
+        },
+        {
+            "type": 1,
+            "content": {
+                "json": "## \ud83d\udd27 Remediation Status"
+            },
+            "name": "remediationHeader"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "let mde_count = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize count());\nlet ca_count = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize count());\nlet total_sev20 = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | where severity >= 20 | summarize dcount(email));\nlet ca_remediated = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize dcount(UserEmail));\nlet mde_remediated = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize dcount(InfectedMachineId));\nprint MDE_Actions = mde_count, CA_Actions = ca_count, Total_HighSev_Users = total_sev20, Users_Remediated = ca_remediated, Devices_Remediated = mde_remediated, Remediation_Rate = iff(total_sev20 > 0, round(todouble(ca_remediated) / todouble(total_sev20) * 100, 1), 0.0)",
+                "size": 4,
+                "title": "Remediation Dashboard",
+                "queryType": 0,
+                "visualization": "tiles"
+            },
+            "name": "remediationTiles"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "Spycloud_MDE_Logs_CL\n| where TimeGenerated {TimeRange}\n| summarize Actions = count() by bin(TimeGenerated, 1d), PlaybookName\n| render timechart",
+                "size": 0,
+                "title": "MDE Remediation Actions Over Time",
+                "queryType": 0,
+                "visualization": "timechart"
+            },
+            "customWidth": "50",
+            "name": "mdeTimechart"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloud_ConditionalAccessLogs_CL\n| where TimeGenerated {TimeRange}\n| summarize Actions = count() by bin(TimeGenerated, 1d), PlaybookName\n| render timechart",
+                "size": 0,
+                "title": "CA Remediation Actions Over Time",
+                "queryType": 0,
+                "visualization": "timechart"
+            },
+            "customWidth": "50",
+            "name": "caTimechart"
+        },
+        {
+            "type": 1,
+            "content": {
+                "json": "## \ud83d\udccb Breach Catalog"
+            },
+            "name": "catalogHeader"
+        },
+        {
+            "type": 3,
+            "content": {
+                "version": "KqlItem/1.0",
+                "query": "SpyCloudBreachCatalog_CL\n| where TimeGenerated {TimeRange}\n| project ['Source ID'] = source_id, ['Breach Title'] = breach_title, ['Status'] = status, ['Description'] = description, ['Ingested'] = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm')\n| top 25 by Ingested desc",
+                "size": 0,
+                "title": "Recent Breach Catalog Entries",
+                "queryType": 0,
+                "visualization": "table"
+            },
+            "name": "catalogTable"
+        },
+        {
+            "type": 1,
+            "content": {
+                "json": "---\n\n*SpyCloud Sentinel Supreme v5.2 \u2014 Dashboard auto-refreshes with time range selector above.*"
+            },
+            "name": "footer"
+        }
+    ],
+    "styleSettings": {},
+    "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
