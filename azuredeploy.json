@@ -3535,7 +3535,8 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName'))]",
                 "[resourceId('Microsoft.Logic/workflows', variables('caPlaybookName'))]",
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+                "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
             ],
             "properties": {
                 "displayName": "SpyCloud \u2014 Auto-Remediate Infostealer Incidents",
@@ -3582,14 +3583,14 @@
             "condition": "[parameters('enableMdePlaybook')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), variables('sentinelResponderRoleId'))]",
+            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), variables('sentinelAutomationContributorRoleId'))]",
             "scope": "[variables('workspaceResourceId')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName'))]",
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
             ],
             "properties": {
-                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('sentinelResponderRoleId'))]",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('sentinelAutomationContributorRoleId'))]",
                 "principalId": "[if(parameters('enableMdePlaybook'), reference(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), '2019-05-01', 'full').identity.principalId, 'skip')]",
                 "principalType": "ServicePrincipal"
             }
@@ -3598,14 +3599,14 @@
             "condition": "[parameters('enableCaPlaybook')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), variables('sentinelResponderRoleId'))]",
+            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), variables('sentinelAutomationContributorRoleId'))]",
             "scope": "[variables('workspaceResourceId')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Logic/workflows', variables('caPlaybookName'))]",
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
             ],
             "properties": {
-                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('sentinelResponderRoleId'))]",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('sentinelAutomationContributorRoleId'))]",
                 "principalId": "[if(parameters('enableCaPlaybook'), reference(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), '2019-05-01', 'full').identity.principalId, 'skip')]",
                 "principalType": "ServicePrincipal"
             }
@@ -5110,7 +5111,8 @@
                 "suppressionDuration": "PT1H",
                 "suppressionEnabled": false,
                 "tactics": [
-                    "CredentialAccess"
+                    "CredentialAccess",
+                    "Reconnaissance"
                 ],
                 "techniques": [
                     "T1589"
