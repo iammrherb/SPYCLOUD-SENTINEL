@@ -2008,18 +2008,12 @@
           "instructionSteps": [
             {
               "title": "Prerequisites \u2014 Read Before Connecting",
-              "description": "**Complete ALL prerequisites before clicking Connect.**\n\n### A. SpyCloud Account & API Key\n\n| Requirement | Details |\n|------------|----------|\n| Subscription | Active SpyCloud Enterprise or Enterprise+ API plan |\n| API Key | Generate from [portal.spycloud.com](https://portal.spycloud.com) \u2192 **Settings** \u2192 **API Keys** |\n| API Region | US (`api.spycloud.io`) \u2014 configured automatically |\n| Products | Employee ATO, Consumer ATO, Compass, Third-Party Insight, Ransomware Prevention |\n\n### B. Azure Permissions Required\n\n| Role | Scope | Purpose |\n|------|-------|----------|\n| Microsoft Sentinel Contributor | Resource Group | Create/manage connectors, rules, workbooks |\n| Log Analytics Contributor | Workspace | Create custom tables, manage retention |\n| Monitoring Metrics Publisher | Data Collection Rule | Authorize data ingestion via DCE |\n\n### C. Network Requirements\n\n| Direction | Protocol | Destination | Port |\n|-----------|----------|-------------|------|\n| Outbound | HTTPS | `api.spycloud.io` | 443 |\n| Outbound | HTTPS | `*.ingest.monitor.azure.com` | 443 |\n\nNo inbound rules required \u2014 this is a pull-based connector.\n\n### D. Capacity Planning\n\n| Environment | Assets | Daily Ingestion | Notes |\n|-------------|--------|-----------------|-------|\n| Small/POC | <1,000 | 1-10 MB/day | Standard settings work |\n| Medium | 1K-10K | 10-100 MB/day | Default 40-min polling |\n| Large | 10K-100K | 100-500 MB/day | Consider Enterprise+ |\n| Very Large | 100K+ | 500+ MB/day | Contact SpyCloud support |",
+              "description": "Complete ALL prerequisites before clicking Connect.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "Your SpyCloud API key is at portal.spycloud.com \u2192 Settings \u2192 API Keys. Need an account? Contact support@spycloud.com."
-                  }
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**E. Data Retention**\n\nRetention is set at the workspace level during ARM deployment (default 90 days, max 730). To change after deployment: Log Analytics workspace \u2192 Settings \u2192 Usage and estimated costs \u2192 Data Retention.\n\nCLI: `az monitor log-analytics workspace update --retention-in-days 365`"
+                    "text": "**A. SpyCloud Account & API Key**\n\n| Requirement | Details |\n|-------------|----------|\n| Subscription | Active SpyCloud Enterprise or Enterprise+ API plan |\n| API Key | Generate from portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| API Region | US (api.spycloud.io) \u2014 configured automatically |\n\n**B. Azure Permissions Required**\n\n| Role | Scope |\n|------|-------|\n| Microsoft Sentinel Contributor | Resource Group |\n| Log Analytics Contributor | Workspace |\n| Monitoring Metrics Publisher | Data Collection Rule |\n\n**C. Network:** Outbound HTTPS to api.spycloud.io:443 and *.ingest.monitor.azure.com:443\n\n**D. Data Retention:** Set at workspace level during deployment (default 90 days, max 730). Change after deployment: Log Analytics workspace \u2192 Usage and estimated costs \u2192 Data Retention."
                   }
                 }
               ]
@@ -2043,8 +2037,8 @@
               ]
             },
             {
-              "title": "Step 2 \u2014 Severity Levels & Exposure Types",
-              "description": "Control **what data** flows into Sentinel.\n\n### Severity Level Reference\n\n| Severity | Category | What It Contains | Response |\n|----------|----------|------------------|---------|\n| **2** | Breach Credential | Email + password from third-party breach | Monitor, reset if reused |\n| **5** | Breach + PII | Above + name, phone, DOB, address, SSN | Notify affected users |\n| **20** | Infostealer | Credential stolen by malware from infected device | **URGENT**: Isolate device, force reset |\n| **25** | Infostealer + App | Above + stolen cookies, sessions, autofill | **CRITICAL**: Full remediation |\n\n### Exposure Type Reference\n\n| Type | Description | SpyCloud Product |\n|------|-------------|------------------|\n| **Corporate** | Credentials matching your monitored corporate email domains | Employee ATO Prevention |\n| **Infected** | Credentials stolen by infostealer malware from compromised devices | Session Identity Protection |\n| **Compass** | Consumer identity exposures for monitored consumer accounts | Consumer ATO Prevention |\n\n**Recommendations:**\n- **Maximum protection:** All severity levels + all exposure types\n- **Infostealer focus:** Severity 20+25 only\n- **Corporate only:** All severity levels, Corporate type only",
+              "title": "Step 2 \u2014 Data Filters",
+              "description": "Select which severity levels, exposure types, and password handling to apply.",
               "instructions": [
                 {
                   "type": "Dropdown",
@@ -2124,8 +2118,8 @@
               ]
             },
             {
-              "title": "Step 3 \u2014 Polling, Retrieval & Data Streams",
-              "description": "Configure polling frequency, historical lookback, retry behavior, and review the data streams.",
+              "title": "Step 3 \u2014 Polling & Retrieval Settings",
+              "description": "Configure how often and how far back the connector fetches data.",
               "instructions": [
                 {
                   "type": "Dropdown",
@@ -2135,7 +2129,7 @@
                     "options": [
                       {
                         "key": "5",
-                        "text": "5 minutes \u2014 Near real-time (high API usage)"
+                        "text": "5 minutes (near real-time)"
                       },
                       {
                         "key": "15",
@@ -2143,7 +2137,7 @@
                       },
                       {
                         "key": "30",
-                        "text": "30 minutes \u2014 Recommended"
+                        "text": "30 minutes (recommended)"
                       },
                       {
                         "key": "60",
@@ -2158,12 +2152,8 @@
                         "text": "4 hours"
                       },
                       {
-                        "key": "480",
-                        "text": "8 hours"
-                      },
-                      {
                         "key": "1440",
-                        "text": "24 hours \u2014 Once daily"
+                        "text": "24 hours (once daily)"
                       }
                     ],
                     "placeholder": "How often to fetch new records",
@@ -2188,18 +2178,18 @@
                       },
                       {
                         "key": "90",
-                        "text": "90 days \u2014 Quarter"
+                        "text": "90 days"
                       },
                       {
                         "key": "180",
-                        "text": "180 days \u2014 Half year"
+                        "text": "180 days"
                       },
                       {
                         "key": "365",
-                        "text": "365 days \u2014 Full year (recommended)"
+                        "text": "365 days (recommended)"
                       }
                     ],
-                    "placeholder": "How far back to retrieve on first connection",
+                    "placeholder": "How far back on first connection",
                     "isMultiSelect": false,
                     "required": true,
                     "defaultAllSelected": false
@@ -2221,14 +2211,14 @@
                       },
                       {
                         "key": "5",
-                        "text": "5 retries \u2014 Recommended"
+                        "text": "5 retries (recommended)"
                       },
                       {
                         "key": "10",
-                        "text": "10 retries \u2014 High reliability"
+                        "text": "10 retries"
                       }
                     ],
-                    "placeholder": "Retries on API call failure",
+                    "placeholder": "Retries on API failure",
                     "isMultiSelect": false,
                     "required": true,
                     "defaultAllSelected": false
@@ -2250,7 +2240,7 @@
                       },
                       {
                         "key": "120",
-                        "text": "120 seconds \u2014 Recommended"
+                        "text": "120 seconds (recommended)"
                       },
                       {
                         "key": "180",
@@ -2258,7 +2248,7 @@
                       },
                       {
                         "key": "300",
-                        "text": "300 seconds \u2014 Large environments (50K+ assets)"
+                        "text": "300 seconds (large environments)"
                       }
                     ],
                     "placeholder": "Timeout per API request",
@@ -2270,7 +2260,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**How Settings Work**\n\nAll settings above are applied when you click **Connect**. The connector uses these values for every polling cycle.\n\n- **Polling Interval** controls the Watchlist (New) and Breach Catalog pollers\n- **Modified Records** poller always runs daily (24h window) to catch re-sighted credentials\n- **Lookback** only affects the first data pull \u2014 subsequent polls use incremental timestamps\n- **Retry** and **Timeout** apply to all three pollers\n\nTo change settings after connecting: disconnect and reconnect with new values.\n\n---\n\n### Data Streams (Created Automatically)\n\n| Module | Endpoint | Table | Description |\n|--------|----------|-------|-------------|\n| Watchlist (New) | `/breach/data/watchlist` | `SpyCloudBreachWatchlist_CL` (73 cols) | Primary credential + PII exposure feed |\n| Watchlist (Modified) | Same + modification dates | `SpyCloudBreachWatchlist_CL` | Re-sighted/updated records (24h sweep) |\n| Breach Catalog | `/breach/catalog` | `SpyCloudBreachCatalog_CL` (5 cols) | Breach source metadata |\n\n**Audit Tables** (populated by playbooks):\n- `Spycloud_MDE_Logs_CL` (19 cols) \u2014 MDE device isolation actions\n- `SpyCloud_ConditionalAccessLogs_CL` (14 cols) \u2014 CA password reset/revoke actions"
+                    "text": "Settings are applied when you click **Connect**. To change: disconnect \u2192 update \u2192 reconnect. The Modified Records poller always runs on a 24h window."
                   }
                 }
               ]
@@ -2282,7 +2272,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "After connecting, enable analytics rules: Sentinel \u2192 Analytics \u2192 filter 'SpyCloud' \u2192 enable individually. Start with Infostealer Exposure, Plaintext Password, Session Cookies, and Data Health."
+                    "text": "**After connecting, enable analytics rules:** Sentinel \u2192 Analytics \u2192 filter 'SpyCloud' \u2192 enable rules individually.\n\n| Use Case | Rule/Resource |\n|----------|---------------|\n| Infostealer detection | Analytics Rules #1-6 |\n| Automated device isolation | MDE Remediation playbook |\n| Automated password reset | CA Remediation playbook |\n| IdP cross-correlation | Rules #14-17 (Okta/Duo/Ping/Entra) |\n| Executive monitoring | Rule #20 |\n| Copilot investigation | Plugin: 28 KQL skills |\n\n**Data streams created automatically:** SpyCloudBreachWatchlist_CL (73 cols), SpyCloudBreachCatalog_CL (5 cols), plus 2 audit tables populated by playbooks."
                   }
                 }
               ]
@@ -2307,7 +2297,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "Run the verification script from Cloud Shell: curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS"
+                    "text": "**Verify data is flowing:**\n```\nSpyCloudBreachWatchlist_CL | summarize count(), max(TimeGenerated)\n```\n\n**Run full health check:**\n```\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\n**Troubleshooting:** 401 = wrong API key | 403 = not Enterprise tier | No data after 10min = check network to api.spycloud.io"
                   }
                 }
               ]
@@ -2441,29 +2431,37 @@
               }
             },
             "lookbackDays": {
-              "type": "int",
-              "defaultValue": 365,
+              "type": "array",
+              "defaultValue": [
+                "365"
+              ],
               "metadata": {
                 "description": "Days to look back on initial data pull (1-365)."
               }
             },
             "pollingIntervalMin": {
-              "type": "int",
-              "defaultValue": 30,
+              "type": "array",
+              "defaultValue": [
+                "30"
+              ],
               "metadata": {
                 "description": "Polling interval in minutes (5-1440). How often the connector fetches new records."
               }
             },
             "retryCount": {
-              "type": "int",
-              "defaultValue": 5,
+              "type": "array",
+              "defaultValue": [
+                "5"
+              ],
               "metadata": {
                 "description": "Number of retry attempts for failed API calls (1-10)."
               }
             },
             "timeoutInSeconds": {
-              "type": "int",
-              "defaultValue": 120,
+              "type": "array",
+              "defaultValue": [
+                "120"
+              ],
               "metadata": {
                 "description": "API request timeout in seconds (30-300)."
               }
@@ -2518,7 +2516,7 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "headers": {
                     "Accept": "application/json"
                   },
@@ -2528,8 +2526,8 @@
                     "show_plain_password": "[[join(parameters('show_plain_password'), ',')]",
                     "cursor": "start"
                   },
-                  "retryCount": "[[parameters('retryCount')]",
-                  "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2581,8 +2579,8 @@
                     "type": "[[join(parameters('watchlistType'), ',')]",
                     "show_plain_password": "[[join(parameters('show_plain_password'), ',')]"
                   },
-                  "retryCount": "[[parameters('retryCount')]",
-                  "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2624,12 +2622,12 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "headers": {
                     "Accept": "application/json"
                   },
-                  "retryCount": "[[parameters('retryCount')]",
-                  "timeoutInSeconds": "[[parameters('timeoutInSeconds')]"
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
