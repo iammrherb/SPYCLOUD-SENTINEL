@@ -34,9 +34,21 @@ on:
         type: boolean
         default: true
       enable_rules_library:
-        description: 'Deploy full analytics rules library (all disabled by default)'
+        description: 'Deploy full analytics rules library (22 rules, all disabled by default)'
         type: boolean
         default: false
+      enable_cred_response:
+        description: 'Deploy Credential Response playbook (Teams alerts + identity protection)'
+        type: boolean
+        default: false
+      enable_mde_blocklist:
+        description: 'Deploy MDE Blocklist playbook (scheduled severity 25 device scan)'
+        type: boolean
+        default: false
+      enable_post_deploy:
+        description: 'Run automated post-deploy script (resolves DCE/DCR + assigns RBAC)'
+        type: boolean
+        default: true
 
 permissions:
   id-token: write
@@ -99,6 +111,9 @@ jobs:
             enableAnalyticsRule=true
             enableAutomationRule=true
             enableAnalyticsRulesLibrary=${{ inputs.enable_rules_library }}
+            enableCredResponsePlaybook=${{ inputs.enable_cred_response }}
+            enableMdeBlocklistPlaybook=${{ inputs.enable_mde_blocklist }}
+            enablePostDeployScript=${{ inputs.enable_post_deploy }}
           deploymentName: spycloud-${{ github.run_number }}
           failOnStdErr: false
 
