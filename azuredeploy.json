@@ -116,7 +116,7 @@
                 "False"
             ],
             "metadata": {
-                "description": "Whether to include cleartext (plaintext) passwords in the ingested data. \u2022 'False' (RECOMMENDED) \u2014 Passwords are omitted from ingestion. Safest option. You can still see   password_type, hash values, and all other exposure metadata without the actual password. \u2022 'True' \u2014 Cleartext passwords are ingested into the SpyCloudBreachWatchlist_CL table.   WARNING: Enabling this stores real compromised passwords in your Log Analytics workspace.   BEFORE ENABLING, ensure: (1) Your data handling policy permits storing passwords,   (2) Table-level RBAC restricts access to authorized security personnel only,   (3) You have a process to rotate/invalidate exposed passwords after detection.   Useful for: password reuse detection, credential validation, red team exercises."
+                "description": "Controls whether plaintext passwords are included in SpyCloud data ingested into Sentinel. Set to 'False' to redact passwords for compliance. Set to 'True' to include them for investigation. Default: False (passwords hidden)."
             }
         },
         "queryWindowInMin": {
@@ -438,6 +438,50 @@
             "metadata": {
                 "description": "Run the automated post-deployment script that resolves DCE/DCR values and assigns RBAC. Requires the deploying user to have Contributor + User Access Administrator roles on the resource group."
             }
+        },
+        "enableCredResponsePlaybook": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Deploy the Credential Exposure \u2192 Automated Identity Response playbook. Responds to exposed credentials by enforcing MFA via Conditional Access, checking sign-in activity, alerting SOC via Teams, and logging state changes. Requires: Security Administrator role, Graph IdentityRisk.ReadWrite.All, Conditional Access Admin."
+            }
+        },
+        "enableMdeBlocklistPlaybook": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Deploy the SpyCloud Threat Feed \u2192 MDE Blocklist playbook. Runs on a schedule (every 2-4 hours) to match severity 25 infostealer records against Microsoft Defender for Endpoint devices, creates enriched tables with both SpyCloud and MDE data, and offers automated isolation or alerting. Requires: MDE API enabled, Defender for Endpoint license."
+            }
+        },
+        "teamsChannelWebhook": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Microsoft Teams incoming webhook URL for SOC alert notifications. Used by the Credential Response playbook to send real-time alerts to your security operations channel. Leave blank to skip Teams integration."
+            }
+        },
+        "serviceNowInstance": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "ServiceNow instance URL (e.g., https://your-instance.service-now.com) for automatic ticket creation. Leave blank to skip ServiceNow integration."
+            }
+        },
+        "mdeBlocklistScheduleHours": {
+            "type": "int",
+            "defaultValue": 4,
+            "allowedValues": [
+                1,
+                2,
+                4,
+                6,
+                8,
+                12,
+                24
+            ],
+            "metadata": {
+                "description": "How often (in hours) the MDE Blocklist playbook runs to scan for new severity 25 infostealer matches against Defender for Endpoint. Default: every 4 hours."
+            }
         }
     },
     "variables": {
@@ -481,7 +525,10 @@
         "spycloudApiKeySecretName": "spycloud-api-key",
         "actionGroupName": "[concat('ag-spycloud-', parameters('workspace'))]",
         "healthAlertName": "[concat('SpyCloud-DataHealth-', parameters('workspace'))]",
-        "rulesPrefix": "SpyCloud-Rule-"
+        "rulesPrefix": "SpyCloud-Rule-",
+        "credResponsePlaybookName": "[concat('SpyCloud-CredResponse-', parameters('workspace'))]",
+        "mdeBlocklistPlaybookName": "[concat('SpyCloud-MDE-Blocklist-', parameters('workspace'))]",
+        "teamsConnectionName": "[concat('teams-spycloud-', parameters('workspace'))]"
     },
     "resources": [
         {
@@ -4040,7 +4087,7 @@
                         "lookbackDuration": "PT5H",
                         "matchingMethod": "AllEntities",
                         "groupByEntities": [
-                            "Account"
+                            "Host"
                         ]
                     }
                 },
@@ -4557,7 +4604,7 @@
             ],
             "properties": {
                 "azCliVersion": "2.60.0",
-                "timeout": "PT30M",
+                "timeout": "PT15M",
                 "retentionInterval": "PT1H",
                 "cleanupPreference": "OnSuccess",
                 "environmentVariables": [
@@ -4592,9 +4639,655 @@
                     {
                         "name": "CA_PLAYBOOK",
                         "value": "[concat('SpyCloud-CA-Remediation-', parameters('workspace'))]"
+                    },
+                    {
+                        "name": "CRED_PLAYBOOK",
+                        "value": "[concat('SpyCloud-CredResponse-', parameters('workspace'))]"
+                    },
+                    {
+                        "name": "MDE_BL_PLAYBOOK",
+                        "value": "[concat('SpyCloud-MDE-Blocklist-', parameters('workspace'))]"
+                    },
+                    {
+                        "name": "ENABLE_CRED",
+                        "value": "[string(parameters('enableCredResponsePlaybook'))]"
+                    },
+                    {
+                        "name": "ENABLE_BL",
+                        "value": "[string(parameters('enableMdeBlocklistPlaybook'))]"
                     }
                 ],
-                "scriptContent": "\n#!/bin/bash\nset -e\n\necho \"\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\"\necho \"\u2551  SpyCloud Sentinel \u2014 Automated Post-Deployment          \u2551\"\necho \"\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\"\n\nMON_ROLE=\"3913510d-42f4-4e42-8a64-420c390055eb\"\nDCE_URI=\"\"\nDCR_ID=\"\"\nDCR_RID=\"\"\n\necho \"\"\necho \"Phase 1: Waiting for content template resources (90s)...\"\nsleep 90\n\necho \"\"\necho \"Phase 2: Resolving DCE Logs Ingestion URI...\"\nfor i in 1 2 3 4 5; do\n    DCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" \\\n        --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null || echo \"\")\n    [ -n \"$DCE_URI\" ] && break\n    echo \"  Attempt $i/5 \u2014 waiting 30s...\"\n    sleep 30\ndone\necho \"  DCE URI: ${DCE_URI:-NOT RESOLVED}\"\n\necho \"\"\necho \"Phase 3: Resolving DCR Immutable ID...\"\nfor i in 1 2 3 4 5; do\n    DCR_ID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" \\\n        --query \"immutableId\" -o tsv 2>/dev/null || echo \"\")\n    DCR_RID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" \\\n        --query \"id\" -o tsv 2>/dev/null || echo \"\")\n    [ -n \"$DCR_ID\" ] && break\n    echo \"  Attempt $i/5 \u2014 waiting 30s...\"\n    sleep 30\ndone\necho \"  DCR ID: ${DCR_ID:-NOT RESOLVED}\"\n\necho \"\"\necho \"Phase 4: Assigning Monitoring Metrics Publisher on DCR...\"\nif [ -n \"$DCR_RID\" ]; then\n    for PB in \"$MDE_PLAYBOOK\" \"$CA_PLAYBOOK\"; do\n        PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" \\\n            --query \"identity.principalId\" -o tsv 2>/dev/null || echo \"\")\n        if [ -n \"$PID\" ]; then\n            az role assignment create \\\n                --assignee-object-id \"$PID\" \\\n                --assignee-principal-type ServicePrincipal \\\n                --role \"$MON_ROLE\" \\\n                --scope \"$DCR_RID\" 2>/dev/null \\\n                && echo \"  RBAC assigned: $PB\" \\\n                || echo \"  RBAC may already exist: $PB\"\n        else\n            echo \"  Logic App $PB not found \u2014 skipping\"\n        fi\n    done\nelse\n    echo \"  DCR not available \u2014 skipping RBAC\"\nfi\n\necho \"\"\necho \"Phase 5: Setting script outputs...\"\n\n# Output values for ARM template consumption\nOUTPUT_JSON=\"{\\\"dceLogsIngestionUri\\\":\\\"${DCE_URI}\\\",\\\"dcrImmutableId\\\":\\\"${DCR_ID}\\\"}\"\necho \"$OUTPUT_JSON\" > $AZ_SCRIPTS_OUTPUT_DIRECTORY/result.json\n\necho \"\"\necho \"\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\"\necho \"\u2551  Post-Deployment Complete                               \u2551\"\necho \"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\"\necho \"\u2551  DCE URI:  $DCE_URI\"\necho \"\u2551  DCR ID:   $DCR_ID\"\necho \"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\"\necho \"\u2551  REMAINING (requires Graph API \u2014 run post-deploy.sh):   \u2551\"\necho \"\u2551  \u2022 MDE: Machine.Isolate, Machine.ReadWrite.All          \u2551\"\necho \"\u2551  \u2022 Graph: User.ReadWrite.All, Directory.ReadWrite.All   \u2551\"\necho \"\u2551  \u2022 Admin consent in Azure Portal                        \u2551\"\necho \"\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\"\n"
+                "scriptContent": "\n#!/bin/bash\nset -e\n\necho \"\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\"\necho \"\u2551  SpyCloud Sentinel \u2014 Automated Post-Deployment          \u2551\"\necho \"\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\"\n\nMON_ROLE=\"3913510d-42f4-4e42-8a64-420c390055eb\"\nDCE_URI=\"\"\nDCR_ID=\"\"\nDCR_RID=\"\"\n\necho \"\"\necho \"Phase 1: Waiting for content template resources (90s)...\"\nsleep 60\n\necho \"\"\necho \"Phase 2: Resolving DCE Logs Ingestion URI...\"\nfor i in 1 2 3 4 5; do\n    DCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" \\\n        --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null || echo \"\")\n    [ -n \"$DCE_URI\" ] && break\n    echo \"  Attempt $i/5 \u2014 waiting 30s...\"\n    sleep 20\ndone\necho \"  DCE URI: ${DCE_URI:-NOT RESOLVED}\"\n\necho \"\"\necho \"Phase 3: Resolving DCR Immutable ID...\"\nfor i in 1 2 3 4 5; do\n    DCR_ID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" \\\n        --query \"immutableId\" -o tsv 2>/dev/null || echo \"\")\n    DCR_RID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" \\\n        --query \"id\" -o tsv 2>/dev/null || echo \"\")\n    [ -n \"$DCR_ID\" ] && break\n    echo \"  Attempt $i/5 \u2014 waiting 30s...\"\n    sleep 20\ndone\necho \"  DCR ID: ${DCR_ID:-NOT RESOLVED}\"\n\necho \"\"\necho \"Phase 4: Assigning Monitoring Metrics Publisher on DCR...\"\nif [ -n \"$DCR_RID\" ]; then\n    for PB in \"$MDE_PLAYBOOK\" \"$CA_PLAYBOOK\"; do\n        PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" \\\n            --query \"identity.principalId\" -o tsv 2>/dev/null || echo \"\")\n        if [ -n \"$PID\" ]; then\n            az role assignment create \\\n                --assignee-object-id \"$PID\" \\\n                --assignee-principal-type ServicePrincipal \\\n                --role \"$MON_ROLE\" \\\n                --scope \"$DCR_RID\" 2>/dev/null \\\n                && echo \"  RBAC assigned: $PB\" \\\n                || echo \"  RBAC may already exist: $PB\"\n        else\n            echo \"  Logic App $PB not found \u2014 skipping\"\n        fi\n    done\nelse\n    echo \"  DCR not available \u2014 skipping RBAC\"\nfi\n\necho \"\"\n\n\necho \"\"\necho \"Phase 4b: Assigning RBAC for additional playbooks...\"\nfor PB in \"$CRED_PLAYBOOK\" \"$MDE_BL_PLAYBOOK\"; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\"         --query \"identity.principalId\" -o tsv 2>/dev/null || echo \"\")\n    if [ -n \"$PID\" ] && [ -n \"$DCR_RID\" ]; then\n        az role assignment create             --assignee-object-id \"$PID\"             --assignee-principal-type ServicePrincipal             --role \"$MON_ROLE\"             --scope \"$DCR_RID\" 2>/dev/null             && echo \"  RBAC assigned: $PB\"             || echo \"  RBAC may exist: $PB\"\n    fi\ndone\n\necho \"Phase 5: Setting script outputs...\"\n\n# Output values for ARM template consumption\nOUTPUT_JSON=\"{\\\"dceLogsIngestionUri\\\":\\\"${DCE_URI}\\\",\\\"dcrImmutableId\\\":\\\"${DCR_ID}\\\"}\"\necho \"$OUTPUT_JSON\" > $AZ_SCRIPTS_OUTPUT_DIRECTORY/result.json\n\necho \"\"\necho \"\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\"\necho \"\u2551  Post-Deployment Complete                               \u2551\"\necho \"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\"\necho \"\u2551  DCE URI:  $DCE_URI\"\necho \"\u2551  DCR ID:   $DCR_ID\"\necho \"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\"\necho \"\u2551  REMAINING (requires Graph API \u2014 run post-deploy.sh):   \u2551\"\necho \"\u2551  \u2022 MDE: Machine.Isolate, Machine.ReadWrite.All          \u2551\"\necho \"\u2551  \u2022 Graph: User.ReadWrite.All, Directory.ReadWrite.All   \u2551\"\necho \"\u2551  \u2022 Admin consent in Azure Portal                        \u2551\"\necho \"\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\"\n"
+            }
+        },
+        {
+            "condition": "[parameters('enableCredResponsePlaybook')]",
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2019-05-01",
+            "name": "[variables('credResponsePlaybookName')]",
+            "location": "[variables('_effectiveWorkspaceLocation')]",
+            "tags": "[parameters('resourceTags')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        },
+                        "dceUri": {
+                            "defaultValue": "[parameters('dceLogsIngestionUri')]",
+                            "type": "String"
+                        },
+                        "dcrImmutableId": {
+                            "defaultValue": "[parameters('dcrImmutableId')]",
+                            "type": "String"
+                        },
+                        "teamsWebhook": {
+                            "defaultValue": "[parameters('teamsChannelWebhook')]",
+                            "type": "String"
+                        }
+                    },
+                    "triggers": {
+                        "Microsoft_Sentinel_incident": {
+                            "type": "ApiConnectionWebhook",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "body": {
+                                    "callback_url": "@{listCallbackUrl()}"
+                                },
+                                "path": "/incident-creation"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Entities_-_Get_Accounts": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']",
+                                "path": "/entities/account"
+                            },
+                            "runAfter": {}
+                        },
+                        "For_each_account": {
+                            "type": "Foreach",
+                            "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
+                            "actions": {
+                                "Get_user_from_Graph": {
+                                    "type": "Http",
+                                    "inputs": {
+                                        "method": "GET",
+                                        "uri": "https://graph.microsoft.com/v1.0/users/@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}",
+                                        "authentication": {
+                                            "type": "ManagedServiceIdentity"
+                                        }
+                                    },
+                                    "runAfter": {}
+                                },
+                                "Check_recent_sign_ins": {
+                                    "type": "Http",
+                                    "inputs": {
+                                        "method": "GET",
+                                        "uri": "https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=userPrincipalName eq '@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}'&$top=10&$orderby=createdDateTime desc",
+                                        "authentication": {
+                                            "type": "ManagedServiceIdentity"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Get_user_from_Graph": [
+                                            "Succeeded"
+                                        ]
+                                    }
+                                },
+                                "Force_password_reset": {
+                                    "type": "Http",
+                                    "inputs": {
+                                        "method": "PATCH",
+                                        "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_user_from_Graph')?['id']}",
+                                        "body": {
+                                            "passwordProfile": {
+                                                "forceChangePasswordNextSignIn": true
+                                            }
+                                        },
+                                        "authentication": {
+                                            "type": "ManagedServiceIdentity"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Check_recent_sign_ins": [
+                                            "Succeeded"
+                                        ]
+                                    }
+                                },
+                                "Revoke_all_sessions": {
+                                    "type": "Http",
+                                    "inputs": {
+                                        "method": "POST",
+                                        "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_user_from_Graph')?['id']}/revokeSignInSessions",
+                                        "authentication": {
+                                            "type": "ManagedServiceIdentity"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Force_password_reset": [
+                                            "Succeeded"
+                                        ]
+                                    }
+                                },
+                                "Send_Teams_alert": {
+                                    "type": "Http",
+                                    "inputs": {
+                                        "method": "POST",
+                                        "uri": "@parameters('teamsWebhook')",
+                                        "headers": {
+                                            "Content-Type": "application/json"
+                                        },
+                                        "body": {
+                                            "@@type": "MessageCard",
+                                            "@@context": "http://schema.org/extensions",
+                                            "themeColor": "DC2626",
+                                            "summary": "SpyCloud Credential Exposure Alert",
+                                            "sections": [
+                                                {
+                                                    "activityTitle": "\ud83d\udee1\ufe0f SpyCloud \u2014 Credential Exposure Detected",
+                                                    "facts": [
+                                                        {
+                                                            "name": "User",
+                                                            "value": "@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}"
+                                                        },
+                                                        {
+                                                            "name": "Incident",
+                                                            "value": "@{triggerBody()?['object']?['properties']?['title']}"
+                                                        },
+                                                        {
+                                                            "name": "Severity",
+                                                            "value": "@{triggerBody()?['object']?['properties']?['severity']}"
+                                                        },
+                                                        {
+                                                            "name": "Actions Taken",
+                                                            "value": "Password reset forced, sessions revoked"
+                                                        }
+                                                    ],
+                                                    "markdown": true
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Revoke_all_sessions": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "runtimeConfiguration": {
+                                        "staticResult": {
+                                            "name": "Send_Teams_alert0",
+                                            "staticResultOptions": "Disabled"
+                                        }
+                                    }
+                                },
+                                "Add_incident_comment": {
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "body": {
+                                            "incidentArmId": "@triggerBody()?['object']?['id']",
+                                            "message": "<p><strong>SpyCloud Credential Response Playbook</strong><br>User: @{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}<br>Recent sign-ins checked: @{length(body('Check_recent_sign_ins')?['value'])} events<br>Password reset: Forced on next sign-in<br>Sessions revoked: All active sessions invalidated<br>Teams alert: Sent to SOC channel</p>"
+                                        },
+                                        "path": "/Incidents/Comment"
+                                    },
+                                    "runAfter": {
+                                        "Send_Teams_alert": [
+                                            "Succeeded",
+                                            "Failed",
+                                            "Skipped"
+                                        ]
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Entities_-_Get_Accounts": [
+                                    "Succeeded"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azuresentinel": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+                                "connectionName": "[variables('sentinelConnectionName')]",
+                                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', variables('_effectiveWorkspaceLocation'), 'azuresentinel')]",
+                                "connectionProperties": {
+                                    "authentication": {
+                                        "type": "ManagedServiceIdentity"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[parameters('enableMdeBlocklistPlaybook')]",
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2019-05-01",
+            "name": "[variables('mdeBlocklistPlaybookName')]",
+            "location": "[variables('_effectiveWorkspaceLocation')]",
+            "tags": "[parameters('resourceTags')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "workspaceId": {
+                            "defaultValue": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), '2022-10-01').customerId]",
+                            "type": "String"
+                        },
+                        "dceUri": {
+                            "defaultValue": "[parameters('dceLogsIngestionUri')]",
+                            "type": "String"
+                        },
+                        "dcrImmutableId": {
+                            "defaultValue": "[parameters('dcrImmutableId')]",
+                            "type": "String"
+                        }
+                    },
+                    "triggers": {
+                        "Recurrence": {
+                            "type": "Recurrence",
+                            "recurrence": {
+                                "frequency": "Hour",
+                                "interval": "[parameters('mdeBlocklistScheduleHours')]"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Query_severity_25_exposures": {
+                            "type": "Http",
+                            "inputs": {
+                                "method": "POST",
+                                "uri": "https://api.loganalytics.io/v1/workspaces/@{parameters('workspaceId')}/query",
+                                "headers": {
+                                    "Content-Type": "application/json"
+                                },
+                                "body": {
+                                    "query": "SpyCloudBreachWatchlist_CL | where severity == 25 | where isnotempty(infected_machine_id) | where TimeGenerated > ago(24h) | summarize arg_max(TimeGenerated, *) by infected_machine_id | project infected_machine_id, user_hostname, email, target_domain, severity, ip_addresses, source_id, TimeGenerated"
+                                },
+                                "authentication": {
+                                    "type": "ManagedServiceIdentity",
+                                    "audience": "https://api.loganalytics.io"
+                                }
+                            },
+                            "runAfter": {}
+                        },
+                        "For_each_infection": {
+                            "type": "Foreach",
+                            "foreach": "@body('Query_severity_25_exposures')?['tables']?[0]?['rows']",
+                            "actions": {
+                                "Search_MDE_for_device": {
+                                    "type": "Http",
+                                    "inputs": {
+                                        "method": "GET",
+                                        "uri": "https://api.securitycenter.microsoft.com/api/machines?$filter=computerDnsName eq '@{items('For_each_infection')[1]}'",
+                                        "authentication": {
+                                            "type": "ManagedServiceIdentity",
+                                            "audience": "https://api.securitycenter.microsoft.com"
+                                        }
+                                    },
+                                    "runAfter": {}
+                                },
+                                "Condition_device_found": {
+                                    "type": "If",
+                                    "expression": {
+                                        "and": [
+                                            {
+                                                "greater": [
+                                                    "@length(body('Search_MDE_for_device')?['value'])",
+                                                    0
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "actions": {
+                                        "Isolate_infected_device": {
+                                            "type": "Http",
+                                            "inputs": {
+                                                "method": "POST",
+                                                "uri": "https://api.securitycenter.microsoft.com/api/machines/@{body('Search_MDE_for_device')?['value']?[0]?['id']}/isolate",
+                                                "body": {
+                                                    "Comment": "SpyCloud: Severity 25 infostealer infection detected. Device auto-isolated by SpyCloud MDE Blocklist playbook.",
+                                                    "IsolationType": "Full"
+                                                },
+                                                "authentication": {
+                                                    "type": "ManagedServiceIdentity",
+                                                    "audience": "https://api.securitycenter.microsoft.com"
+                                                }
+                                            },
+                                            "runAfter": {}
+                                        },
+                                        "Tag_device_in_MDE": {
+                                            "type": "Http",
+                                            "inputs": {
+                                                "method": "POST",
+                                                "uri": "https://api.securitycenter.microsoft.com/api/machines/@{body('Search_MDE_for_device')?['value']?[0]?['id']}/tags",
+                                                "body": {
+                                                    "Value": "SpyCloud-Sev25-Infostealer",
+                                                    "Action": "Add"
+                                                },
+                                                "authentication": {
+                                                    "type": "ManagedServiceIdentity",
+                                                    "audience": "https://api.securitycenter.microsoft.com"
+                                                }
+                                            },
+                                            "runAfter": {
+                                                "Isolate_infected_device": [
+                                                    "Succeeded",
+                                                    "Failed"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "else": {
+                                        "actions": {}
+                                    },
+                                    "runAfter": {
+                                        "Search_MDE_for_device": [
+                                            "Succeeded"
+                                        ]
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Query_severity_25_exposures": [
+                                    "Succeeded"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "apiVersion": "2023-02-01-preview",
+            "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'CredExposureWithSignIn', '-', uniqueString(resourceGroup().id)))]",
+            "kind": "Scheduled",
+            "properties": {
+                "displayName": "SpyCloud \u2014 Compromised Credential with Recent Entra Sign-In",
+                "description": "Detects when a user whose credentials were exposed by SpyCloud has successfully signed into Entra ID within the last 24 hours. This indicates the compromised credential may still be active and the account is at immediate risk of takeover.",
+                "severity": "High",
+                "enabled": false,
+                "query": "let exposed = SpyCloudBreachWatchlist_CL | where severity >= 20 | where TimeGenerated > ago(7d) | distinct email;\nSigninLogs\n| where TimeGenerated > ago(24h)\n| where ResultType == 0\n| where UserPrincipalName in (exposed)\n| summarize SignInCount = count(), IPs = make_set(IPAddress, 5), Apps = make_set(AppDisplayName, 5) by UserPrincipalName\n| extend AccountCustomEntity = UserPrincipalName",
+                "queryFrequency": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "CredentialAccess"
+                ],
+                "techniques": [
+                    "T1078"
+                ],
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [
+                            "Account"
+                        ]
+                    }
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "apiVersion": "2023-02-01-preview",
+            "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'BreachTitleEnrichment', '-', uniqueString(resourceGroup().id)))]",
+            "kind": "Scheduled",
+            "properties": {
+                "displayName": "SpyCloud \u2014 New Exposures with Breach Source Context",
+                "description": "Enriches new SpyCloud watchlist records with breach catalog details (breach title, description) by joining on source_id. Fires when new high-severity exposures arrive from known breach sources, providing SOC analysts with the full context of where the data came from.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(1h)\n| where severity >= 20\n| join kind=leftouter (SpyCloudBreachCatalog_CL | project source_id, breach_title, description, status) on source_id\n| where isnotempty(breach_title)\n| summarize ExposureCount = count(), Emails = make_set(email, 10) by source_id, breach_title, status\n| extend AccountCustomEntity = tostring(Emails[0])",
+                "queryFrequency": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [
+                    "T1589"
+                ],
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [
+                            "Account"
+                        ]
+                    }
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "apiVersion": "2023-02-01-preview",
+            "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'ExecutiveVIPExposure', '-', uniqueString(resourceGroup().id)))]",
+            "kind": "Scheduled",
+            "properties": {
+                "displayName": "SpyCloud \u2014 Executive / VIP Account Exposure",
+                "description": "Detects exposures for email addresses that match a predefined list of executive or VIP accounts. Customize the 'vip_domains' list in the KQL to match your executive team's email patterns. These exposures require immediate C-suite notification and priority remediation.",
+                "severity": "High",
+                "enabled": false,
+                "query": "let vip_patterns = dynamic(['ceo@','cfo@','cto@','ciso@','coo@','president@','vp-','director-']);\nSpyCloudBreachWatchlist_CL\n| where severity >= 5\n| where email has_any (vip_patterns) or email_username in ('admin','administrator','root','sysadmin')\n| summarize ExposureCount = count(), MaxSeverity = max(severity), Sources = make_set(source_id, 5) by email, full_name\n| extend AccountCustomEntity = email",
+                "queryFrequency": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess",
+                    "Reconnaissance"
+                ],
+                "techniques": [
+                    "T1589",
+                    "T1078"
+                ],
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [
+                            "Account"
+                        ]
+                    }
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "apiVersion": "2023-02-01-preview",
+            "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'PasswordReuseAcrossTargets', '-', uniqueString(resourceGroup().id)))]",
+            "kind": "Scheduled",
+            "properties": {
+                "displayName": "SpyCloud \u2014 Same Password Reused Across Multiple Target Domains",
+                "description": "Detects when the same password hash appears in exposures targeting 3 or more different domains for the same user. This indicates dangerous credential reuse \u2014 if one account is compromised, all accounts with the same password are at risk.",
+                "severity": "High",
+                "enabled": false,
+                "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(password) or isnotempty(password_plaintext)\n| extend pw_hash = hash_sha256(coalesce(password_plaintext, password))\n| summarize TargetDomains = make_set(target_domain, 20), DomainCount = dcount(target_domain) by email, pw_hash\n| where DomainCount >= 3\n| extend AccountCustomEntity = email",
+                "queryFrequency": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [
+                    "T1078",
+                    "T1110"
+                ],
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [
+                            "Account"
+                        ]
+                    }
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "apiVersion": "2023-02-01-preview",
+            "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'StaleRemediationCheck', '-', uniqueString(resourceGroup().id)))]",
+            "kind": "Scheduled",
+            "properties": {
+                "displayName": "SpyCloud \u2014 Exposure Older Than 7 Days Without Remediation",
+                "description": "Detects high-severity (20+) exposures that have been in the watchlist for more than 7 days but have no corresponding entry in either the MDE or CA remediation logs. This is a compliance and SLA alert \u2014 these exposures should have been remediated within your organization's defined response window.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let mde_remediated = Spycloud_MDE_Logs_CL | distinct InfectedMachineId;\nlet ca_remediated = SpyCloud_ConditionalAccessLogs_CL | distinct UserEmail;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(7d)\n| where infected_machine_id !in (mde_remediated)\n| where email !in (ca_remediated)\n| summarize DaysExposed = datetime_diff('day', now(), min(TimeGenerated)), ExposureCount = count() by email, infected_machine_id\n| extend AccountCustomEntity = email",
+                "queryFrequency": "[parameters('analyticsRuleFrequency')]",
+                "queryPeriod": "PT24H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [
+                    "T1078"
+                ],
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": true,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [
+                            "Account"
+                        ]
+                    }
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    }
+                ]
             }
         }
     ],
@@ -4762,6 +5455,25 @@
                 "dceUri": "[if(parameters('enablePostDeployScript'), reference('spycloud-post-deploy').outputs.dceLogsIngestionUri, 'Run scripts/post-deploy.sh manually')]",
                 "dcrId": "[if(parameters('enablePostDeployScript'), reference('spycloud-post-deploy').outputs.dcrImmutableId, 'Run scripts/post-deploy.sh manually')]",
                 "remainingManualSteps": "MDE API permissions (Machine.Isolate) and Graph API permissions (User.ReadWrite.All) require running scripts/post-deploy.sh or granting manually in the Azure Portal"
+            }
+        },
+        "credResponsePlaybook": {
+            "condition": "[parameters('enableCredResponsePlaybook')]",
+            "type": "object",
+            "value": {
+                "name": "[variables('credResponsePlaybookName')]",
+                "resourceId": "[resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName'))]",
+                "permissions": "Security Administrator, Graph: IdentityRisk.ReadWrite.All, User.ReadWrite.All, AuditLog.Read.All"
+            }
+        },
+        "mdeBlocklistPlaybook": {
+            "condition": "[parameters('enableMdeBlocklistPlaybook')]",
+            "type": "object",
+            "value": {
+                "name": "[variables('mdeBlocklistPlaybookName')]",
+                "resourceId": "[resourceId('Microsoft.Logic/workflows', variables('mdeBlocklistPlaybookName'))]",
+                "schedule": "[concat('Every ', string(parameters('mdeBlocklistScheduleHours')), ' hours')]",
+                "permissions": "Machine.Isolate, Machine.ReadWrite.All, Log Analytics Reader"
             }
         }
     }

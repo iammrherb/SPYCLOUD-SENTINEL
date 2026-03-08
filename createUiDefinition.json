@@ -6,7 +6,7 @@
         "config": {
             "isWizard": true,
             "basics": {
-                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel \u2014 Unified Threat Intelligence\n\nDeploy SpyCloud's darknet intelligence into Microsoft Sentinel with automated remediation, 17 analytics rules, and Security Copilot integration.\n\n**What gets deployed:**\n- Log Analytics Workspace + Microsoft Sentinel\n- SpyCloud CCF data connector (3 API pollers)\n- 4 custom log tables (73+ columns)\n- Logic App playbooks (MDE + Conditional Access)\n- Azure Key Vault for API key storage\n- Up to 17 analytics rules (all disabled by default)\n\n[Learn more](https://github.com/iammrherb/SPYCLOUD-SENTINEL)",
+                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel \u2014 Unified Threat Intelligence\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nDeploy SpyCloud's breach, malware, and phishing intelligence into Microsoft Sentinel with:\n\n- **CCF Data Connector** \u2014 3 REST API pollers (Watchlist New + Modified + Catalog)\n- **4 Custom Tables** \u2014 73+ columns covering credentials, PII, device forensics, account metadata\n- **2 Logic App Playbooks** \u2014 MDE device isolation + Conditional Access identity protection\n- **17 Analytics Rules** \u2014 Infostealer, plaintext passwords, PII, session cookies, device re-infection, IdP correlation (all deploy DISABLED for review)\n- **Azure Key Vault** \u2014 Secure API key storage\n- **Automated Post-Deploy** \u2014 DCE/DCR resolution and RBAC assignment runs inside the deployment\n\n**Prerequisites:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com) \u2192 Settings \u2192 API Keys\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture Guide](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
                 "location": {
                     "label": "Deployment Region",
                     "allowedValues": [
@@ -139,6 +139,109 @@
                             }
                         ],
                         "visible": true
+                    },
+                    {
+                        "name": "sectionDataConfig",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Data Ingestion Settings",
+                        "elements": [
+                            {
+                                "name": "dataConfigInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Configure which SpyCloud exposure data to ingest. Severity levels determine the type and urgency of exposed data. Higher severity = more critical exposure."
+                                }
+                            },
+                            {
+                                "name": "severityFilter",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Severity Levels to Ingest",
+                                "multiselect": true,
+                                "defaultValue": [
+                                    {
+                                        "value": "2"
+                                    },
+                                    {
+                                        "value": "5"
+                                    },
+                                    {
+                                        "value": "20"
+                                    },
+                                    {
+                                        "value": "25"
+                                    }
+                                ],
+                                "toolTip": "Select which SpyCloud severity levels to ingest.\n\n\u2022 Severity 2: Email + password from third-party breach (lowest risk)\n\u2022 Severity 5: Breach credential + PII (name, phone, DOB, address)\n\u2022 Severity 20: Infostealer credential \u2014 malware stole this from an infected device (HIGH risk)\n\u2022 Severity 25: Infostealer + application data \u2014 stolen cookies, sessions, autofill enabling MFA bypass (CRITICAL)",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "2 \u2014 Breach Credential (email + password from breach)",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "label": "5 \u2014 Breach + PII (credential + name, phone, DOB)",
+                                            "value": "5"
+                                        },
+                                        {
+                                            "label": "20 \u2014 Infostealer Credential (malware-stolen, HIGH risk)",
+                                            "value": "20"
+                                        },
+                                        {
+                                            "label": "25 \u2014 Infostealer + App Data (cookies/sessions, CRITICAL)",
+                                            "value": "25"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "showPlainPassword",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Include Plaintext Passwords in Data",
+                                "defaultValue": "No \u2014 Redact passwords (recommended for compliance)",
+                                "toolTip": "Controls whether plaintext passwords are included in SpyCloud data ingested into Sentinel.\n\nSet to 'No' (recommended) to redact all plaintext passwords before they reach your SIEM. This is required by many compliance frameworks (PCI DSS, SOC 2, HIPAA).\n\nSet to 'Yes' only if your SOC team needs to see exposed passwords for investigation purposes and your organization's data handling policies permit it.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "No \u2014 Redact passwords (recommended for compliance)",
+                                            "value": "False"
+                                        },
+                                        {
+                                            "label": "Yes \u2014 Include plaintext passwords (for investigation)",
+                                            "value": "True"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "queryWindowInMin",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 10,
+                                "max": 120,
+                                "label": "Polling Interval (minutes)",
+                                "defaultValue": 40,
+                                "showStepMarkers": false,
+                                "toolTip": "How often the CCF connector polls the SpyCloud API for new data. Default: 40 minutes. Lower values increase freshness but may hit API rate limits.",
+                                "visible": true
+                            },
+                            {
+                                "name": "initialLookbackDays",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 1,
+                                "max": 365,
+                                "label": "Initial Data Lookback (days)",
+                                "defaultValue": 30,
+                                "showStepMarkers": false,
+                                "toolTip": "How many days of historical SpyCloud data to pull on first connection. Default: 30 days. Higher values pull more historical data but take longer on initial sync.",
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
                     }
                 ]
             },
@@ -157,14 +260,14 @@
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Playbooks use Logic Apps with managed identity to automatically respond to SpyCloud-detected threats. API permissions are assigned after deployment via the post-deploy script."
+                                    "text": "Playbooks are Logic Apps that automatically respond to SpyCloud-detected threats. They use Sentinel automation rules with the 'Microsoft Sentinel Incident' trigger to fire when incidents are created. Each playbook uses a system-assigned managed identity \u2014 no credentials are stored in the workflow. API permissions (MDE Machine.Isolate, Graph User.ReadWrite.All) are assigned by the automated post-deploy script or can be granted manually in Azure Portal \u2192 Enterprise Applications."
                                 }
                             },
                             {
                                 "name": "enableMdePlaybook",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Enable MDE Device Isolation Playbook",
-                                "toolTip": "Automatically isolates infected devices in Microsoft Defender for Endpoint and tags them for investigation. Requires MDE license.",
+                                "toolTip": "Deploys a Logic App that automatically responds to infostealer infections detected by SpyCloud:\n\n1. Triggered by Sentinel incident (severity 20+)\n2. Extracts infected_machine_id and user_hostname from SpyCloud data\n3. Searches Microsoft Defender for Endpoint for matching devices\n4. If match found: isolates the device to prevent lateral movement\n5. Tags the device with 'SpyCloud-Infostealer' for SOC tracking\n6. Adds investigation comments to the Sentinel incident\n7. Logs all actions to Spycloud_MDE_Logs_CL audit table\n\nRequires: Microsoft Defender for Endpoint license, Machine.Isolate + Machine.ReadWrite.All API permissions.",
                                 "constraints": {
                                     "required": false
                                 }
@@ -173,10 +276,22 @@
                                 "name": "enableCaPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Enable Conditional Access Remediation Playbook",
-                                "toolTip": "Automatically resets passwords, revokes sessions, and adds users to CA exclusion groups when compromised credentials are detected. Requires Entra ID P1+.",
+                                "toolTip": "Deploys a Logic App that protects compromised identities when SpyCloud detects credential exposure:\n\n1. Triggered by Sentinel incident (any severity with email field)\n2. Extracts compromised email addresses from SpyCloud data\n3. Looks up user in Entra ID (Azure AD) via Microsoft Graph\n4. Forces password reset on next sign-in\n5. Revokes all active sessions and refresh tokens\n6. Optionally adds user to a Conditional Access exclusion group\n7. Adds remediation comments to the Sentinel incident\n8. Logs all actions to SpyCloud_ConditionalAccessLogs_CL audit table\n\nRequires: Entra ID P1+, User.ReadWrite.All + Directory.ReadWrite.All Graph API permissions.",
                                 "constraints": {
                                     "required": false
                                 }
+                            },
+                            {
+                                "name": "enableCredResponsePlaybook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Credential Exposure \u2192 Automated Identity Response Playbook",
+                                "toolTip": "Deploys an advanced Logic App that responds to credential exposures with a multi-step workflow:\n\n1. Triggered by Sentinel incident from SpyCloud alert\n2. Checks user's recent sign-in activity in Entra ID\n3. Forces password reset on next sign-in\n4. Revokes all active user sessions\n5. Sends real-time alert to Microsoft Teams SOC channel\n6. Adds investigation comments to the Sentinel incident\n\nRequires: Security Administrator, Graph IdentityRisk.ReadWrite.All"
+                            },
+                            {
+                                "name": "enableMdeBlocklistPlaybook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable SpyCloud Threat Feed \u2192 MDE Blocklist Playbook (Scheduled)",
+                                "toolTip": "Deploys a scheduled Logic App that runs every 2-4 hours to:\n\n1. Query severity 25 (CRITICAL) infostealer records from SpyCloud\n2. Match infected_machine_id and user_hostname against Microsoft Defender for Endpoint\n3. If device found in MDE: automatically isolate and tag with 'SpyCloud-Sev25-Infostealer'\n4. Create enriched correlation table with both SpyCloud and MDE data\n\nRequires: MDE license with API enabled, Machine.Isolate + Machine.ReadWrite.All"
                             }
                         ],
                         "visible": true
@@ -237,6 +352,79 @@
                 "label": "Monitoring & Notifications",
                 "elements": [
                     {
+                        "name": "sectionIntegrations",
+                        "type": "Microsoft.Common.Section",
+                        "label": "SOC Integrations",
+                        "elements": [
+                            {
+                                "name": "teamsChannelWebhook",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Microsoft Teams Webhook URL (Optional)",
+                                "placeholder": "https://outlook.office.com/webhook/...",
+                                "toolTip": "Incoming webhook URL for your SOC Microsoft Teams channel. The Credential Response playbook sends real-time alerts here when compromised credentials trigger automated remediation. Get the webhook URL from Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook \u2192 Configure.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^https://.*webhook.*$",
+                                    "validationMessage": "Enter a valid Teams webhook URL or leave blank."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "serviceNowInstance",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "ServiceNow Instance URL (Optional)",
+                                "placeholder": "https://your-instance.service-now.com",
+                                "toolTip": "Your ServiceNow instance URL for automatic incident ticket creation. Leave blank if you don't use ServiceNow.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "mdeBlocklistScheduleHours",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "MDE Blocklist Scan Frequency",
+                                "defaultValue": "Every 4 hours",
+                                "toolTip": "How often the MDE Blocklist playbook scans for new severity 25 infostealer matches against Defender for Endpoint.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Every 1 hour",
+                                            "value": 1
+                                        },
+                                        {
+                                            "label": "Every 2 hours",
+                                            "value": 2
+                                        },
+                                        {
+                                            "label": "Every 4 hours (recommended)",
+                                            "value": 4
+                                        },
+                                        {
+                                            "label": "Every 6 hours",
+                                            "value": 6
+                                        },
+                                        {
+                                            "label": "Every 8 hours",
+                                            "value": 8
+                                        },
+                                        {
+                                            "label": "Every 12 hours",
+                                            "value": 12
+                                        },
+                                        {
+                                            "label": "Every 24 hours",
+                                            "value": 24
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
                         "name": "sectionNotifications",
                         "type": "Microsoft.Common.Section",
                         "label": "Alert Notifications",
@@ -274,7 +462,7 @@
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "If you use Okta, Duo, Ping Identity, or CyberArk, enable the analytics rules library above. The IdP correlation rules will detect compromised SpyCloud credentials being used in those providers' sign-in logs. You must install the IdP connectors from Sentinel Content Hub separately."
+                                    "text": "Identity Provider correlation rules detect when credentials compromised in SpyCloud data are actively used to sign in through your identity providers. This catches account takeover in real-time.\n\n**Supported providers (must be ingested into Sentinel separately):**\n\u2022 Okta SSO \u2192 Content Hub \u2192 'Okta Single Sign-On' connector \u2192 Table: Okta_CL\n\u2022 Cisco Duo \u2192 Content Hub \u2192 'Cisco Duo Security' connector \u2192 Table: Duo_CL\n\u2022 Ping Identity \u2192 Syslog/API via AMA agent \u2192 Table: PingFederate_CL\n\u2022 Entra ID \u2192 Diagnostic Settings \u2192 SignInLogs table (built-in)\n\u2022 CyberArk \u2192 Content Hub \u2192 'CyberArk EPM' connector \u2192 Table: CyberArk_CL"
                                 }
                             },
                             {
@@ -314,7 +502,16 @@
             "notificationEmail": "[steps('monitoringConfig').sectionNotifications.notificationEmail]",
             "enableSessionCookieDetection": "[steps('monitoringConfig').sectionIdp.enableSessionCookieDetection]",
             "enableIdentityProviderAlerts": "[steps('monitoringConfig').sectionIdp.enableIdentityProviderAlerts]",
-            "enablePostDeployScript": "[steps('automationConfig').sectionRules.enablePostDeployScript]"
+            "enablePostDeployScript": "[steps('automationConfig').sectionRules.enablePostDeployScript]",
+            "severityFilter": "[steps('workspaceConfig').sectionDataConfig.severityFilter]",
+            "showPlainPassword": "[steps('workspaceConfig').sectionDataConfig.showPlainPassword]",
+            "queryWindowInMin": "[steps('workspaceConfig').sectionDataConfig.queryWindowInMin]",
+            "initialLookbackDays": "[steps('workspaceConfig').sectionDataConfig.initialLookbackDays]",
+            "enableCredResponsePlaybook": "[steps('automationConfig').sectionPlaybooks.enableCredResponsePlaybook]",
+            "enableMdeBlocklistPlaybook": "[steps('automationConfig').sectionPlaybooks.enableMdeBlocklistPlaybook]",
+            "teamsChannelWebhook": "[steps('monitoringConfig').sectionIntegrations.teamsChannelWebhook]",
+            "serviceNowInstance": "[steps('monitoringConfig').sectionIntegrations.serviceNowInstance]",
+            "mdeBlocklistScheduleHours": "[steps('monitoringConfig').sectionIntegrations.mdeBlocklistScheduleHours]"
         }
     }
 }
