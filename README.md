@@ -6,28 +6,104 @@
 <h3 align="center">Unified Darknet Threat Intelligence for Microsoft Sentinel</h3>
 
 <p align="center">
-  <em>4 playbooks · 22 analytics rules · Sentinel workbook dashboard · Security Copilot AI agent</em>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/version-5.6-00B4D8?style=for-the-badge" alt="v5.6"/>
-  <img src="https://img.shields.io/badge/sentinel-ready-0D1B2A?style=for-the-badge&logo=microsoftazure" alt="Sentinel"/>
-  <img src="https://img.shields.io/badge/copilot-integrated-E07A5F?style=for-the-badge&logo=microsoft" alt="Copilot"/>
-  <img src="https://img.shields.io/badge/playbooks-4-2D6A4F?style=for-the-badge" alt="4 Playbooks"/>
-  <img src="https://img.shields.io/badge/rules-22-415A77?style=for-the-badge" alt="22 Rules"/>
+  <img src="https://img.shields.io/badge/version-7.1-00B4D8?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/sentinel-ready-0D1B2A?style=for-the-badge&logo=microsoftazure"/>
+  <img src="https://img.shields.io/badge/copilot-integrated-E07A5F?style=for-the-badge&logo=microsoft"/>
+  <img src="https://img.shields.io/badge/playbooks-4-2D6A4F?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/rules-22-415A77?style=for-the-badge"/>
 </p>
 
 ---
 
-## 🚀 Deploy
+## Product Features & Capabilities
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure"/></a>   <a href="https://shell.azure.com" target="_blank"><img src="https://learn.microsoft.com/azure/cloud-shell/media/embed-cloud-shell/launch-cloud-shell-1.png" alt="Cloud Shell" width="140"/></a>
+| Category | Feature | Details |
+|----------|---------|---------|
+| 🔌 **Data Ingestion** | CCF REST API Connector | 3 pollers (Watchlist New, Watchlist Modified, Breach Catalog) with Bearer token auth, cursor-based pagination, configurable severity/type filters |
+| | 4 Custom Tables | SpyCloudBreachWatchlist_CL (73 cols), SpyCloudBreachCatalog_CL (5 cols), Spycloud_MDE_Logs_CL (19 cols), SpyCloud_ConditionalAccessLogs_CL (14 cols) |
+| | Data Collection Rule | KQL transforms normalize raw API data before table ingestion |
+| | Data Collection Endpoint | HTTPS ingestion endpoint for secure data flow |
+| ⚙️ **Automation** | MDE Device Isolation | Searches MDE for infected devices, isolates, tags with SpyCloud identifier |
+| | CA Identity Protection | Forces password reset, revokes sessions, adds to CA exclusion group |
+| | Credential Response | Checks recent sign-ins, resets password, revokes sessions, sends Teams/Slack alert |
+| | MDE Blocklist (Scheduled) | Scans severity 25 records on schedule, auto-isolates matched MDE devices |
+| 🎯 **Detection** | 22 Analytics Rules | 12 core detection + 4 IdP correlation + 5 advanced correlation + 1 health monitoring |
+| | MITRE ATT&CK Mapping | T1078, T1110, T1530, T1539, T1547, T1550, T1552, T1555, T1562, T1589 |
+| | Entity Mapping | Account, Host, IP entity extraction for investigation |
+| 📊 **Visualization** | Sentinel Workbook | 12 interactive charts: exposure tiles, severity trends, top users, top devices, password types, domains, geo, remediation, catalog |
+| 🤖 **AI Integration** | Security Copilot Plugin | 28 KQL skills across 9 categories |
+| | Security Copilot Agent | 30 interactive skills with natural language investigation |
+| 🔔 **Notifications** | Teams Webhook | Real-time SOC channel alerts via MessageCard |
+| | Slack Webhook | Real-time Slack SOC notifications |
+| | Email Notifications | Action Group alerts for health monitoring |
+| 🔒 **Security** | Managed Identity | Zero credentials in Logic App workflows |
+| | SecureString API Key | Never exposed in logs or outputs |
+| | Resource Tags | Default + custom tags on all resources |
 
-**Deploy to Azure** opens a custom 3-step wizard. **Cloud Shell** lets you run the interactive script:
+---
 
-```bash
-curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/deploy-all.sh | bash
+## Architecture
+
 ```
+                    ┌──────────────────────────────────────┐
+                    │       SpyCloud Darknet Intelligence    │
+                    │    api.spycloud.io (US) / api.eu (EU) │
+                    └────────────────┬─────────────────────┘
+                                     │ HTTPS / Bearer Token
+                                     ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                     MICROSOFT SENTINEL                                  │
+│                                                                        │
+│  ┌──────────────┐    ┌──────┐    ┌─────────────────────────────────┐  │
+│  │ CCF Connector │───▶│ DCE  │───▶│   DCR (4 KQL Transforms)       │  │
+│  │ 3 Pollers     │    │HTTPS │    │                                 │  │
+│  │ • Watchlist   │    │Ingest│    │ ┌─ SpyCloudBreachWatchlist_CL  │  │
+│  │ • Modified    │    └──────┘    │ │  (73 columns: creds, PII,    │  │
+│  │ • Catalog     │               │ │   device forensics, social)   │  │
+│  └──────────────┘               │ ├─ SpyCloudBreachCatalog_CL     │  │
+│                                  │ │  (5 cols: source metadata)    │  │
+│                                  │ ├─ Spycloud_MDE_Logs_CL        │  │
+│                                  │ │  (19 cols: MDE audit trail)   │  │
+│                                  │ └─ SpyCloud_CA_Logs_CL         │  │
+│                                  │    (14 cols: CA audit trail)    │  │
+│                                  └──────────────┬──────────────────┘  │
+│                                                  │                     │
+│  ┌──────────────────────┐  ┌─────────────────────┼───────────────┐    │
+│  │ 📊 Workbook Dashboard │  │  22 Analytics Rules  │               │    │
+│  │  12 charts            │  │  (all disabled by    ▼               │    │
+│  │  Tiles, trends, geo   │  │   default)     Sentinel Incidents   │    │
+│  └──────────────────────┘  └───────────────┬─────────────────────┘    │
+│                                             │                          │
+│         ┌──────────┬──────────┬─────────────┤                          │
+│         ▼          ▼          ▼             ▼                          │
+│    ┌─────────┐┌────────┐┌──────────┐┌─────────────┐                   │
+│    │ PB1 MDE ││PB2 CA  ││ PB3 Cred ││ PB4 MDE     │                   │
+│    │ Isolate ││Identity││ Response ││ Blocklist   │                   │
+│    │ + Tag   ││Protect ││ +Teams   ││ (Scheduled) │                   │
+│    └────┬────┘└───┬────┘└────┬─────┘└──────┬──────┘                   │
+│         │         │          │              │                          │
+│    MDE API   Graph API  Graph+Teams    MDE API                        │
+│                              +Slack                                    │
+└────────────────────────────────────────────────────────────────────────┘
+                            │
+              ┌─────────────┴────────────────┐
+              │  Microsoft Security Copilot    │
+              │  Plugin: 28 KQL skills         │
+              │  Agent: 30 interactive skills   │
+              └──────────────────────────────┘
+```
+
+---
+
+## Deploy
+
+### Step 1: Deploy Infrastructure (ARM Template)
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a>
+
+The portal wizard has 3 steps: **Workspace** (create or select existing + retention) → **Playbooks & Rules** (toggle 4 playbooks, MDE config, 22 rules) → **Security** (dashboard, tags, Teams/Slack/email, IdP correlation).
+
+The ARM template deploys: workspace, Sentinel (auto-enabled via OnboardingStates API), DCE, DCR, 4 tables, 3 pollers, connector definition, 4 Logic Apps, 22 analytics rules, workbook dashboard, managed identity, deployment script.
 
 <details><summary><strong>Azure CLI</strong></summary>
 
@@ -35,7 +111,7 @@ curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scri
 az login && az group create -n spycloud-sentinel -l eastus
 az deployment group create -g spycloud-sentinel \
   --template-uri https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/azuredeploy.json \
-  --parameters workspace=spycloud-ws spycloudApiKey=YOUR-KEY createNewWorkspace=true
+  --parameters workspace=my-sentinel-ws
 ```
 </details>
 
@@ -45,308 +121,154 @@ az deployment group create -g spycloud-sentinel \
 Connect-AzAccount
 New-AzResourceGroupDeployment -Name "SpyCloud" -ResourceGroupName "spycloud-sentinel" `
   -TemplateUri "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/azuredeploy.json" `
-  -workspace "spycloud-ws" -createNewWorkspace $true -spycloudApiKey (Read-Host -AsSecureString "Key")
+  -workspace "my-sentinel-ws"
 ```
 </details>
 
-<details><summary><strong>GitHub Actions</strong></summary>
+### Step 2: Activate the SpyCloud Connector
 
-Fork → add secrets `AZURE_CREDENTIALS` + `SPYCLOUD_API_KEY` → Actions → Run workflow
-</details>
+> **The ARM template deploys the connector framework. You must activate it in Sentinel to start data flow.**
+
+1. Portal → **Microsoft Sentinel** → your workspace → **Data connectors**
+2. Search **"SpyCloud"** → click → **Open connector page**
+3. **Step 1:** Paste your SpyCloud API key (from portal.spycloud.com → Settings → API Keys)
+4. **Step 2:** Select severity levels (recommend: all 4), exposure types, password handling
+5. **Step 3:** Click **Connect**
+6. Data appears within 5-10 minutes
+
+### Step 3: Verify Deployment
+
+```bash
+curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS
+```
+
+Checks 10 sections: workspace, Sentinel, DCE, DCR, 4 tables, connector status, Logic Apps + permissions, analytics rules, workbook, deployment script.
+
+### Step 4: Enable Analytics Rules
+
+Sentinel → **Analytics** → filter "SpyCloud" → enable rules individually. Recommended first: #1 (Infostealer Exposure), #2 (Plaintext Password), #4 (Session Cookies), #9 (Remediation Gap), #12 (Data Health).
+
+### Step 5: Grant API Permissions (if needed)
+
+The deployment script attempts to grant MDE + Graph API permissions. If it shows "needs admin consent":
+1. Entra ID → Enterprise Applications → filter **Managed Identities**
+2. Find each SpyCloud Logic App → Permissions → **Grant admin consent**
+
+### Step 6: Upload Security Copilot Files
+
+| File | Destination |
+|------|------------|
+| `copilot/SpyCloud_Plugin.yaml` | securitycopilot.microsoft.com → Sources → Custom → Upload Plugin |
+| `copilot/SpyCloud_Agent.yaml` | securitycopilot.microsoft.com → Build → Upload YAML → Publish |
 
 ---
 
-## 🏗️ Architecture
-
-```
-                        ┌─────────────────────────────────────┐
-                        │      SpyCloud Darknet Intelligence   │
-                        │   Breaches · Infostealers · Phishing │
-                        │         api.spycloud.io              │
-                        └────────────────┬────────────────────┘
-                                         │ HTTPS / Bearer Token
-                                         ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                        MICROSOFT SENTINEL                                    │
-│                                                                              │
-│  ┌─────────────────┐      ┌────────┐      ┌───────────────────────────────┐ │
-│  │  CCF Connector   │─────▶│  DCE   │─────▶│      DCR (KQL Transform)     │ │
-│  │ ┌─────────────┐  │      │ HTTPS  │      │                               │ │
-│  │ │ Watchlist    │  │      │ Ingest │      │  Stream → Table mapping:      │ │
-│  │ │  New + Mod   │  │      └────────┘      │  ┌─────────────────────────┐ │ │
-│  │ ├─────────────┤  │                       │  │ SpyCloudBreachWatchlist │ │ │
-│  │ │  Catalog     │  │                       │  │ _CL (73 columns)       │ │ │
-│  │ └─────────────┘  │                       │  ├─────────────────────────┤ │ │
-│  └─────────────────┘                       │  │ SpyCloudBreachCatalog  │ │ │
-│                                             │  │ _CL (13 columns)       │ │ │
-│                                             │  ├─────────────────────────┤ │ │
-│                                             │  │ Spycloud_MDE_Logs_CL   │ │ │
-│                                             │  │ (19 cols - audit)       │ │ │
-│                                             │  ├─────────────────────────┤ │ │
-│                                             │  │ SpyCloud_CA_Logs_CL    │ │ │
-│                                             │  │ (14 cols - audit)       │ │ │
-│                                             │  └─────────────────────────┘ │ │
-│                                             └──────────────┬──────────────┘ │
-│                                                            │                 │
-│  ┌─────────────────────────────┐                          │                 │
-│  │   📊 Sentinel Workbook      │◀─────────────────────────┤                 │
-│  │   10 interactive charts      │                          │                 │
-│  │   Exposure · Severity ·      │                          │                 │
-│  │   Devices · Remediation      │                          │                 │
-│  └─────────────────────────────┘                          │                 │
-│                                                            ▼                 │
-│  ┌───────────────────────────────────────────────────────────┐              │
-│  │                    22 Analytics Rules                       │              │
-│  │  (all deploy DISABLED — review + enable individually)      │              │
-│  │                                                             │              │
-│  │  Core: infostealer, plaintext pw, PII, cookies, reinfect   │              │
-│  │  IdP:  Okta, Duo, Ping, Entra cross-correlation            │              │
-│  │  Adv:  VIP, pw reuse, sign-in correlation, SLA, enrichment │              │
-│  └──────────────────────┬────────────────────────────────────┘              │
-│                          │ creates                                           │
-│                          ▼                                                   │
-│  ┌───────────────────────────────┐                                          │
-│  │      Sentinel Incidents        │                                          │
-│  │  severity + entity mapping     │                                          │
-│  └──────────────┬────────────────┘                                          │
-│                  │ triggers                                                   │
-│                  ▼                                                            │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                        Automation Rule                                  │ │
-│  └──┬──────────┬──────────────┬────────────────────────────┬─────────────┘ │
-│     │          │              │                             │               │
-│     ▼          ▼              ▼                             ▼               │
-│  ┌────────┐┌────────┐ ┌─────────────┐             ┌──────────────┐        │
-│  │  PB 1  ││  PB 2  │ │   PB 3      │             │    PB 4      │        │
-│  │  MDE   ││  CA    │ │   Cred      │             │  MDE Block   │        │
-│  │Isolate ││Identity│ │  Response   │             │  (Scheduled) │        │
-│  │+ Tag   ││Protect │ │ + Teams     │             │  Sev 25 Scan │        │
-│  └───┬────┘└───┬────┘ └─────┬───────┘             └──────┬───────┘        │
-│      │         │             │                            │                │
-│      ▼         ▼             ▼                            ▼                │
-│   MDE API   Graph API    Graph API                    MDE API              │
-│   Isolate   PW Reset     Sign-In Check               Search               │
-│   Tag       Revoke       PW Reset                    Isolate               │
-│             Session      Revoke + Teams              Tag Sev25             │
-│                                                                             │
-└──────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-                   ┌──────────────────────────────┐
-                   │   Microsoft Security Copilot   │
-                   │   Plugin: 28 KQL skills        │
-                   │   Agent: 30 interactive skills  │
-                   └──────────────────────────────┘
-```
-
----
-
-## 📦 What Gets Deployed
-
-| Tier | Resource | Count | Toggle | Default |
-|------|----------|-------|--------|---------|
-| 🏗️ Foundation | Workspace + Sentinel | 1 | `createNewWorkspace` | ✅ On |
-| | DCE + DCR + 4 Tables + 3 Pollers | 8 | Always | — |
-| 🔐 Security | Key Vault + Secret | 2 | `enableKeyVault` | ✅ On |
-| ⚙️ Playbook 1 | MDE Device Isolation | 1 | `enableMdePlaybook` | ✅ On |
-| ⚙️ Playbook 2 | CA Identity Protection | 1 | `enableCaPlaybook` | ✅ On |
-| ⚙️ Playbook 3 | Credential Response + Teams | 1 | `enableCredResponsePlaybook` | ❌ Off |
-| ⚙️ Playbook 4 | MDE Blocklist (Scheduled) | 1 | `enableMdeBlocklistPlaybook` | ❌ Off |
-| 🎯 Detection | 22 Analytics Rules (ALL disabled) | 22 | `enableAnalyticsRulesLibrary` | ❌ Off |
-| 📊 Dashboard | Sentinel Workbook (10 charts) | 1 | `enableWorkbook` | ✅ On |
-| 🤖 Auto-Config | Deployment Script (DCE/DCR/RBAC) | 1 | `enablePostDeployScript` | ✅ On |
-| 🔔 Monitoring | Action Group + Health Alert | 2 | `enableNotifications` | ❌ Off |
-
-**Total: 54 parameters · 46 resources · 21 outputs**
-
----
-
-## ⚙️ 4 Playbooks
-
-### PB1: MDE Device Isolation
-
-> **Use case:** An employee's laptop is infected with RedLine Stealer. SpyCloud detects the stolen credentials. This playbook auto-isolates the device in Defender.
-
-```
-Sentinel Incident (sev 20+) → Extract machine ID → Search MDE
-  ├─ FOUND → Isolate (Full/Selective) → Tag → Comment → Log
-  └─ NOT FOUND → Log for manual review
-```
-
-### PB2: CA Identity Protection
-
-> **Use case:** A user's corporate password appears in a darknet breach. This playbook forces a password reset and kills all sessions before the attacker can use it.
-
-```
-Sentinel Incident (email) → Lookup user in Entra ID
-  ├─ FOUND → Reset password → Revoke sessions → Add to CA group → Log
-  └─ NOT FOUND → Log as external
-```
-
-### PB3: Credential Response + Teams Alert
-
-> **Use case:** SOC wants real-time Teams notifications when credentials are exposed, plus automated sign-in activity analysis.
-
-```
-Sentinel Incident → For each account:
-  → Check last 10 Entra sign-ins
-  → Force password reset
-  → Revoke sessions
-  → Send Teams MessageCard to SOC channel
-  → Add incident comment
-```
-
-### PB4: MDE Blocklist (Scheduled)
-
-> **Use case:** Every 4 hours, automatically scan for CRITICAL severity 25 infections and isolate matched devices before attackers can use stolen cookies/sessions.
-
-```
-Schedule (1-24h) → Query sev 25 records
-  → Match against MDE inventory
-  → Isolate + Tag "SpyCloud-Sev25-Infostealer"
-```
-
----
-
-## 🎯 22 Analytics Rules (All Disabled by Default)
+## 22 Analytics Rules
 
 | # | Rule | Sev | Use Case |
 |---|------|-----|----------|
-| 1 | Infostealer Exposure | 🔴 | Sev 20+ malware-stolen credentials |
-| 2 | Plaintext Password | 🔴 | Cleartext passwords — immediate attacker use |
-| 3 | Sensitive PII | 🔴 | SSN, bank, tax, health — compliance trigger |
-| 4 | Session Cookie Theft | 🔴 | Sev 25 — stolen cookies bypass MFA |
-| 5 | Device Re-Infection | 🔴 | Same device compromised again |
-| 6 | Multi-Domain Exposure | 🟠 | Creds for 5+ domains |
-| 7 | Geographic Anomaly | 🟠 | Infections from unusual countries |
-| 8 | High-Sighting Credential | 🟠 | Same creds in 3+ sources |
-| 9 | Remediation Gap | 🔴 | No response after 2+ hours |
-| 10 | AV Bypass | 🟢 | AV present but failed |
-| 11 | New Malware Family | 🟢 | New breach in catalog |
-| 12 | Data Health | 🟠 | No data for 3+ hours |
-| 13-16 | IdP Correlation (×4) | 🔴 | Okta, Duo, Ping, Entra |
-| 17 | Credential + Recent Sign-In | 🔴 | Compromised user signed in within 24h |
-| 18 | Breach Source Enrichment | 🟠 | Joins catalog for breach_title |
-| 19 | Executive/VIP Exposure | 🔴 | CEO/CFO/CISO accounts |
-| 20 | Password Reuse | 🔴 | Same password for 3+ domains |
-| 21 | Stale Exposure (7+ days) | 🟠 | SLA/compliance alert |
+| 1 | Infostealer Exposure | 🔴 High | Severity 20+ malware-stolen credentials |
+| 2 | Plaintext Password | 🔴 High | Cleartext passwords available to attackers |
+| 3 | Sensitive PII | 🔴 High | SSN, bank, tax, health data exposed |
+| 4 | Session Cookie Theft | 🔴 High | Stolen cookies/tokens bypass MFA |
+| 5 | Device Re-Infection | 🔴 High | Same device compromised again |
+| 6 | Multi-Domain Exposure | 🟠 Med | Credentials for 5+ domains |
+| 7 | Geographic Anomaly | 🟠 Med | Infections from unusual countries |
+| 8 | High-Sighting Credential | 🟠 Med | Same creds in 3+ sources |
+| 9 | Remediation Gap | 🔴 High | No auto-response after 2+ hours |
+| 10 | AV Bypass | 🟢 Info | AV present but failed |
+| 11 | New Malware Family | 🟢 Info | New breach source detected |
+| 12 | Data Ingestion Health | 🟠 Med | No data for 3+ hours |
+| 13-16 | IdP Correlation (×4) | 🔴 High | Okta, Duo, Ping, Entra cross-reference |
+| 17 | Credential + Sign-In | 🔴 High | Compromised user signed in within 24h |
+| 18 | Breach Enrichment | 🟠 Med | Joins catalog for breach context |
+| 19 | Executive/VIP | 🔴 High | CEO/CFO/CISO accounts exposed |
+| 20 | Password Reuse | 🔴 High | Same password for 3+ domains |
+| 21 | Stale Exposure | 🟠 Med | Unresolved exposure >7 days (SLA) |
 
 ---
 
-## 📊 Sentinel Workbook Dashboard
+## Security Copilot
 
-Deploys to: **Sentinel → Workbooks → SpyCloud Threat Intelligence Dashboard**
+**Plugin (28 skills):** User investigation, password analysis, severity/domain analysis, PII scanning, device forensics, breach catalog, MDE/CA remediation tracking, cross-table health.
 
-| Chart | Type | Shows |
-|-------|------|-------|
-| Exposure Overview | Tiles | Total, users, devices, sev 25, plaintext passwords |
-| Exposure Trend | Timechart | Daily count by severity |
-| Severity Distribution | Pie | 2/5/20/25 breakdown |
-| Top 20 Exposed Users | Table | Severity heatmap, plaintext count |
-| Password Types | Bar | MD5/SHA1/bcrypt/plaintext |
-| Top Targeted Domains | Bar | Most-attacked domains |
-| Top 20 Infected Devices | Table | Machine ID, hostname, severity |
-| Infections by Country | Bar | Geographic distribution |
-| Remediation Dashboard | Tiles | MDE + CA actions, remediation rate % |
-| Breach Catalog | Table | Recent breach sources |
+**Agent (30 skills):** Natural language investigation — "Investigate john@company.com", "Show our dark web exposure", "Which devices are infected?", "Do we have plaintext passwords exposed?"
 
 ---
 
-## 🤖 Security Copilot
+## Cross-Data-Source Correlation
 
-Upload `copilot/SpyCloud_Plugin.yaml` → **Sources → Custom** (28 KQL skills)
-Upload `copilot/SpyCloud_Agent.yaml` → **Build → Upload YAML** (30 skills + AI)
+Maximize value by enabling additional connectors:
 
----
-
-## 🔧 Post-Deployment
-
-### Step 1: Run post-deploy script (grants MDE + Graph API permissions)
-
-```bash
-chmod +x scripts/post-deploy.sh
-./scripts/post-deploy.sh -g spycloud-sentinel -w spycloud-ws
-```
-
-### Step 2: Verify data flow
-
-```kusto
-SpyCloudBreachWatchlist_CL | summarize count(), max(TimeGenerated)
-SpyCloudBreachCatalog_CL | summarize count(), max(TimeGenerated)
-```
-
-### Step 3: Enable analytics rules
-
-Sentinel → Analytics → filter "SpyCloud" → review → enable individually
-
-### Step 4: Upload Copilot files
-
-| File | Destination | Settings |
-|------|------------|----------|
-| `copilot/SpyCloud_Plugin.yaml` | Sources → Custom → Upload | TenantId, SubscriptionId, ResourceGroupName, WorkspaceName |
-| `copilot/SpyCloud_Agent.yaml` | Build → Upload YAML → Publish | Same settings |
-
-### Step 5: Configure Entra ID logs (manual — cannot be automated)
-
-Entra ID → Monitoring → Diagnostic settings → Add → check SignInLogs, AuditLogs, RiskyUsers → Send to workspace
-
-### Step 6: Install IdP connectors (optional)
-
-| Provider | Install | Enables Rule |
-|----------|---------|-------------|
-| Okta | Content Hub → "Okta SSO" | #13 |
-| Duo | Content Hub → "Cisco Duo" | #14 |
-| Ping | AMA syslog/API | #15 |
-| Entra | Diagnostic settings | #16 |
-
-### Verification commands
-
-```bash
-az resource list -g spycloud-sentinel --query "[].{Type:type,Name:name}" -o table
-az logic workflow list -g spycloud-sentinel --query "[].{Name:name,State:state}" -o table
-az monitor data-collection endpoint show --name dce-spycloud-spycloud-ws -g spycloud-sentinel --query logsIngestion.endpoint -o tsv
-az monitor data-collection rule show --name dcr-spycloud-spycloud-ws -g spycloud-sentinel --query immutableId -o tsv
-```
+| Connector | Install | Enables |
+|-----------|---------|---------|
+| **Entra ID** | Diagnostic Settings → SignInLogs | Rule #16 (SpyCloud × Entra), Rule #17 (Credential + Sign-In) |
+| **Microsoft Defender XDR** | Content Hub | MDE alert correlation with SpyCloud infections |
+| **Okta SSO** | Content Hub | Rule #13 (SpyCloud × Okta) |
+| **Cisco Duo** | Content Hub | Rule #14 (SpyCloud × Duo) |
+| **Ping Identity** | AMA syslog/API | Rule #15 (SpyCloud × Ping) |
+| **Microsoft 365** | Content Hub | Compromised user email/file access correlation |
+| **Defender for Cloud Apps** | Content Hub | SaaS app usage after credential compromise |
+| **Threat Intelligence** | Content Hub | SpyCloud IOCs matched against TI feeds |
 
 ---
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
-| `Missing required permissions for Sentinel on playbook` | Fixed v5.6 — role assignments use Sentinel Automation Contributor + automation rule depends on role completion |
-| `RoleAssignmentUpdateNotPermitted` | Fixed v5.6 — new GUID seeds per version to avoid collision with old deployments |
-| `No valid tactic for T1078` | Fixed v5.6 — ALL T1078 rules include InitialAccess |
-| `table not found` in workbook | Fixed v5.6 — queries use `union isfuzzy=true` fallback |
-| `ResourceNotFound` for workspace | Set `createNewWorkspace=true` |
-| No data flowing | Check Sentinel → Data connectors → SpyCloud status |
-| Logic Apps not triggering | Run `post-deploy.sh` to grant API permissions |
-| Copilot skills empty | Verify TenantId, SubscriptionId, ResourceGroupName, WorkspaceName |
-| Teams alerts not sending | Regenerate webhook: Teams → Channel → Connectors |
+| "Workspace not onboarded to Sentinel" | Fixed v6.1 — OnboardingStates API always enables Sentinel |
+| "RoleAssignmentUpdateNotPermitted" | Fixed v6.4 — role assignments removed from template |
+| "show_plain_password expected String" | Fixed v7.1 — all CCF dropdown params are type=array |
+| "apiRegion expected String" | Fixed v7.1 — removed from connector params, hardcoded US |
+| No data after connecting | Wait 5-10 min. Check: Sentinel → Data connectors → SpyCloud status |
+| Workbook shows "no results" | Data needs to flow first. Tables are empty until connector activates |
+| Logic App not triggering | Check deployment script logs + grant admin consent for API permissions |
+| KQL parse error in workbook | Fixed v7.0 — all queries rewritten without format_datetime |
 
 ---
 
-## 📁 Repository
+## Repository Structure
 
 ```
 SPYCLOUD-SENTINEL/
-├── azuredeploy.json                 ← ARM template (54 params, 46 resources)
-├── azuredeploy.parameters.json      ← Sample parameters
-├── createUiDefinition.json          ← Custom portal wizard (39 outputs)
-├── .github/workflows/deploy.yml     ← GitHub Actions CI/CD
+├── azuredeploy.json                    ← ARM template (43 params, 41 resources)
+├── azuredeploy.parameters.json         ← Sample parameters
+├── createUiDefinition.json             ← Portal wizard (30 outputs, 3 steps)
+├── .github/workflows/deploy.yml        ← GitHub Actions CI/CD
 ├── scripts/
-│   ├── deploy-all.sh                ← Interactive guided deployment
-│   └── post-deploy.sh              ← Post-deploy RBAC + API perms
+│   ├── deploy-all.sh                   ← Interactive guided deployment (9 phases)
+│   ├── post-deploy.sh                  ← Standalone RBAC + API permissions
+│   └── verify-deployment.sh            ← 10-section verification with portal links
 ├── copilot/
-│   ├── SpyCloud_Plugin.yaml         ← 28 KQL skills
-│   └── SpyCloud_Agent.yaml          ← 30 skills + AI agent
+│   ├── SpyCloud_Plugin.yaml            ← Security Copilot plugin (28 skills)
+│   └── SpyCloud_Agent.yaml             ← Interactive Copilot agent (30 skills)
 ├── workbooks/
-│   └── SpyCloud-ThreatIntel-Dashboard.json ← Sentinel workbook
+│   └── SpyCloud-ThreatIntel-Dashboard.json ← Sentinel workbook (12 charts)
 └── docs/
-    ├── images/SpyCloud-Logo-white.png
+    ├── images/ (3 logo variants)
     ├── architecture.md
     └── azure-sp-setup.md
 ```
+
+---
+
+## Roadmap
+
+| Status | Feature |
+|--------|---------|
+| 🟢 Shipped | 4 playbooks, 22 rules, workbook, Copilot plugin+agent, auto-deploy script |
+| 🟡 Next | Jupyter notebooks (exposure investigation, infection analysis, org report) |
+| 🟡 Next | Slack webhook wired into Credential Response playbook |
+| 🟡 Next | ServiceNow ticket creation in playbooks |
+| 🟡 Next | Enhanced Copilot skills (cross-data-source, hunt queries, chained investigation) |
+| 🔵 Planned | Multiple workbook dashboards (Executive Summary, SOC Operations, Compliance) |
+| 🔵 Planned | MCP server integrations (Atlassian Jira, Gmail notifications) |
+| 🔵 Planned | A2A agent orchestration for multi-step remediation |
+| 🔵 Planned | Custom VIP/executive watchlist with elevated alerting |
+| 🔵 Planned | EU API region support (currently hardcoded US) |
+| ⚪ Future | Automated connector activation (pending Sentinel CCF platform support) |
+| ⚪ Future | Sentinel SOAR notebook for guided investigation |
 
 ---
 
