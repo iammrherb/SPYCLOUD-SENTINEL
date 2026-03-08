@@ -514,6 +514,22 @@
             "metadata": {
                 "description": "Cost center tag for billing."
             }
+        },
+        "newWorkspaceSku": {
+            "type": "string",
+            "defaultValue": "PerGB2018",
+            "allowedValues": [
+                "PerGB2018",
+                "CapacityReservation",
+                "Free",
+                "Standalone",
+                "Standard",
+                "Premium",
+                "PerNode"
+            ],
+            "metadata": {
+                "description": "Pricing tier for the NEW Log Analytics workspace (only used when createNewWorkspace=TRUE). PerGB2018 = Pay-As-You-Go, CapacityReservation = committed tier with discounts. Ignored when using an existing workspace."
+            }
         }
     },
     "variables": {
