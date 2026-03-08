@@ -2350,7 +2350,7 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
+                  "queryWindowInMin": 30,
                   "headers": {
                     "Accept": "application/json"
                   },
@@ -2456,7 +2456,7 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
+                  "queryWindowInMin": 30,
                   "headers": {
                     "Accept": "application/json"
                   },
@@ -2567,7 +2567,9 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('mdePlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": "[variables('allTags')]",
+      "tags": {
+        "solution": "SpyCloud-Sentinel"
+      },
       "identity": {
         "type": "SystemAssigned"
       },
@@ -2600,6 +2602,22 @@
             "mdeTagName": {
               "defaultValue": "[parameters('mdeTagName')]",
               "type": "String"
+            },
+            "slackWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "teamsWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "notificationEmail": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "serviceNowUrl": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -2773,6 +2791,155 @@
                         },
                         "path": "/Incidents/Comment"
                       }
+                    },
+                    "Notify_Slack": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('slackWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_Slack": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('slackWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "text": ":computer: *SpyCloud MDE* | Device isolated: @{items('For_each_host')?['HostName']} | @{utcNow()}"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Add_comment_to_incident": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
+                    },
+                    "Notify_Teams": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('teamsWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_Teams": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('teamsWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "@type": "MessageCard",
+                              "@context": "http://schema.org/extensions",
+                              "themeColor": "d63384",
+                              "summary": "SpyCloud MDE \u2014 Device Isolated",
+                              "sections": [
+                                {
+                                  "activityTitle": "SpyCloud MDE \u2014 Device Isolated",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                                  "text": "Device isolated in Defender due to infostealer infection."
+                                }
+                              ]
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Notify_Slack": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
+                    },
+                    "Notify_Email": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('notificationEmail')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_SendMail": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "https://graph.microsoft.com/v1.0/users/@{parameters('notificationEmail')}/sendMail",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "message": {
+                                "subject": "SpyCloud MDE \u2014 Device Isolated",
+                                "body": {
+                                  "contentType": "HTML",
+                                  "content": "<h2>SpyCloud MDE \u2014 Device Isolated</h2><p>Device isolated in Defender due to infostealer infection.</p>"
+                                },
+                                "toRecipients": [
+                                  {
+                                    "emailAddress": {
+                                      "address": "@{parameters('notificationEmail')}"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "authentication": {
+                              "type": "ManagedServiceIdentity"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Notify_Teams": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
                     }
                   },
                   "else": {
@@ -2799,7 +2966,10 @@
               }
             }
           },
-          "outputs": {}
+          "outputs": {},
+          "metadata": {
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+          }
         },
         "parameters": {
           "$connections": {
@@ -2815,6 +2985,18 @@
                 }
               }
             }
+          },
+          "slackWebhook": {
+            "value": "[parameters('slackWebhookUrl')]"
+          },
+          "teamsWebhook": {
+            "value": "[parameters('teamsWebhookUrl')]"
+          },
+          "notificationEmail": {
+            "value": "[parameters('notificationEmail')]"
+          },
+          "serviceNowUrl": {
+            "value": "[parameters('serviceNowInstance')]"
           }
         }
       }
@@ -2825,7 +3007,9 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('caPlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": "[variables('allTags')]",
+      "tags": {
+        "solution": "SpyCloud-Sentinel"
+      },
       "identity": {
         "type": "SystemAssigned"
       },
@@ -2854,6 +3038,22 @@
             "caSecurityGroupId": {
               "defaultValue": "[parameters('caSecurityGroupId')]",
               "type": "String"
+            },
+            "slackWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "teamsWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "notificationEmail": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "serviceNowUrl": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -3063,6 +3263,155 @@
                         },
                         "path": "/Incidents/Comment"
                       }
+                    },
+                    "Notify_Slack": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('slackWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_Slack": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('slackWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "text": ":lock: *SpyCloud CA* | Identity protected: @{items('For_each_account')?['Name']} | Password reset + sessions revoked | @{utcNow()}"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Add_comment_to_incident_CA": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
+                    },
+                    "Notify_Teams": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('teamsWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_Teams": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('teamsWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "@type": "MessageCard",
+                              "@context": "http://schema.org/extensions",
+                              "themeColor": "d63384",
+                              "summary": "SpyCloud CA \u2014 Identity Protected",
+                              "sections": [
+                                {
+                                  "activityTitle": "SpyCloud CA \u2014 Identity Protected",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                                  "text": "Password reset and sessions revoked for compromised user."
+                                }
+                              ]
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Notify_Slack": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
+                    },
+                    "Notify_Email": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('notificationEmail')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_SendMail": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "https://graph.microsoft.com/v1.0/users/@{parameters('notificationEmail')}/sendMail",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "message": {
+                                "subject": "SpyCloud CA \u2014 Identity Protected",
+                                "body": {
+                                  "contentType": "HTML",
+                                  "content": "<h2>SpyCloud CA \u2014 Identity Protected</h2><p>Password reset and sessions revoked for compromised user.</p>"
+                                },
+                                "toRecipients": [
+                                  {
+                                    "emailAddress": {
+                                      "address": "@{parameters('notificationEmail')}"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "authentication": {
+                              "type": "ManagedServiceIdentity"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Notify_Teams": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
                     }
                   },
                   "else": {
@@ -3089,7 +3438,10 @@
               }
             }
           },
-          "outputs": {}
+          "outputs": {},
+          "metadata": {
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+          }
         },
         "parameters": {
           "$connections": {
@@ -3105,6 +3457,18 @@
                 }
               }
             }
+          },
+          "slackWebhook": {
+            "value": "[parameters('slackWebhookUrl')]"
+          },
+          "teamsWebhook": {
+            "value": "[parameters('teamsWebhookUrl')]"
+          },
+          "notificationEmail": {
+            "value": "[parameters('notificationEmail')]"
+          },
+          "serviceNowUrl": {
+            "value": "[parameters('serviceNowInstance')]"
           }
         }
       }
@@ -4109,7 +4473,9 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('credResponsePlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": "[variables('allTags')]",
+      "tags": {
+        "solution": "SpyCloud-Sentinel"
+      },
       "identity": {
         "type": "SystemAssigned"
       },
@@ -4136,8 +4502,20 @@
               "type": "String"
             },
             "teamsWebhook": {
-              "defaultValue": "[parameters('teamsChannelWebhook')]",
-              "type": "String"
+              "type": "String",
+              "defaultValue": ""
+            },
+            "slackWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "notificationEmail": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "serviceNowUrl": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -4236,57 +4614,6 @@
                     ]
                   }
                 },
-                "Send_Teams_alert": {
-                  "type": "Http",
-                  "inputs": {
-                    "method": "POST",
-                    "uri": "@parameters('teamsWebhook')",
-                    "headers": {
-                      "Content-Type": "application/json"
-                    },
-                    "body": {
-                      "@@type": "MessageCard",
-                      "@@context": "http://schema.org/extensions",
-                      "themeColor": "DC2626",
-                      "summary": "SpyCloud Credential Exposure Alert",
-                      "sections": [
-                        {
-                          "activityTitle": "\ud83d\udee1\ufe0f SpyCloud \u2014 Credential Exposure Detected",
-                          "facts": [
-                            {
-                              "name": "User",
-                              "value": "@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}"
-                            },
-                            {
-                              "name": "Incident",
-                              "value": "@{triggerBody()?['object']?['properties']?['title']}"
-                            },
-                            {
-                              "name": "Severity",
-                              "value": "@{triggerBody()?['object']?['properties']?['severity']}"
-                            },
-                            {
-                              "name": "Actions Taken",
-                              "value": "Password reset forced, sessions revoked"
-                            }
-                          ],
-                          "markdown": true
-                        }
-                      ]
-                    }
-                  },
-                  "runAfter": {
-                    "Revoke_all_sessions": [
-                      "Succeeded"
-                    ]
-                  },
-                  "runtimeConfiguration": {
-                    "staticResult": {
-                      "name": "Send_Teams_alert0",
-                      "staticResultOptions": "Disabled"
-                    }
-                  }
-                },
                 "Add_incident_comment": {
                   "type": "ApiConnection",
                   "inputs": {
@@ -4309,6 +4636,201 @@
                       "Skipped"
                     ]
                   }
+                },
+                "Notify_Slack": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('slackWebhook')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "HTTP_Slack": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@parameters('slackWebhook')",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "text": ":rotating_light: *SpyCloud Credential Response* | @{items('For_each_account')?['Name']} | Reset + Revoke + Investigated | @{utcNow()}"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Add_incident_comment": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
+                },
+                "Notify_Teams": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('teamsWebhook')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "HTTP_Teams": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@parameters('teamsWebhook')",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "@type": "MessageCard",
+                          "@context": "http://schema.org/extensions",
+                          "themeColor": "d63384",
+                          "summary": "SpyCloud Credential Response",
+                          "sections": [
+                            {
+                              "activityTitle": "SpyCloud Credential Response",
+                              "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                              "text": "Credential exposure response completed: sign-in check, password reset, session revocation."
+                            }
+                          ]
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Notify_Slack": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
+                },
+                "Notify_Email": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('notificationEmail')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "HTTP_SendMail": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "https://graph.microsoft.com/v1.0/users/@{parameters('notificationEmail')}/sendMail",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "message": {
+                            "subject": "SpyCloud Credential Response",
+                            "body": {
+                              "contentType": "HTML",
+                              "content": "<h2>SpyCloud Credential Response</h2><p>Credential exposure response completed: sign-in check, password reset, session revocation.</p>"
+                            },
+                            "toRecipients": [
+                              {
+                                "emailAddress": {
+                                  "address": "@{parameters('notificationEmail')}"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "authentication": {
+                          "type": "ManagedServiceIdentity"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Notify_Teams": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
+                },
+                "Create_ServiceNow_Incident": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('serviceNowUrl')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "HTTP_SNOW": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@{parameters('serviceNowUrl')}/api/now/table/incident",
+                        "headers": {
+                          "Content-Type": "application/json",
+                          "Accept": "application/json"
+                        },
+                        "body": {
+                          "short_description": "SpyCloud: Credential exposure - @{items('For_each_account')?['Name']}",
+                          "description": "Compromised credentials detected and remediated automatically.",
+                          "urgency": "2",
+                          "impact": "2",
+                          "category": "Security"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Notify_Email": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
                 }
               },
               "runAfter": {
@@ -4317,6 +4839,9 @@
                 ]
               }
             }
+          },
+          "metadata": {
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           }
         },
         "parameters": {
@@ -4333,6 +4858,18 @@
                 }
               }
             }
+          },
+          "slackWebhook": {
+            "value": "[parameters('slackWebhookUrl')]"
+          },
+          "teamsWebhook": {
+            "value": "[parameters('teamsWebhookUrl')]"
+          },
+          "notificationEmail": {
+            "value": "[parameters('notificationEmail')]"
+          },
+          "serviceNowUrl": {
+            "value": "[parameters('serviceNowInstance')]"
           }
         }
       }
@@ -4343,7 +4880,9 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('mdeBlocklistPlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": "[variables('allTags')]",
+      "tags": {
+        "solution": "SpyCloud-Sentinel"
+      },
       "identity": {
         "type": "SystemAssigned"
       },
@@ -4367,6 +4906,22 @@
             "dcrImmutableId": {
               "defaultValue": "[parameters('dcrImmutableId')]",
               "type": "String"
+            },
+            "slackWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "teamsWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "notificationEmail": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "serviceNowUrl": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -4462,6 +5017,155 @@
                           "Failed"
                         ]
                       }
+                    },
+                    "Notify_Slack": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('slackWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_Slack": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('slackWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "text": ":shield: *SpyCloud Sev25* | Device isolated: @{items('For_each_infection')?['infected_machine_id']} | @{utcNow()}"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Tag_device_in_MDE": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
+                    },
+                    "Notify_Teams": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('teamsWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_Teams": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('teamsWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "@type": "MessageCard",
+                              "@context": "http://schema.org/extensions",
+                              "themeColor": "d63384",
+                              "summary": "SpyCloud Blocklist \u2014 Sev25 Isolation",
+                              "sections": [
+                                {
+                                  "activityTitle": "SpyCloud Blocklist \u2014 Sev25 Isolation",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                                  "text": "Critical severity 25 infected device automatically isolated."
+                                }
+                              ]
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Notify_Slack": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
+                    },
+                    "Notify_Email": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('notificationEmail')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "HTTP_SendMail": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "https://graph.microsoft.com/v1.0/users/@{parameters('notificationEmail')}/sendMail",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "message": {
+                                "subject": "SpyCloud Blocklist \u2014 Sev25 Isolation",
+                                "body": {
+                                  "contentType": "HTML",
+                                  "content": "<h2>SpyCloud Blocklist \u2014 Sev25 Isolation</h2><p>Critical severity 25 infected device automatically isolated.</p>"
+                                },
+                                "toRecipients": [
+                                  {
+                                    "emailAddress": {
+                                      "address": "@{parameters('notificationEmail')}"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "authentication": {
+                              "type": "ManagedServiceIdentity"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Notify_Teams": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
                     }
                   },
                   "else": {
@@ -4480,6 +5184,23 @@
                 ]
               }
             }
+          },
+          "metadata": {
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+          }
+        },
+        "parameters": {
+          "slackWebhook": {
+            "value": "[parameters('slackWebhookUrl')]"
+          },
+          "teamsWebhook": {
+            "value": "[parameters('teamsWebhookUrl')]"
+          },
+          "notificationEmail": {
+            "value": "[parameters('notificationEmail')]"
+          },
+          "serviceNowUrl": {
+            "value": "[parameters('serviceNowInstance')]"
           }
         }
       }
@@ -4842,6 +5563,256 @@
           }
         ],
         "scriptContent": "#!/bin/bash\n# SpyCloud Sentinel \u2014 Post-Deployment (all steps non-fatal)\n# If the managed identity lacks permissions, steps will skip gracefully.\n# Run verify-deployment.sh from Cloud Shell to check + fix anything missed.\n\necho \"SpyCloud Sentinel \u2014 Post-Deployment\"\n\necho \"[1/7] Waiting 90s for resource provisioning...\"\nsleep 90\n\necho \"[2/7] Resolving DCE...\"\nDCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null) || true\nfor i in 1 2 3 4; do\n  [ -n \"$DCE_URI\" ] && break\n  sleep 20\n  DCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null) || true\ndone\necho \"  DCE=${DCE_URI:-NOT_RESOLVED}\"\n\necho \"[3/7] Resolving DCR...\"\nDCR_ID=\"\"\nDCR_RID=\"\"\nfor i in 1 2 3 4 5; do\n  DCR_ID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" --query \"immutableId\" -o tsv 2>/dev/null) || true\n  DCR_RID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" --query \"id\" -o tsv 2>/dev/null) || true\n  [ -n \"$DCR_ID\" ] && break\n  sleep 20\ndone\necho \"  DCR=${DCR_ID:-NOT_RESOLVED}\"\n\necho \"[4/7] Assigning Monitoring Metrics Publisher...\"\nif [ -n \"$DCR_RID\" ]; then\n  for PB in $MDE_PB $CA_PB $CRED_PB $BL_PB; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    if [ -n \"$PID\" ]; then\n      az role assignment create --assignee-object-id \"$PID\" --assignee-principal-type ServicePrincipal         --role \"3913510d-42f4-4e42-8a64-420c390055eb\" --scope \"$DCR_RID\" 2>/dev/null         && echo \"  $PB \u2713\" || echo \"  $PB: exists or no permission\"\n    fi\n  done\nfi\n\necho \"[5/7] MDE API permissions...\"\nMDE_SP=$(az ad sp show --id \"fc780465-2017-40d4-a0c5-307022471b92\" --query \"id\" -o tsv 2>/dev/null) || true\nif [ -n \"$MDE_SP\" ]; then\n  for PB in \"$MDE_PB\" \"$BL_PB\"; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    [ -z \"$PID\" ] && continue\n    for PERM in \"Machine.Isolate\" \"Machine.ReadWrite.All\"; do\n      RID=$(az ad sp show --id \"fc780465-2017-40d4-a0c5-307022471b92\" --query \"appRoles[?value=='$PERM'].id | [0]\" -o tsv 2>/dev/null) || true\n      [ -n \"$RID\" ] && az rest --method POST         --uri \"https://graph.microsoft.com/v1.0/servicePrincipals/$MDE_SP/appRoleAssignedTo\"         --body \"{\\\"principalId\\\":\\\"$PID\\\",\\\"resourceId\\\":\\\"$MDE_SP\\\",\\\"appRoleId\\\":\\\"$RID\\\"}\"         2>/dev/null && echo \"  $PERM \u2192 $PB \u2713\" || echo \"  $PERM: exists or no permission\"\n    done\n  done\nfi\n\necho \"[6/7] Graph API permissions...\"\nGRAPH_SP=$(az ad sp show --id \"00000003-0000-0000-c000-000000000000\" --query \"id\" -o tsv 2>/dev/null) || true\nif [ -n \"$GRAPH_SP\" ]; then\n  for PB in \"$CA_PB\" \"$CRED_PB\"; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    [ -z \"$PID\" ] && continue\n    for PERM in \"User.ReadWrite.All\" \"Directory.ReadWrite.All\"; do\n      RID=$(az ad sp show --id \"00000003-0000-0000-c000-000000000000\" --query \"appRoles[?value=='$PERM'].id | [0]\" -o tsv 2>/dev/null) || true\n      [ -n \"$RID\" ] && az rest --method POST         --uri \"https://graph.microsoft.com/v1.0/servicePrincipals/$GRAPH_SP/appRoleAssignedTo\"         --body \"{\\\"principalId\\\":\\\"$PID\\\",\\\"resourceId\\\":\\\"$GRAPH_SP\\\",\\\"appRoleId\\\":\\\"$RID\\\"}\"         2>/dev/null && echo \"  $PERM \u2192 $PB \u2713\" || echo \"  $PERM: exists or no permission\"\n    done\n  done\nfi\n\necho \"[7/7] Automation rule...\"\nMDE_LA=$(az logic workflow show --name \"$MDE_PB\" -g \"$RG\" --query id -o tsv 2>/dev/null) || true\nWS_ID=$(az monitor log-analytics workspace show --workspace-name \"$WS\" -g \"$RG\" --query id -o tsv 2>/dev/null) || true\nTID=$(az account show --query tenantId -o tsv 2>/dev/null) || true\nif [ -n \"$MDE_LA\" ] && [ -n \"$WS_ID\" ]; then\n  az rest --method PUT     --uri \"https://management.azure.com${WS_ID}/providers/Microsoft.SecurityInsights/automationRules/spycloud-auto-rule?api-version=2023-02-01-preview\"     --body \"{\\\"properties\\\":{\\\"displayName\\\":\\\"SpyCloud Auto Remediation\\\",\\\"order\\\":1,\\\"triggeringLogic\\\":{\\\"isEnabled\\\":true,\\\"triggersOn\\\":\\\"Incidents\\\",\\\"triggersWhen\\\":\\\"Created\\\",\\\"conditions\\\":[]},\\\"actions\\\":[{\\\"order\\\":1,\\\"actionType\\\":\\\"RunPlaybook\\\",\\\"actionConfiguration\\\":{\\\"logicAppResourceId\\\":\\\"$MDE_LA\\\",\\\"tenantId\\\":\\\"$TID\\\"}}]}}\"     2>/dev/null && echo \"  Automation rule \u2713\" || echo \"  Automation rule: needs manual setup\"\nfi\n\necho \"\"\necho \"DONE. DCE=$DCE_URI DCR=$DCR_ID\"\necho \"Verify: curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g $RG -w $WS\"\n"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxDNS\u2014InfectedUser'))]",
+      "apiVersion": "2023-02-01",
+      "kind": "Scheduled",
+      "location": "[parameters('deploymentRegion')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud \u00d7 DNS \u2014 Infected User Resolving Malicious Domains",
+        "description": "Cross-data correlation rule: SpyCloud \u00d7 DNS \u2014 Infected User Resolving Malicious Domains",
+        "severity": "High",
+        "enabled": false,
+        "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 20\n| distinct email, target_domain;\nDnsEvents\n| where TimeGenerated > ago(1d)\n| where Name has_any (exposed | project target_domain)\n| join kind=inner exposed on $left.Name == $right.target_domain\n| project TimeGenerated, ClientIP, Name, email, target_domain, QueryType",
+        "queryFrequency": "PT6H",
+        "queryPeriod": "P7D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "InitialAccess",
+          "CommandAndControl"
+        ],
+        "techniques": [
+          "T1071",
+          "T1078"
+        ],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxNetwork\u2014Infected'))]",
+      "apiVersion": "2023-02-01",
+      "kind": "Scheduled",
+      "location": "[parameters('deploymentRegion')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud \u00d7 Network \u2014 Infected IP in Device Network Events",
+        "description": "Cross-data correlation rule: SpyCloud \u00d7 Network \u2014 Infected IP in Device Network Events",
+        "severity": "High",
+        "enabled": false,
+        "query": "let ips = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 20\n| mv-expand ip = ip_addresses\n| extend src_ip = tostring(ip)\n| where isnotempty(src_ip)\n| distinct src_ip, email, infected_machine_id;\nDeviceNetworkEvents\n| where TimeGenerated > ago(1d)\n| where RemoteIP in~ (ips | project src_ip)\n| join kind=inner ips on $left.RemoteIP == $right.src_ip\n| project TimeGenerated, DeviceName, RemoteIP, RemoteUrl, email, infected_machine_id",
+        "queryFrequency": "PT6H",
+        "queryPeriod": "P7D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "InitialAccess",
+          "LateralMovement"
+        ],
+        "techniques": [
+          "T1078",
+          "T1021"
+        ],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxMDEDevices\u2014Infec'))]",
+      "apiVersion": "2023-02-01",
+      "kind": "Scheduled",
+      "location": "[parameters('deploymentRegion')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud \u00d7 MDE Devices \u2014 Infected Machine in Defender Inventory",
+        "description": "Cross-data correlation rule: SpyCloud \u00d7 MDE Devices \u2014 Infected Machine in Defender Inventory",
+        "severity": "High",
+        "enabled": false,
+        "query": "let devices = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 20 and isnotempty(user_hostname)\n| distinct user_hostname, email, severity, infected_machine_id;\nDeviceInfo\n| where TimeGenerated > ago(1d)\n| join kind=inner devices on $left.DeviceName == $right.user_hostname\n| project TimeGenerated, DeviceName, DeviceId, OSPlatform, email, severity, infected_machine_id",
+        "queryFrequency": "PT6H",
+        "queryPeriod": "P7D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "InitialAccess",
+          "Execution"
+        ],
+        "techniques": [
+          "T1078",
+          "T1059"
+        ],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxMDEAlerts\u2014Exposu'))]",
+      "apiVersion": "2023-02-01",
+      "kind": "Scheduled",
+      "location": "[parameters('deploymentRegion')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud \u00d7 MDE Alerts \u2014 Exposure Correlated with Defender Alert",
+        "description": "Cross-data correlation rule: SpyCloud \u00d7 MDE Alerts \u2014 Exposure Correlated with Defender Alert",
+        "severity": "High",
+        "enabled": false,
+        "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| distinct email;\nAlertInfo\n| where TimeGenerated > ago(2d)\n| join kind=inner AlertEvidence on AlertId\n| where EntityType == 'User'\n| extend upn = tolower(strcat(AccountName, '@', AccountDomain))\n| where upn in~ (exposed)\n| project TimeGenerated, AlertId, Title, Severity, upn, Category",
+        "queryFrequency": "PT6H",
+        "queryPeriod": "P7D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "InitialAccess",
+          "CredentialAccess"
+        ],
+        "techniques": [
+          "T1078",
+          "T1110"
+        ],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxCloudApps\u2014Compro'))]",
+      "apiVersion": "2023-02-01",
+      "kind": "Scheduled",
+      "location": "[parameters('deploymentRegion')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud \u00d7 Cloud Apps \u2014 Compromised User Accessing SaaS",
+        "description": "Cross-data correlation rule: SpyCloud \u00d7 Cloud Apps \u2014 Compromised User Accessing SaaS",
+        "severity": "Medium",
+        "enabled": false,
+        "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| distinct email;\nCloudAppEvents\n| where TimeGenerated > ago(2d)\n| where AccountId in~ (exposed)\n| where ActionType in ('FileDownloaded','FileUploaded','FileShared','MailSend')\n| summarize Actions=count(), Apps=dcount(Application) by AccountId, Application, ActionType",
+        "queryFrequency": "PT6H",
+        "queryPeriod": "P7D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "Collection",
+          "Exfiltration"
+        ],
+        "techniques": [
+          "T1530",
+          "T1567"
+        ],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxEntraRisk\u2014Expose'))]",
+      "apiVersion": "2023-02-01",
+      "kind": "Scheduled",
+      "location": "[parameters('deploymentRegion')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud \u00d7 Entra Risk \u2014 Exposed User Flagged Risky",
+        "description": "Cross-data correlation rule: SpyCloud \u00d7 Entra Risk \u2014 Exposed User Flagged Risky",
+        "severity": "High",
+        "enabled": false,
+        "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| distinct email;\nAADUserRiskEvents\n| where TimeGenerated > ago(2d)\n| where UserPrincipalName in~ (exposed)\n| project TimeGenerated, UserPrincipalName, RiskLevel, RiskState, RiskDetail",
+        "queryFrequency": "PT6H",
+        "queryPeriod": "P7D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": [
+          "InitialAccess"
+        ],
+        "techniques": [
+          "T1078"
+        ],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities"
+          }
+        }
       }
     }
   ],
