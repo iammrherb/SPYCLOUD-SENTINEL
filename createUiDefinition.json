@@ -436,6 +436,28 @@
                                     "required": false
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "jiraWebhookUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Jira Automation Webhook URL (optional)",
+                                "placeholder": "https://automation.atlassian.com/pro/hooks/...",
+                                "toolTip": "Jira Automation webhook URL. The Credential Response playbook creates Jira issues for credential exposures. Configure: Jira \u2192 Project Settings \u2192 Automation \u2192 Create Rule \u2192 Incoming Webhook.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "azureDevOpsWebhookUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Azure DevOps Service Hook URL (optional)",
+                                "placeholder": "https://dev.azure.com/...",
+                                "toolTip": "Azure DevOps service hook URL. Creates work items for credential exposures. Configure: DevOps \u2192 Project Settings \u2192 Service hooks.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
                             }
                         ],
                         "visible": true
@@ -540,7 +562,9 @@
             "tagEnvironment": "[steps('securityConfig').sectionTags.tagEnvironment]",
             "tagOwner": "[steps('securityConfig').sectionTags.tagOwner]",
             "tagCostCenter": "[steps('securityConfig').sectionTags.tagCostCenter]",
-            "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]"
+            "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]",
+            "jiraWebhookUrl": "[steps('securityConfig').sectionIntegrations.jiraWebhookUrl]",
+            "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]"
         }
     }
 }
