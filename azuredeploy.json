@@ -3559,9 +3559,7 @@
                 "[resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName'))]",
                 "[resourceId('Microsoft.Logic/workflows', variables('caPlaybookName'))]",
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-                "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
-                "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), 'sentinel-automation-v54', subscription().subscriptionId))]",
-                "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), 'sentinel-automation-v54', subscription().subscriptionId))]"
+                "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
             ],
             "properties": {
                 "displayName": "SpyCloud \u2014 Auto-Remediate Infostealer Incidents",
@@ -3608,7 +3606,7 @@
             "condition": "[parameters('enableMdePlaybook')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), 'sentinel-automation-v54', subscription().subscriptionId)]",
+            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), 'sentinel-v55', subscription().subscriptionId)]",
             "scope": "[variables('workspaceResourceId')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName'))]",
@@ -3624,7 +3622,7 @@
             "condition": "[parameters('enableCaPlaybook')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), 'sentinel-automation-v54', subscription().subscriptionId)]",
+            "name": "[guid(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), 'sentinel-v55', subscription().subscriptionId)]",
             "scope": "[variables('workspaceResourceId')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Logic/workflows', variables('caPlaybookName'))]",
@@ -4599,7 +4597,7 @@
             "condition": "[parameters('enablePostDeployScript')]",
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)), 'contributor-v54', subscription().subscriptionId)]",
+            "name": "[guid(concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)), 'contributor-v55', subscription().subscriptionId)]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)))]"
             ],
