@@ -242,6 +242,100 @@
                             }
                         ],
                         "visible": true
+                    },
+                    {
+                        "name": "sectionAdvanced",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Advanced Settings",
+                        "elements": [
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Key Vault Name (leave blank for auto-generated)",
+                                "defaultValue": "",
+                                "placeholder": "e.g., kv-spycloud-prod (auto-generated if blank)",
+                                "toolTip": "Globally unique name for Azure Key Vault (3-24 chars, alphanumeric + hyphens, start with letter). Leave blank to auto-generate a unique name based on your resource group and workspace. The Key Vault stores your SpyCloud API key as a secret with RBAC authorization and soft-delete protection.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^[a-zA-Z][a-zA-Z0-9-]{2,23}$",
+                                    "validationMessage": "3-24 characters: letters, numbers, hyphens. Must start with a letter."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "workspacePricingTier",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Workspace Pricing Tier",
+                                "defaultValue": "Pay-as-you-go (PerGB2018)",
+                                "toolTip": "Log Analytics workspace pricing tier. Pay-as-you-go is recommended for most deployments. Commitment tiers offer discounts for predictable daily ingestion volumes.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Pay-as-you-go (PerGB2018)",
+                                            "value": "PerGB2018"
+                                        },
+                                        {
+                                            "label": "Commitment Tier - 100 GB/day",
+                                            "value": "CapacityReservation"
+                                        },
+                                        {
+                                            "label": "Free Tier (limited)",
+                                            "value": "Free"
+                                        },
+                                        {
+                                            "label": "Standalone",
+                                            "value": "Standalone"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "resourceTags",
+                                "type": "Microsoft.Common.TagsByResource",
+                                "resources": [
+                                    "Microsoft.OperationalInsights/workspaces",
+                                    "Microsoft.Logic/workflows",
+                                    "Microsoft.KeyVault/vaults",
+                                    "Microsoft.Insights/dataCollectionEndpoints"
+                                ],
+                                "visible": true
+                            },
+                            {
+                                "name": "rateLimitQPS",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 1,
+                                "max": 10,
+                                "label": "API Rate Limit (requests/second)",
+                                "defaultValue": 2,
+                                "showStepMarkers": true,
+                                "toolTip": "Maximum SpyCloud API requests per second. Default: 2 QPS. Increase only if SpyCloud has approved a higher rate limit for your account. Higher values speed up initial data sync but may cause 429 rate limiting errors.",
+                                "visible": true
+                            },
+                            {
+                                "name": "networkAccessMode",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "DCE Network Access",
+                                "defaultValue": "Public (Enabled)",
+                                "toolTip": "Public network access setting for the Data Collection Endpoint.\n\n\u2022 Enabled (default): DCE accepts data from the public internet. Required for the SpyCloud CCF connector.\n\u2022 SecuredByPerimeter: Restricts access to a network security perimeter. Use only if you have a configured Azure network security perimeter.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Public (Enabled)",
+                                            "value": "Enabled"
+                                        },
+                                        {
+                                            "label": "Secured by Network Perimeter",
+                                            "value": "SecuredByPerimeter"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
                     }
                 ]
             },
@@ -341,6 +435,141 @@
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Run automated post-deployment script (resolves DCE/DCR + assigns RBAC)",
                                 "toolTip": "Automatically runs a deployment script after all resources are created. It waits for the Sentinel content template, resolves the DCE Logs Ingestion URI and DCR Immutable ID, and assigns the Monitoring Metrics Publisher role to both Logic Apps. This eliminates the need to run scripts/post-deploy.sh manually for basic setup. MDE and Graph API permissions still require manual steps."
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionPlaybookConfig",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Playbook Configuration",
+                        "elements": [
+                            {
+                                "name": "configInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "These settings customize how the playbooks respond to SpyCloud-detected threats. You can change these after deployment by editing the Logic App parameters in the Azure Portal."
+                                }
+                            },
+                            {
+                                "name": "caSecurityGroupId",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Conditional Access Security Group Object ID (Optional)",
+                                "defaultValue": "",
+                                "placeholder": "e.g., a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                                "toolTip": "Object ID of an Entra ID security group. When the CA playbook remediates a compromised user, it adds them to this group. You can then create a Conditional Access policy that targets this group to enforce MFA, block legacy auth, or require compliant devices.\n\nTo find the Object ID: Entra ID \u2192 Groups \u2192 select your group \u2192 Overview \u2192 Object ID.\n\nLeave blank to skip group assignment (password reset and session revocation still occur).",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                                    "validationMessage": "Enter a valid GUID (e.g., a1b2c3d4-e5f6-7890-abcd-ef1234567890) or leave blank."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "mdeIsolationType",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "MDE Device Isolation Type",
+                                "defaultValue": "Full Isolation (recommended)",
+                                "toolTip": "How aggressively the MDE playbook isolates infected devices.\n\n\u2022 Full: Complete network isolation \u2014 device cannot communicate with any network except MDE cloud service. Most secure, prevents lateral movement.\n\u2022 Selective: Allows limited Outlook, Teams, and Skype connectivity while blocking other traffic. Less disruptive but allows some communication channels.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Full Isolation (recommended)",
+                                            "value": "Full"
+                                        },
+                                        {
+                                            "label": "Selective Isolation (allows Outlook/Teams)",
+                                            "value": "Selective"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "mdeTagName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "MDE Device Tag Name",
+                                "defaultValue": "SpyCloud-Compromised",
+                                "toolTip": "Tag applied to compromised devices in Microsoft Defender for Endpoint. SOC teams can filter MDE device inventory by this tag to find all SpyCloud-identified infected devices. Customize to match your organization's tagging conventions.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-zA-Z0-9-_]{3,50}$",
+                                    "validationMessage": "3-50 characters: letters, numbers, hyphens, underscores."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "spycloudSeverityThreshold",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Minimum Severity for Playbook Triggering",
+                                "defaultValue": "20 \u2014 Infostealer (recommended)",
+                                "toolTip": "Minimum SpyCloud severity level that triggers automated remediation playbooks.\n\n\u2022 2: Triggers on ALL exposures including basic breach credentials (high volume, many false positives)\n\u2022 5: Triggers on breach + PII exposures\n\u2022 20: Triggers on infostealer credentials only (recommended \u2014 these are actively stolen by malware)\n\u2022 25: Triggers only on critical infostealer + application data (cookies/sessions)",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "2 \u2014 All exposures (high volume)",
+                                            "value": 2
+                                        },
+                                        {
+                                            "label": "5 \u2014 Breach + PII",
+                                            "value": 5
+                                        },
+                                        {
+                                            "label": "20 \u2014 Infostealer (recommended)",
+                                            "value": 20
+                                        },
+                                        {
+                                            "label": "25 \u2014 Critical only (infostealer + app data)",
+                                            "value": 25
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "analyticsRuleFrequency",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Analytics Rule Frequency",
+                                "defaultValue": "Every 1 hour (recommended)",
+                                "toolTip": "How often analytics rules evaluate KQL queries against your SpyCloud data. More frequent = faster detection but higher compute cost.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Every 5 minutes (real-time, higher cost)",
+                                            "value": "PT5M"
+                                        },
+                                        {
+                                            "label": "Every 15 minutes",
+                                            "value": "PT15M"
+                                        },
+                                        {
+                                            "label": "Every 30 minutes",
+                                            "value": "PT30M"
+                                        },
+                                        {
+                                            "label": "Every 1 hour (recommended)",
+                                            "value": "PT1H"
+                                        },
+                                        {
+                                            "label": "Every 4 hours",
+                                            "value": "PT4H"
+                                        },
+                                        {
+                                            "label": "Every 12 hours",
+                                            "value": "PT12H"
+                                        },
+                                        {
+                                            "label": "Every 24 hours",
+                                            "value": "PT24H"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
                             }
                         ],
                         "visible": true
@@ -479,6 +708,50 @@
                             }
                         ],
                         "visible": true
+                    },
+                    {
+                        "name": "sectionWatchlistConfig",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Watchlist Configuration",
+                        "elements": [
+                            {
+                                "name": "watchlistType",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Watchlist Exposure Types to Ingest",
+                                "multiselect": true,
+                                "defaultValue": [
+                                    {
+                                        "value": "corporate"
+                                    },
+                                    {
+                                        "value": "infected"
+                                    },
+                                    {
+                                        "value": "compass"
+                                    }
+                                ],
+                                "toolTip": "Select which SpyCloud watchlist categories to monitor.\n\n\u2022 Corporate: Employee credentials found in breaches and malware logs matching your corporate domains\n\u2022 Infected: Devices infected with infostealer malware that have accessed your corporate resources\n\u2022 Compass: Third-party/supply chain exposures related to your organization's extended attack surface",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Corporate \u2014 Employee credential exposures",
+                                            "value": "corporate"
+                                        },
+                                        {
+                                            "label": "Infected \u2014 Infostealer-infected devices",
+                                            "value": "infected"
+                                        },
+                                        {
+                                            "label": "Compass \u2014 Supply chain / third-party exposures",
+                                            "value": "compass"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
                     }
                 ]
             }
@@ -511,7 +784,17 @@
             "enableMdeBlocklistPlaybook": "[steps('automationConfig').sectionPlaybooks.enableMdeBlocklistPlaybook]",
             "teamsChannelWebhook": "[steps('monitoringConfig').sectionIntegrations.teamsChannelWebhook]",
             "serviceNowInstance": "[steps('monitoringConfig').sectionIntegrations.serviceNowInstance]",
-            "mdeBlocklistScheduleHours": "[steps('monitoringConfig').sectionIntegrations.mdeBlocklistScheduleHours]"
+            "mdeBlocklistScheduleHours": "[steps('monitoringConfig').sectionIntegrations.mdeBlocklistScheduleHours]",
+            "keyVaultName": "[if(equals(steps('workspaceConfig').sectionAdvanced.keyVaultName, ''), '', steps('workspaceConfig').sectionAdvanced.keyVaultName)]",
+            "workspacePricingTier": "[steps('workspaceConfig').sectionAdvanced.workspacePricingTier]",
+            "rateLimitQPS": "[steps('workspaceConfig').sectionAdvanced.rateLimitQPS]",
+            "networkAccessMode": "[steps('workspaceConfig').sectionAdvanced.networkAccessMode]",
+            "caSecurityGroupId": "[steps('automationConfig').sectionPlaybookConfig.caSecurityGroupId]",
+            "mdeIsolationType": "[steps('automationConfig').sectionPlaybookConfig.mdeIsolationType]",
+            "mdeTagName": "[steps('automationConfig').sectionPlaybookConfig.mdeTagName]",
+            "spycloudSeverityThreshold": "[steps('automationConfig').sectionPlaybookConfig.spycloudSeverityThreshold]",
+            "analyticsRuleFrequency": "[steps('automationConfig').sectionPlaybookConfig.analyticsRuleFrequency]",
+            "watchlistType": "[steps('monitoringConfig').sectionWatchlistConfig.watchlistType]"
         }
     }
 }
