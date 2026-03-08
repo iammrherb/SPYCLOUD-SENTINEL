@@ -3573,7 +3573,7 @@
       }
     },
     {
-      "condition": "[and(parameters('enableNotifications'), not(empty(parameters('notificationEmail'))))]",
+      "condition": "[parameters('enableNotifications')]",
       "type": "Microsoft.Insights/actionGroups",
       "apiVersion": "2023-01-01",
       "name": "[variables('actionGroupName')]",
@@ -3589,11 +3589,11 @@
             "useCommonAlertSchema": true
           }
         ],
-        "webhookReceivers": "[if(empty(parameters('teamsWebhookUrl')), json('[]'), json(concat('[{\"name\":\"SpyCloud-Teams\",\"serviceUri\":\"', parameters('teamsWebhookUrl'), '\",\"useCommonAlertSchema\":true}]')))]"
+        "webhookReceivers": "[union(if(empty(parameters('teamsWebhookUrl')), json('[]'), json(concat('[{\"name\":\"SpyCloud-Teams-SOC\",\"serviceUri\":\"', parameters('teamsWebhookUrl'), '\",\"useCommonAlertSchema\":true}]'))), if(empty(parameters('slackWebhookUrl')), json('[]'), json(concat('[{\"name\":\"SpyCloud-Slack-SOC\",\"serviceUri\":\"', parameters('slackWebhookUrl'), '\",\"useCommonAlertSchema\":true}]'))))]"
       }
     },
     {
-      "condition": "[and(parameters('enableNotifications'), not(empty(parameters('notificationEmail'))))]",
+      "condition": "[parameters('enableNotifications')]",
       "type": "Microsoft.Insights/scheduledQueryRules",
       "apiVersion": "2023-03-15-preview",
       "name": "[variables('healthAlertName')]",
