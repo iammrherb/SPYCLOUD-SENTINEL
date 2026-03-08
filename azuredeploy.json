@@ -4622,7 +4622,7 @@
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Authorization/roleAssignments', guid(concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)), 'contributor'))]",
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)))]",
                 "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
                 "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
             ],
