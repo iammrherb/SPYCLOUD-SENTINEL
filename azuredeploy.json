@@ -2350,7 +2350,7 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
+                  "queryWindowInMin": 30,
                   "headers": {
                     "Accept": "application/json"
                   },
@@ -2456,7 +2456,7 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[parameters('pollingIntervalMin')]",
+                  "queryWindowInMin": 30,
                   "headers": {
                     "Accept": "application/json"
                   },
@@ -2600,6 +2600,10 @@
             "mdeTagName": {
               "defaultValue": "[parameters('mdeTagName')]",
               "type": "String"
+            },
+            "slackWebhook": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -2773,6 +2777,47 @@
                         },
                         "path": "/Incidents/Comment"
                       }
+                    },
+                    "Send_Slack_MDE_alert": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('slackWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "Post_MDE_to_Slack": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('slackWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "text": ":computer: *SpyCloud MDE Alert \u2014 Device Isolated*\n\n*Device:* @{items('For_each_host')?['HostName']}\n*Action:* Device isolated in Microsoft Defender\n*Incident:* @{triggerBody()?['object']?['properties']?['title']}\n*Time:* @{utcNow()}"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Add_comment_to_incident": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
                     }
                   },
                   "else": {
@@ -2815,6 +2860,9 @@
                 }
               }
             }
+          },
+          "slackWebhook": {
+            "value": "[parameters('slackWebhookUrl')]"
           }
         }
       }
@@ -2854,6 +2902,10 @@
             "caSecurityGroupId": {
               "defaultValue": "[parameters('caSecurityGroupId')]",
               "type": "String"
+            },
+            "slackWebhook": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -3063,6 +3115,47 @@
                         },
                         "path": "/Incidents/Comment"
                       }
+                    },
+                    "Send_Slack_CA_alert": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('slackWebhook')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "Post_CA_to_Slack": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@parameters('slackWebhook')",
+                            "headers": {
+                              "Content-Type": "application/json"
+                            },
+                            "body": {
+                              "text": ":lock: *SpyCloud CA Alert \u2014 Identity Protected*\n\n*User:* @{items('For_each_account')?['Name']}@@{items('For_each_account')?['UPNSuffix']}\n*Actions:* Password reset + session revocation\n*Incident:* @{triggerBody()?['object']?['properties']?['title']}\n*Time:* @{utcNow()}"
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {
+                        "Add_comment_to_incident_CA": [
+                          "Succeeded",
+                          "Failed",
+                          "Skipped"
+                        ]
+                      }
                     }
                   },
                   "else": {
@@ -3105,6 +3198,9 @@
                 }
               }
             }
+          },
+          "slackWebhook": {
+            "value": "[parameters('slackWebhookUrl')]"
           }
         }
       }
@@ -4138,6 +4234,14 @@
             "teamsWebhook": {
               "defaultValue": "[parameters('teamsChannelWebhook')]",
               "type": "String"
+            },
+            "slackWebhook": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "serviceNowInstance": {
+              "type": "String",
+              "defaultValue": ""
             }
           },
           "triggers": {
@@ -4309,6 +4413,94 @@
                       "Skipped"
                     ]
                   }
+                },
+                "Send_Slack_alert": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('slackWebhook')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Post_to_Slack": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@parameters('slackWebhook')",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "text": ":rotating_light: *SpyCloud Credential Exposure*\n*User:* @{items('For_each_account')?['Name']}@@{items('For_each_account')?['UPNSuffix']}\n*Actions:* Password reset + session revoke\n*Incident:* @{triggerBody()?['object']?['properties']?['title']}"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Send_Teams_alert": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
+                },
+                "Create_ServiceNow_incident": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "equals": [
+                            "@parameters('serviceNowInstance')",
+                            ""
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Create_SNOW_ticket": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@{parameters('serviceNowInstance')}/api/now/table/incident",
+                        "headers": {
+                          "Content-Type": "application/json",
+                          "Accept": "application/json"
+                        },
+                        "body": {
+                          "short_description": "SpyCloud: Credential exposure - @{items('For_each_account')?['Name']}",
+                          "description": "SpyCloud detected compromised credentials.\nUser: @{items('For_each_account')?['Name']}@@{items('For_each_account')?['UPNSuffix']}\nIncident: @{triggerBody()?['object']?['properties']?['title']}\nSeverity: @{triggerBody()?['object']?['properties']?['severity']}\nActions: Password reset, sessions revoked, Teams/Slack notified",
+                          "urgency": "2",
+                          "impact": "2",
+                          "category": "Security",
+                          "subcategory": "Credential Exposure"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Send_Slack_alert": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped"
+                    ]
+                  }
                 }
               },
               "runAfter": {
@@ -4333,6 +4525,12 @@
                 }
               }
             }
+          },
+          "slackWebhook": {
+            "value": "[parameters('slackWebhookUrl')]"
+          },
+          "serviceNowInstance": {
+            "value": "[parameters('serviceNowInstance')]"
           }
         }
       }
