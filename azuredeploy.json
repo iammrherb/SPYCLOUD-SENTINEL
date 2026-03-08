@@ -2612,7 +2612,7 @@
                         },
                         "show_plain_password": {
                             "defaultValue": "False",
-                            "type": "string",
+                            "type": "array",
                             "metadata": {
                                 "description": "Include cleartext passwords in ingested data. 'False' (recommended) omits passwords. 'True' requires data handling policy and table-level RBAC."
                             }
