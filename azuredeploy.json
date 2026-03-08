@@ -599,7 +599,6 @@
             }
         },
         {
-            "condition": "[parameters('createNewWorkspace')]",
             "type": "Microsoft.OperationsManagement/solutions",
             "apiVersion": "2015-11-01-preview",
             "name": "[concat('SecurityInsights(', parameters('workspace'), ')')]",
