@@ -1993,16 +1993,28 @@
                     },
                     "instructionSteps": [
                         {
+                            "title": "Prerequisites \u2014 Read Before Connecting",
+                            "description": "**Complete ALL prerequisites before clicking Connect.**\n\n### A. SpyCloud Account & API Key\n\n| Requirement | Details |\n|------------|----------|\n| Subscription | Active SpyCloud Enterprise or Enterprise+ API plan |\n| API Key | Generate from [portal.spycloud.com](https://portal.spycloud.com) \u2192 **Settings** \u2192 **API Keys** |\n| API Region | US (`api.spycloud.io`) \u2014 configured automatically |\n| Products | Employee ATO, Consumer ATO, Compass, Third-Party Insight, Ransomware Prevention |\n\n### B. Azure Permissions Required\n\n| Role | Scope | Purpose |\n|------|-------|----------|\n| Microsoft Sentinel Contributor | Resource Group | Create/manage connectors, rules, workbooks |\n| Log Analytics Contributor | Workspace | Create custom tables, manage retention |\n| Monitoring Metrics Publisher | Data Collection Rule | Authorize data ingestion via DCE |\n\n### C. Network Requirements\n\n| Direction | Protocol | Destination | Port |\n|-----------|----------|-------------|------|\n| Outbound | HTTPS | `api.spycloud.io` | 443 |\n| Outbound | HTTPS | `*.ingest.monitor.azure.com` | 443 |\n\nNo inbound rules required \u2014 this is a pull-based connector.\n\n### D. Capacity Planning\n\n| Environment | Assets | Daily Ingestion | Notes |\n|-------------|--------|-----------------|-------|\n| Small/POC | <1,000 | 1-10 MB/day | Standard settings work |\n| Medium | 1K-10K | 10-100 MB/day | Default 40-min polling |\n| Large | 10K-100K | 100-500 MB/day | Consider Enterprise+ |\n| Very Large | 100K+ | 500+ MB/day | Contact SpyCloud support |",
+                            "instructions": [
+                                {
+                                    "type": "InfoMessage",
+                                    "parameters": {
+                                        "text": "Your SpyCloud API key is at portal.spycloud.com \u2192 Settings \u2192 API Keys. Need an account? Contact support@spycloud.com."
+                                    }
+                                }
+                            ]
+                        },
+                        {
                             "title": "Step 1 \u2014 SpyCloud API Authentication",
-                            "description": "Enter your SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com) \u2192 **Settings** \u2192 **API Keys**.\n\nThe key is stored securely and sent as `Authorization: Bearer <key>` on every API request.",
+                            "description": "Enter your SpyCloud Enterprise API key. The key is sent as `Authorization: Bearer <key>` on every API request and stored securely \u2014 never exposed in deployment logs or outputs.\n\n**Where to find your API key:**\n1. Open [portal.spycloud.com](https://portal.spycloud.com)\n2. Click **Settings** (gear icon) \u2192 **API Keys**\n3. Copy the key labeled **Enterprise API**\n4. Paste it below\n\n**Do NOT** add the `Bearer` prefix \u2014 the connector adds it automatically.",
                             "instructions": [
                                 {
                                     "type": "Textbox",
                                     "parameters": {
-                                        "label": "SpyCloud API Key",
+                                        "label": "SpyCloud Enterprise API Key",
                                         "name": "apiKey",
                                         "type": "password",
-                                        "placeholder": "Paste your API key from portal.spycloud.com",
+                                        "placeholder": "Paste your API key from portal.spycloud.com \u2192 Settings \u2192 API Keys",
                                         "validations": {
                                             "required": true
                                         }
@@ -2011,32 +2023,33 @@
                             ]
                         },
                         {
-                            "title": "Step 2 \u2014 Data Filtering",
-                            "description": "**Severity Levels:** 2=Breach Credential, 5=Breach+PII, 20=Infostealer (HIGH), 25=Infostealer+App (CRITICAL)\n\n**Exposure Types:** Corporate=your domains, Infected=malware-stolen, Compass=consumer monitoring",
+                            "title": "Step 2 \u2014 Severity Levels & Exposure Types",
+                            "description": "Control **what data** flows into Sentinel.\n\n### Severity Level Reference\n\n| Severity | Category | What It Contains | Response |\n|----------|----------|------------------|---------|\n| **2** | Breach Credential | Email + password from third-party breach | Monitor, reset if reused |\n| **5** | Breach + PII | Above + name, phone, DOB, address, SSN | Notify affected users |\n| **20** | Infostealer | Credential stolen by malware from infected device | **URGENT**: Isolate device, force reset |\n| **25** | Infostealer + App | Above + stolen cookies, sessions, autofill | **CRITICAL**: Full remediation |\n\n### Exposure Type Reference\n\n| Type | Description | SpyCloud Product |\n|------|-------------|------------------|\n| **Corporate** | Credentials matching your monitored corporate email domains | Employee ATO Prevention |\n| **Infected** | Credentials stolen by infostealer malware from compromised devices | Session Identity Protection |\n| **Compass** | Consumer identity exposures for monitored consumer accounts | Consumer ATO Prevention |\n\n**Recommendations:**\n- **Maximum protection:** All severity levels + all exposure types\n- **Infostealer focus:** Severity 20+25 only\n- **Corporate only:** All severity levels, Corporate type only",
                             "instructions": [
                                 {
                                     "type": "Dropdown",
                                     "parameters": {
-                                        "label": "Severity Levels",
+                                        "label": "Severity Levels to Ingest",
                                         "name": "severity",
                                         "options": [
                                             {
                                                 "key": "2",
-                                                "text": "2 \u2014 Breach Credential"
+                                                "text": "2 \u2014 Breach Credential (email + password from breach)"
                                             },
                                             {
                                                 "key": "5",
-                                                "text": "5 \u2014 Breach + PII"
+                                                "text": "5 \u2014 Breach + PII (credential + name/phone/DOB/address)"
                                             },
                                             {
                                                 "key": "20",
-                                                "text": "20 \u2014 Infostealer (HIGH)"
+                                                "text": "20 \u2014 Infostealer Credential (malware-stolen from device)"
                                             },
                                             {
                                                 "key": "25",
-                                                "text": "25 \u2014 Infostealer + App Data (CRITICAL)"
+                                                "text": "25 \u2014 Infostealer + App Data (cookies/sessions/autofill)"
                                             }
                                         ],
+                                        "placeholder": "Select severity levels (recommend: all 4)",
                                         "isMultiSelect": true,
                                         "required": true,
                                         "defaultAllSelected": true
@@ -2045,22 +2058,23 @@
                                 {
                                     "type": "Dropdown",
                                     "parameters": {
-                                        "label": "Exposure Types",
+                                        "label": "Exposure Types to Ingest",
                                         "name": "watchlistType",
                                         "options": [
                                             {
                                                 "key": "corporate",
-                                                "text": "Corporate \u2014 Your monitored email domains"
+                                                "text": "Corporate \u2014 Your monitored email domains & IP assets"
                                             },
                                             {
                                                 "key": "infected",
-                                                "text": "Infected Devices \u2014 Infostealer malware"
+                                                "text": "Infected Devices \u2014 Infostealer malware credentials"
                                             },
                                             {
                                                 "key": "compass",
                                                 "text": "Compass \u2014 Consumer identity monitoring"
                                             }
                                         ],
+                                        "placeholder": "Select exposure types (recommend: all 3)",
                                         "isMultiSelect": true,
                                         "required": true,
                                         "defaultAllSelected": true
@@ -2074,13 +2088,14 @@
                                         "options": [
                                             {
                                                 "key": "False",
-                                                "text": "No \u2014 Exclude (recommended)"
+                                                "text": "No \u2014 Exclude cleartext passwords (RECOMMENDED \u2014 most secure)"
                                             },
                                             {
                                                 "key": "True",
-                                                "text": "Yes \u2014 Include (requires data handling policy)"
+                                                "text": "Yes \u2014 Include cleartext passwords (requires data handling policy + table RBAC)"
                                             }
                                         ],
+                                        "placeholder": "Select password handling",
                                         "isMultiSelect": false,
                                         "required": true,
                                         "defaultAllSelected": false
@@ -2089,14 +2104,50 @@
                             ]
                         },
                         {
-                            "title": "Step 3 \u2014 Connect",
-                            "description": "Click **Connect** to activate. Data appears within 5-10 minutes.\n\n**Default settings:** US API region, 40-minute polling, 2 QPS rate limit, 30-day lookback.\n\nTo verify: `SpyCloudBreachWatchlist_CL | count`",
+                            "title": "Step 3 \u2014 Data Streams & Tables",
+                            "description": "This connector creates and populates the following tables in your workspace:\n\n### Connector Modules (activated automatically)\n\n| Module | API Endpoint | Table | Description |\n|--------|-------------|-------|-----------|\n| Watchlist (New) | `/breach/data/watchlist` | `SpyCloudBreachWatchlist_CL` | Primary credential/PII exposure feed |\n| Watchlist (Modified) | `/breach/data/watchlist` + modification dates | `SpyCloudBreachWatchlist_CL` | Updated/re-sighted records |\n| Breach Catalog | `/breach/catalog` | `SpyCloudBreachCatalog_CL` | Breach source metadata for enrichment |\n\n### Audit Tables (populated by playbooks)\n\n| Table | Columns | Populated By |\n|-------|---------|-------------|\n| `Spycloud_MDE_Logs_CL` | 19 | MDE Remediation playbook (device isolation, tagging) |\n| `SpyCloud_ConditionalAccessLogs_CL` | 14 | CA Identity playbook (password reset, session revoke) |\n\n### Default Connector Settings\n\n| Setting | Value | Notes |\n|---------|-------|-------|\n| API Region | US (`api.spycloud.io`) | Hardcoded \u2014 contact support for EU |\n| Polling Interval | 40 minutes | Balanced freshness vs API consumption |\n| Modified Records | Daily (1440 min) | Catches re-sighted credentials |\n| Rate Limit | 2 QPS | Standard Enterprise tier |\n| Retries | 3 | Exponential backoff |\n| Timeout | 60 seconds | Increase if you have >50K assets |",
+                            "instructions": [
+                                {
+                                    "type": "InfoMessage",
+                                    "parameters": {
+                                        "text": "All three connector modules activate automatically when you click Connect. No additional configuration needed for data streams."
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Step 4 \u2014 Use Cases & Integration",
+                            "description": "### What You Can Do With SpyCloud Data in Sentinel\n\n| Use Case | How | Resources |\n|----------|-----|-----------|\n| **Compromised Credential Detection** | 22 analytics rules detect exposures by severity, type, and context | Sentinel \u2192 Analytics |\n| **Automated Device Isolation** | MDE playbook isolates infected devices in Defender | Logic App: SpyCloud-MDE-Remediation |\n| **Automated Password Reset** | CA playbook forces reset + revokes sessions in Entra ID | Logic App: SpyCloud-CA-Remediation |\n| **SOC Alerting** | Teams/Slack notifications on critical exposures | Logic App: SpyCloud-CredResponse |\n| **Scheduled Threat Scanning** | MDE Blocklist scans severity 25 on schedule | Logic App: SpyCloud-MDE-Blocklist |\n| **Executive/VIP Monitoring** | Dedicated rule for CEO/CFO/CISO accounts | Analytics Rule #19 |\n| **Password Reuse Detection** | Same hash across 3+ target domains | Analytics Rule #20 |\n| **IdP Cross-Correlation** | Match exposures against Okta/Duo/Ping/Entra sign-ins | Analytics Rules #13-16 |\n| **Breach Impact Assessment** | Join exposures with catalog for breach context | Analytics Rule #18 |\n| **Interactive Investigation** | Security Copilot plugin with 28 KQL skills + AI agent | Copilot \u2192 Sources \u2192 SpyCloud |\n\n### Recommended Additional Data Connectors\n\nEnable these in Sentinel Content Hub for maximum correlation:\n\n| Connector | Why | Enables |\n|-----------|-----|---------|\n| **Entra ID Diagnostics** | Sign-in correlation with compromised credentials | Rule #16, #17 |\n| **Microsoft Defender XDR** | Alert timeline correlation with infections | MDE playbook enrichment |\n| **Okta SSO** | Catch compromised creds in Okta sign-ins | Rule #13 |\n| **Cisco Duo** | Catch compromised creds in Duo MFA | Rule #14 |\n| **Microsoft 365** | Email/file access after credential compromise | Incident investigation |",
+                            "instructions": [
+                                {
+                                    "type": "InfoMessage",
+                                    "parameters": {
+                                        "text": "After connecting, enable analytics rules: Sentinel \u2192 Analytics \u2192 filter 'SpyCloud' \u2192 enable individually. Start with Infostealer Exposure, Plaintext Password, Session Cookies, and Data Health."
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Step 5 \u2014 Connect",
+                            "description": "**Review your settings above, then click Connect.**\n\n### What Happens When You Click Connect\n\n1. **Validation** \u2014 API key verified against SpyCloud endpoint\n2. **Backfill** \u2014 Initial 30-day historical data pull begins (5-30 minutes)\n3. **Polling** \u2014 Ongoing 40-minute incremental polling activates\n4. **Transform** \u2014 Raw API data normalized via KQL transforms in the DCR\n5. **Ingestion** \u2014 Data flows into your custom tables\n6. **Status** \u2014 Connector tile shows 'Connected' within 5-10 minutes\n\n### Checklist Before Connecting\n\n- [ ] API key from portal.spycloud.com \u2192 Settings \u2192 API Keys\n- [ ] Severity levels selected (recommend: all 4)\n- [ ] Exposure types selected (recommend: all 3)\n- [ ] Password handling preference set (recommend: No / exclude)\n\n### Resources Created by This Connector\n\n| Resource | Name | Purpose |\n|----------|------|---------|\n| DCE | `dce-spycloud-{workspace}` | HTTPS ingestion endpoint |\n| DCR | `dcr-spycloud-{workspace}` | KQL transforms + table routing |\n| Table | `SpyCloudBreachWatchlist_CL` | 73 columns \u2014 credentials, PII, device forensics |\n| Table | `SpyCloudBreachCatalog_CL` | 5 columns \u2014 breach source metadata |\n| Table | `Spycloud_MDE_Logs_CL` | 19 columns \u2014 MDE remediation audit |\n| Table | `SpyCloud_ConditionalAccessLogs_CL` | 14 columns \u2014 CA remediation audit |",
                             "instructions": [
                                 {
                                     "type": "ConnectionToggleButton",
                                     "parameters": {
                                         "connectLabel": "Connect to SpyCloud",
                                         "name": "toggle"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Step 6 \u2014 Verification & Troubleshooting",
+                            "description": "### Quick Health Check (run 5-10 minutes after connecting)\n\n```kusto\nSpyCloudBreachWatchlist_CL\n| summarize TotalRecords=count(), Newest=max(TimeGenerated), Oldest=min(TimeGenerated), Domains=dcount(email_domain), Breaches=dcount(source_id)\n| extend Status = iff(TotalRecords > 0, 'RECEIVING DATA', 'WAITING')\n```\n\n### Full 4-Table Health Dashboard\n\n```kusto\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA')\n| project Table, Records, Latest, HoursSince=datetime_diff('hour', now(), Latest)\n```\n\n### Troubleshooting\n\n| Symptom | Cause | Fix |\n|---------|-------|-----|\n| No data after 30 min | Invalid API key | Regenerate at portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| No data after 30 min | Wrong severity filter | Ensure at least one severity level selected |\n| Partial data | Rate limited (HTTP 429) | Contact SpyCloud to verify your API tier |\n| Timeouts | Large watchlist | Contact SpyCloud support \u2014 may need Enterprise+ tier |\n| Watchlist but no Catalog | Both should activate together | Disconnect and reconnect |\n| No MDE/CA logs | Normal \u2014 these are populated by playbooks | Enable playbooks + create test incident |\n\n### Support\n\n| Issue | Contact |\n|-------|----------|\n| SpyCloud API / Data | support@spycloud.com or portal.spycloud.com |\n| Azure / Sentinel | Azure Portal \u2192 Help + Support |\n| This Integration | github.com/iammrherb/SPYCLOUD-SENTINEL/issues |",
+                            "instructions": [
+                                {
+                                    "type": "InfoMessage",
+                                    "parameters": {
+                                        "text": "Run the verification script from Cloud Shell: curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS"
                                     }
                                 }
                             ]
