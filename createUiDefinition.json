@@ -520,18 +520,64 @@
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Tags are applied to all deployed resources for cost tracking, ownership, and governance. The 'solution' tag is always set to 'SpyCloud-ThreatIntel-Sentinel'."
+                                    "text": "Tags are applied to ALL deployed resources. Default tags (solution, version, deployedBy) are always included. Add custom tags below for cost tracking, ownership, or compliance."
                                 }
                             },
                             {
-                                "name": "resourceTags",
-                                "type": "Microsoft.Common.TagsByResource",
-                                "resources": [
-                                    "Microsoft.OperationalInsights/workspaces",
-                                    "Microsoft.Logic/workflows",
-                                    "Microsoft.KeyVault/vaults",
-                                    "Microsoft.Insights/dataCollectionEndpoints"
-                                ],
+                                "name": "tagEnvironment",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Environment Tag",
+                                "defaultValue": "Production",
+                                "toolTip": "Environment classification for all deployed resources.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Production",
+                                            "value": "production"
+                                        },
+                                        {
+                                            "label": "Staging",
+                                            "value": "staging"
+                                        },
+                                        {
+                                            "label": "Development",
+                                            "value": "development"
+                                        },
+                                        {
+                                            "label": "Test",
+                                            "value": "test"
+                                        },
+                                        {
+                                            "label": "POC",
+                                            "value": "poc"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "tagOwner",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Owner Tag",
+                                "defaultValue": "",
+                                "placeholder": "e.g., security-ops@company.com or SOC Team",
+                                "toolTip": "Team or individual responsible for these resources.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "tagCostCenter",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Cost Center Tag",
+                                "defaultValue": "",
+                                "placeholder": "e.g., CC-12345 or Security-Budget",
+                                "toolTip": "Cost center for billing allocation.",
+                                "constraints": {
+                                    "required": false
+                                },
                                 "visible": true
                             }
                         ],
@@ -673,7 +719,10 @@
             "teamsWebhookUrl": "[steps('securityConfig').sectionNotifications.teamsWebhookUrl]",
             "enableSessionCookieDetection": "[steps('securityConfig').sectionIdp.enableSessionCookieDetection]",
             "enableIdentityProviderAlerts": "[steps('securityConfig').sectionIdp.enableIdentityProviderAlerts]",
-            "enableWorkbook": "[steps('securityConfig').sectionDashboard.enableWorkbook]"
+            "enableWorkbook": "[steps('securityConfig').sectionDashboard.enableWorkbook]",
+            "tagEnvironment": "[steps('securityConfig').sectionTags.tagEnvironment]",
+            "tagOwner": "[steps('securityConfig').sectionTags.tagOwner]",
+            "tagCostCenter": "[steps('securityConfig').sectionTags.tagCostCenter]"
         }
     }
 }
