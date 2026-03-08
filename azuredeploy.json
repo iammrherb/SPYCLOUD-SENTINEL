@@ -2084,8 +2084,12 @@
                         "text": "Infected Devices \u2014 Infostealer malware credentials"
                       },
                       {
-                        "key": "compass",
-                        "text": "Compass \u2014 Consumer identity monitoring"
+                        "key": "email_domain",
+                        "text": "Email Domain \u2014 All exposures matching email domains"
+                      },
+                      {
+                        "key": "target_domain",
+                        "text": "Target Domain \u2014 Exposures by target service domain"
                       }
                     ],
                     "placeholder": "Select exposure types (recommend: all 3)",
@@ -2422,8 +2426,7 @@
             "watchlistType": {
               "defaultValue": [
                 "corporate",
-                "infected",
-                "compass"
+                "infected"
               ],
               "type": "array",
               "metadata": {
@@ -2522,9 +2525,7 @@
                   },
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "type": "[[join(parameters('watchlistType'), ',')]",
-                    "show_plain_password": "[[join(parameters('show_plain_password'), ',')]",
-                    "cursor": "start"
+                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
                   },
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
@@ -2576,8 +2577,7 @@
                     "since_modification_date": "{_QueryWindowStartTime}",
                     "until_modification_date": "{_QueryWindowEndTime}",
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "type": "[[join(parameters('watchlistType'), ',')]",
-                    "show_plain_password": "[[join(parameters('show_plain_password'), ',')]"
+                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
                   },
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
@@ -2627,7 +2627,8 @@
                     "Accept": "application/json"
                   },
                   "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "queryParameters": {}
                 },
                 "response": {
                   "eventsJsonPaths": [
