@@ -440,7 +440,8 @@
     "credResponsePlaybookName": "[concat('SpyCloud-CredResponse-', take(parameters('workspace'), 30))]",
     "mdeBlocklistPlaybookName": "[concat('SpyCloud-MDE-Blocklist-', take(parameters('workspace'), 30))]",
     "teamsConnectionName": "[concat('teams-spycloud-', take(parameters('workspace'), 30))]",
-    "allTags": "[union(parameters('resourceTags'), createObject('environment', parameters('tagEnvironment'), 'owner', if(empty(parameters('tagOwner')), 'unassigned', parameters('tagOwner')), 'costCenter', if(empty(parameters('tagCostCenter')), 'unassigned', parameters('tagCostCenter'))))]"
+    "allTags": "[union(parameters('resourceTags'), createObject('environment', parameters('tagEnvironment'), 'owner', if(empty(parameters('tagOwner')), 'unassigned', parameters('tagOwner')), 'costCenter', if(empty(parameters('tagCostCenter')), 'unassigned', parameters('tagCostCenter'))))]",
+    "_dcrFullName": "[concat('dcr-ccf-', parameters('workspace'))]"
   },
   "resources": [
     {
@@ -1023,12 +1024,15 @@
             }
           ],
           "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
-          "dcrConfig": {}
+          "dcrConfig": {
+            "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]"
+          }
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
       ]
     },
     {
@@ -1098,7 +1102,6 @@
             "apiKey": {
               "defaultValue": "",
               "type": "securestring",
-              "minLength": 1,
               "metadata": {
                 "description": "SpyCloud Enterprise API Key \u2014 sent as 'X-Api-Key: <key>' on every API request. Obtain from portal.spycloud.com \u2192 Settings \u2192 API Keys. Stored securely as a SecureString, never exposed in logs or outputs."
               }
@@ -1132,8 +1135,8 @@
             "dcrConfig": {
               "type": "object",
               "defaultValue": {
-                "dataCollectionEndpoint": "auto-populated by connector framework",
-                "dataCollectionRuleImmutableId": "auto-populated by connector framework"
+                "dataCollectionEndpoint": "",
+                "dataCollectionRuleImmutableId": ""
               }
             },
             "watchlistType": {
