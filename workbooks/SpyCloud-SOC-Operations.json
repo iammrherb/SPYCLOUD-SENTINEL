@@ -1,0 +1,535 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# SpyCloud SOC Operations Dashboard\n**Security Operations Center** - Real-time threat monitoring, investigation tools, correlation analysis, and threat hunting capabilities powered by SpyCloud darknet intelligence.\n\n> This workbook is designed for SOC analysts performing active investigations, threat hunting, and incident response using SpyCloud data correlated with Microsoft Sentinel.\n\n---"
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "soc_time_range",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000 },
+                { "durationMs": 14400000 },
+                { "durationMs": 43200000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 259200000 },
+                { "durationMs": 604800000 },
+                { "durationMs": 2592000000 }
+              ],
+              "allowCustom": true
+            },
+            "label": "Time Range"
+          },
+          {
+            "id": "soc_sev_filter",
+            "version": "KqlParameterItem/1.0",
+            "name": "SeverityFilter",
+            "type": 2,
+            "isRequired": false,
+            "multiSelect": true,
+            "quote": "",
+            "delimiter": ",",
+            "query": "SpyCloudBreachWatchlist_CL | distinct severity | order by severity desc",
+            "typeSettings": {
+              "additionalResourceOptions": [ "value::all" ]
+            },
+            "defaultValue": "value::all",
+            "label": "Severity"
+          }
+        ]
+      },
+      "name": "globalParams"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Live Threat Feed",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## Live Threat Feed\nReal-time exposure ingestion, active incidents, and playbook execution status for the current operational period."
+            },
+            "name": "tab1Header"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[\"New Exposures (24h)\",0,1,\"Critical Exposures\",0,2,\"Active Incidents\",0,3,\"Playbook Runs (24h)\",0,4,\"Pending Remediations\",0,5]),\n(SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(24h) | summarize v=count() | extend Label=\"New Exposures (24h)\", Order=1 | project Label, Value=v, Order),\n(SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(24h) | where severity == 25 | summarize v=count() | extend Label=\"Critical Exposures\", Order=2 | project Label, Value=v, Order),\n(SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(24h) | where severity >= 20 | summarize v=dcount(email) | extend Label=\"Active Incidents\", Order=3 | project Label, Value=v, Order),\n(union (Spycloud_MDE_Logs_CL | where TimeGenerated > ago(24h)), (SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(24h)) | summarize v=count() | extend Label=\"Playbook Runs (24h)\", Order=4 | project Label, Value=v, Order),\n(let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct user_principal_name_s;\nSpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) | where severity >= 20 | where email !in (remediated) | summarize v=dcount(email) | extend Label=\"Pending Remediations\", Order=5 | project Label, Value=v, Order)\n| summarize Value=max(Value) by Label, Order\n| order by Order asc",
+              "size": 4,
+              "title": "Live Threat Summary",
+              "queryType": 0,
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": { "columnMatch": "Label", "formatter": 1 },
+                "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+              }
+            },
+            "name": "liveThreatTiles"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(24h)\n| summarize Exposures=count() by bin(TimeGenerated, 15m)\n| order by TimeGenerated asc)",
+              "size": 0,
+              "title": "Real-Time Exposure Ingestion (Last 24 Hours - 15min bins)",
+              "queryType": 0,
+              "visualization": "areachart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  { "seriesName": "Exposures", "color": "blue" }
+                ]
+              }
+            },
+            "name": "realtimeIngestion"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let remediated = SpyCloud_ConditionalAccessLogs_CL\n| where TimeGenerated {TimeRange}\n| distinct user_principal_name_s;\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| where email !in (remediated)\n| summarize Exposures=count(), MaxSeverity=max(severity), PlaintextPWs=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id), LatestExposure=max(TimeGenerated) by email\n| extend Priority = case(MaxSeverity == 25, \"P1-CRITICAL\", MaxSeverity == 20, \"P2-HIGH\", \"P3-MEDIUM\")\n| order by MaxSeverity desc, Exposures desc\n| take 30\n| project Priority, User=email, Exposures, PlaintextPWs, InfectedDevices, LatestExposure)",
+              "size": 0,
+              "title": "Unresolved High-Severity Exposures Requiring Action",
+              "queryType": 0,
+              "visualization": "table",
+              "gridSettings": {
+                "sortBy": [{ "itemKey": "Priority", "sortOrder": 1 }]
+              }
+            },
+            "name": "unresolvedHighSev"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(union\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | project TimeGenerated, Playbook=\"SpyCloud-MDE-Isolation\", Target=device_name_s, Action=action_type_s, Status=status_s),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | project TimeGenerated, Playbook=\"SpyCloud-CA-Remediation\", Target=user_principal_name_s, Action=action_s, Status=status_s)\n| extend StatusIndicator = case(Status in (\"Succeeded\", \"Success\", \"Completed\"), \"SUCCESS\", Status in (\"Failed\", \"Error\"), \"FAILED\", \"PENDING\")\n| order by TimeGenerated desc\n| take 50\n| project TimeGenerated, Playbook, Target, Action, StatusIndicator)",
+              "size": 0,
+              "title": "Recent Playbook Executions and Status",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "recentPlaybookExecutions"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(24h)\n| extend SeverityLabel = case(severity == 25, \"Critical\", severity == 20, \"High\", severity == 5, \"Medium\", severity == 2, \"Low\", \"Other\")\n| summarize Count=count() by bin(TimeGenerated, 1h), SeverityLabel\n| order by TimeGenerated asc)",
+              "size": 0,
+              "title": "Exposure Ingestion by Severity (Last 24h - Hourly)",
+              "queryType": 0,
+              "visualization": "areachart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  { "seriesName": "Critical", "color": "redBright" },
+                  { "seriesName": "High", "color": "orange" },
+                  { "seriesName": "Medium", "color": "yellow" },
+                  { "seriesName": "Low", "color": "blue" }
+                ]
+              }
+            },
+            "name": "ingestionBySeverity"
+          }
+        ]
+      },
+      "name": "tabLiveThreatFeed"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Investigation Hub",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## Investigation Hub\nParameter-driven entity lookup across all SpyCloud data sources and correlated Sentinel tables. Search by user, device, or IP address."
+            },
+            "name": "tab2Header"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "search_user",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "SearchUser",
+                  "type": 1,
+                  "isRequired": false,
+                  "value": "",
+                  "label": "User Email (partial match)",
+                  "description": "Enter a full or partial email address to search across all SpyCloud tables"
+                },
+                {
+                  "id": "search_device",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "SearchDevice",
+                  "type": 1,
+                  "isRequired": false,
+                  "value": "",
+                  "label": "Device ID or Hostname",
+                  "description": "Enter a device identifier or hostname to search"
+                },
+                {
+                  "id": "search_ip",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "SearchIP",
+                  "type": 1,
+                  "isRequired": false,
+                  "value": "",
+                  "label": "IP Address",
+                  "description": "Enter an IP address to search across all tables"
+                }
+              ]
+            },
+            "name": "investigationParams"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where (isnotempty(\"{SearchUser}\") and email has \"{SearchUser}\")\n    or (isnotempty(\"{SearchDevice}\") and (infected_machine_id has \"{SearchDevice}\" or user_hostname has \"{SearchDevice}\"))\n    or (isnotempty(\"{SearchIP}\") and ip_address has \"{SearchIP}\")\n| project TimeGenerated, Source=\"BreachWatchlist\", Email=email, Severity=severity, PasswordType=password_type, HasPlaintext=isnotempty(password_plaintext), Domain=target_domain, DeviceID=infected_machine_id, Hostname=user_hostname, IP=ip_address, SourceID=source_id\n| order by TimeGenerated desc\n| take 100)",
+              "size": 0,
+              "title": "SpyCloud Breach Watchlist Results",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "searchBreachWatchlist"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudCompassData_CL\n| where TimeGenerated {TimeRange}\n| where (isnotempty(\"{SearchUser}\") and email has \"{SearchUser}\")\n    or (isnotempty(\"{SearchDevice}\") and (infected_machine_id has \"{SearchDevice}\" or user_hostname has \"{SearchDevice}\"))\n    or (isnotempty(\"{SearchIP}\") and ip_address has \"{SearchIP}\")\n| project TimeGenerated, Source=\"CompassData\", Email=email, Severity=severity, Domain=target_domain, DeviceID=infected_machine_id, Hostname=user_hostname, IP=ip_address, BreachCategory=breach_category\n| order by TimeGenerated desc\n| take 100)",
+              "size": 0,
+              "title": "SpyCloud Compass Data Results",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "searchCompassData"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachCatalog_CL\n| where TimeGenerated {TimeRange}\n| where isnotempty(\"{SearchUser}\") or isnotempty(\"{SearchDevice}\") or isnotempty(\"{SearchIP}\")\n| join kind=inner (\n    SpyCloudBreachWatchlist_CL\n    | where TimeGenerated {TimeRange}\n    | where (isnotempty(\"{SearchUser}\") and email has \"{SearchUser}\")\n        or (isnotempty(\"{SearchDevice}\") and (infected_machine_id has \"{SearchDevice}\" or user_hostname has \"{SearchDevice}\"))\n        or (isnotempty(\"{SearchIP}\") and ip_address has \"{SearchIP}\")\n    | distinct source_id\n) on $left.catalog_id == $right.source_id\n| summarize arg_max(TimeGenerated, *) by catalog_id\n| project CatalogID=catalog_id, BreachTitle=breach_title, Status=breach_status, Category=tostring(breach_category), Description=breach_description\n| take 25)",
+              "size": 0,
+              "title": "Related Breach Catalog Entries",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "searchBreachCatalog"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(Spycloud_MDE_Logs_CL\n| where TimeGenerated {TimeRange}\n| where (isnotempty(\"{SearchDevice}\") and (device_id_s has \"{SearchDevice}\" or device_name_s has \"{SearchDevice}\"))\n| project TimeGenerated, Source=\"MDE_Logs\", Device=device_name_s, DeviceId=device_id_s, Action=action_type_s, Status=status_s\n| order by TimeGenerated desc\n| take 50)",
+              "size": 0,
+              "title": "MDE Remediation Actions for Entity",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "searchMDELogs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloud_ConditionalAccessLogs_CL\n| where TimeGenerated {TimeRange}\n| where (isnotempty(\"{SearchUser}\") and user_principal_name_s has \"{SearchUser}\")\n| project TimeGenerated, Source=\"CA_Logs\", User=user_principal_name_s, Action=action_s, Status=status_s\n| order by TimeGenerated desc\n| take 50)",
+              "size": 0,
+              "title": "Conditional Access Actions for Entity",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "searchCALogs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SigninLogs\n| where TimeGenerated {TimeRange}\n| where (isnotempty(\"{SearchUser}\") and UserPrincipalName has \"{SearchUser}\")\n    or (isnotempty(\"{SearchIP}\") and IPAddress has \"{SearchIP}\")\n| project TimeGenerated, User=UserPrincipalName, IPAddress, Location=strcat(tostring(LocationDetails.city), \", \", tostring(LocationDetails.countryOrRegion)), App=AppDisplayName, Status=case(ResultType == 0, \"Success\", \"Failed\"), RiskLevel=RiskLevelDuringSignIn, ConditionalAccessStatus\n| order by TimeGenerated desc\n| take 75)",
+              "size": 0,
+              "title": "Related Sign-In Activity",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "searchSigninLogs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(CommonSecurityLog\n| where TimeGenerated {TimeRange}\n| where (isnotempty(\"{SearchIP}\") and (SourceIP has \"{SearchIP}\" or DestinationIP has \"{SearchIP}\"))\n| project TimeGenerated, SourceIP, DestinationIP, DestinationPort, Protocol=ApplicationProtocol, Action=DeviceAction, Vendor=DeviceVendor, Product=DeviceProduct, Message=Activity\n| order by TimeGenerated desc\n| take 75)",
+              "size": 0,
+              "title": "Related Firewall / Network Events",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "searchFirewallEvents"
+          }
+        ]
+      },
+      "name": "tabInvestigationHub"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Correlation Matrix",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## Correlation Matrix\nCross-source correlation of SpyCloud exposure events with Microsoft Sentinel security data sources. Identify overlapping indicators across sign-in logs, Office activity, firewall events, and device telemetry."
+            },
+            "name": "tab3Header"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[\"SpyCloud x SigninLogs\",0,1,\"SpyCloud x OfficeActivity\",0,2,\"SpyCloud x CommonSecurityLog\",0,3,\"SpyCloud x DeviceEvents\",0,4,\"SpyCloud x BehaviorAnalytics\",0,5]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | distinct email;\nSigninLogs | where TimeGenerated {TimeRange} | where UserPrincipalName in (exposedUsers) | summarize v=count() | extend Label=\"SpyCloud x SigninLogs\", Order=1 | project Label, Value=v, Order),\n(let exposedUsers = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | distinct email;\nOfficeActivity | where TimeGenerated {TimeRange} | where UserId in (exposedUsers) | summarize v=count() | extend Label=\"SpyCloud x OfficeActivity\", Order=2 | project Label, Value=v, Order),\n(let spycloudIPs = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and isnotempty(ip_address) | distinct tostring(ip_address);\nCommonSecurityLog | where TimeGenerated {TimeRange} | where SourceIP in (spycloudIPs) or DestinationIP in (spycloudIPs) | summarize v=count() | extend Label=\"SpyCloud x CommonSecurityLog\", Order=3 | project Label, Value=v, Order),\n(let exposedUsers = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | distinct email;\nDeviceEvents | where TimeGenerated {TimeRange} | where AccountUpn in (exposedUsers) | summarize v=count() | extend Label=\"SpyCloud x DeviceEvents\", Order=4 | project Label, Value=v, Order),\n(let exposedUsers = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | distinct email;\nBehaviorAnalytics | where TimeGenerated {TimeRange} | where UserPrincipalName in (exposedUsers) | summarize v=count() | extend Label=\"SpyCloud x BehaviorAnalytics\", Order=5 | project Label, Value=v, Order)\n| summarize Value=max(Value) by Label, Order\n| order by Order asc",
+              "size": 4,
+              "title": "Cross-Source Correlation Counts",
+              "queryType": 0,
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": { "columnMatch": "Label", "formatter": 1 },
+                "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+              }
+            },
+            "name": "correlationCountTiles"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| summarize MaxSev=max(severity), SpyCloudExposures=count() by email;\nSigninLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers | project email)\n| summarize SignIns=count(), FailedSignIns=countif(ResultType != 0), RiskySignIns=countif(RiskLevelDuringSignIn in (\"high\", \"medium\")), DistinctIPs=dcount(IPAddress) by UserPrincipalName\n| join kind=inner (exposedUsers) on $left.UserPrincipalName == $right.email\n| project User=UserPrincipalName, SpyCloudSeverity=MaxSev, SpyCloudExposures, SignIns, FailedSignIns, RiskySignIns, DistinctIPs\n| order by SpyCloudSeverity desc, RiskySignIns desc\n| take 30)",
+              "size": 0,
+              "title": "SpyCloud Events Correlated with SigninLogs",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "correlationSigninLogs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| summarize MaxSev=max(severity), SpyCloudExposures=count() by email;\nOfficeActivity\n| where TimeGenerated {TimeRange}\n| where UserId in (exposedUsers | project email)\n| summarize OfficeEvents=count(), FileAccesses=countif(Operation has_any (\"FileAccessed\", \"FileDownloaded\", \"FilePreviewed\")), Modifications=countif(Operation has_any (\"FileModified\", \"FileUploaded\", \"FileDeleted\")), MailActions=countif(Operation has_any (\"Send\", \"MailboxLogin\", \"MoveToDeletedItems\")), DistinctOps=dcount(Operation) by UserId\n| join kind=inner (exposedUsers) on $left.UserId == $right.email\n| project User=UserId, SpyCloudSeverity=MaxSev, SpyCloudExposures, OfficeEvents, FileAccesses, Modifications, MailActions, DistinctOps\n| order by SpyCloudSeverity desc, OfficeEvents desc\n| take 30)",
+              "size": 0,
+              "title": "SpyCloud Events Correlated with OfficeActivity",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "correlationOfficeActivity"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let spycloudIPs = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and isnotempty(ip_address)\n| summarize MaxSev=max(severity), Exposures=count() by IP=tostring(ip_address);\nCommonSecurityLog\n| where TimeGenerated {TimeRange}\n| extend MatchedIP = case(SourceIP in (spycloudIPs | project IP), SourceIP, DestinationIP in (spycloudIPs | project IP), DestinationIP, \"\")\n| where isnotempty(MatchedIP)\n| summarize FirewallHits=count(), Allowed=countif(DeviceAction has_any (\"Allow\", \"Accept\", \"Pass\")), Blocked=countif(DeviceAction has_any (\"Block\", \"Deny\", \"Drop\")), DistinctPorts=dcount(DestinationPort), Vendors=make_set(DeviceVendor) by MatchedIP\n| join kind=inner (spycloudIPs) on $left.MatchedIP == $right.IP\n| project IP=MatchedIP, SpyCloudSeverity=MaxSev, SpyCloudExposures=Exposures, FirewallHits, AllowedTraffic=Allowed, BlockedTraffic=Blocked, DistinctPorts, FirewallVendors=strcat_array(Vendors, \", \")\n| order by SpyCloudSeverity desc, FirewallHits desc\n| take 30)",
+              "size": 0,
+              "title": "SpyCloud Events Correlated with CommonSecurityLog",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "correlationCommonSecurityLog"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| summarize MaxSev=max(severity), SpyCloudExposures=count() by email;\nDeviceEvents\n| where TimeGenerated {TimeRange}\n| where AccountUpn in (exposedUsers | project email)\n| summarize DeviceEvents=count(), DistinctActions=dcount(ActionType), DistinctDevices=dcount(DeviceName), SuspiciousActions=countif(ActionType has_any (\"ProcessCreate\", \"RegistryValueSet\", \"PowershellCommand\", \"ScriptContent\")) by AccountUpn\n| join kind=inner (exposedUsers) on $left.AccountUpn == $right.email\n| project User=AccountUpn, SpyCloudSeverity=MaxSev, SpyCloudExposures, DeviceEvents, DistinctActions, DistinctDevices, SuspiciousActions\n| order by SpyCloudSeverity desc, SuspiciousActions desc\n| take 30)",
+              "size": 0,
+              "title": "SpyCloud Events Correlated with DeviceEvents",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "correlationDeviceEvents"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nlet signinCorr = SigninLogs | where TimeGenerated {TimeRange} | where UserPrincipalName in (exposedUsers) | summarize SigninEvents=count() by bin(TimeGenerated, 1d) | extend Source=\"SigninLogs\";\nlet officeCorr = OfficeActivity | where TimeGenerated {TimeRange} | where UserId in (exposedUsers) | summarize OfficeEvents=count() by bin(TimeGenerated, 1d) | extend Source=\"OfficeActivity\";\nlet spycloudIngest = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | summarize SpyCloudEvents=count() by bin(TimeGenerated, 1d) | extend Source=\"SpyCloud\";\nunion\n(signinCorr | project TimeGenerated, Count=SigninEvents, Source),\n(officeCorr | project TimeGenerated, Count=OfficeEvents, Source),\n(spycloudIngest | project TimeGenerated, Count=SpyCloudEvents, Source)\n| order by TimeGenerated asc)",
+              "size": 0,
+              "title": "Cross-Source Correlation Heat Map (Daily Event Overlap)",
+              "queryType": 0,
+              "visualization": "areachart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  { "seriesName": "SpyCloud", "color": "redBright" },
+                  { "seriesName": "SigninLogs", "color": "blue" },
+                  { "seriesName": "OfficeActivity", "color": "green" }
+                ]
+              }
+            },
+            "name": "correlationHeatMap"
+          }
+        ]
+      },
+      "name": "tabCorrelationMatrix"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Hunting Dashboard",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "## Hunting Dashboard\nPre-built threat hunting queries, anomaly detection outputs, suspicious pattern identification, and investigation bookmarks for proactive threat discovery."
+            },
+            "name": "tab4Header"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where isnotempty(password_plaintext) and severity >= 20\n| join kind=inner (\n    SigninLogs\n    | where TimeGenerated {TimeRange}\n    | where ResultType == 0\n    | summarize SuccessfulSignIns=count(), LastSignIn=max(TimeGenerated) by UserPrincipalName\n) on $left.email == $right.UserPrincipalName\n| summarize PlaintextExposures=count(), BreachSources=dcount(source_id), MaxSev=max(severity) by email, SuccessfulSignIns, LastSignIn\n| where SuccessfulSignIns > 0\n| extend HuntFinding=\"HUNT-001: Plaintext Password Exposed + Active Sign-Ins\"\n| order by MaxSev desc, PlaintextExposures desc\n| take 25\n| project Finding=HuntFinding, User=email, PlaintextExposures, BreachSources, RecentSuccessfulSignIns=SuccessfulSignIns, LastSignIn)",
+              "size": 0,
+              "title": "HUNT-001: Users with Plaintext Passwords Still Signing In",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "hunt001PlaintextActive"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and isnotempty(infected_machine_id) and severity >= 20\n| distinct infected_machine_id, email\n| join kind=inner (\n    SigninLogs\n    | where TimeGenerated {TimeRange}\n    | where ResultType == 0\n    | extend isMultiGeo = bag_keys(LocationDetails) contains \"city\"\n    | summarize DistinctLocations=dcount(tostring(LocationDetails.city)), DistinctIPs=dcount(IPAddress), Locations=make_set(strcat(tostring(LocationDetails.city), \", \", tostring(LocationDetails.countryOrRegion)), 5) by UserPrincipalName\n    | where DistinctLocations > 2\n) on $left.email == $right.UserPrincipalName\n| project Finding=\"HUNT-002: Infected Device User + Multi-Location Sign-Ins\", User=email, DeviceID=infected_machine_id, DistinctLocations, DistinctIPs, SampleLocations=strcat_array(Locations, \" | \")\n| take 25)",
+              "size": 0,
+              "title": "HUNT-002: Infected Device Users with Multi-Location Sign-Ins",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "hunt002InfectedMultiGeo"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nOfficeActivity\n| where TimeGenerated {TimeRange}\n| where UserId in (exposedUsers)\n| where Operation has_any (\"New-InboxRule\", \"Set-InboxRule\", \"UpdateInboxRules\", \"New-TransportRule\")\n| project TimeGenerated, Finding=\"HUNT-003: Exposed User Creating Mail Rules\", User=UserId, Operation, ClientIP, Parameters=tostring(Parameters)\n| order by TimeGenerated desc\n| take 30)",
+              "size": 0,
+              "title": "HUNT-003: Exposed Users Creating Suspicious Mail Rules",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "hunt003MailRules"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nOfficeActivity\n| where TimeGenerated {TimeRange}\n| where UserId in (exposedUsers)\n| where Operation has_any (\"FileDownloaded\", \"FileAccessed\", \"FileSyncDownloadedFull\")\n| summarize Downloads=count(), UniqueFiles=dcount(OfficeObjectId), DistinctIPs=dcount(ClientIP) by UserId, bin(TimeGenerated, 1h)\n| where Downloads > 50\n| extend Finding=\"HUNT-004: Bulk Download from Exposed Account\"\n| project Finding, User=UserId, TimeWindow=TimeGenerated, FilesDownloaded=Downloads, UniqueFiles, SourceIPs=DistinctIPs\n| order by FilesDownloaded desc\n| take 25)",
+              "size": 0,
+              "title": "HUNT-004: Bulk File Downloads from Exposed Accounts",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "hunt004BulkDownloads"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let spycloudIPs = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and isnotempty(ip_address) and severity >= 20\n| distinct tostring(ip_address);\nSigninLogs\n| where TimeGenerated {TimeRange}\n| where IPAddress in (spycloudIPs)\n| summarize Users=make_set(UserPrincipalName, 10), SignInCount=count(), SuccessCount=countif(ResultType == 0), FailCount=countif(ResultType != 0) by IPAddress\n| where array_length(Users) > 1\n| extend Finding=\"HUNT-005: Multiple Accounts from Same Exposed IP\"\n| project Finding, IPAddress, UniqueUsers=array_length(Users), UserList=strcat_array(Users, \", \"), TotalSignIns=SignInCount, Successful=SuccessCount, Failed=FailCount\n| order by UniqueUsers desc\n| take 25)",
+              "size": 0,
+              "title": "HUNT-005: Multiple Accounts Accessed from Same Exposed IP",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "hunt005SharedIP"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nBehaviorAnalytics\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers)\n| where InvestigationPriority > 5\n| summarize MaxPriority=max(InvestigationPriority), AvgPriority=round(avg(InvestigationPriority), 1), AnomalyCount=count(), Activities=make_set(ActivityType, 5) by UserPrincipalName\n| extend Finding=\"HUNT-006: High Anomaly Score from Exposed User\"\n| order by MaxPriority desc\n| take 25\n| project Finding, User=UserPrincipalName, MaxAnomalyScore=MaxPriority, AvgAnomalyScore=AvgPriority, AnomalyEvents=AnomalyCount, ActivityTypes=strcat_array(Activities, \", \"))",
+              "size": 0,
+              "title": "HUNT-006: High UEBA Anomaly Scores for Exposed Users",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "hunt006UEBAAnomalies"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nSigninLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers)\n| where AppDisplayName has_any (\"Azure Portal\", \"Microsoft Azure Management\", \"Azure Resource Manager\", \"Graph Explorer\", \"Azure DevOps\")\n| where ResultType == 0\n| summarize AccessCount=count(), DistinctApps=make_set(AppDisplayName), DistinctIPs=dcount(IPAddress), LastAccess=max(TimeGenerated) by UserPrincipalName\n| extend Finding=\"HUNT-007: Exposed User Accessing Privileged Azure Resources\"\n| project Finding, User=UserPrincipalName, AccessCount, Applications=strcat_array(DistinctApps, \", \"), UniqueIPs=DistinctIPs, LastAccess\n| order by AccessCount desc\n| take 25)",
+              "size": 0,
+              "title": "HUNT-007: Exposed Users Accessing Privileged Azure Resources",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "hunt007PrivilegedAccess"
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "---\n### Investigation Notes & Bookmarks\nUse the query below to track investigation notes stored via Sentinel Bookmarks related to SpyCloud findings."
+            },
+            "name": "bookmarksHeader"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(HuntingBookmark\n| where TimeGenerated {TimeRange}\n| where Tags has \"SpyCloud\" or BookmarkName has \"SpyCloud\" or QueryText has \"SpyCloud\"\n| project TimeGenerated, BookmarkName, CreatedBy=CreatedByName, Tags, Notes=Notes, QueryText=substring(QueryText, 0, 200)\n| order by TimeGenerated desc\n| take 25)",
+              "size": 0,
+              "title": "SpyCloud-Related Investigation Bookmarks",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "huntingBookmarks"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where severity >= 20\n| summarize Exposures=count(), UniqueUsers=dcount(email), PlaintextPWs=countif(isnotempty(password_plaintext)), Devices=dcount(infected_machine_id) by bin(TimeGenerated, 1d)\n| extend AnomalyScore = iff(Exposures > avg_of(Exposures) + 2 * stdev_of(Exposures), \"ANOMALY\", \"NORMAL\")\n| order by TimeGenerated desc)",
+              "size": 0,
+              "title": "Daily Anomaly Detection - Exposure Volume Spikes",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "anomalyDetection"
+          }
+        ]
+      },
+      "name": "tabHuntingDashboard"
+    }
+  ],
+  "styleSettings": {},
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

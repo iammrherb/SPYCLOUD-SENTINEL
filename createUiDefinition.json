@@ -757,6 +757,294 @@
                         "visible": true
                     }
                 ]
+            },
+            {
+                "name": "remediationConfig",
+                "label": "Remediation & Conditional Access",
+                "elements": [
+                    {
+                        "name": "sectionCAGroups",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Security Group Architecture",
+                        "elements": [
+                            {
+                                "name": "caGroupInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "SpyCloud uses a tiered security group architecture for Conditional Access enforcement. Create these groups in Entra ID BEFORE deployment, then enter their Object IDs below. Playbooks will automatically move users between groups based on exposure severity.\n\n| Group | Purpose | CA Policy to Create |\n|-------|---------|--------------------|\n| SpyCloud-Blocked | Severity 25 — block all access | Block access from all locations |\n| SpyCloud-Restricted | Severity 20 — restricted access | Require compliant device + MFA |\n| SpyCloud-Monitored | Severity 5 — enhanced monitoring | Require MFA from untrusted locations |\n| SpyCloud-Remediated | Post-remediation tracking | Normal access (monitoring only) |\n\nTo create groups: Entra ID > Groups > New Group > Security > enter name > Create"
+                                }
+                            },
+                            {
+                                "name": "blockedGroupId",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "SpyCloud-Blocked Group Object ID",
+                                "placeholder": "e.g., 12345678-abcd-efgh-ijkl-123456789012",
+                                "toolTip": "Object ID of the 'SpyCloud-Blocked' security group. Users with severity 25 exposures are added here. Create a CA policy that blocks all access for this group.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                                    "validationMessage": "Must be a valid GUID (e.g., 12345678-abcd-1234-efgh-123456789012) or leave blank."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "restrictedGroupId",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "SpyCloud-Restricted Group Object ID",
+                                "placeholder": "e.g., 12345678-abcd-efgh-ijkl-123456789012",
+                                "toolTip": "Object ID of the 'SpyCloud-Restricted' security group. Users with severity 20 exposures are added here. Create a CA policy that requires compliant device + MFA for this group.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                                    "validationMessage": "Must be a valid GUID or leave blank."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "monitoredGroupId",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "SpyCloud-Monitored Group Object ID",
+                                "placeholder": "e.g., 12345678-abcd-efgh-ijkl-123456789012",
+                                "toolTip": "Object ID of the 'SpyCloud-Monitored' security group. Users with severity 5 exposures are added here.",
+                                "constraints": {
+                                    "required": false,
+                                    "regex": "^$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                                    "validationMessage": "Must be a valid GUID or leave blank."
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionAuthMethods",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Authentication Method Enforcement",
+                        "elements": [
+                            {
+                                "name": "authMethodInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Warning",
+                                    "text": "These settings control how playbooks manage authentication methods for compromised users. Disabling auth methods forces users to re-register, which improves security but creates friction. Test with a small group before enabling organization-wide."
+                                }
+                            },
+                            {
+                                "name": "enableMfaReRegistration",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Force MFA re-registration for severity 25 exposures",
+                                "toolTip": "When enabled, the playbook will delete all existing MFA registrations for users with severity 25 (critical) exposures, forcing them to re-register. This prevents attackers from using compromised MFA tokens."
+                            },
+                            {
+                                "name": "disableWeakAuthMethods",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Disable SMS/phone MFA for severity 20+ exposures",
+                                "toolTip": "When enabled, the playbook will disable SMS and phone call MFA methods for exposed users, requiring them to use Microsoft Authenticator or FIDO2 security keys instead."
+                            },
+                            {
+                                "name": "enforceFido2Only",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enforce FIDO2/hardware token only for severity 25 exposures",
+                                "toolTip": "Most restrictive option. Disables ALL auth methods except FIDO2 security keys and certificate-based authentication (CBA). Only enable if your organization has FIDO2 keys deployed."
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionDeviceRemediation",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Device Remediation Settings",
+                        "elements": [
+                            {
+                                "name": "deviceRemInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Configure how SpyCloud playbooks respond to infected devices detected in the exposure data. Actions are severity-based and fully customizable."
+                                }
+                            },
+                            {
+                                "name": "enableAutoIsolation",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Auto-isolate devices for severity 25 exposures",
+                                "toolTip": "Automatically isolate devices in MDE when SpyCloud detects severity 25 (critical) infostealer infections. Requires MDE P2."
+                            },
+                            {
+                                "name": "enableIntuneCompliance",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Mark devices non-compliant in Intune for severity 20+",
+                                "toolTip": "Mark infected devices as non-compliant in Intune, triggering Conditional Access device compliance policies."
+                            },
+                            {
+                                "name": "deviceAutoReleaseHours",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Auto-release isolation after (hours)",
+                                "defaultValue": "72 hours (recommended)",
+                                "toolTip": "Automatically release device isolation after this many hours. Set to 'Never' to require manual release.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        { "label": "24 hours", "value": 24 },
+                                        { "label": "48 hours", "value": 48 },
+                                        { "label": "72 hours (recommended)", "value": 72 },
+                                        { "label": "168 hours (1 week)", "value": 168 },
+                                        { "label": "Never (manual release only)", "value": 0 }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[steps('remediationConfig').sectionDeviceRemediation.enableAutoIsolation]"
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionFirewall",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Firewall Integration",
+                        "elements": [
+                            {
+                                "name": "firewallInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Enable firewall integrations to automatically push SpyCloud IOCs (IP addresses, domains) to your perimeter firewalls. Supports Fortinet FortiGate, Palo Alto Networks, and Azure Firewall. Requires API access to your firewall management plane."
+                                }
+                            },
+                            {
+                                "name": "enableFortinetIntegration",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Fortinet FortiGate integration",
+                                "toolTip": "Push SpyCloud IPs to FortiGate address objects and correlate with FSSO sessions."
+                            },
+                            {
+                                "name": "fortinetApiUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "FortiGate Management URL",
+                                "placeholder": "https://fortigate.example.com:443",
+                                "toolTip": "HTTPS URL for FortiGate REST API. Must be accessible from Azure Logic Apps.",
+                                "constraints": { "required": false },
+                                "visible": "[steps('remediationConfig').sectionFirewall.enableFortinetIntegration]"
+                            },
+                            {
+                                "name": "enablePaloAltoIntegration",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Palo Alto Networks integration",
+                                "toolTip": "Push SpyCloud IPs to PAN-OS address groups and correlate with User-ID traffic."
+                            },
+                            {
+                                "name": "paloAltoApiUrl",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "PAN-OS Management URL",
+                                "placeholder": "https://panorama.example.com:443",
+                                "toolTip": "HTTPS URL for PAN-OS XML API. Must be accessible from Azure Logic Apps.",
+                                "constraints": { "required": false },
+                                "visible": "[steps('remediationConfig').sectionFirewall.enablePaloAltoIntegration]"
+                            },
+                            {
+                                "name": "enableAzureFirewall",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Azure Firewall IP group updates",
+                                "toolTip": "Automatically update Azure Firewall IP groups with SpyCloud compromised IPs."
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "troubleshootingGuide",
+                "label": "Troubleshooting & Tips",
+                "elements": [
+                    {
+                        "name": "sectionConnectorTroubleshooting",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Connector & Data Ingestion Troubleshooting",
+                        "elements": [
+                            {
+                                "name": "connectorTsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "=== CONNECTOR TROUBLESHOOTING ===\n\nPROBLEM: No data after 15 minutes\nCAUSE: API key invalid, wrong tier, or network issue\nFIX: Test your key: curl -H 'X-Api-Key: YOUR_KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1\n  - 200 response = key is valid\n  - 401 response = key is invalid or expired\n  - Connection timeout = network/firewall blocking outbound HTTPS to api.spycloud.io\n\nPROBLEM: 401 Unauthorized on connect\nCAUSE: Wrong API key type (SaaS vs Enterprise)\nFIX: Ensure you have an ENTERPRISE tier key from portal.spycloud.com > Account Settings > API Keys\n\nPROBLEM: Watchlist data appears but Catalog is empty\nCAUSE: API permissions or endpoint access\nFIX: Contact SpyCloud support — Catalog may require separate endpoint authorization\n\nPROBLEM: Compass tables are empty\nCAUSE: Enterprise+ subscription required\nFIX: Compass Data and Compass Devices require Enterprise+ tier. Contact SpyCloud sales to upgrade\n\nPROBLEM: Data appears but stops after initial sync\nCAUSE: API rate limiting or cursor/checkpoint issue\nFIX: Check DCR metrics in Azure Monitor > Data Collection Rules. If rate limited, increase polling interval to 60min+\n\nPROBLEM: Duplicate records appearing\nCAUSE: Overlapping lookback period during initial sync\nFIX: Normal behavior — deduplicate in KQL using: | summarize arg_max(TimeGenerated, *) by document_id\n\nPROBLEM: High ingestion costs\nCAUSE: Large watchlist with all severity levels\nFIX: 1) Filter to severity >= 20 (infostealer only) 2) Increase polling interval 3) Reduce retention 4) Use summary rules"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionPlaybookTroubleshooting",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Playbook & Automation Troubleshooting",
+                        "elements": [
+                            {
+                                "name": "playbookTsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "=== PLAYBOOK TROUBLESHOOTING ===\n\nPROBLEM: Playbooks are not triggering on incidents\nCAUSE 1: Analytics rule is disabled\nFIX: Sentinel > Analytics > filter 'SpyCloud' > verify rules are Enabled\nCAUSE 2: Automation rule is disabled\nFIX: Sentinel > Automation > verify SpyCloud automation rules are Enabled\nCAUSE 3: Logic App is disabled\nFIX: Resource Group > Logic Apps > verify each SpyCloud Logic App shows 'Enabled'\n\nPROBLEM: Playbook fails with 403 Forbidden\nCAUSE: Managed identity missing required permissions\nFIX: Run scripts/grant-permissions.sh from Cloud Shell, OR manually assign:\n  - MDE Playbook: Machine.Isolate, Machine.ReadWrite.All (on WindowsDefenderATP)\n  - CA Playbook: User.ReadWrite.All, Directory.ReadWrite.All, UserAuthenticationMethod.ReadWrite.All (on Microsoft Graph)\n  - Enrichment Playbook: SecurityEvents.Read.All (on Microsoft Graph)\n\nPROBLEM: MDE isolation fails\nCAUSE: No Defender for Endpoint P2 license or device not onboarded\nFIX: Verify MDE P2 license. Check device is onboarded: security.microsoft.com > Device inventory\n\nPROBLEM: Password reset fails\nCAUSE: Missing Entra ID P1+ license or insufficient permissions\nFIX: Verify Entra P1+. Assign User.ReadWrite.All to Logic App managed identity\n\nPROBLEM: MFA re-registration fails\nCAUSE: Missing UserAuthenticationMethod.ReadWrite.All permission\nFIX: Assign via PowerShell:\n  Connect-MgGraph -Scopes 'AppRoleAssignment.ReadWrite.All'\n  $sp = Get-MgServicePrincipal -Filter \"displayName eq 'SpyCloud-CA-Remediation-{workspace}'\"\n  # Assign UserAuthenticationMethod.ReadWrite.All\n\nPROBLEM: Security group assignment fails\nCAUSE: Missing Directory.ReadWrite.All permission\nFIX: Assign Directory.ReadWrite.All to Logic App managed identity\n\nPROBLEM: Teams notification not sending\nCAUSE: Invalid webhook URL or Teams connector expired\nFIX: Teams > Channel > Connectors > Incoming Webhook > regenerate URL > update Logic App parameter\n\nPROBLEM: ServiceNow ticket creation fails\nCAUSE: Invalid instance URL or authentication\nFIX: Verify instance URL format (https://instance.service-now.com), check API credentials\n\nTIP: Check Logic App Run History\n  Resource Group > Logic Apps > select playbook > Run History > click failed run > expand actions to see error details"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionRuleTroubleshooting",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Analytics Rule Troubleshooting",
+                        "elements": [
+                            {
+                                "name": "ruleTsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "=== ANALYTICS RULE TROUBLESHOOTING ===\n\nPROBLEM: Rule shows 'Error' status in Sentinel\nCAUSE: KQL syntax error or missing table\nFIX: Open rule > Edit > Run query > check for errors in Log Analytics\n\nPROBLEM: Rule creates no incidents despite having data\nCAUSE: Threshold too high or time range mismatch\nFIX: Open rule > Edit > lower triggerThreshold or expand queryPeriod\n\nPROBLEM: Too many incidents being created\nCAUSE: Threshold too low for your data volume\nFIX: Increase triggerThreshold, add severity filters, or group incidents by entity\n\nPROBLEM: Cross-source correlation rules show no results\nCAUSE: Required data source not connected\nFIX: Install the required connector from Content Hub:\n  - SigninLogs rules: Install 'Microsoft Entra ID' connector + enable Sign-in Logs diagnostic\n  - OfficeActivity rules: Install 'Office 365' connector\n  - CommonSecurityLog rules: Install your firewall vendor's connector (Fortinet, PaloAlto, etc.)\n  - BehaviorAnalytics rules: Enable UEBA (Sentinel > Settings > UEBA > ON)\n  - DeviceEvents rules: Install 'Microsoft Defender for Endpoint' connector\n  - DnsEvents rules: Install 'DNS' connector + enable DNS Analytics\n\nPROBLEM: UEBA correlation rules show no results\nCAUSE: UEBA not enabled or not enough data for baseline\nFIX: Enable UEBA (Sentinel > Settings > UEBA > ON). UEBA needs 14+ days to build baselines\n\nPROBLEM: Fusion rule not detecting multi-stage attacks\nCAUSE: Fusion disabled or insufficient correlated signals\nFIX: Enable Fusion (Sentinel > Analytics > filter 'Fusion' > Enable). Fusion needs multiple signal sources\n\nTIP: Test any rule query manually in Log Analytics before enabling"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionDiagnosticQueries",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Diagnostic Queries & Health Checks",
+                        "elements": [
+                            {
+                                "name": "diagQueriesInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "=== DIAGNOSTIC QUERIES (run in Log Analytics) ===\n\n1. OVERALL HEALTH CHECK:\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest\n\n2. CONNECTOR HEALTH:\nSentinelHealth\n| where TimeGenerated > ago(24h)\n| where SentinelResourceType == 'Data connector'\n| where SentinelResourceName contains 'SpyCloud'\n| project TimeGenerated, Status, Description\n\n3. INGESTION VOLUME (last 7 days):\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d)\n| summarize DailyRecords=count() by bin(TimeGenerated, 1d)\n| render timechart\n\n4. PLAYBOOK EXECUTION STATUS:\nSpyCloud_ConditionalAccessLogs_CL\n| union Spycloud_MDE_Logs_CL\n| where TimeGenerated > ago(7d)\n| summarize Actions=count(), Successes=countif(ActionStatus=='Success'), Failures=countif(ActionStatus=='Failed') by Action\n\n5. SEVERITY DISTRIBUTION:\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d)\n| summarize Count=count() by severity\n| order by severity\n\n6. TOP EXPOSED USERS:\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d)\n| summarize Exposures=count(), MaxSeverity=max(severity) by email\n| order by Exposures desc\n| take 20\n\n7. REMEDIATION GAP (exposures without CA action > 48h):\nlet exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(48h) and severity >= 20\n| distinct email;\nlet remediatedUsers = SpyCloud_ConditionalAccessLogs_CL\n| where TimeGenerated > ago(48h)\n| distinct Email;\nexposedUsers\n| where email !in (remediatedUsers)"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionPerformanceTips",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Performance Tips & Best Practices",
+                        "elements": [
+                            {
+                                "name": "perfTipsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "=== PERFORMANCE OPTIMIZATION ===\n\n1. POLLING INTERVAL\n  - Start with 30min (recommended for most orgs)\n  - Reduce to 5-15min for active incident response\n  - Increase to 60min+ for cost-sensitive environments\n\n2. SEVERITY FILTERING\n  - Start with ALL severity levels to understand your exposure landscape\n  - After 1 week, if volume is overwhelming, filter to severity >= 20 (infostealer only)\n  - Enable severity 2-5 (breach) rules only when you have capacity to triage\n\n3. DATA RETENTION OPTIMIZATION\n  Per-table recommendations:\n  - SpyCloudBreachWatchlist_CL: 90d (active remediation) to 365d (compliance)\n  - SpyCloudBreachCatalog_CL: 730d (reference data, very low volume)\n  - SpyCloudCompassData_CL: 90-180d (moderate volume)\n  - SpyCloudCompassDevices_CL: 90-180d (low volume)\n  - Spycloud_MDE_Logs_CL: 90d (audit trail)\n  - SpyCloud_ConditionalAccessLogs_CL: 90d (audit trail)\n\n4. SUMMARY RULES (for high-volume environments)\n  If ingesting 100K+ records/day:\n  - Create summary rules to pre-aggregate by domain, severity, and date\n  - Use summary tables for workbook/dashboard queries\n  - Keep detailed tables for investigation and hunting only\n\n5. ANALYTICS RULE PHASING\n  Week 1: Enable core infostealer detection (severity 20+)\n  Week 2: Enable device infection and session cookie rules\n  Week 3: Enable O365 and Entra ID correlation rules\n  Week 4: Enable UEBA, firewall, and DNS correlation rules\n\n6. WORKBOOK OPTIMIZATION\n  - Always use time range parameters (default 24h for live, 30d for trends)\n  - Use summarize/project in KQL to minimize data scanned\n  - Consider pinning key panels to Azure Dashboard for quick access\n\n=== SUPPORT CONTACTS ===\n- SpyCloud API: support@spycloud.com\n- GitHub Issues: github.com/iammrherb/SPYCLOUD-SENTINEL/issues\n- Microsoft Sentinel: Azure Portal > Support + Troubleshooting\n- Playbook Permissions: Run scripts/grant-permissions.sh from Cloud Shell"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
             }
         ],
         "outputs": {
