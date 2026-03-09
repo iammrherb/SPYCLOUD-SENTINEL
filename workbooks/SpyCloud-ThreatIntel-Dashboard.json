@@ -409,7 +409,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachCatalog_CL\n| where TimeGenerated {TimeRange}\n| summarize arg_max(TimeGenerated, *) by source_id\n| project source_id, breach_title, status, description, TimeGenerated\n| order by TimeGenerated desc\n| take 50)",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachCatalog_CL\n| where TimeGenerated {TimeRange}\n| summarize arg_max(TimeGenerated, *) by catalog_id\n| project catalog_id, breach_title, breach_status, breach_description, TimeGenerated\n| order by TimeGenerated desc\n| take 50)",
         "size": 0,
         "title": "Recent Breach Catalog Entries",
         "queryType": 0,
