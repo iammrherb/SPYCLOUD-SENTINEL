@@ -397,28 +397,6 @@
       "metadata": {
         "description": "Azure DevOps Service Hook URL for auto-creating work items. Leave blank to skip."
       }
-    },
-    "apiRegion": {
-      "type": "string",
-      "defaultValue": "US",
-      "allowedValues": [
-        "US",
-        "EU"
-      ],
-      "metadata": {
-        "description": "SpyCloud API region. US = api.spycloud.io (default). EU = eu.api.spycloud.io (when available). Contact SpyCloud for EU region access."
-      }
-    },
-    "deploymentMode": {
-      "type": "string",
-      "defaultValue": "Full",
-      "allowedValues": [
-        "Full",
-        "Update"
-      ],
-      "metadata": {
-        "description": "Full = first-time (creates all). Update = add/update features on existing deployment."
-      }
     }
   },
   "variables": {
@@ -462,15 +440,14 @@
     "credResponsePlaybookName": "[concat('SpyCloud-CredResponse-', take(parameters('workspace'), 30))]",
     "mdeBlocklistPlaybookName": "[concat('SpyCloud-MDE-Blocklist-', take(parameters('workspace'), 30))]",
     "teamsConnectionName": "[concat('teams-spycloud-', take(parameters('workspace'), 30))]",
-    "allTags": "[union(parameters('resourceTags'), createObject('environment', parameters('tagEnvironment'), 'owner', if(empty(parameters('tagOwner')), 'unassigned', parameters('tagOwner')), 'costCenter', if(empty(parameters('tagCostCenter')), 'unassigned', parameters('tagCostCenter'))))]",
-    "_apiBaseUrl": "[if(equals(parameters('apiRegion'), 'EU'), 'https://eu.api.spycloud.io', 'https://api.spycloud.io')]"
+    "allTags": "[union(parameters('resourceTags'), createObject('environment', parameters('tagEnvironment'), 'owner', if(empty(parameters('tagOwner')), 'unassigned', parameters('tagOwner')), 'costCenter', if(empty(parameters('tagCostCenter')), 'unassigned', parameters('tagCostCenter'))))]"
   },
   "resources": [
     {
       "type": "Microsoft.OperationalInsights/workspaces",
       "apiVersion": "2022-10-01",
       "name": "[parameters('workspace')]",
-      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "location": "[if(empty(parameters('workspaceRegionOverride')), resourceGroup().location, parameters('workspaceRegionOverride'))]",
       "tags": "[variables('allTags')]",
       "properties": {
         "sku": {
@@ -528,8 +505,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
-      ],
-      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
+      ]
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
@@ -794,12 +770,6 @@
                       "required": true
                     },
                     "toolTip": "Your SpyCloud Enterprise API key from portal.spycloud.com \u2192 Settings \u2192 API Keys. This key authenticates all API requests using the X-Api-Key header. Must be an Enterprise or Enterprise+ tier key \u2014 Standard keys will return 403."
-                  }
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**API Region:** Currently set to US (api.spycloud.io). EU region support is available via the `apiRegion` ARM parameter \u2014 set to 'EU' during deployment for eu.api.spycloud.io. Contact SpyCloud for EU region access."
                   }
                 }
               ]
