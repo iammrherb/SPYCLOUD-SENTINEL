@@ -49,6 +49,42 @@
               "allowCustom": true
             },
             "label": "Time Range"
+          },
+          {
+            "id": "sev_filter",
+            "version": "KqlParameterItem/1.0",
+            "name": "SeverityFilter",
+            "type": 2,
+            "isRequired": false,
+            "multiSelect": true,
+            "quote": "",
+            "delimiter": ",",
+            "query": "SpyCloudBreachWatchlist_CL | distinct severity | order by severity desc",
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ]
+            },
+            "defaultValue": "value::all",
+            "label": "Severity"
+          },
+          {
+            "id": "domain_filter",
+            "version": "KqlParameterItem/1.0",
+            "name": "DomainFilter",
+            "type": 2,
+            "isRequired": false,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "SpyCloudBreachWatchlist_CL | where isnotempty(email_domain) | distinct email_domain | order by email_domain asc | take 50",
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ]
+            },
+            "defaultValue": "value::all",
+            "label": "Email Domain"
           }
         ]
       },

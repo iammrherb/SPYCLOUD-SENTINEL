@@ -136,6 +136,27 @@
                             }
                         ],
                         "visible": true
+                    },
+                    {
+                        "name": "apiRegion",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "SpyCloud API Region",
+                        "toolTip": "Select the SpyCloud API region. US (default) = api.spycloud.io. EU = eu.api.spycloud.io (contact SpyCloud for access). All data is processed in the selected region.",
+                        "defaultValue": "US",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "US (api.spycloud.io)",
+                                    "value": "US"
+                                },
+                                {
+                                    "label": "EU (eu.api.spycloud.io)",
+                                    "value": "EU"
+                                }
+                            ]
+                        },
+                        "visible": true
                     }
                 ]
             },
@@ -573,7 +594,8 @@
             "tagCostCenter": "[steps('securityConfig').sectionTags.tagCostCenter]",
             "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]",
             "jiraWebhookUrl": "[steps('securityConfig').sectionIntegrations.jiraWebhookUrl]",
-            "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]"
+            "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]",
+            "apiRegion": "[steps('workspaceConfig').apiRegion]"
         }
     }
 }
