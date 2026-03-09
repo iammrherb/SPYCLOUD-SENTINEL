@@ -744,98 +744,87 @@
           },
           "instructionSteps": [
             {
-              "title": "Step 6 - Verification and Upgrade Path",
-              "description": "Review requirements before connecting.",
+              "title": "Prerequisites and Licenses",
+              "description": "Review before connecting.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "### Verify Data Pipeline\n\n```\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass')\n| project Table, Records, Latest\n```\n\n### Redeployment and Upgrade Path\n\nUse Deploy to Azure button with **Deployment Mode = Update** to add features without recreating the data pipeline.\n\n| When You Get | What Unlocks | How |\n|-------------|-------------|-----|\n| MDE P2 license | Device isolation | Redeploy (Update) + grant-permissions.sh |\n| Entra ID P1/P2 | Password reset + CA | Redeploy (Update) + grant-permissions.sh |\n| Security Copilot | 115 investigation skills | Upload YAML from /copilot |\n| New SpyCloud release | New pollers and rules | Pull latest + redeploy |\n\n### Grant Permissions (When Licensed)\n\n```\ncurl -sL .../scripts/grant-permissions.sh | bash -s -- -g RG -w WS\n```\n\nOr: Entra ID -> Enterprise Apps -> Managed Identities -> Grant consent\n\n### Troubleshooting\n\n| Issue | Fix |\n|-------|-----|\n| No data after 10 min | Check DCR exists in Monitor |\n| Playbooks fail | Need MDE/Entra license + permissions |\n| Rules not visible | Verify enableAnalyticsRule=true |\n| Workbook empty | Wait for first polling cycle |\n\n### Schema Migration (Redeployment)\n\nIf redeploying after a schema change and you see 'columns do not exist in new schema', delete old tables first:\n\n```bash\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/cleanup-tables.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\nThen redeploy with **Deployment Mode = Full**. This deletes and recreates tables + DCR + DCE with the new schema."
+                    "text": "### What Works Immediately (No Extra Licenses)\n\nAfter Deploy + Connect: 5 pollers ingest into 6 tables, 38 analytics rules create incidents, 22-chart workbook, 8 hunting queries, Copilot skills, Slack/Teams/Email/ServiceNow/Jira/DevOps notifications.\n\n### License Requirements for Playbooks\n\n| Playbook | License | What It Does |\n|----------|---------|-------------|\n| MDE Isolation (PB1, PB4) | Defender for Endpoint P2 | Isolates infected devices |\n| CA Password Reset (PB2) | Entra ID P1+ | Resets passwords, revokes sessions |\n| Credential Response (PB3) | Entra ID P1+ (for reset) | Full investigation + remediation |\n\n### Required Permissions\n\n| Role | Scope |\n|------|-------|\n| Sentinel Contributor | Resource Group |\n| Log Analytics Contributor | Workspace |\n\n### API Key\n\nSpyCloud Enterprise API key from portal.spycloud.com.\n\n### Network\n\nOutbound HTTPS to api.spycloud.io:443 only."
                   }
                 }
               ]
             },
             {
-              "title": "Step 1 \u2014 SpyCloud API Authentication",
-              "description": "Enter your SpyCloud Enterprise API key. The key is sent as `X-Api-Key: <key>` on every API request and stored securely \u2014 never exposed in deployment logs or outputs.\n\n**Where to find your API key:**\n1. Open [portal.spycloud.com](https://portal.spycloud.com)\n2. Click **Settings** (gear icon) \u2192 **API Keys**\n3. Copy the key labeled **Enterprise API**\n4. Paste it below\n\nThe key is sent as the `X-Api-Key` header on every API request.",
+              "title": "Step 1 - API Authentication",
+              "description": "Enter your SpyCloud Enterprise API key.",
               "instructions": [
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "SpyCloud Enterprise API Key",
                     "name": "apiKey",
+                    "label": "SpyCloud Enterprise API Key",
+                    "placeholder": "Paste your API key from portal.spycloud.com",
                     "type": "password",
-                    "placeholder": "Paste your API key from portal.spycloud.com \u2192 Settings \u2192 API Keys",
-                    "validations": {
-                      "required": true
-                    },
-                    "toolTip": "Your SpyCloud Enterprise API key from portal.spycloud.com \u2192 Settings \u2192 API Keys. This key authenticates all API requests using the X-Api-Key header. Must be an Enterprise or Enterprise+ tier key \u2014 Standard keys will return 403."
+                    "toolTip": "Enterprise API key from portal.spycloud.com. Sent as X-Api-Key header. Must be Enterprise tier."
                   }
                 }
               ]
             },
             {
-              "title": "Step 2 \u2014 Data Filters",
-              "description": "Select which severity levels, exposure types, and password handling to apply.",
+              "title": "Step 2 - Data Filters",
+              "description": "Select severity levels, exposure types, and password handling.",
               "instructions": [
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Severity Levels to Ingest",
+                    "label": "Severity Levels",
                     "name": "severity",
                     "options": [
                       {
                         "key": "2",
-                        "text": "2 \u2014 Breach Credential (email + password from breach)"
+                        "text": "2 - Breach Credential"
                       },
                       {
                         "key": "5",
-                        "text": "5 \u2014 Breach + PII (credential + name/phone/DOB/address)"
+                        "text": "5 - Breach + PII"
                       },
                       {
                         "key": "20",
-                        "text": "20 \u2014 Infostealer Credential (malware-stolen from device)"
+                        "text": "20 - Infostealer Credential"
                       },
                       {
                         "key": "25",
-                        "text": "25 \u2014 Infostealer + App Data (cookies/sessions/autofill)"
+                        "text": "25 - Infostealer + App Data (cookies/sessions)"
                       }
                     ],
-                    "placeholder": "Select severity levels (recommend: all 4)",
+                    "placeholder": "Select severity levels",
                     "isMultiSelect": true,
                     "required": true,
                     "defaultAllSelected": true,
-                    "toolTip": "Select which severity levels to ingest. Severity 25 = critical (stolen cookies/sessions/autofill from infostealers). Severity 20 = high (malware-stolen credentials). Severity 5 = standard (breach + PII). Severity 2 = low (breach credential only). Recommend selecting all 4 for maximum coverage."
+                    "toolTip": "Severity 25 = critical (stolen cookies bypass MFA). 20 = high (malware-stolen). 5 = standard (PII). 2 = low (breach only). Select all for maximum coverage."
                   }
                 },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Exposure Types to Ingest",
+                    "label": "Exposure Types",
                     "name": "watchlistType",
                     "options": [
                       {
                         "key": "corporate",
-                        "text": "Corporate \u2014 Your monitored email domains & IP assets"
+                        "text": "Corporate - Monitored email domains"
                       },
                       {
                         "key": "infected",
-                        "text": "Infected Devices \u2014 Infostealer malware credentials"
-                      },
-                      {
-                        "key": "email_domain",
-                        "text": "Email Domain \u2014 All exposures matching email domains"
-                      },
-                      {
-                        "key": "target_domain",
-                        "text": "Target Domain \u2014 Exposures by target service domain"
+                        "text": "Infected Devices - Infostealer malware"
                       }
                     ],
-                    "placeholder": "Select exposure types (recommend: all 3)",
+                    "placeholder": "Select exposure types",
                     "isMultiSelect": true,
                     "required": true,
                     "defaultAllSelected": true,
-                    "toolTip": "Filter by exposure type. Corporate = your monitored email domains. Infected = credentials stolen by infostealer malware. Email Domain / Target Domain = additional filtering. Omitting returns all types (recommended for most deployments)."
+                    "toolTip": "Corporate = your monitored domains. Infected = credentials stolen by malware."
                   }
                 },
                 {
@@ -846,25 +835,25 @@
                     "options": [
                       {
                         "key": "False",
-                        "text": "No \u2014 Exclude cleartext passwords (RECOMMENDED \u2014 most secure)"
+                        "text": "No - Exclude cleartext passwords (recommended)"
                       },
                       {
                         "key": "True",
-                        "text": "Yes \u2014 Include cleartext passwords (requires data handling policy + table RBAC)"
+                        "text": "Yes - Include cleartext passwords"
                       }
                     ],
                     "placeholder": "Select password handling",
                     "isMultiSelect": false,
                     "required": true,
                     "defaultAllSelected": false,
-                    "toolTip": "Controls whether plaintext passwords are included in the data. 'No' (recommended) excludes cleartext passwords for security. 'Yes' includes them \u2014 requires data handling policy and consider table-level RBAC to restrict access."
+                    "toolTip": "No (recommended) excludes cleartext for security. Yes requires data handling policy."
                   }
                 }
               ]
             },
             {
-              "title": "Step 3 \u2014 Polling & Retrieval Settings",
-              "description": "Configure how often and how far back the connector fetches data.",
+              "title": "Step 3 - Polling and Retrieval",
+              "description": "Configure polling frequency, lookback, retries, and timeout.",
               "instructions": [
                 {
                   "type": "Dropdown",
@@ -874,7 +863,7 @@
                     "options": [
                       {
                         "key": "5",
-                        "text": "5 minutes (near real-time)"
+                        "text": "5 minutes"
                       },
                       {
                         "key": "15",
@@ -889,29 +878,25 @@
                         "text": "1 hour"
                       },
                       {
-                        "key": "120",
-                        "text": "2 hours"
-                      },
-                      {
                         "key": "240",
                         "text": "4 hours"
                       },
                       {
                         "key": "1440",
-                        "text": "24 hours (once daily)"
+                        "text": "24 hours"
                       }
                     ],
-                    "placeholder": "How often to fetch new records",
+                    "placeholder": "How often to fetch",
                     "isMultiSelect": false,
                     "required": true,
                     "defaultAllSelected": false,
-                    "toolTip": "How often the connector fetches new records from the SpyCloud API. Lower values mean fresher data but more API consumption. 30 minutes is recommended for most environments. Near real-time (5 min) for SOCs requiring immediate alerting. Daily (24h) for low-volume or cost-sensitive deployments."
+                    "toolTip": "How often pollers fetch new records. 30 min recommended."
                   }
                 },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Historical Lookback (First Pull)",
+                    "label": "Historical Lookback",
                     "name": "lookbackDays",
                     "options": [
                       {
@@ -927,25 +912,21 @@
                         "text": "90 days"
                       },
                       {
-                        "key": "180",
-                        "text": "180 days"
-                      },
-                      {
                         "key": "365",
                         "text": "365 days (recommended)"
                       }
                     ],
-                    "placeholder": "How far back on first connection",
+                    "placeholder": "First pull lookback",
                     "isMultiSelect": false,
                     "required": true,
                     "defaultAllSelected": false,
-                    "toolTip": "How far back to retrieve data on the first connection. After the initial pull, only new and modified records are fetched incrementally. 365 days (1 year) recommended for full historical coverage. Shorter periods reduce initial ingestion volume."
+                    "toolTip": "How far back on first connection. 365 days recommended."
                   }
                 },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "API Retry Count",
+                    "label": "Retry Count",
                     "name": "retryCount",
                     "options": [
                       {
@@ -965,23 +946,19 @@
                         "text": "10 retries"
                       }
                     ],
-                    "placeholder": "Retries on API failure",
+                    "placeholder": "Retries on failure",
                     "isMultiSelect": false,
                     "required": true,
                     "defaultAllSelected": false,
-                    "toolTip": "Number of retry attempts when an API call fails due to timeouts, rate limits, or transient errors. Uses exponential backoff between retries. 5 retries is recommended. Increase to 10 for unreliable network connections."
+                    "toolTip": "Retries with exponential backoff. 5 recommended."
                   }
                 },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "API Request Timeout",
+                    "label": "Request Timeout",
                     "name": "timeoutInSeconds",
                     "options": [
-                      {
-                        "key": "30",
-                        "text": "30 seconds"
-                      },
                       {
                         "key": "60",
                         "text": "60 seconds"
@@ -991,62 +968,55 @@
                         "text": "120 seconds (recommended)"
                       },
                       {
-                        "key": "180",
-                        "text": "180 seconds"
-                      },
-                      {
                         "key": "300",
-                        "text": "300 seconds (large environments)"
+                        "text": "300 seconds"
                       }
                     ],
-                    "placeholder": "Timeout per API request",
+                    "placeholder": "Timeout per request",
                     "isMultiSelect": false,
                     "required": true,
                     "defaultAllSelected": false,
-                    "toolTip": "Maximum time to wait for a single API response before triggering a retry. Increase for large environments (50K+ monitored assets) where API responses may be larger. 120 seconds handles most environments. Use 300 for very large datasets."
+                    "toolTip": "Max wait per API request. 120s handles most environments."
                   }
+                }
+              ]
+            },
+            {
+              "title": "Step 4 - Recommended Sentinel Features and Connectors",
+              "description": "Enable these for maximum SpyCloud value.",
+              "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "### Enable These Sentinel Features\n\n| Feature | Where to Enable | SpyCloud Use |\n|---------|----------------|-------------|\n| **UEBA** | Sentinel Settings - User and Entity Behavior Analytics | Anomaly detection (Rule 33) |\n| **Entity Behavior** | Same page - enable all entity types | Enriches incidents |\n| **Fusion** | Sentinel Analytics - filter Fusion - enable | ML multi-stage detection |\n| **Threat Intelligence** | Content Hub - install TI solution | IOC matching (Rule 32) |\n\n### Recommended Data Connectors\n\n| Connector | Priority | Rules Enabled | How to Enable |\n|-----------|----------|--------------|---------------|\n| **Entra ID** | Critical | Sign-in, impossible travel (17,18,37) | Entra - Diagnostic Settings - SignInLogs |\n| **Microsoft 365 Defender** | Critical | MDE device + alert (25,26) | Content Hub - install |\n| **Office 365** | High | Mail forwarding (29) | Content Hub - install |\n| **Defender for Office 365** | High | Phishing to exposed users (30) | Content Hub - install |\n| **DNS** | High | Malicious domain (23) | AMA - DNS connector |\n| **Azure Activity** | Medium | Cloud resource changes (34) | Subscription Diagnostic Settings |\n| **AD Identity Protection** | High | Entra risk (28) | Built-in connector |\n| **Defender for Cloud Apps** | Medium | SaaS activity (27) | Content Hub - install |\n| **Defender for Identity** | Medium | Lateral movement (31) | Content Hub - install |\n| **Firewall (CEF/Syslog)** | Medium | Infected IPs (36) | AMA - CEF connector |\n| **Okta SSO** | If applicable | Okta auth (14) | Content Hub - install |\n| **Cisco Duo** | If applicable | Duo MFA (15) | Content Hub - install |\n\n### Verify Permissions\n\n```\naz role assignment list --assignee $(az account show --query user.name -o tsv) --resource-group YOUR-RG -o table\n```\n\nRequired: Sentinel Contributor + Log Analytics Contributor."
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Step 5 - Connect",
+              "description": "Click Connect to activate all 5 pollers.",
+              "instructions": [
+                {
+                  "type": "ConnectionToggleButton",
+                  "parameters": {}
                 },
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "Settings are applied when you click **Connect**. To change: disconnect \u2192 update \u2192 reconnect. The Modified Records poller always runs on a 24h window."
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 4 \u2014 Cross-Connector Integration & Use Cases",
-              "description": "### What You Can Do With SpyCloud Data in Sentinel\n\n| Use Case | How | Resources |\n|----------|-----|-----------|\n| **Compromised Credential Detection** | 22 analytics rules detect exposures by severity, type, and context | Sentinel \u2192 Analytics |\n| **Automated Device Isolation** | MDE playbook isolates infected devices in Defender | Logic App: SpyCloud-MDE-Remediation |\n| **Automated Password Reset** | CA playbook forces reset + revokes sessions in Entra ID | Logic App: SpyCloud-CA-Remediation |\n| **SOC Alerting** | Teams/Slack notifications on critical exposures | Logic App: SpyCloud-CredResponse |\n| **Scheduled Threat Scanning** | MDE Blocklist scans severity 25 on schedule | Logic App: SpyCloud-MDE-Blocklist |\n| **Executive/VIP Monitoring** | Dedicated rule for CEO/CFO/CISO accounts | Analytics Rule #19 |\n| **Password Reuse Detection** | Same hash across 3+ target domains | Analytics Rule #20 |\n| **IdP Cross-Correlation** | Match exposures against Okta/Duo/Ping/Entra sign-ins | Analytics Rules #13-16 |\n| **Breach Impact Assessment** | Join exposures with catalog for breach context | Analytics Rule #18 |\n| **Interactive Investigation** | Security Copilot plugin with 28 KQL skills + AI agent | Copilot \u2192 Sources \u2192 SpyCloud |\n\n### Recommended Additional Data Connectors\n\nEnable these in Sentinel Content Hub for maximum correlation:\n\n| Connector | Why | Enables |\n|-----------|-----|---------|\n| **Entra ID Diagnostics** | Sign-in correlation with compromised credentials | Rule #16, #17 |\n| **Microsoft Defender XDR** | Alert timeline correlation with infections | MDE playbook enrichment |\n| **Okta SSO** | Catch compromised creds in Okta sign-ins | Rule #13 |\n| **Cisco Duo** | Catch compromised creds in Duo MFA | Rule #14 |\n| **Microsoft 365** | Email/file access after credential compromise | Incident investigation |",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "### Recommended Additional Connectors\n\nEnable these for maximum SpyCloud correlation:\n\n| Connector | Source | SpyCloud Rules | Priority |\n|-----------|--------|---------------|----------|\n| **Entra ID** | Diagnostic Settings | Sign-in correlation, impossible travel | Critical |\n| **Microsoft Defender XDR** | Content Hub | Device inventory, MDE alerts | Critical |\n| **Office 365** | Content Hub | Mail forwarding by exposed users | High |\n| **Defender for Office 365** | Content Hub | Phishing to exposed users | High |\n| **DNS** | Azure Monitor Agent | Malicious domain resolution | High |\n| **Azure Activity** | Diagnostic Settings | Cloud resource modification | Medium |\n| **Threat Intelligence** | Content Hub | IOC matching with infection IPs | Medium |\n| **UEBA** | Sentinel Settings | Anomaly detection for exposed users | Medium |\n| **Azure AD Identity Protection** | Built-in | Entra risk level correlation | High |\n| **Defender for Cloud Apps** | Content Hub | SaaS activity post-exposure | Medium |\n| **Defender for Identity** | Content Hub | Lateral movement detection | Medium |\n| **Okta SSO** | Content Hub | Okta sign-in correlation | If applicable |\n| **Cisco Duo** | Content Hub | Duo MFA correlation | If applicable |\n| **Ping Identity** | AMA Syslog | Ping auth correlation | If applicable |\n| **Firewall (CEF/Syslog)** | AMA | Infected IP in network logs | If applicable |\n\n### 6 SpyCloud Tables\n\n| Table | Source | Content |\n|-------|--------|----------|\n| `SpyCloudBreachWatchlist_CL` | Watchlist API | Credentials, PII, device forensics |\n| `SpyCloudBreachCatalog_CL` | Catalog API | Breach source metadata |\n| `SpyCloudCompassData_CL` | Compass API | Consumer identity exposures |\n| `SpyCloudCompassDevices_CL` | Compass Devices API | Infected device inventory |\n| `Spycloud_MDE_Logs_CL` | MDE Playbook | Device isolation audit |\n| `SpyCloud_ConditionalAccessLogs_CL` | CA Playbook | Password reset audit |"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 5 \u2014 Connect",
-              "description": "**Review your settings above, then click Connect.**\n\n### What Happens When You Click Connect\n\n1. **Validation** \u2014 API key verified against SpyCloud endpoint\n2. **Backfill** \u2014 Initial 30-day historical data pull begins (5-30 minutes)\n3. **Polling** \u2014 Ongoing 40-minute incremental polling activates\n4. **Transform** \u2014 Raw API data normalized via KQL transforms in the DCR\n5. **Ingestion** \u2014 Data flows into your custom tables\n6. **Status** \u2014 Connector tile shows 'Connected' within 5-10 minutes\n\n### Checklist Before Connecting\n\n- [ ] API key from portal.spycloud.com \u2192 Settings \u2192 API Keys\n- [ ] Severity levels selected (recommend: all 4)\n- [ ] Exposure types selected (recommend: all 3)\n- [ ] Password handling preference set (recommend: No / exclude)\n\n### Resources Created by This Connector\n\n| Resource | Name | Purpose |\n|----------|------|---------|\n| DCE | `dce-spycloud-{workspace}` | HTTPS ingestion endpoint |\n| DCR | `dcr-spycloud-{workspace}` | KQL transforms + table routing |\n| Table | `SpyCloudBreachWatchlist_CL` | 73 columns \u2014 credentials, PII, device forensics |\n| Table | `SpyCloudBreachCatalog_CL` | 5 columns \u2014 breach source metadata |\n| Table | `Spycloud_MDE_Logs_CL` | 19 columns \u2014 MDE remediation audit |\n| Table | `SpyCloud_ConditionalAccessLogs_CL` | 14 columns \u2014 CA remediation audit |",
-              "instructions": [
-                {
-                  "type": "ConnectionToggleButton",
-                  "parameters": {
-                    "connectLabel": "Connect to SpyCloud",
-                    "name": "toggle"
+                    "text": "Data appears within 5-10 minutes after connecting."
                   }
                 }
               ]
             },
             {
               "title": "Step 6 - Verification and Upgrade Path",
-              "description": "### Quick Health Check (run 5-10 minutes after connecting)\n\n```kusto\nSpyCloudBreachWatchlist_CL\n| summarize TotalRecords=count(), Newest=max(TimeGenerated), Oldest=min(TimeGenerated), Domains=dcount(email_domain), Breaches=dcount(source_id)\n| extend Status = iff(TotalRecords > 0, 'RECEIVING DATA', 'WAITING')\n```\n\n### Full 4-Table Health Dashboard\n\n```kusto\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA')\n| project Table, Records, Latest, HoursSince=datetime_diff('hour', now(), Latest)\n```\n\n### Troubleshooting\n\n| Symptom | Cause | Fix |\n|---------|-------|-----|\n| No data after 30 min | Invalid API key | Regenerate at portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| No data after 30 min | Wrong severity filter | Ensure at least one severity level selected |\n| Partial data | Rate limited (HTTP 429) | Contact SpyCloud to verify your API tier |\n| Timeouts | Large watchlist | Contact SpyCloud support \u2014 may need Enterprise+ tier |\n| Watchlist but no Catalog | Both should activate together | Disconnect and reconnect |\n| No MDE/CA logs | Normal \u2014 these are populated by playbooks | Enable playbooks + create test incident |\n\n### Support\n\n| Issue | Contact |\n|-------|----------|\n| SpyCloud API / Data | support@spycloud.com or portal.spycloud.com |\n| Azure / Sentinel | Azure Portal \u2192 Help + Support |\n| This Integration | github.com/iammrherb/SPYCLOUD-SENTINEL/issues |",
+              "description": "Verify data flow and plan for enhancements.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "### Verify Data Pipeline\n\n```\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass')\n| project Table, Records, Latest\n```\n\n### Redeployment and Upgrade Path\n\nUse Deploy to Azure button with **Deployment Mode = Update** to add features without recreating the data pipeline.\n\n| When You Get | What Unlocks | How |\n|-------------|-------------|-----|\n| MDE P2 license | Device isolation | Redeploy (Update) + grant-permissions.sh |\n| Entra ID P1/P2 | Password reset + CA | Redeploy (Update) + grant-permissions.sh |\n| Security Copilot | 115 investigation skills | Upload YAML from /copilot |\n| New SpyCloud release | New pollers and rules | Pull latest + redeploy |\n\n### Grant Permissions (When Licensed)\n\n```\ncurl -sL .../scripts/grant-permissions.sh | bash -s -- -g RG -w WS\n```\n\nOr: Entra ID -> Enterprise Apps -> Managed Identities -> Grant consent\n\n### Troubleshooting\n\n| Issue | Fix |\n|-------|-----|\n| No data after 10 min | Check DCR exists in Monitor |\n| Playbooks fail | Need MDE/Entra license + permissions |\n| Rules not visible | Verify enableAnalyticsRule=true |\n| Workbook empty | Wait for first polling cycle |\n\n### Schema Migration (Redeployment)\n\nIf redeploying after a schema change and you see 'columns do not exist in new schema', delete old tables first:\n\n```bash\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/cleanup-tables.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\nThen redeploy with **Deployment Mode = Full**. This deletes and recreates tables + DCR + DCE with the new schema."
+                    "text": "### Verify Data Pipeline\n\n```\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n(SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest\n```\n\n### 5 Pollers\n\n| Poller | Endpoint | Interval |\n|--------|----------|----------|\n| Watchlist New | /breach/data/watchlist | Configurable |\n| Watchlist Modified | /breach/data/watchlist | 24h fixed |\n| Breach Catalog | /breach/catalog | Configurable |\n| Compass Data | /compass/data | Configurable |\n| Compass Devices | /compass/devices | Configurable |\n\n### Upgrade Path\n\n| When You Get | What Unlocks | How |\n|-------------|-------------|-----|\n| MDE P2 | Device isolation | grant-permissions.sh |\n| Entra P1/P2 | Password reset | grant-permissions.sh |\n| Security Copilot | 115 skills | Upload YAML from /copilot |\n\n### Schema Migration\n\nIf redeploying after schema changes:\n```\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/cleanup-tables.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\n### Troubleshooting\n\n| Issue | Fix |\n|-------|-----|\n| No data after 10 min | Check DCR in Monitor |\n| Playbooks fail | Need MDE/Entra license + permissions |\n| 401 on connect | Wrong API key tier (need Enterprise) |\n| Schema mismatch | Run cleanup-tables.sh then redeploy |"
                   }
                 }
               ]
