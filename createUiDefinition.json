@@ -6,7 +6,7 @@
         "config": {
             "isWizard": true,
             "basics": {
-                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel Supreme\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 3 REST API pollers\n- 4 custom log tables (73+ columns)\n- 4 Logic App playbooks (MDE, CA, Credential Response, MDE Blocklist)\n- 22 analytics rules (all deploy disabled for review)\n- Azure Key Vault for secure API key storage\n- Automated post-deployment configuration\n- Security Copilot plugin + interactive agent (upload separately)\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
+                "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel Supreme\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 5 REST API pollers\n- 6 custom log tables (118+ columns)\n- 5 Logic App playbooks (MDE, CA, Credential, Blocklist, TI Enrichment)\n- 43+ analytics rules + Fusion + 5 Microsoft Security Incident Creation rules\n- UEBA, Anomaly Detection, EyesOn audit settings\n- 3 automation rules (auto-triage, device tasks, auto-close)\n- 15 hunting queries across all MITRE ATT&CK tactics\n- 4 watchlists (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- Security Copilot plugin + interactive agent (58+ skills)\n- Comprehensive connector + feature recommendations\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
                 "location": {
                     "label": "Deployment Region",
                     "allowedValues": [
@@ -539,6 +539,224 @@
                         "visible": true
                     }
                 ]
+            },
+            {
+                "name": "sentinelFeatures",
+                "label": "Sentinel Platform Settings",
+                "elements": [
+                    {
+                        "name": "sectionSentinelSettings",
+                        "type": "Microsoft.Common.Section",
+                        "label": "UEBA, Anomaly Detection & Fusion",
+                        "elements": [
+                            {
+                                "name": "settingsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "These settings enable core Sentinel platform features that maximize SpyCloud threat detection. All are included in Microsoft Sentinel at no additional license cost.\n\n--- UEBA (User and Entity Behavior Analytics) ---\nCreates behavioral baselines for every user and entity. When SpyCloud detects credential exposure, UEBA anomalies reveal if those credentials are actively being exploited. Enables:\n  - EntityAnalytics: Profiles users from Entra ID (identity provider)\n  - Ueba: Processes SigninLogs, AuditLogs, AzureActivity, SecurityEvent\n  - EyesOn: Audit trail of analyst activity in Sentinel\n  - Required role: Security Administrator (on the workspace)\n  - SpyCloud rule dependency: Rule #29 (UEBA Anomalous Behavior from Exposed User)\n\n--- Anomaly Detection ---\nML-powered rules that detect deviations from normal behavior patterns:\n  - Anomalous sign-in locations and times\n  - Unusual resource access patterns\n  - Abnormal data transfer volumes\n  - Complements SpyCloud by detecting exploitation of exposed credentials\n  - No additional configuration — rules auto-tune to your environment\n\n--- Fusion Advanced Multistage Attack Detection ---\nPatented ML that correlates low-fidelity alerts across kill chain stages:\n  - Detects: credential theft -> lateral movement -> data exfiltration chains\n  - Sources: All SpyCloud scheduled rules + Defender XDR + Entra ID Protection + Defender for Cloud + MCAS + Palo Alto\n  - Output: High-confidence, low-volume incidents (typically 1-5 per week)\n  - Note: Replaced by Defender XDR correlation engine if onboarded to unified Defender portal"
+                                }
+                            },
+                            {
+                                "name": "enableUEBA",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable UEBA (User and Entity Behavior Analytics)",
+                                "defaultValue": true,
+                                "toolTip": "Deploys 3 settings resources: EntityAnalytics (Entra ID provider), Ueba (SigninLogs, AuditLogs, AzureActivity, SecurityEvent data sources), and EyesOn (analyst audit tracking). Required role: Security Administrator. No additional license cost."
+                            },
+                            {
+                                "name": "enableAnomalies",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Anomaly Detection (ML-powered behavioral anomalies)",
+                                "defaultValue": true,
+                                "toolTip": "Enables built-in ML anomaly detection rules. Auto-tunes to your environment over 14 days. Detects unusual sign-in patterns, resource access anomalies, and behavioral deviations. No additional license cost."
+                            },
+                            {
+                                "name": "enableFusionRule",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Fusion Advanced Multistage Attack Detection",
+                                "defaultValue": true,
+                                "toolTip": "Deploys the Fusion analytics rule (template ID: f71aba3d-28fb-450b-b192-4e76a83015c8). Correlates alerts from: SpyCloud scheduled rules, Defender XDR, Entra ID Protection, Defender for Cloud, MCAS, Defender for Identity, and Palo Alto. No additional license cost."
+                            },
+                            {
+                                "name": "enableMicrosoftSecurityIncidentRules",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Create Microsoft Security Incident Creation rules (5 rules)",
+                                "defaultValue": true,
+                                "toolTip": "Deploys 5 MicrosoftSecurityIncidentCreation rules that auto-create Sentinel incidents from alerts generated by:\n1. Microsoft Defender XDR (Defender for Endpoint, Identity, Office 365, Cloud Apps)\n2. Entra ID Protection (risky users, risky sign-ins)\n3. Microsoft Defender for Cloud (VM, SQL, Storage, K8s, App Service)\n4. Microsoft Cloud App Security (impossible travel, OAuth abuse, mass downloads)\n5. Microsoft Defender for Identity (pass-the-hash, golden ticket, DCSync)\n\nThese ensure ALL Microsoft security alerts flow into Sentinel for cross-correlation with SpyCloud exposure data. Each rule requires the corresponding connector to be installed."
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionTiEnrichment",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Threat Intelligence Enrichment Playbook",
+                        "elements": [
+                            {
+                                "name": "tiInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "The TI Enrichment playbook (Logic App) triggers on SpyCloud incident creation and automatically:\n\n1. Extracts IP address entities from the incident\n2. Queries VirusTotal API (v3) for IP reputation — malicious/suspicious/harmless scores\n3. Queries AbuseIPDB API for abuse confidence score and total reports\n4. Adds enrichment results as incident comments for SOC analyst review\n\nRequirements:\n  - VirusTotal API key (free tier: 4 requests/minute, 500/day — sufficient for most SOCs)\n  - AbuseIPDB API key (optional — edit playbook post-deployment to add)\n  - Logic App Contributor role on the resource group\n  - Microsoft Sentinel Responder role for incident comment creation\n\nGet your free VirusTotal API key: https://www.virustotal.com/gui/my-apikey\nGet your free AbuseIPDB API key: https://www.abuseipdb.com/account/api"
+                                }
+                            },
+                            {
+                                "name": "enableTiEnrichmentPlaybook",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Deploy TI Enrichment Playbook (VirusTotal + AbuseIPDB auto-lookup)",
+                                "toolTip": "Deploys a Logic App that automatically enriches SpyCloud incidents with threat intelligence from VirusTotal and AbuseIPDB. Runs on every incident creation. VirusTotal free tier: 4 req/min, 500/day."
+                            },
+                            {
+                                "name": "virusTotalApiKey",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "VirusTotal API Key",
+                                    "confirmPassword": "Confirm VirusTotal API Key"
+                                },
+                                "toolTip": "Get your free API key at: https://www.virustotal.com/gui/my-apikey — Copy the 64-character hex string from your profile page.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": "[steps('sentinelFeatures').sectionTiEnrichment.enableTiEnrichmentPlaybook]"
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "prerequisites",
+                "label": "Prerequisites & Licensing",
+                "elements": [
+                    {
+                        "name": "sectionPrereqs",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Pre-Deployment Validation Checklist",
+                        "elements": [
+                            {
+                                "name": "prereqChecklist",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Warning",
+                                    "text": "VALIDATE THESE PREREQUISITES BEFORE DEPLOYING. Incomplete prerequisites will cause deployment failures or limited functionality.\n\n=== REQUIRED FOR ALL DEPLOYMENTS ===\n\n[1] SpyCloud Enterprise API Key\n    - Obtain from: https://portal.spycloud.com > Account Settings > API Keys\n    - Test your key: curl -s -o /dev/null -w '%{http_code}' -H 'X-Api-Key: YOUR_KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1\n    - Expected: HTTP 200. If 401: wrong key or wrong tier. Contact support@spycloud.com\n    - Enterprise tier: Watchlist + Breach Catalog pollers\n    - Enterprise+ tier: Adds Compass Data + Compass Devices pollers\n\n[2] Azure RBAC Roles (on the target resource group)\n    Verify with: az role assignment list --assignee $(az ad signed-in-user show --query id -o tsv) --scope /subscriptions/{sub}/resourceGroups/{rg} --query '[].roleDefinitionName' -o tsv\n\n    REQUIRED:\n    - Microsoft Sentinel Contributor — create/manage connectors, analytics rules, watchlists, hunting queries\n    - Log Analytics Contributor — create tables, manage DCR/DCE, write data\n    - Monitoring Metrics Publisher — required on the DCR for data ingestion via DCE\n\n    REQUIRED IF ENABLING PLAYBOOKS:\n    - Logic App Contributor — create and manage Logic App workflows\n    - Managed Identity Operator — assign managed identity to Logic Apps\n    - Microsoft Sentinel Automation Contributor — connect automation rules to playbooks\n\n    REQUIRED IF ENABLING UEBA:\n    - Security Administrator — configure EntityAnalytics and UEBA settings\n\n[3] Network Requirements\n    - Outbound HTTPS (443) from Azure to: api.spycloud.io\n    - No inbound rules required — all connections are outbound-only\n    - If using Private Link: ensure DCE is accessible from the workspace\n    - If using Firewall/Proxy: whitelist api.spycloud.io and *.spycloud.com\n\n[4] Log Analytics Workspace\n    - Existing workspace with Microsoft Sentinel enabled, OR\n    - Template can create a new workspace (toggle in Step 1)\n    - Pricing tier: PerGB2018 (pay-as-you-go) recommended for most deployments\n    - Commitment tier: 100GB/day+ for large enterprises (significant discount)"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionLicensing",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Licensing Requirements by Feature",
+                        "elements": [
+                            {
+                                "name": "licensingMatrix",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "=== WHAT WORKS WITHOUT EXTRA LICENSES (Microsoft Sentinel only) ===\n\n- All 5 SpyCloud data pollers (CCF connector)\n- All 6 custom log tables (156 columns total)\n- All 44 analytics rules (38 scheduled + 1 Fusion + 5 MSIC)\n- All 15 hunting queries\n- All 4 watchlists (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- All 4 automation rules\n- Workbook dashboard (19+ visualizations)\n- UEBA, Anomaly Detection, EyesOn, Fusion\n- 6 notification channels (Slack, Teams, Email, ServiceNow, Jira, Azure DevOps)\n- Security Copilot plugin + agent (requires Copilot license separately)\n\n=== PLAYBOOK LICENSE REQUIREMENTS ===\n\nPlaybook 1: MDE Device Isolation\n  License: Microsoft Defender for Endpoint Plan 2 (P2)\n  Cost: ~$5.20/user/month (included in Microsoft 365 E5)\n  Enables: Automatic device isolation, security tagging, device info lookup\n  API Permissions: Machine.Isolate, Machine.ReadWrite.All (WindowsDefenderATP)\n  Without license: Playbook deploys but isolation actions return 403 Forbidden\n  Purchase: https://www.microsoft.com/en-us/security/business/endpoint-security/microsoft-defender-endpoint\n\nPlaybook 2: Conditional Access Identity Protection\n  License: Microsoft Entra ID P1 or P2\n  Cost: P1 ~$6/user/month (included in M365 E3), P2 ~$9/user/month (included in M365 E5)\n  Enables: Force password reset, revoke sessions, add user to CA group\n  API Permissions: User.ReadWrite.All, Directory.ReadWrite.All, GroupMember.ReadWrite.All (Microsoft Graph)\n  Without P1+: Password reset and CA group assignment fail. Session revocation may work.\n  Purchase: https://www.microsoft.com/en-us/security/business/microsoft-entra-pricing\n\nPlaybook 3: Credential Response\n  License: Microsoft Entra ID P1 or P2 (for password reset)\n  Enables: UPN-based targeted password reset + Teams/Slack/Email notifications\n  Without license: Notifications work, password reset fails\n\nPlaybook 4: MDE Blocklist\n  License: Microsoft Defender for Endpoint Plan 2 (P2)\n  Enables: Block malicious IPs/domains from SpyCloud infostealer data via MDE custom indicators\n  API Permissions: Ti.ReadWrite (WindowsDefenderATP)\n  Without license: Scheduled scans run but blocklist updates return 403\n\nPlaybook 5: TI Enrichment\n  License: None required (uses free-tier external APIs)\n  Requires: VirusTotal API key (free: 4 req/min) + optional AbuseIPDB key (free: 1000 req/day)\n  Enables: Automatic IP reputation lookup on incident creation\n\n=== MICROSOFT SECURITY PRODUCT LICENSES (for MSIC rules) ===\n\nMSIC Rule: Defender XDR\n  License: Microsoft 365 E5, E5 Security, or standalone Defender plans\n  Without: Rule deploys but no alerts flow (no source data)\n\nMSIC Rule: Entra ID Protection\n  License: Microsoft Entra ID P2 (included in M365 E5)\n  Without: Rule deploys but no risky user/sign-in detections\n\nMSIC Rule: Defender for Cloud\n  License: Microsoft Defender for Cloud (per-resource pricing varies)\n  Without: Rule deploys but no Defender for Cloud alerts\n\nMSIC Rule: Cloud App Security\n  License: Microsoft Defender for Cloud Apps (included in M365 E5)\n  Without: Rule deploys but no MCAS alerts\n\nMSIC Rule: Defender for Identity\n  License: Microsoft Defender for Identity (~$5.50/user/month, included in M365 E5)\n  Without: Rule deploys but no on-prem AD threat detections\n\n=== SECURITY COPILOT ===\n\n  License: Microsoft Security Copilot (consumption-based, ~$4/SCU/hour)\n  Enables: 58+ natural language investigation skills, autonomous agent triage\n  Without: Plugin and agent YAML files still deploy but cannot be used\n  Purchase: https://www.microsoft.com/en-us/security/business/ai-machine-learning/microsoft-security-copilot"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionPermissionValidation",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Permission Validation Commands",
+                        "elements": [
+                            {
+                                "name": "permissionCommands",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Run these commands in Azure Cloud Shell (bash) to validate permissions BEFORE deploying:\n\n--- CHECK YOUR CURRENT ROLES ---\naz role assignment list --assignee $(az ad signed-in-user show --query id -o tsv) --query '[].{Role:roleDefinitionName, Scope:scope}' -o table\n\n--- ASSIGN MISSING ROLES (requires Owner/User Access Administrator) ---\n\n# Core deployment roles:\nSUB_ID=$(az account show --query id -o tsv)\nRG_NAME=\"your-resource-group\"\nUSER_ID=$(az ad signed-in-user show --query id -o tsv)\n\naz role assignment create --assignee $USER_ID --role 'Microsoft Sentinel Contributor' --scope /subscriptions/$SUB_ID/resourceGroups/$RG_NAME\naz role assignment create --assignee $USER_ID --role 'Log Analytics Contributor' --scope /subscriptions/$SUB_ID/resourceGroups/$RG_NAME\naz role assignment create --assignee $USER_ID --role 'Logic App Contributor' --scope /subscriptions/$SUB_ID/resourceGroups/$RG_NAME\n\n# UEBA (if enabling):\naz role assignment create --assignee $USER_ID --role 'Security Administrator' --scope /subscriptions/$SUB_ID/resourceGroups/$RG_NAME\n\n--- POST-DEPLOYMENT: GRANT PLAYBOOK PERMISSIONS ---\nAfter deployment, run scripts/grant-permissions.sh from Cloud Shell to:\n  1. Assign MDE API permissions (Machine.Isolate, Machine.ReadWrite.All)\n  2. Assign Graph API permissions (User.ReadWrite.All, Directory.ReadWrite.All, GroupMember.ReadWrite.All)\n  3. Assign Monitoring Metrics Publisher on DCR\n  4. Grant Sentinel Automation Contributor to playbook managed identities\n\nOr manually:\n  Azure Portal > Enterprise Applications > [Logic App name] > Permissions > Grant admin consent\n\n--- VERIFY SENTINEL IS ENABLED ---\naz sentinel onboarding-state show --resource-group $RG_NAME --workspace-name your-workspace\n\n--- VERIFY DATA CONNECTOR HEALTH ---\naz sentinel data-connector list --resource-group $RG_NAME --workspace-name your-workspace --query '[].{Name:name, Kind:kind}' -o table"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "connectorGuide",
+                "label": "Connector & Integration Guide",
+                "elements": [
+                    {
+                        "name": "sectionTier1",
+                        "type": "Microsoft.Common.Section",
+                        "label": "TIER 1: CRITICAL Connectors (Required for Core SpyCloud Rules)",
+                        "elements": [
+                            {
+                                "name": "tier1Info",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Warning",
+                                    "text": "These connectors are NOT deployed by this template but are REQUIRED for maximum SpyCloud analytics rule coverage. Without these, 20+ analytics rules will have no source data to correlate against.\n\n=== 1. Microsoft Entra ID (Azure AD) ===\nPriority: CRITICAL\nCost: FREE (included with any Azure subscription)\nSpyCloud Rules Enabled: #6 (Exposed User Sign-In), #7 (Risky Sign-In After Exposure), #10 (MFA Bypass), #18 (Impossible Travel), #29 (UEBA Anomaly), plus 7 hunting queries\nTables: SigninLogs, AuditLogs, AADNonInteractiveUserSignInLogs, AADManagedIdentitySignInLogs\n\nStep-by-step setup:\n  1. Azure Portal > Microsoft Entra ID > Diagnostic settings > Add diagnostic setting\n  2. Name: 'sentinel-entra-logs'\n  3. CHECK: SignInLogs, AuditLogs, NonInteractiveUserSignInLogs, ManagedIdentitySignInLogs, ServicePrincipalSignInLogs, RiskyUsers, UserRiskEvents\n  4. Destination: Send to Log Analytics workspace > select your Sentinel workspace\n  5. Save\n  6. Verify: Run in Log Analytics: SigninLogs | take 10\n  7. First data appears within 5-10 minutes\n\nAlternative (Content Hub): Sentinel > Content Hub > search 'Microsoft Entra ID' > Install > Data Connectors > Microsoft Entra ID > Open connector page > Enable desired log types\n\nRequired role: Global Administrator or Security Administrator in Entra ID\nDocs: https://learn.microsoft.com/en-us/azure/active-directory/reports-monitoring/howto-integrate-activity-logs-with-log-analytics\n\n=== 2. Microsoft Defender XDR (Microsoft 365 Defender) ===\nPriority: CRITICAL\nCost: Requires Microsoft 365 E5, E5 Security, or standalone Defender plans\nSpyCloud Rules Enabled: #11 (MDE Device Correlation), #12 (MDE Alert + Exposure), #13 (MDE Network Correlation), Fusion source, plus lateral movement hunting query\nTables: DeviceInfo, DeviceNetworkEvents, DeviceLogonEvents, AlertEvidence, AlertInfo, IdentityLogonEvents, IdentityDirectoryEvents, EmailEvents, CloudAppEvents\n\nStep-by-step setup:\n  1. Sentinel > Content Hub > search 'Microsoft Defender XDR' > Install\n  2. Data Connectors > Microsoft Defender XDR > Open connector page\n  3. Under 'Connect incidents and alerts': Toggle ON\n  4. Under 'Connect entities': Select ALL available event types\n  5. Click 'Apply Changes'\n  6. Verify: Run in Log Analytics: DeviceInfo | take 10\n  7. Historical data backfill available (up to 30 days)\n\nRequired role: Global Administrator or Security Administrator\nDocs: https://learn.microsoft.com/en-us/azure/sentinel/connect-microsoft-365-defender\n\n=== 3. Azure Activity ===\nPriority: CRITICAL\nCost: FREE (included with any Azure subscription)\nSpyCloud Rules Enabled: #2 (Exposed User Cloud Admin Activity), UEBA data source\nTables: AzureActivity\n\nStep-by-step setup:\n  1. Sentinel > Data Connectors > Azure Activity > Open connector page\n  2. Click 'Launch Azure Policy Assignment Wizard'\n  3. Scope: Select your subscription(s)\n  4. Parameters: Primary Log Analytics workspace = your Sentinel workspace\n  5. Remediation: Check 'Create a remediation task'\n  6. Review + Create\n  7. Verify: Run in Log Analytics: AzureActivity | take 10\n  8. Data appears within 5-15 minutes\n\nRequired role: Owner or Contributor on the subscription\nDocs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/azure-activity\n\n=== 4. Office 365 ===\nPriority: CRITICAL\nCost: FREE (included with Microsoft 365 subscription)\nSpyCloud Rules Enabled: #14 (Email Compromise After Exposure), mailbox compromise hunting query, data exfiltration hunting query\nTables: OfficeActivity\n\nStep-by-step setup:\n  1. Sentinel > Data Connectors > Office 365 > Open connector page\n  2. CHECK: Exchange, SharePoint, Teams\n  3. Click 'Apply Changes'\n  4. Verify: Run in Log Analytics: OfficeActivity | take 10\n\nRequired role: Global Administrator or Security Administrator\nDocs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/office-365"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionTier2",
+                        "type": "Microsoft.Common.Section",
+                        "label": "TIER 2: HIGH VALUE Connectors (Advanced Correlation)",
+                        "elements": [
+                            {
+                                "name": "tier2Info",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "These connectors enable advanced cross-correlation between SpyCloud exposure data and Microsoft security products. Each adds significant detection coverage.\n\n=== 5. Microsoft Defender for Cloud ===\nCost: Per-resource pricing (varies by workload type)\nSpyCloud MSIC Rule: Auto-creates incidents from Defender for Cloud alerts. Fusion source.\nTables: SecurityAlert, SecurityRecommendation\n\nSetup:\n  1. Defender for Cloud > Environment Settings > select subscription > Enable desired plans\n  2. Continuous Export > Add > Export to Log Analytics workspace > select Sentinel workspace\n  3. Export: Security alerts (all severities), Security recommendations\n  4. Save\nDocs: https://learn.microsoft.com/en-us/azure/defender-for-cloud/continuous-export\n\n=== 6. Microsoft Defender for Cloud Apps (MCAS) ===\nCost: Included in Microsoft 365 E5, or standalone ~$3.50/user/month\nSpyCloud MSIC Rule: Auto-creates incidents from MCAS alerts. Detects impossible travel, OAuth abuse, mass file downloads by compromised users.\nTables: CloudAppEvents, McasShadowItReporting\n\nSetup:\n  1. Content Hub > search 'Microsoft Defender for Cloud Apps' > Install\n  2. Data Connectors > Microsoft Defender for Cloud Apps > Open connector page\n  3. Enable alerts and discovery logs\n  4. Apply Changes\nDocs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/microsoft-defender-for-cloud-apps\n\n=== 7. Microsoft Defender for Identity ===\nCost: ~$5.50/user/month (included in Microsoft 365 E5)\nSpyCloud MSIC Rule: Auto-creates incidents from Defender for Identity alerts. Critical for detecting pass-the-hash, golden ticket, DCSync, reconnaissance from stolen on-prem AD credentials.\nTables: IdentityLogonEvents, IdentityDirectoryEvents, IdentityQueryEvents\n\nSetup:\n  1. Content Hub > search 'Microsoft Defender for Identity' > Install\n  2. Deploy sensor on domain controllers: https://learn.microsoft.com/en-us/defender-for-identity/install-sensor\n  3. Data Connectors > Microsoft Defender for Identity > Enable\nDocs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/microsoft-defender-for-identity\n\n=== 8. DNS Analytics ===\nCost: FREE (Windows DNS) or included with DNS server\nSpyCloud Rules Enabled: #3 (DNS + SpyCloud Infected IP Correlation)\nTables: DnsEvents, DnsInventory\n\nSetup (Windows DNS via AMA):\n  1. Content Hub > search 'DNS' > Install\n  2. Deploy Azure Monitor Agent on DNS servers\n  3. Create Data Collection Rule targeting DNS event logs\nSetup (third-party DNS): Forward DNS logs via Syslog/CEF to AMA\nDocs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/dns\n\n=== 9. Threat Intelligence ===\nCost: FREE (TAXII feeds) or per Microsoft Defender TI license\nSpyCloud Rules Enabled: #17 (SpyCloud + TI Cross-Reference), Fusion source, TI enrichment\nTables: ThreatIntelligenceIndicator\n\nSetup (TAXII 2.0/2.1):\n  1. Data Connectors > Threat Intelligence - TAXII > Open connector page\n  2. Enter: Friendly name, API root URL, Collection ID, Username/Password\n  3. Popular free TAXII feeds: Anomali Limo, FS-ISAC (requires membership), AlienVault OTX\n  4. Click Add\nSetup (Microsoft Defender TI):\n  1. Content Hub > search 'Microsoft Defender Threat Intelligence' > Install\n  2. Data Connectors > Microsoft Defender Threat Intelligence > Enable\nDocs: https://learn.microsoft.com/en-us/azure/sentinel/connect-threat-intelligence-taxii"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionTier3",
+                        "type": "Microsoft.Common.Section",
+                        "label": "TIER 3: RECOMMENDED Connectors (Third-Party & Extended Coverage)",
+                        "elements": [
+                            {
+                                "name": "tier3Info",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "These connectors extend SpyCloud detection to third-party identity providers, firewalls, EDR, and multi-cloud environments.\n\n=== IDENTITY PROVIDERS ===\n\n10. Okta Single Sign-On\n  Cost: Requires Okta subscription + Okta System Log API access\n  SpyCloud Rule: #15 (Okta Sign-In from Exposed User)\n  Table: Okta_CL\n  Setup: Content Hub > 'Okta Single Sign-On' > Install > Configure API token from Okta Admin Console > Security > API > Tokens\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/okta-single-sign-on\n\n11. Cisco Duo Security\n  Cost: Requires Duo subscription + Admin API access\n  SpyCloud Rule: #4 (Duo Auth from Exposed User)\n  Table: DuoSecurityAuthentication_CL\n  Setup: Content Hub > 'Cisco Duo Security' > Install > Configure integration key, secret key, API hostname from Duo Admin Panel > Applications > Admin API\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/cisco-duo-security\n\n12. Ping Identity / PingOne\n  Cost: Requires Ping subscription + API access\n  SpyCloud Rule: #16 (Ping Auth from Exposed User)\n  Table: PingFederateAudit_CL\n  Setup: Configure Syslog/API forwarding via AMA agent to Log Analytics workspace\n\n=== FIREWALLS & NETWORK ===\n\n13. Palo Alto Networks (PAN-OS)\n  Cost: Requires Palo Alto firewall subscription\n  SpyCloud Rule: #32 (Firewall + SpyCloud Infected IP), Fusion raw log source\n  Table: CommonSecurityLog\n  Setup: Content Hub > 'Palo Alto Networks' > Install > Configure CEF/Syslog forwarding via AMA\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/palo-alto-networks\n\n14. Fortinet FortiGate\n  Cost: Requires Fortinet subscription\n  Table: CommonSecurityLog\n  Setup: Content Hub > 'Fortinet FortiGate' > Install > Configure CEF forwarding\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/fortinet-fortigate\n\n15. Zscaler Internet Access\n  Cost: Requires Zscaler subscription\n  Table: CommonSecurityLog\n  Setup: Content Hub > 'Zscaler' > Install > Configure NSS feed to CEF\n\n=== EDR & ENDPOINT ===\n\n16. CrowdStrike Falcon\n  Cost: Requires CrowdStrike subscription\n  Table: CommonSecurityLog or CrowdStrike_CL\n  Setup: Content Hub > 'CrowdStrike Falcon Endpoint Protection' > Install > Configure Falcon Data Replicator or API connector\n\n=== MULTI-CLOUD ===\n\n17. AWS CloudTrail\n  Cost: AWS CloudTrail free tier (management events)\n  Table: AWSCloudTrail\n  Setup: Content Hub > 'Amazon Web Services' > Install > Configure S3 bucket + SQS queue\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/connect-aws\n\n18. Google Cloud Platform (GCP)\n  Cost: GCP audit logging (included)\n  Table: GCPAuditLogs\n  Setup: Content Hub > 'Google Cloud Platform' > Install > Configure Pub/Sub topic\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/connect-google-cloud-platform"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionPostDeployFeatures",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Post-Deployment Features & Configuration",
+                        "elements": [
+                            {
+                                "name": "postDeployInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "=== FEATURES TO ENABLE AFTER DEPLOYMENT ===\n\n1. Security Copilot Plugin + Agent\n  WHERE: Security Copilot portal > Settings > Custom Plugins > Upload\n  FILES: copilot/SpyCloud_Plugin.yaml (58+ KQL skills), copilot/SpyCloud_Agent.yaml (autonomous investigation)\n  REQUIRES: Microsoft Security Copilot license (consumption-based)\n  SKILLS: Credential investigation, breach metadata, device forensics, Compass intelligence, remediation tracking, cross-table correlation, UEBA correlation, Fusion analysis, TI enrichment, malware family tracking, executive summaries\n\n2. Sentinel Repositories (CI/CD)\n  WHERE: Sentinel > Settings > Repositories > Connect\n  HOW: Connect your GitHub or Azure DevOps repository for version control of analytics rules, playbooks, and hunting queries\n  BENEFIT: Automated deployment of rule updates, audit trail, rollback capability\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/ci-cd\n\n3. Watchlist Population\n  After deployment, populate these watchlists with your organization's data:\n  - SpyCloud-VIP-Watchlist: Add executive/admin email addresses for priority alerting\n  - SpyCloud-IOC-Blocklist: Add known malicious IPs/domains from your threat feeds\n  - SpyCloud-Approved-Domains: Add all your corporate email domains\n  - SpyCloud-HighValue-Assets: Add critical servers, DCs, VPN gateways, database servers\n  WHERE: Sentinel > Watchlists > select watchlist > Edit\n\n4. Analytics Rule Review\n  All 38 scheduled SpyCloud rules deploy DISABLED by default. Review and enable:\n  WHERE: Sentinel > Analytics > filter by 'SpyCloud' > select each rule > Enable\n  RECOMMENDATION: Enable rules in phases — start with severity 20+ infostealer rules, then expand\n\n5. Automation Rule Tuning\n  - Auto-Escalate Critical: Enabled by default — auto-promotes plaintext/cookie/MFA bypass incidents to High severity\n  - Auto-Task Device Infections: Enabled by default — adds investigation tasks for device incidents\n  - Auto-Close Informational: DISABLED by default — enable after reviewing incident volume\n  WHERE: Sentinel > Automation > Automation Rules\n\n6. Summary Rules (Cost Optimization)\n  For high-volume environments (100K+ records/day), consider creating summary rules:\n  WHERE: Azure Monitor > Summary Rules > Create\n  USE CASE: Aggregate SpyCloudBreachWatchlist_CL data by domain/severity for faster dashboard queries\n  Docs: https://learn.microsoft.com/en-us/azure/sentinel/summary-rules\n\n7. Data Retention Optimization\n  Configure per-table retention to balance cost and compliance:\n  WHERE: Log Analytics > Tables > select table > Manage table > Data retention\n  RECOMMENDATION:\n    - SpyCloudBreachWatchlist_CL: 90-365 days (depends on remediation SLA)\n    - SpyCloudBreachCatalog_CL: 365-730 days (reference data, low volume)\n    - Spycloud_MDE_Logs_CL: 90 days (audit trail)\n    - SpyCloud_ConditionalAccessLogs_CL: 90 days (audit trail)\n    - SpyCloudCompassData_CL: 90-180 days (moderate volume)\n    - SpyCloudCompassDevices_CL: 90-180 days (low volume)"
+                                }
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -573,7 +791,13 @@
             "tagCostCenter": "[steps('securityConfig').sectionTags.tagCostCenter]",
             "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]",
             "jiraWebhookUrl": "[steps('securityConfig').sectionIntegrations.jiraWebhookUrl]",
-            "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]"
+            "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]",
+            "enableUEBA": "[steps('sentinelFeatures').sectionSentinelSettings.enableUEBA]",
+            "enableAnomalies": "[steps('sentinelFeatures').sectionSentinelSettings.enableAnomalies]",
+            "enableFusionRule": "[steps('sentinelFeatures').sectionSentinelSettings.enableFusionRule]",
+            "enableMicrosoftSecurityIncidentRules": "[steps('sentinelFeatures').sectionSentinelSettings.enableMicrosoftSecurityIncidentRules]",
+            "enableTiEnrichmentPlaybook": "[steps('sentinelFeatures').sectionTiEnrichment.enableTiEnrichmentPlaybook]",
+            "virusTotalApiKey": "[steps('sentinelFeatures').sectionTiEnrichment.virusTotalApiKey]"
         }
     }
 }

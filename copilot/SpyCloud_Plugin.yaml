@@ -1,7 +1,7 @@
 Descriptor:
   Name: SpyCloud Sentinel Threat Intelligence
   DisplayName: SpyCloud Sentinel Threat Intelligence
-  Description: Comprehensive SpyCloud threat intelligence plugin for Microsoft Sentinel covering all 4 custom tables with 118 total columns. Queries breach credentials, plaintext passwords, infostealer malware forensics, PII including SSN and financial data, MDE device isolation audit logs, Entra ID Conditional Access remediation logs, breach catalog metadata, and full cross-table correlation. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping.
+  Description: Comprehensive SpyCloud threat intelligence plugin for Microsoft Sentinel with 96 resources including 44 analytics rules, 15 hunting queries, 5 playbooks, 4 watchlists, 4 automation rules, 4 Sentinel settings (UEBA, Anomalies, EyesOn, EntityAnalytics), Fusion multistage detection, 5 MSIC rules, TI enrichment playbook, and 6 notification channels. Covers all 4 custom tables with 118 total columns. Queries breach credentials, plaintext passwords, infostealer malware forensics, PII including SSN and financial data, MDE device isolation audit logs, Entra ID Conditional Access remediation logs, breach catalog metadata, UEBA anomaly correlation, Fusion multistage incidents, automation rule metrics, session cookie theft detection, lateral movement hunting, data exfiltration detection, malware family tracking, IOC blocklist management, high-value asset monitoring, MSIC incident correlation, and executive reporting. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping.
   Settings:
     - Name: TenantId
       Description: Your Azure Tenant ID where the Sentinel workspace is located.
@@ -931,3 +931,321 @@ SkillGroups:
             (exposed | where isnotempty(password_plaintext) and email !in~ (remediated_users) | summarize Users=dcount(email) | extend Priority="HIGH", Action="Plaintext password exposures without password reset"),
             (exposed | where severity >= 5 | summarize v=dcount(email) | where v > 0 | extend Priority="MEDIUM", Action="Users exposed in last 7d — review for password reuse patterns")
             | project Priority, Action
+
+      # =====================================================================
+      # 13. UEBA CORRELATION AND ANOMALY DETECTION
+      # =====================================================================
+
+      - Name: GetUEBAAnomaliesForExposedUsers
+        DisplayName: Correlate SpyCloud exposures with UEBA anomalies
+        Description: |
+          Cross-references SpyCloud exposed users with UEBA anomaly data to find users showing both credential exposure and anomalous behavior. Identifies users with both compromised credentials and suspicious behavioral patterns detected by Sentinel UEBA, enabling prioritized investigation of the highest-risk accounts.
+        ExamplePrompts:
+          - Show UEBA anomalies for SpyCloud exposed users
+          - Which exposed users have anomalous behavior
+          - Cross-reference SpyCloud with UEBA data
+          - Find users with both credential exposure and suspicious activity
+          - Correlate SpyCloud breaches with behavioral analytics
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back for exposures (e.g., 7d, 14d, 30d). Default is 14d.
+            Required: false
+          - Name: MinSeverity
+            Description: Minimum SpyCloud severity level to include (e.g., 5, 20, 25). Default is 5.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago({{Lookback}}) and severity >= {{MinSeverity}} | distinct email; BehaviorAnalytics | where TimeGenerated > ago(7d) | where UserPrincipalName in~ (exposed) | where ActivityInsights has "anomalous" or InvestigationPriority > 5 | project TimeGenerated, UserPrincipalName, ActionType, ActivityInsights, InvestigationPriority, SourceIPAddress
+
+      # =====================================================================
+      # 14. FUSION MULTISTAGE INCIDENT ANALYSIS
+      # =====================================================================
+
+      - Name: GetFusionMultistageIncidents
+        DisplayName: Get Fusion-detected multistage attack incidents
+        Description: |
+          Retrieves Fusion-detected multistage attack incidents that may involve SpyCloud-exposed credentials. Fusion uses ML to correlate low-fidelity alerts across multiple data sources into high-confidence incidents, detecting attacks that span initial access through lateral movement and exfiltration.
+        ExamplePrompts:
+          - Show Fusion multistage attack incidents
+          - Get Fusion-detected incidents involving SpyCloud
+          - List multistage attack incidents from Fusion
+          - Show ML-correlated attack incidents
+          - What Fusion incidents involve exposed credentials
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SecurityIncident | where TimeGenerated > ago({{Lookback}}) | where AdditionalData has "Fusion" | project TimeGenerated, Title, Severity, Status, Owner, IncidentUrl, AdditionalData
+
+      # =====================================================================
+      # 15. THREAT INTELLIGENCE ENRICHMENT
+      # =====================================================================
+
+      - Name: GetTIEnrichmentResults
+        DisplayName: Show TI enrichment results for SpyCloud incidents
+        Description: |
+          Shows threat intelligence enrichment results from the TI Enrichment playbook, including VirusTotal and AbuseIPDB scores for IPs associated with SpyCloud incidents. Provides external threat context for indicators found in SpyCloud exposure data.
+        ExamplePrompts:
+          - Show TI enrichment results for SpyCloud incidents
+          - What VirusTotal scores are on SpyCloud-related IPs
+          - Get threat intelligence enrichment for SpyCloud alerts
+          - Show AbuseIPDB scores for SpyCloud incidents
+          - What external threat intel enriched SpyCloud incidents
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back for TI enrichment results (e.g., 7d, 14d, 30d). Default is 14d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SecurityIncident | where TimeGenerated > ago({{Lookback}}) | where Comments has "TI Enrichment" or Comments has "VirusTotal" | project TimeGenerated, Title, Comments, Severity
+
+      # =====================================================================
+      # 16. AUTOMATION RULE EFFECTIVENESS
+      # =====================================================================
+
+      - Name: GetAutomationRuleMetrics
+        DisplayName: Analyze SpyCloud automation rule effectiveness
+        Description: |
+          Analyzes the effectiveness of SpyCloud automation rules including auto-escalation, auto-triage, and auto-close actions. Shows execution counts, success rates, and failure rates for each automation rule to ensure automated response workflows are functioning correctly.
+        ExamplePrompts:
+          - Show SpyCloud automation rule metrics
+          - How effective are the SpyCloud automation rules
+          - What is the success rate of SpyCloud auto-triage
+          - Show automation rule execution statistics
+          - Are SpyCloud automation rules working correctly
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back for automation rule metrics (e.g., 7d, 14d, 30d). Default is 30d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SentinelHealth | where TimeGenerated > ago({{Lookback}}) | where SentinelResourceType == "Automation rule" | where SentinelResourceName startswith "SpyCloud" | summarize Executions=count(), Succeeded=countif(Status=="Success"), Failed=countif(Status!="Success") by SentinelResourceName | extend SuccessRate=round(100.0*Succeeded/Executions, 1)
+
+      # =====================================================================
+      # 17. SESSION COOKIE THEFT AND TOKEN REPLAY HUNTING
+      # =====================================================================
+
+      - Name: HuntStolenSessionCookies
+        DisplayName: Hunt stolen session cookies bypassing MFA
+        Description: |
+          Identifies users with stolen session cookies from SpyCloud who have recent sign-ins potentially bypassing MFA via token replay. Detects post-authentication attacks where stolen cookies or session tokens allow attackers to impersonate users without triggering MFA challenges.
+        ExamplePrompts:
+          - Hunt for stolen session cookie abuse
+          - Find users bypassing MFA with stolen tokens
+          - Detect token replay attacks from SpyCloud data
+          - Which users with stolen cookies have suspicious sign-ins
+          - Hunt for session hijacking from infostealer infections
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let stolen = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | where isnotempty(infected_machine_id) | distinct email; SigninLogs | where TimeGenerated > ago(7d) and ResultType == 0 | where AuthenticationRequirement == "singleFactorAuthentication" | where UserPrincipalName in~ (stolen) | summarize Sessions=count(), UniqueIPs=dcount(IPAddress), Countries=dcount(LocationDetails.countryOrRegion) by UserPrincipalName | where UniqueIPs > 1
+
+      # =====================================================================
+      # 18. LATERAL MOVEMENT DETECTION
+      # =====================================================================
+
+      - Name: HuntLateralMovementFromExposedAccounts
+        DisplayName: Detect lateral movement from exposed accounts
+        Description: |
+          Detects lateral movement patterns from accounts with SpyCloud credential exposure, focusing on remote interactive and network logon types. Identifies compromised accounts accessing multiple targets via RDP, SMB, or network logons indicating potential lateral movement activity.
+        ExamplePrompts:
+          - Detect lateral movement from SpyCloud exposed accounts
+          - Hunt for RDP and network logons from compromised users
+          - Which exposed accounts are moving laterally
+          - Find lateral movement from infostealer-compromised accounts
+          - Show multi-target access from SpyCloud exposed users
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let compromised = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email; IdentityLogonEvents | where TimeGenerated > ago(7d) | where AccountUpn in~ (compromised) | where LogonType in ("RemoteInteractive", "Network") | summarize UniqueTargets=dcount(DestinationDeviceName), Logons=count() by AccountUpn, DeviceName | where UniqueTargets > 2
+
+      # =====================================================================
+      # 19. DATA EXFILTRATION DETECTION
+      # =====================================================================
+
+      - Name: HuntDataExfiltrationFromExposedUsers
+        DisplayName: Detect data exfiltration from exposed users
+        Description: |
+          Detects mass file downloads and data exfiltration from cloud apps by users whose credentials were exposed in SpyCloud data. Identifies potential data theft by monitoring for unusual download volumes from compromised accounts across Microsoft 365, SharePoint, OneDrive, and other cloud applications.
+        ExamplePrompts:
+          - Hunt for data exfiltration from SpyCloud exposed users
+          - Detect mass downloads by compromised users
+          - Find file theft from infostealer-compromised accounts
+          - Which exposed users are downloading excessive files
+          - Show cloud data exfiltration by SpyCloud exposed users
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email; CloudAppEvents | where TimeGenerated > ago(7d) | where ActionType in ("FileDownloaded", "FileSyncDownloadedFull") | join kind=inner (IdentityInfo | distinct AccountUPN, AccountObjectId) on AccountObjectId | where AccountUPN in~ (exposed) | summarize Downloads=count(), UniqueFiles=dcount(ObjectName) by AccountUPN | where Downloads > 50
+
+      # =====================================================================
+      # 20. MALWARE FAMILY TRACKING
+      # =====================================================================
+
+      - Name: TrackMalwareFamilyTrends
+        DisplayName: Track infostealer malware family trends
+        Description: |
+          Tracks infostealer malware family trends from SpyCloud data showing which malware families target your organization. Identifies RedLine, Raccoon, Vidar, LummaC2, StealC, and other infostealer families by analyzing infection paths and provides victim and device counts per family.
+        ExamplePrompts:
+          - What malware families are targeting our organization
+          - Show infostealer malware family trends from SpyCloud
+          - Track which infostealers are most prevalent
+          - Break down SpyCloud infections by malware family
+          - Which malware families have the most victims
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back for malware trends (e.g., 30d, 60d, 90d). Default is 30d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachWatchlist_CL | where TimeGenerated > ago({{Lookback}}) and severity >= 20 | where isnotempty(infected_path) | extend malware_family = case(infected_path contains "redline", "RedLine", infected_path contains "raccoon", "Raccoon", infected_path contains "vidar", "Vidar", infected_path contains "lumma", "LummaC2", infected_path contains "stealc", "StealC", "Unknown") | summarize Victims=dcount(email), Devices=dcount(infected_machine_id) by malware_family | order by Victims desc
+
+      # =====================================================================
+      # 21. WATCHLIST MANAGEMENT
+      # =====================================================================
+
+      - Name: GetIOCBlocklistEntries
+        DisplayName: Get IOC Blocklist watchlist entries
+        Description: |
+          Retrieves current entries from the SpyCloud IOC Blocklist watchlist for malicious IPs, domains, and URLs. Shows all indicators that have been flagged for blocking based on SpyCloud threat intelligence data including severity, source, and date added.
+        ExamplePrompts:
+          - Show SpyCloud IOC blocklist entries
+          - What IPs and domains are on the SpyCloud blocklist
+          - List blocked indicators from SpyCloud
+          - Get current IOC blocklist from SpyCloud watchlist
+          - What indicators are being blocked from SpyCloud data
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            _GetWatchlist('SpyCloud-IOC-Blocklist') | project Indicator, Type, Severity, Source, DateAdded, Notes
+
+      - Name: GetHighValueAssets
+        DisplayName: Get high-value assets for elevated monitoring
+        Description: |
+          Retrieves the list of high-value assets (critical servers, DCs, VPN gateways) that require elevated monitoring when accessed by SpyCloud-exposed users. Used by analytics rules to trigger higher severity alerts when compromised credentials are used against critical infrastructure.
+        ExamplePrompts:
+          - Show high-value assets from SpyCloud watchlist
+          - What critical servers are being monitored for SpyCloud access
+          - List high-value assets requiring elevated protection
+          - Get the SpyCloud high-value asset inventory
+          - What infrastructure gets priority alerts from SpyCloud
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            _GetWatchlist('SpyCloud-HighValue-Assets') | project AssetName, AssetType, Criticality, Owner, Notes
+
+      - Name: GetApprovedDomains
+        DisplayName: Show approved corporate email domains
+        Description: |
+          Shows corporate email domains configured for SpyCloud monitoring scope. These are the domains used by analytics rules to determine which email exposures are in scope for alerting and automated remediation.
+        ExamplePrompts:
+          - Show SpyCloud approved domains
+          - What email domains is SpyCloud monitoring
+          - List corporate domains in SpyCloud scope
+          - Get the SpyCloud domain watchlist
+          - Which domains are configured for SpyCloud monitoring
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            _GetWatchlist('SpyCloud-Approved-Domains') | project Domain, Type, Priority, Notes
+
+      # =====================================================================
+      # 22. MSIC INCIDENT CORRELATION
+      # =====================================================================
+
+      - Name: GetMSICIncidentCorrelation
+        DisplayName: Correlate MSIC incidents with SpyCloud exposure
+        Description: |
+          Shows Microsoft Security Incident Creation rule incidents and their correlation with SpyCloud exposure data. Correlates incidents from Azure AD Identity Protection, Azure Security Center, Microsoft 365 Defender, Microsoft Cloud App Security, and Azure ATP with SpyCloud exposure records to identify attacks that may have originated from stolen credentials.
+        ExamplePrompts:
+          - Show MSIC incidents correlated with SpyCloud data
+          - Correlate Microsoft security incidents with SpyCloud exposures
+          - Which Microsoft security incidents involve SpyCloud users
+          - Show identity protection incidents for exposed users
+          - Cross-reference Microsoft Defender incidents with SpyCloud
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back for MSIC incidents (e.g., 7d, 14d, 30d). Default is 14d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SecurityIncident | where TimeGenerated > ago({{Lookback}}) | where ProviderName in ("Azure Active Directory Identity Protection", "Azure Security Center", "Microsoft 365 Defender", "Microsoft Cloud App Security", "Azure Advanced Threat Protection") | join kind=leftouter (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) | distinct email) on $left.Owner.userPrincipalName == $right.email | project TimeGenerated, Title, Severity, ProviderName, email, Status
+
+      # =====================================================================
+      # 23. EXECUTIVE REPORTING
+      # =====================================================================
+
+      - Name: GenerateExecutiveSummary
+        DisplayName: Generate SpyCloud executive summary report
+        Description: |
+          Generates an executive summary report of SpyCloud threat intelligence including total exposures, active infostealers, remediation rates, and top risks. Provides a consolidated view of the organization's exposure posture, remediation progress, and incident response metrics for leadership briefings.
+        ExamplePrompts:
+          - Generate a SpyCloud executive summary
+          - Show SpyCloud executive report
+          - Create a leadership briefing on SpyCloud exposure
+          - Summarize SpyCloud threat intelligence for executives
+          - Get a high-level SpyCloud exposure report
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) and ActionStatus=="Success" | summarize Remediations=dcount(UserPrincipalName); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
