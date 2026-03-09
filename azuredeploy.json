@@ -1637,7 +1637,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend catalog_id = toint(column_ifexists('id', '')) | extend breach_title = tostring(column_ifexists('title', '')) | extend breach_description = tostring(column_ifexists('description', '')) | extend breach_type = tostring(column_ifexists('type', '')) | extend breach_status = tostring(column_ifexists('status', '')) | extend confidence = toint(confidence) | extend num_records = toint(num_records) | extend assets = iff(gettype(assets) == 'string', parse_json(assets), assets)",
+            "transformKql": "source | extend TimeGenerated = now(), catalog_id = toint(id), breach_title = tostring(title), breach_description = tostring(description), breach_type = tostring(['type']), breach_status = tostring(status), confidence = toint(confidence), num_records = toint(num_records)",
             "outputStream": "Custom-SpyCloudBreachCatalog_CL"
           },
           {
@@ -1667,7 +1667,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(column_ifexists('Status', ''))",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()), ActionStatus = tostring(Status)",
             "outputStream": "Custom-Spycloud_MDE_Logs_CL"
           },
           {
@@ -1677,7 +1677,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(column_ifexists('Status', ''))",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()), ActionStatus = tostring(Status)",
             "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
           }
         ]
