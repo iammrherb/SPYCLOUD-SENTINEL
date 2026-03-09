@@ -1597,7 +1597,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now()",
+            "transformKql": "source\n| extend TimeGenerated = now()\n| extend severity = toint(severity)\n| extend sighting = toint(sighting)\n| extend source_id = toint(source_id)\n| extend ip_addresses = iff(gettype(ip_addresses) == \"string\", parse_json(ip_addresses), ip_addresses)\n| extend av_softwares = iff(gettype(av_softwares) == \"string\", parse_json(av_softwares), av_softwares)\n| extend email = tolower(tostring(email))\n| extend email_domain = tolower(tostring(email_domain))\n| extend target_domain = tolower(tostring(target_domain))",
             "outputStream": "Custom-SpyCloudBreachWatchlist_CL"
           },
           {
@@ -1607,7 +1607,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now()",
+            "transformKql": "source\n| extend TimeGenerated = now()\n| extend id = toint(id)\n| extend confidence = toint(confidence)\n| extend num_records = toint(num_records)\n| extend assets = iff(gettype(assets) == \"string\", parse_json(assets), assets)\n| extend title = tostring(title)\n| extend status = tostring(status)",
             "outputStream": "Custom-SpyCloudBreachCatalog_CL"
           },
           {
@@ -1617,7 +1617,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now()",
+            "transformKql": "source\n| extend TimeGenerated = now()\n| extend severity = toint(severity)\n| extend sighting = toint(sighting)\n| extend source_id = toint(source_id)\n| extend ip_addresses = iff(gettype(ip_addresses) == \"string\", parse_json(ip_addresses), ip_addresses)\n| extend av_softwares = iff(gettype(av_softwares) == \"string\", parse_json(av_softwares), av_softwares)\n| extend email = tolower(tostring(email))\n| extend target_domain = tolower(tostring(target_domain))",
             "outputStream": "Custom-SpyCloudCompassData_CL"
           },
           {
@@ -1627,7 +1627,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now()",
+            "transformKql": "source\n| extend TimeGenerated = now()\n| extend source_id = toint(source_id)\n| extend application_count = toint(application_count)\n| extend ip_addresses = iff(gettype(ip_addresses) == \"string\", parse_json(ip_addresses), ip_addresses)",
             "outputStream": "Custom-SpyCloudCompassDevices_CL"
           },
           {
@@ -3200,7 +3200,8 @@
                     "placeholder": "Paste your API key from portal.spycloud.com \u2192 Settings \u2192 API Keys",
                     "validations": {
                       "required": true
-                    }
+                    },
+                    "toolTip": "Your SpyCloud Enterprise API key from portal.spycloud.com \u2192 Settings \u2192 API Keys. This key authenticates all API requests using the X-Api-Key header. Must be an Enterprise or Enterprise+ tier key \u2014 Standard keys will return 403."
                   }
                 }
               ]
@@ -3235,7 +3236,8 @@
                     "placeholder": "Select severity levels (recommend: all 4)",
                     "isMultiSelect": true,
                     "required": true,
-                    "defaultAllSelected": true
+                    "defaultAllSelected": true,
+                    "toolTip": "Select which severity levels to ingest. Severity 25 = critical (stolen cookies/sessions/autofill from infostealers). Severity 20 = high (malware-stolen credentials). Severity 5 = standard (breach + PII). Severity 2 = low (breach credential only). Recommend selecting all 4 for maximum coverage."
                   }
                 },
                 {
@@ -3264,7 +3266,8 @@
                     "placeholder": "Select exposure types (recommend: all 3)",
                     "isMultiSelect": true,
                     "required": true,
-                    "defaultAllSelected": true
+                    "defaultAllSelected": true,
+                    "toolTip": "Filter by exposure type. Corporate = your monitored email domains. Infected = credentials stolen by infostealer malware. Email Domain / Target Domain = additional filtering. Omitting returns all types (recommended for most deployments)."
                   }
                 },
                 {
@@ -3285,7 +3288,8 @@
                     "placeholder": "Select password handling",
                     "isMultiSelect": false,
                     "required": true,
-                    "defaultAllSelected": false
+                    "defaultAllSelected": false,
+                    "toolTip": "Controls whether plaintext passwords are included in the data. 'No' (recommended) excludes cleartext passwords for security. 'Yes' includes them \u2014 requires data handling policy and consider table-level RBAC to restrict access."
                   }
                 }
               ]
@@ -3332,7 +3336,8 @@
                     "placeholder": "How often to fetch new records",
                     "isMultiSelect": false,
                     "required": true,
-                    "defaultAllSelected": false
+                    "defaultAllSelected": false,
+                    "toolTip": "How often the connector fetches new records from the SpyCloud API. Lower values mean fresher data but more API consumption. 30 minutes is recommended for most environments. Near real-time (5 min) for SOCs requiring immediate alerting. Daily (24h) for low-volume or cost-sensitive deployments."
                   }
                 },
                 {
@@ -3365,7 +3370,8 @@
                     "placeholder": "How far back on first connection",
                     "isMultiSelect": false,
                     "required": true,
-                    "defaultAllSelected": false
+                    "defaultAllSelected": false,
+                    "toolTip": "How far back to retrieve data on the first connection. After the initial pull, only new and modified records are fetched incrementally. 365 days (1 year) recommended for full historical coverage. Shorter periods reduce initial ingestion volume."
                   }
                 },
                 {
@@ -3394,7 +3400,8 @@
                     "placeholder": "Retries on API failure",
                     "isMultiSelect": false,
                     "required": true,
-                    "defaultAllSelected": false
+                    "defaultAllSelected": false,
+                    "toolTip": "Number of retry attempts when an API call fails due to timeouts, rate limits, or transient errors. Uses exponential backoff between retries. 5 retries is recommended. Increase to 10 for unreliable network connections."
                   }
                 },
                 {
@@ -3427,7 +3434,8 @@
                     "placeholder": "Timeout per API request",
                     "isMultiSelect": false,
                     "required": true,
-                    "defaultAllSelected": false
+                    "defaultAllSelected": false,
+                    "toolTip": "Maximum time to wait for a single API response before triggering a retry. Increase for large environments (50K+ monitored assets) where API responses may be larger. 120 seconds handles most environments. Use 300 for very large datasets."
                   }
                 },
                 {
@@ -4067,7 +4075,8 @@
                 "method": "post",
                 "body": "@triggerBody()?['object']?['properties']?['relatedEntities']",
                 "path": "/entities/host"
-              }
+              },
+              "description": "Extract host entities (hostname, infected_machine_id) from the Sentinel incident to identify which devices need isolation."
             },
             "For_each_host": {
               "runAfter": {
@@ -4249,7 +4258,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
                     },
                     "Notify_Teams": {
                       "type": "If",
@@ -4300,7 +4310,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
                     },
                     "Notify_Email": {
                       "type": "If",
@@ -4357,7 +4368,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
                     }
                   },
                   "else": {
@@ -4381,13 +4393,15 @@
                     }
                   }
                 }
-              }
+              },
+              "description": "Process each infected host: search MDE, isolate if found, tag, log, and notify. Continues to next host if one fails."
             }
           },
           "outputs": {},
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
-          }
+          },
+          "description": "SpyCloud MDE Device Isolation \u2014 Automatically isolates infected devices in Microsoft Defender for Endpoint when SpyCloud detects infostealer malware. Extracts host entities from incidents, searches MDE for matching devices, isolates them (Full or Selective), adds a SpyCloud tag, logs the action, and notifies SOC via Slack, Teams, and Email."
         },
         "parameters": {
           "$connections": {
@@ -4503,7 +4517,8 @@
                 "method": "post",
                 "body": "@triggerBody()?['object']?['properties']?['relatedEntities']",
                 "path": "/entities/account"
-              }
+              },
+              "description": "Extract account entities (email, UPN) from the Sentinel incident to identify which users need credential remediation."
             },
             "For_each_account": {
               "runAfter": {
@@ -4721,7 +4736,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
                     },
                     "Notify_Teams": {
                       "type": "If",
@@ -4772,7 +4788,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
                     },
                     "Notify_Email": {
                       "type": "If",
@@ -4829,7 +4846,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
                     }
                   },
                   "else": {
@@ -4853,13 +4871,15 @@
                     }
                   }
                 }
-              }
+              },
+              "description": "Process each exposed user: Graph lookup, password reset, session revocation, CA group addition, logging, and notification."
             }
           },
           "outputs": {},
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
-          }
+          },
+          "description": "SpyCloud CA Identity Protection \u2014 Automatically resets passwords and revokes sessions in Entra ID when SpyCloud detects compromised credentials. Looks up users via Microsoft Graph, forces immediate password reset, revokes all active sessions, optionally adds to a Conditional Access security group, logs the action, and notifies SOC."
         },
         "parameters": {
           "$connections": {
@@ -4903,7 +4923,7 @@
       "kind": "Scheduled",
       "properties": {
         "displayName": "SpyCloud \u2014 Infostealer Exposure Detected",
-        "description": "[concat('Detects new infostealer-sourced credential exposures from SpyCloud watchlist data with severity >= ', string(parameters('spycloudSeverityThreshold')), '. Triggers MDE device isolation and Entra ID password reset playbooks via automation rule.')]",
+        "description": "Detects when SpyCloud identifies credentials stolen by infostealer malware (severity 20+). These are active infections where malware on a device has exfiltrated passwords, cookies, and session tokens. Requires immediate device investigation and credential reset. Creates an incident with the exposed email as an account entity.",
         "severity": "[parameters('analyticsRuleSeverity')]",
         "enabled": false,
         "query": "[concat('SpyCloudBreachWatchlist_CL\n| where severity >= ', string(parameters('spycloudSeverityThreshold')), '\n| where isnotempty(infected_machine_id)\n| summarize\n    ExposureCount = count(),\n    Emails = make_set(email, 10),\n    TargetDomains = make_set(target_domain, 10),\n    MaxSeverity = max(severity),\n    LatestExposure = max(TimeGenerated)\n  by infected_machine_id, user_hostname, source_id\n| extend\n    HostCustomEntity = user_hostname,\n    AccountCustomEntity = tostring(Emails[0])')]",
@@ -5088,7 +5108,7 @@
       "kind": "Scheduled",
       "properties": {
         "displayName": "SpyCloud \u2014 Plaintext Password Exposure (Critical Risk)",
-        "description": "Fires when a SpyCloud exposure record contains a cleartext plaintext password. These credentials can be used immediately by attackers without any cracking. Requires urgent password reset.",
+        "description": "Alerts when SpyCloud finds credentials with plaintext (unencrypted) passwords. These credentials can be used immediately by attackers without any cracking. Highest priority for password reset. Check if the password is reused across other services.",
         "severity": "High",
         "enabled": false,
         "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(password_plaintext)\n| summarize ExposureCount = count(), TargetDomains = make_set(target_domain, 10), LatestExposure = max(TimeGenerated) by email, email_domain\n| extend AccountCustomEntity = email",
@@ -5196,7 +5216,7 @@
       "kind": "Scheduled",
       "properties": {
         "displayName": "SpyCloud \u2014 Stolen Session Cookies / Tokens (MFA Bypass Risk)",
-        "description": "Detects severity 25 exposures which include stolen browser cookies, session tokens, and autofill data. Attackers can replay these tokens to bypass MFA entirely. Requires immediate session revocation for all affected users.",
+        "description": "Detects when stolen browser cookies or session tokens are found in SpyCloud data. Attackers can use these to bypass MFA entirely by replaying the authenticated session. Requires immediate session revocation and device investigation. This is the most dangerous exposure type.",
         "severity": "High",
         "enabled": false,
         "query": "SpyCloudBreachWatchlist_CL\n| where severity == 25\n| summarize ExposureCount = count(), TargetDomains = make_set(target_domain, 15), Devices = make_set(infected_machine_id, 5) by email, user_hostname\n| extend AccountCustomEntity = email, HostCustomEntity = user_hostname",
@@ -5208,7 +5228,6 @@
         "suppressionEnabled": false,
         "tactics": [
           "CredentialAccess",
-          "LateralMovement",
           "DefenseEvasion"
         ],
         "techniques": [
@@ -5990,7 +6009,8 @@
                 "body": "@triggerBody()?['object']?['properties']?['relatedEntities']",
                 "path": "/entities/account"
               },
-              "runAfter": {}
+              "runAfter": {},
+              "description": "Extract account entities from incident for credential response investigation."
             },
             "For_each_account": {
               "type": "Foreach",
@@ -6117,7 +6137,8 @@
                       "Failed",
                       "Skipped"
                     ]
-                  }
+                  },
+                  "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
                 },
                 "Notify_Teams": {
                   "type": "If",
@@ -6168,7 +6189,8 @@
                       "Failed",
                       "Skipped"
                     ]
-                  }
+                  },
+                  "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
                 },
                 "Notify_Email": {
                   "type": "If",
@@ -6225,7 +6247,8 @@
                       "Failed",
                       "Skipped"
                     ]
-                  }
+                  },
+                  "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
                 },
                 "Create_ServiceNow_Incident": {
                   "type": "If",
@@ -6271,7 +6294,8 @@
                       "Failed",
                       "Skipped"
                     ]
-                  }
+                  },
+                  "description": "Create a ServiceNow incident via REST API (/api/now/table/incident). Only fires if serviceNowInstance URL is configured. Fields: short_description, description, urgency=2, impact=2, category=Security, subcategory=Credential Exposure."
                 },
                 "Create_Jira_Issue": {
                   "type": "If",
@@ -6330,7 +6354,8 @@
                       "Failed",
                       "Skipped"
                     ]
-                  }
+                  },
+                  "description": "Create a Jira issue via Automation Webhook. Only fires if jiraWebhookUrl is configured. Configure at: Jira \u2192 Project \u2192 Automation \u2192 Create Rule \u2192 When: Incoming Webhook. Fields: summary, description, issuetype=Bug, priority=High, labels=[spycloud, credential-exposure, security]."
                 },
                 "Create_DevOps_WorkItem": {
                   "type": "If",
@@ -6379,19 +6404,22 @@
                       "Failed",
                       "Skipped"
                     ]
-                  }
+                  },
+                  "description": "Create an Azure DevOps work item via Service Hook. Only fires if azureDevOpsWebhookUrl is configured. Configure at: DevOps \u2192 Project Settings \u2192 Service hooks. Fields: System.Title, System.Description, WorkItemType=Bug, Priority=2, Tags=SpyCloud;Security."
                 }
               },
               "runAfter": {
                 "Entities_-_Get_Accounts": [
                   "Succeeded"
                 ]
-              }
+              },
+              "description": "Full response chain: Graph lookup \u2192 sign-in analysis \u2192 password reset \u2192 session revocation \u2192 incident comment \u2192 Slack \u2192 Teams \u2192 Email \u2192 ServiceNow \u2192 Jira \u2192 Azure DevOps."
             }
           },
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
-          }
+          },
+          "description": "SpyCloud Credential Response \u2014 Full SOC investigation and remediation workflow. Checks recent sign-in activity for compromised users, forces password reset, revokes sessions, then creates tickets in ServiceNow/Jira/Azure DevOps and sends rich notifications to Slack/Teams/Email. Designed as the primary automated response playbook."
         },
         "parameters": {
           "$connections": {
@@ -6505,7 +6533,8 @@
                   "audience": "https://api.loganalytics.io"
                 }
               },
-              "runAfter": {}
+              "runAfter": {},
+              "description": "KQL query against SpyCloudBreachWatchlist_CL for severity 25 records with infected_machine_id \u2014 these are active infostealer infections with stolen cookies, sessions, and autofill data."
             },
             "For_each_infection": {
               "type": "Foreach",
@@ -6612,7 +6641,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
                     },
                     "Notify_Teams": {
                       "type": "If",
@@ -6663,7 +6693,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
                     },
                     "Notify_Email": {
                       "type": "If",
@@ -6720,7 +6751,8 @@
                           "Failed",
                           "Skipped"
                         ]
-                      }
+                      },
+                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
                     }
                   },
                   "else": {
@@ -6737,12 +6769,14 @@
                 "Query_severity_25_exposures": [
                   "Succeeded"
                 ]
-              }
+              },
+              "description": "For each critical infection: search MDE by machine ID, isolate the device, tag it, and send Slack/Teams/Email notification."
             }
           },
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
-          }
+          },
+          "description": "SpyCloud MDE Blocklist (Scheduled) \u2014 Runs on a configurable schedule (default every 4 hours) to scan for severity 25 critical infostealer infections. Queries SpyCloudBreachWatchlist_CL for the highest severity exposures, searches MDE for matching devices, and isolates them with a 'SpyCloud-Sev25-Infostealer' tag. Proactive defense against the most dangerous infections."
         },
         "parameters": {
           "slackWebhook": {
@@ -6876,7 +6910,7 @@
       "kind": "Scheduled",
       "properties": {
         "displayName": "SpyCloud \u2014 Executive / VIP Account Exposure",
-        "description": "Detects exposures for email addresses that match a predefined list of executive or VIP accounts. Customize the 'vip_domains' list in the KQL to match your executive team's email patterns. These exposures require immediate C-suite notification and priority remediation.",
+        "description": "Specifically monitors for credential exposures of executive and VIP accounts (CEO, CFO, CTO, CISO, VP, Director, admin, root, service accounts). These high-value targets require priority remediation and may trigger additional security protocols. Configure the VIP list in the KQL query.",
         "severity": "High",
         "enabled": false,
         "query": "let vip_patterns = dynamic(['ceo@','cfo@','cto@','ciso@','coo@','president@','vp-','director-']);\nSpyCloudBreachWatchlist_CL\n| where severity >= 5\n| where email has_any (vip_patterns) or email_username in ('admin','administrator','root','sysadmin')\n| summarize ExposureCount = count(), MaxSeverity = max(severity), Sources = make_set(source_id, 5) by email, full_name\n| extend AccountCustomEntity = email",
@@ -6888,11 +6922,9 @@
         "suppressionEnabled": false,
         "tactics": [
           "CredentialAccess",
-          "InitialAccess",
-          "Reconnaissance"
+          "InitialAccess"
         ],
         "techniques": [
-          "T1589",
           "T1078"
         ],
         "incidentConfiguration": {
