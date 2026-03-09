@@ -45,14 +45,14 @@
     },
     "dataCollectionEndpointName": {
       "type": "string",
-      "defaultValue": "[concat('dce-spycloud-', parameters('workspace'))]",
+      "defaultValue": "[concat('dce-spycloud-', take(parameters('workspace'), 30))]",
       "metadata": {
         "description": "Name for the Data Collection Endpoint (DCE) that receives SpyCloud API data. Default: 'dce-spycloud-{workspaceName}' \u2014 follows Azure naming best practices. The DCE is the HTTPS ingestion endpoint that the SpyCloud connector sends data to before it reaches your workspace. If a DCE with this name already exists in your resource group, it will be reused. Example: If workspace is 'law-sentinel-prod', DCE will be 'dce-spycloud-law-sentinel-prod'."
       }
     },
     "dataCollectionRuleName": {
       "type": "string",
-      "defaultValue": "[concat('dcr-spycloud-', parameters('workspace'))]",
+      "defaultValue": "[concat('dcr-spycloud-', take(parameters('workspace'), 30))]",
       "metadata": {
         "description": "Name for the Data Collection Rule (DCR) that transforms and routes SpyCloud data to the correct tables. Default: 'dcr-spycloud-{workspaceName}' \u2014 follows Azure naming best practices. The DCR contains KQL transforms that normalize incoming SpyCloud API data and route it to the appropriate custom table (Watchlist, Breach Catalog, MDE Logs, or Conditional Access Logs). Example: If workspace is 'law-sentinel-prod', DCR will be 'dcr-spycloud-law-sentinel-prod'."
       }
@@ -410,10 +410,10 @@
     "_solutionTier": "Community",
     "_solutionEmail": "support@spycloud.com",
     "_solutionLink": "https://portal.spycloud.com",
-    "_dataConnectorContentIdConnectorDefinition": "SpyCloudCCFDefinition",
-    "dataConnectorTemplateNameConnectorDefinition": "[concat(parameters('workspace'),'-dc-',uniquestring(variables('_dataConnectorContentIdConnectorDefinition')))]",
-    "_dataConnectorContentIdConnections": "SpyCloudThreatIntelConnections",
-    "dataConnectorTemplateNameConnections": "[concat(parameters('workspace'),'-dc-',uniquestring(variables('_dataConnectorContentIdConnections')))]",
+    "_dataConnectorContentIdConnectorDefinition": "SpyCloudCCF",
+    "dataConnectorTemplateNameConnectorDefinition": "[concat(take(parameters('workspace'), 30),'-dc-',uniquestring(variables('_dataConnectorContentIdConnectorDefinition')))]",
+    "_dataConnectorContentIdConnections": "SpyCloudTIConn",
+    "dataConnectorTemplateNameConnections": "[concat(take(parameters('workspace'), 30),'-dc-',uniquestring(variables('_dataConnectorContentIdConnections')))]",
     "_logAnalyticsTableId1": "SpyCloudBreachWatchlist_CL",
     "_logAnalyticsTableId2": "SpyCloudBreachCatalog_CL",
     "_logAnalyticsTableId3": "Spycloud_MDE_Logs_CL",
@@ -421,11 +421,11 @@
     "dataCollectionEndpointId1": "[concat('/subscriptions/',parameters('subscription'),'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Insights/dataCollectionEndpoints/',parameters('dataCollectionEndpointName'))]",
     "_logAnalyticsTableId5": "SpyCloudCompassExposures_CL",
     "_effectiveWorkspaceLocation": "[if(empty(parameters('workspaceRegionOverride')), parameters('deploymentRegion'), parameters('workspaceRegionOverride'))]",
-    "_dcrDisplayName": "[concat('SpyCloud ThreatIntel DCR for ', parameters('workspace'))]",
-    "_dceDisplayName": "[concat('SpyCloud ThreatIntel DCE for ', parameters('workspace'))]",
-    "mdePlaybookName": "[concat('SpyCloud-MDE-Remediation-', parameters('workspace'))]",
-    "caPlaybookName": "[concat('SpyCloud-CA-Remediation-', parameters('workspace'))]",
-    "sentinelConnectionName": "[concat('azuresentinel-', parameters('workspace'))]",
+    "_dcrDisplayName": "[concat('SpyCloud ThreatIntel DCR for ', take(parameters('workspace'), 30))]",
+    "_dceDisplayName": "[concat('SpyCloud ThreatIntel DCE for ', take(parameters('workspace'), 30))]",
+    "mdePlaybookName": "[concat('SpyCloud-MDE-Remediation-', take(parameters('workspace'), 30))]",
+    "caPlaybookName": "[concat('SpyCloud-CA-Remediation-', take(parameters('workspace'), 30))]",
+    "sentinelConnectionName": "[concat('azuresentinel-', take(parameters('workspace'), 30))]",
     "analyticsRuleName": "[concat('SpyCloud-Infostealer-Detection-', uniqueString(resourceGroup().id))]",
     "automationRuleName": "[concat('SpyCloud-Auto-Remediation-', uniqueString(resourceGroup().id))]",
     "mdeStreamName": "Custom-Spycloud_MDE_Logs_CL",
@@ -434,12 +434,12 @@
     "sentinelResponderRoleId": "3e150fc0-dc56-4d73-b22a-05e7c05ab4b7",
     "sentinelAutomationContributorRoleId": "f4c81013-99ee-4d62-a7ee-b3f1f648599a",
     "spycloudApiKeySecretName": "spycloud-api-key",
-    "actionGroupName": "[concat('ag-spycloud-', parameters('workspace'))]",
-    "healthAlertName": "[concat('SpyCloud-DataHealth-', parameters('workspace'))]",
+    "actionGroupName": "[concat('ag-spycloud-', take(parameters('workspace'), 30))]",
+    "healthAlertName": "[concat('SpyCloud-DataHealth-', take(parameters('workspace'), 30))]",
     "rulesPrefix": "SpyCloud-Rule-",
-    "credResponsePlaybookName": "[concat('SpyCloud-CredResponse-', parameters('workspace'))]",
-    "mdeBlocklistPlaybookName": "[concat('SpyCloud-MDE-Blocklist-', parameters('workspace'))]",
-    "teamsConnectionName": "[concat('teams-spycloud-', parameters('workspace'))]",
+    "credResponsePlaybookName": "[concat('SpyCloud-CredResponse-', take(parameters('workspace'), 30))]",
+    "mdeBlocklistPlaybookName": "[concat('SpyCloud-MDE-Blocklist-', take(parameters('workspace'), 30))]",
+    "teamsConnectionName": "[concat('teams-spycloud-', take(parameters('workspace'), 30))]",
     "allTags": "[union(parameters('resourceTags'), createObject('environment', parameters('tagEnvironment'), 'owner', if(empty(parameters('tagOwner')), 'unassigned', parameters('tagOwner')), 'costCenter', if(empty(parameters('tagCostCenter')), 'unassigned', parameters('tagCostCenter'))))]"
   },
   "resources": [
@@ -1865,7 +1865,7 @@
       "kind": "Customizable",
       "properties": {
         "connectorUiConfig": {
-          "id": "SpyCloudCCFDefinition",
+          "id": "SpyCloudCCF",
           "title": "SpyCloud Breach Watchlist/Catalog",
           "publisher": "SpyCloud",
           "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/Logos/SpyCloud_Enterprise_Protection.svg)\n\nThe **SpyCloud Threat Intelligence Connector** ingests breach and infostealer exposure data from SpyCloud's Enterprise API into Microsoft Sentinel, enabling automated identity protection and endpoint remediation workflows.\n\n**Data streams include:**\n- **Watchlist Exposures** \u2014 Compromised credentials, PII, and infected device records associated with your organization's monitored email domains, IP ranges, and assets\n- **Breach Catalog** \u2014 Metadata for all breach sources in SpyCloud's database, enabling contextual enrichment and correlation\n- **MDE Remediation Logs** \u2014 Audit trail of automated Microsoft Defender for Endpoint actions (device isolation, tagging, IOC submission)\n- **Conditional Access Logs** \u2014 Audit trail of automated Azure AD / Entra ID identity protection actions (password resets, session revocations, account disablement)\n\n**Use cases:** Compromised credential detection, infostealer infection response, automated password reset enforcement, post-infection device isolation, breach impact assessment, darknet exposure monitoring, compliance evidence collection, third-party/supply chain risk assessment, VIP/executive exposure monitoring.",
@@ -2372,7 +2372,7 @@
           "contentVersion": "[variables('dataConnectorVersionConnections')]",
           "parameters": {
             "connectorDefinitionName": {
-              "defaultValue": "SpyCloudCCFDefinition",
+              "defaultValue": "SpyCloudCCF",
               "type": "string",
               "minLength": 1,
               "metadata": {
@@ -2506,7 +2506,7 @@
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCFDefinition",
+                "connectorDefinitionName": "SpyCloudCCF",
                 "dataType": "[variables('_logAnalyticsTableId1')]",
                 "auth": {
                   "type": "APIKey",
@@ -2557,7 +2557,7 @@
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCFDefinition",
+                "connectorDefinitionName": "SpyCloudCCF",
                 "dataType": "[variables('_logAnalyticsTableId1')]",
                 "auth": {
                   "type": "APIKey",
@@ -2609,7 +2609,7 @@
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCFDefinition",
+                "connectorDefinitionName": "SpyCloudCCF",
                 "dataType": "[variables('_logAnalyticsTableId2')]",
                 "auth": {
                   "type": "APIKey",
