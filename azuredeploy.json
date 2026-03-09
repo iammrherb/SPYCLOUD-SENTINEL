@@ -2240,7 +2240,7 @@
             },
             "show_plain_password": {
               "defaultValue": "False",
-              "type": "array",
+              "type": "string",
               "metadata": {
                 "description": "Include cleartext passwords in ingested data. 'False' (recommended) omits passwords. 'True' requires data handling policy and table-level RBAC."
               }
@@ -2279,28 +2279,22 @@
               }
             },
             "pollingIntervalMin": {
-              "type": "array",
-              "defaultValue": [
-                "30"
-              ],
+              "type": "string",
+              "defaultValue": "30",
               "metadata": {
                 "description": "Polling interval in minutes (5-1440). How often the connector fetches new records."
               }
             },
             "retryCount": {
-              "type": "array",
-              "defaultValue": [
-                "5"
-              ],
+              "type": "string",
+              "defaultValue": "5",
               "metadata": {
                 "description": "Number of retry attempts for failed API calls (1-10)."
               }
             },
             "timeoutInSeconds": {
-              "type": "array",
-              "defaultValue": [
-                "120"
-              ],
+              "type": "string",
+              "defaultValue": "120",
               "metadata": {
                 "description": "API request timeout in seconds (30-300)."
               }
@@ -2355,16 +2349,16 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
                   "headers": {
                     "Accept": "application/json"
                   },
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
+                    "show_plain_password": "[[toLower(parameters('show_plain_password'))]"
                   },
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2414,10 +2408,10 @@
                     "since_modification_date": "{_QueryWindowStartTime}",
                     "until_modification_date": "{_QueryWindowEndTime}",
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
+                    "show_plain_password": "[[toLower(parameters('show_plain_password'))]"
                   },
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2460,12 +2454,12 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
                   "headers": {
                     "Accept": "application/json"
                   },
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
                   "queryParameters": {}
                 },
                 "response": {
@@ -2513,9 +2507,9 @@
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"
                   },
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
                   "startTimeAttributeName": "since",
                   "rateLimitQPS": 2,
                   "headers": {
@@ -2552,9 +2546,9 @@
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
                   "httpMethod": "GET",
                   "queryParameters": {},
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
                   "startTimeAttributeName": "since",
                   "rateLimitQPS": 2,
                   "headers": {
