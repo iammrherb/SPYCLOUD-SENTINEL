@@ -7807,10 +7807,11 @@
       "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoResponse'))]",
       "location": "[parameters('deploymentRegion')]",
-      "condition": "[and(parameters('enableAutomationRule'), parameters('enableAnalyticsRule'))]",
+      "condition": "[and(parameters('enableAutomationRule'), parameters('enableCredResponsePlaybook'))]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
+        "[resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName'))]"
       ],
       "properties": {
         "displayName": "SpyCloud \u2014 Auto-Trigger Remediation Playbooks",
@@ -7838,7 +7839,7 @@
             "order": 1,
             "actionType": "RunPlaybook",
             "actionConfiguration": {
-              "logicAppResourceId": "[if(parameters('enableCredResponsePlaybook'), resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName')), '')]",
+              "logicAppResourceId": "[resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName'))]",
               "tenantId": "[subscription().tenantId]"
             }
           }
