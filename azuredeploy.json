@@ -121,14 +121,14 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Deploy the MDE Remediation Playbook (device isolation, tagging, IOC submission). Requires Microsoft Defender for Endpoint P2 license."
+        "description": "Deploy MDE Device Isolation playbook. REQUIRES: Defender for Endpoint P1/P2. Without license, deploys but cannot function."
       }
     },
     "enableCaPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Conditional Access Remediation Playbook (password reset, session revocation, CA group assignment). Requires Entra ID P1+ license."
+        "description": "Deploy CA Identity Protection playbook. REQUIRES: Entra ID P1/P2. Without license, deploys but cannot reset passwords."
       }
     },
     "enableAnalyticsRule": {
@@ -277,23 +277,23 @@
     },
     "enablePostDeployScript": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
-        "description": "Run the post-deployment script to grant API permissions (MDE Machine.Isolate, Graph User.ReadWrite.All, RBAC) to Logic App managed identities. Required for playbooks to function. Triggers a 'trust authors' prompt in the Azure Portal \u2014 click 'Yes, I trust the authors' to proceed. Without this, playbooks deploy but cannot isolate devices or reset passwords."
+        "description": "No longer needed \u2014 deployment script and container instance removed. All RBAC and API permissions should be granted when you are ready to enable automated playbook response. See connector Step 6 or run scripts/grant-permissions.sh from Cloud Shell."
       }
     },
     "enableCredResponsePlaybook": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Deploy the Credential Exposure \u2192 Automated Identity Response playbook. Responds to exposed credentials by enforcing MFA via Conditional Access, checking sign-in activity, alerting SOC via Teams, and logging state changes. Requires: Security Administrator role, Graph IdentityRisk.ReadWrite.All, Conditional Access Admin."
+        "description": "Deploy Credential Response playbook. REQUIRES: Entra ID P1/P2 for reset. Notifications work without license."
       }
     },
     "enableMdeBlocklistPlaybook": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Deploy the SpyCloud Threat Feed \u2192 MDE Blocklist playbook. Runs on a schedule (every 2-4 hours) to match severity 25 infostealer records against Microsoft Defender for Endpoint devices, creates enriched tables with both SpyCloud and MDE data, and offers automated isolation or alerting. Requires: MDE API enabled, Defender for Endpoint license."
+        "description": "Deploy MDE Blocklist playbook. REQUIRES: Defender for Endpoint P1/P2. Scheduled severity 25 auto-isolation."
       }
     },
     "teamsChannelWebhook": {
@@ -408,6 +408,17 @@
       "metadata": {
         "description": "SpyCloud API region. US = api.spycloud.io (default). EU = eu.api.spycloud.io (when available). Contact SpyCloud for EU region access."
       }
+    },
+    "deploymentMode": {
+      "type": "string",
+      "defaultValue": "Full",
+      "allowedValues": [
+        "Full",
+        "Update"
+      ],
+      "metadata": {
+        "description": "Full = first-time (creates all). Update = add/update features on existing deployment."
+      }
     }
   },
   "variables": {
@@ -516,7 +527,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
-      ]
+      ],
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -657,7 +669,8 @@
         },
         "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
-      }
+      },
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -754,7 +767,8 @@
         },
         "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
-      }
+      },
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -895,7 +909,8 @@
         },
         "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
-      }
+      },
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -948,7 +963,8 @@
         },
         "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
-      }
+      },
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -1017,7 +1033,8 @@
         },
         "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
-      }
+      },
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -1082,7 +1099,8 @@
         },
         "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
-      }
+      },
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.Insights/dataCollectionRules",
@@ -1663,7 +1681,8 @@
             "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
           }
         ]
-      }
+      },
+      "condition": "[equals(parameters('deploymentMode'), 'Full')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
@@ -3188,13 +3207,13 @@
           },
           "instructionSteps": [
             {
-              "title": "Prerequisites \u2014 Read Before Connecting",
-              "description": "Complete ALL prerequisites before clicking Connect.",
+              "title": "Step 6 - Verification and Upgrade Path",
+              "description": "Review requirements before connecting.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "### Pre-Flight Checklist\n\nVerify ALL items before clicking Connect:\n\n| Check | Requirement | How to Verify |\n|-------|-------------|---------------|\n| API Key | SpyCloud Enterprise API key | portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| Permissions | Sentinel Contributor + Log Analytics Contributor | IAM \u2192 Role assignments on resource group |\n| Network | Outbound HTTPS to api.spycloud.io:443 | `curl -s https://api.spycloud.io/health` |\n| DCE Created | Data Collection Endpoint exists | Monitor \u2192 Data Collection Endpoints |\n| DCR Created | Data Collection Rule exists | Monitor \u2192 Data Collection Rules |\n| Tables Created | 6 SpyCloud tables exist | Log Analytics \u2192 Tables \u2192 search 'SpyCloud' |\n| Playbooks | Logic Apps deployed and enabled | Logic Apps \u2192 verify 4 SpyCloud apps |\n| MDE Permissions | Machine.Isolate + Machine.ReadWrite.All | Entra \u2192 Enterprise Apps \u2192 Managed Identities |\n| Graph Permissions | User.ReadWrite.All + Directory.ReadWrite.All | Same as above |\n| Retention | Workspace retention set (recommend 365 days) | Workspace \u2192 Usage \u2192 Data Retention |\n\n**Playbook Permissions:** After deployment, grant admin consent for each Logic App managed identity:\n1. Entra ID \u2192 Enterprise Applications \u2192 filter 'Managed Identities'\n2. Find SpyCloud-MDE-Remediation, SpyCloud-CA-Remediation, SpyCloud-CredResponse\n3. Permissions \u2192 Grant admin consent\n\n**Network:** No inbound rules needed \u2014 this is a pull-based connector."
+                    "text": "### Verify Data Pipeline\n\n```\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass')\n| project Table, Records, Latest\n```\n\n### Redeployment and Upgrade Path\n\nUse Deploy to Azure button with **Deployment Mode = Update** to add features without recreating the data pipeline.\n\n| When You Get | What Unlocks | How |\n|-------------|-------------|-----|\n| MDE P2 license | Device isolation | Redeploy (Update) + grant-permissions.sh |\n| Entra ID P1/P2 | Password reset + CA | Redeploy (Update) + grant-permissions.sh |\n| Security Copilot | 115 investigation skills | Upload YAML from /copilot |\n| New SpyCloud release | New pollers and rules | Pull latest + redeploy |\n\n### Grant Permissions (When Licensed)\n\n```\ncurl -sL .../scripts/grant-permissions.sh | bash -s -- -g RG -w WS\n```\n\nOr: Entra ID -> Enterprise Apps -> Managed Identities -> Grant consent\n\n### Troubleshooting\n\n| Issue | Fix |\n|-------|-----|\n| No data after 10 min | Check DCR exists in Monitor |\n| Playbooks fail | Need MDE/Entra license + permissions |\n| Rules not visible | Verify enableAnalyticsRule=true |\n| Workbook empty | Wait for first polling cycle |"
                   }
                 }
               ]
@@ -3490,13 +3509,13 @@
               ]
             },
             {
-              "title": "Step 6 \u2014 Verification & Troubleshooting",
+              "title": "Step 6 - Verification and Upgrade Path",
               "description": "### Quick Health Check (run 5-10 minutes after connecting)\n\n```kusto\nSpyCloudBreachWatchlist_CL\n| summarize TotalRecords=count(), Newest=max(TimeGenerated), Oldest=min(TimeGenerated), Domains=dcount(email_domain), Breaches=dcount(source_id)\n| extend Status = iff(TotalRecords > 0, 'RECEIVING DATA', 'WAITING')\n```\n\n### Full 4-Table Health Dashboard\n\n```kusto\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA')\n| project Table, Records, Latest, HoursSince=datetime_diff('hour', now(), Latest)\n```\n\n### Troubleshooting\n\n| Symptom | Cause | Fix |\n|---------|-------|-----|\n| No data after 30 min | Invalid API key | Regenerate at portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| No data after 30 min | Wrong severity filter | Ensure at least one severity level selected |\n| Partial data | Rate limited (HTTP 429) | Contact SpyCloud to verify your API tier |\n| Timeouts | Large watchlist | Contact SpyCloud support \u2014 may need Enterprise+ tier |\n| Watchlist but no Catalog | Both should activate together | Disconnect and reconnect |\n| No MDE/CA logs | Normal \u2014 these are populated by playbooks | Enable playbooks + create test incident |\n\n### Support\n\n| Issue | Contact |\n|-------|----------|\n| SpyCloud API / Data | support@spycloud.com or portal.spycloud.com |\n| Azure / Sentinel | Azure Portal \u2192 Help + Support |\n| This Integration | github.com/iammrherb/SPYCLOUD-SENTINEL/issues |",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "### Verify Data Pipeline\n\n```kql\n// Check all 6 tables\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Watchlist\"),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Catalog\"),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Compass Data\"),\n(SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Compass Devices\"),\n(Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"MDE Logs\"),\n(SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"CA Logs\")\n| project Table, Records, Latest\n```\n\n### Automated Health Check\n```bash\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\n### Verify Permissions\n```bash\n# Check Logic App managed identity permissions\naz ad sp show --id $(az logic workflow show -g YOUR-RG -n SpyCloud-MDE-Remediation-YOUR-WS --query identity.principalId -o tsv) --query appRoles\n```\n\n### Troubleshooting\n\n| Symptom | Fix |\n|---------|---------|\n| No data after 10 min | Check DCR exists: Monitor \u2192 Data Collection Rules |\n| 401 on connect | Wrong API key \u2014 must be Enterprise tier |\n| 400 on connect | Check API key at portal.spycloud.com |\n| Playbooks not triggering | Grant admin consent for managed identities |\n| Rules not visible | Check enableAnalyticsRule=true in deployment |\n| Workbook empty | Tables created but no data yet \u2014 wait for first poll |"
+                    "text": "### Verify Data Pipeline\n\n```\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass')\n| project Table, Records, Latest\n```\n\n### Redeployment and Upgrade Path\n\nUse Deploy to Azure button with **Deployment Mode = Update** to add features without recreating the data pipeline.\n\n| When You Get | What Unlocks | How |\n|-------------|-------------|-----|\n| MDE P2 license | Device isolation | Redeploy (Update) + grant-permissions.sh |\n| Entra ID P1/P2 | Password reset + CA | Redeploy (Update) + grant-permissions.sh |\n| Security Copilot | 115 investigation skills | Upload YAML from /copilot |\n| New SpyCloud release | New pollers and rules | Pull latest + redeploy |\n\n### Grant Permissions (When Licensed)\n\n```\ncurl -sL .../scripts/grant-permissions.sh | bash -s -- -g RG -w WS\n```\n\nOr: Entra ID -> Enterprise Apps -> Managed Identities -> Grant consent\n\n### Troubleshooting\n\n| Issue | Fix |\n|-------|-----|\n| No data after 10 min | Check DCR exists in Monitor |\n| Playbooks fail | Need MDE/Entra license + permissions |\n| Rules not visible | Verify enableAnalyticsRule=true |\n| Workbook empty | Wait for first polling cycle |"
                   }
                 }
               ]
@@ -4419,7 +4438,7 @@
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud MDE Device Isolation \u2014 Automatically isolates infected devices in Microsoft Defender for Endpoint when SpyCloud detects infostealer malware. Extracts host entities from incidents, searches MDE for matching devices, isolates them (Full or Selective), adds a SpyCloud tag, logs the action, and notifies SOC via Slack, Teams, and Email."
+          "description": "SpyCloud MDE Device Isolation \u2014 Automatically isolates infected devices in Microsoft Defender for Endpoint when SpyCloud detects infostealer malware. Extracts host entities from incidents, searches MDE for matching devices, isolates them (Full or Selective), adds a SpyCloud tag, logs the action, and notifies SOC via Slack, Teams, and Email. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate devices."
         },
         "parameters": {
           "$connections": {
@@ -4897,7 +4916,7 @@
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud CA Identity Protection \u2014 Automatically resets passwords and revokes sessions in Entra ID when SpyCloud detects compromised credentials. Looks up users via Microsoft Graph, forces immediate password reset, revokes all active sessions, optionally adds to a Conditional Access security group, logs the action, and notifies SOC."
+          "description": "SpyCloud CA Identity Protection \u2014 Automatically resets passwords and revokes sessions in Entra ID when SpyCloud detects compromised credentials. Looks up users via Microsoft Graph, forces immediate password reset, revokes all active sessions, optionally adds to a Conditional Access security group, logs the action, and notifies SOC. REQUIRES: Entra ID P1/P2. Without it, deploys but cannot reset passwords."
         },
         "parameters": {
           "$connections": {
@@ -6479,7 +6498,7 @@
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud Credential Response \u2014 Full SOC investigation and remediation workflow. Checks recent sign-in activity for compromised users, forces password reset, revokes sessions, then creates tickets in ServiceNow/Jira/Azure DevOps and sends rich notifications to Slack/Teams/Email. Designed as the primary automated response playbook."
+          "description": "SpyCloud Credential Response \u2014 Full SOC investigation and remediation workflow. Checks recent sign-in activity for compromised users, forces password reset, revokes sessions, then creates tickets in ServiceNow/Jira/Azure DevOps and sends rich notifications to Slack/Teams/Email. Designed as the primary automated response playbook. REQUIRES: Entra ID P1/P2 for password reset. Notifications work without license."
         },
         "parameters": {
           "$connections": {
@@ -6836,7 +6855,7 @@
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud MDE Blocklist (Scheduled) \u2014 Runs on a configurable schedule (default every 4 hours) to scan for severity 25 critical infostealer infections. Queries SpyCloudBreachWatchlist_CL for the highest severity exposures, searches MDE for matching devices, and isolates them with a 'SpyCloud-Sev25-Infostealer' tag. Proactive defense against the most dangerous infections."
+          "description": "SpyCloud MDE Blocklist (Scheduled) \u2014 Runs on a configurable schedule (default every 4 hours) to scan for severity 25 critical infostealer infections. Queries SpyCloudBreachWatchlist_CL for the highest severity exposures, searches MDE for matching devices, and isolates them with a 'SpyCloud-Sev25-Infostealer' tag. Proactive defense against the most dangerous infections. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate."
         },
         "parameters": {
           "slackWebhook": {
@@ -7145,79 +7164,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
       ]
-    },
-    {
-      "condition": "[parameters('enablePostDeployScript')]",
-      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "apiVersion": "2023-01-31",
-      "name": "[concat('id-spycloud-deploy-', uniqueString(resourceGroup().id))]",
-      "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": "[variables('allTags')]"
-    },
-    {
-      "condition": "[parameters('enablePostDeployScript')]",
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2023-08-01",
-      "name": "spycloud-post-deploy",
-      "location": "[variables('_effectiveWorkspaceLocation')]",
-      "kind": "AzureCLI",
-      "tags": "[variables('allTags')]",
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]": {}
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
-      ],
-      "properties": {
-        "azCliVersion": "2.60.0",
-        "timeout": "PT15M",
-        "retentionInterval": "PT1H",
-        "cleanupPreference": "OnSuccess",
-        "environmentVariables": [
-          {
-            "name": "RG",
-            "value": "[resourceGroup().name]"
-          },
-          {
-            "name": "WS",
-            "value": "[parameters('workspace')]"
-          },
-          {
-            "name": "DCE_NAME",
-            "value": "[parameters('dataCollectionEndpointName')]"
-          },
-          {
-            "name": "DCR_NAME",
-            "value": "[parameters('dataCollectionRuleName')]"
-          },
-          {
-            "name": "MDE_PB",
-            "value": "[concat('SpyCloud-MDE-Remediation-', parameters('workspace'))]"
-          },
-          {
-            "name": "CA_PB",
-            "value": "[concat('SpyCloud-CA-Remediation-', parameters('workspace'))]"
-          },
-          {
-            "name": "CRED_PB",
-            "value": "[concat('SpyCloud-CredResponse-', parameters('workspace'))]"
-          },
-          {
-            "name": "BL_PB",
-            "value": "[concat('SpyCloud-MDE-Blocklist-', parameters('workspace'))]"
-          },
-          {
-            "name": "IDENTITY_NAME",
-            "value": "[concat('id-spycloud-deploy-', uniqueString(resourceGroup().id))]"
-          }
-        ],
-        "scriptContent": "#!/bin/bash\n# SpyCloud Sentinel \u2014 Post-Deployment (all steps non-fatal)\n# If the managed identity lacks permissions, steps will skip gracefully.\n# Run verify-deployment.sh from Cloud Shell to check + fix anything missed.\n\necho \"SpyCloud Sentinel \u2014 Post-Deployment\"\n\necho \"[1/7] Waiting 90s for resource provisioning...\"\nsleep 90\n\necho \"[2/7] Resolving DCE...\"\nDCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null) || true\nfor i in 1 2 3 4; do\n  [ -n \"$DCE_URI\" ] && break\n  sleep 20\n  DCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null) || true\ndone\necho \"  DCE=${DCE_URI:-NOT_RESOLVED}\"\n\necho \"[3/7] Resolving DCR...\"\nDCR_ID=\"\"\nDCR_RID=\"\"\nfor i in 1 2 3 4 5; do\n  DCR_ID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" --query \"immutableId\" -o tsv 2>/dev/null) || true\n  DCR_RID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" --query \"id\" -o tsv 2>/dev/null) || true\n  [ -n \"$DCR_ID\" ] && break\n  sleep 20\ndone\necho \"  DCR=${DCR_ID:-NOT_RESOLVED}\"\n\necho \"[4/7] Assigning Monitoring Metrics Publisher...\"\nif [ -n \"$DCR_RID\" ]; then\n  for PB in $MDE_PB $CA_PB $CRED_PB $BL_PB; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    if [ -n \"$PID\" ]; then\n      az role assignment create --assignee-object-id \"$PID\" --assignee-principal-type ServicePrincipal         --role \"3913510d-42f4-4e42-8a64-420c390055eb\" --scope \"$DCR_RID\" 2>/dev/null         && echo \"  $PB \u2713\" || echo \"  $PB: exists or no permission\"\n    fi\n  done\nfi\n\necho \"[5/7] MDE API permissions...\"\nMDE_SP=$(az ad sp show --id \"fc780465-2017-40d4-a0c5-307022471b92\" --query \"id\" -o tsv 2>/dev/null) || true\nif [ -n \"$MDE_SP\" ]; then\n  for PB in \"$MDE_PB\" \"$BL_PB\"; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    [ -z \"$PID\" ] && continue\n    for PERM in \"Machine.Isolate\" \"Machine.ReadWrite.All\"; do\n      RID=$(az ad sp show --id \"fc780465-2017-40d4-a0c5-307022471b92\" --query \"appRoles[?value=='$PERM'].id | [0]\" -o tsv 2>/dev/null) || true\n      [ -n \"$RID\" ] && az rest --method POST         --uri \"https://graph.microsoft.com/v1.0/servicePrincipals/$MDE_SP/appRoleAssignedTo\"         --body \"{\\\"principalId\\\":\\\"$PID\\\",\\\"resourceId\\\":\\\"$MDE_SP\\\",\\\"appRoleId\\\":\\\"$RID\\\"}\"         2>/dev/null && echo \"  $PERM \u2192 $PB \u2713\" || echo \"  $PERM: exists or no permission\"\n    done\n  done\nfi\n\necho \"[6/7] Graph API permissions...\"\nGRAPH_SP=$(az ad sp show --id \"00000003-0000-0000-c000-000000000000\" --query \"id\" -o tsv 2>/dev/null) || true\nif [ -n \"$GRAPH_SP\" ]; then\n  for PB in \"$CA_PB\" \"$CRED_PB\"; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    [ -z \"$PID\" ] && continue\n    for PERM in \"User.ReadWrite.All\" \"Directory.ReadWrite.All\"; do\n      RID=$(az ad sp show --id \"00000003-0000-0000-c000-000000000000\" --query \"appRoles[?value=='$PERM'].id | [0]\" -o tsv 2>/dev/null) || true\n      [ -n \"$RID\" ] && az rest --method POST         --uri \"https://graph.microsoft.com/v1.0/servicePrincipals/$GRAPH_SP/appRoleAssignedTo\"         --body \"{\\\"principalId\\\":\\\"$PID\\\",\\\"resourceId\\\":\\\"$GRAPH_SP\\\",\\\"appRoleId\\\":\\\"$RID\\\"}\"         2>/dev/null && echo \"  $PERM \u2192 $PB \u2713\" || echo \"  $PERM: exists or no permission\"\n    done\n  done\nfi\n\necho \"[7/7] Automation rule...\"\nMDE_LA=$(az logic workflow show --name \"$MDE_PB\" -g \"$RG\" --query id -o tsv 2>/dev/null) || true\nWS_ID=$(az monitor log-analytics workspace show --workspace-name \"$WS\" -g \"$RG\" --query id -o tsv 2>/dev/null) || true\nTID=$(az account show --query tenantId -o tsv 2>/dev/null) || true\nif [ -n \"$MDE_LA\" ] && [ -n \"$WS_ID\" ]; then\n  az rest --method PUT     --uri \"https://management.azure.com${WS_ID}/providers/Microsoft.SecurityInsights/automationRules/spycloud-auto-rule?api-version=2023-02-01-preview\"     --body \"{\\\"properties\\\":{\\\"displayName\\\":\\\"SpyCloud Auto Remediation\\\",\\\"order\\\":1,\\\"triggeringLogic\\\":{\\\"isEnabled\\\":true,\\\"triggersOn\\\":\\\"Incidents\\\",\\\"triggersWhen\\\":\\\"Created\\\",\\\"conditions\\\":[]},\\\"actions\\\":[{\\\"order\\\":1,\\\"actionType\\\":\\\"RunPlaybook\\\",\\\"actionConfiguration\\\":{\\\"logicAppResourceId\\\":\\\"$MDE_LA\\\",\\\"tenantId\\\":\\\"$TID\\\"}}]}}\"     2>/dev/null && echo \"  Automation rule \u2713\" || echo \"  Automation rule: needs manual setup\"\nfi\n\necho \"\"\necho \"DONE. DCE=$DCE_URI DCR=$DCR_ID\"\necho \"Verify: curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g $RG -w $WS\"\n"
-      }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
