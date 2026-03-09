@@ -2430,7 +2430,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "[[concat(variables('_apiBaseUrl'), '/enterprise-v2/breach/data/watchlist')]",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/data/watchlist",
                   "httpMethod": "GET",
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
@@ -2481,7 +2481,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "[[concat(variables('_apiBaseUrl'), '/enterprise-v2/breach/data/watchlist')]",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/data/watchlist",
                   "httpMethod": "GET",
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-dd",
@@ -2533,7 +2533,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "[[concat(variables('_apiBaseUrl'), '/enterprise-v2/breach/catalog')]",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/catalog",
                   "httpMethod": "GET",
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
@@ -2585,7 +2585,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "[[concat(variables('_apiBaseUrl'), '/enterprise-v2/compass/data')]",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
                   "httpMethod": "GET",
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"
@@ -2625,7 +2625,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "[[concat(variables('_apiBaseUrl'), '/enterprise-v2/compass/devices')]",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
