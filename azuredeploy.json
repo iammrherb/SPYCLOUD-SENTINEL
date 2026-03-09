@@ -1651,7 +1651,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(Status)",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(Status) | project TimeGenerated, IncidentId, DeviceName, DeviceId, MachineId, Action, IsolationType, Tag, ActionStatus, Email, Severity, InfectedMachineId, UserHostname",
             "outputStream": "Custom-Spycloud_MDE_Logs_CL"
           },
           {
@@ -1661,7 +1661,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(Status)",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(Status) | project TimeGenerated, IncidentId, UserPrincipalName, UserId, Action, ActionStatus, PasswordReset, SessionsRevoked, AddedToCAGroup, CAGroupId, Email, Severity",
             "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
           }
         ]
