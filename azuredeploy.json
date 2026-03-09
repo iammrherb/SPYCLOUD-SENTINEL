@@ -2326,12 +2326,12 @@
                 ]
               },
               "dependsOn": [
-                "[concat(parameters('workspace'), '/SpyCloud_ConditionalAccessLogs_CL')]",
-                "[concat(parameters('workspace'), '/Spycloud_MDE_Logs_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloudCompassDevices_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloudCompassData_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloudBreachCatalog_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloudBreachWatchlist_CL')]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachWatchlist_CL')]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachCatalog_CL')]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassData_CL')]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassDevices_CL')]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]",
                 "[resourceId('Microsoft.Insights/dataCollectionEndpoints', concat('dce-spycloud-', parameters('workspace')))]"
               ]
             },
