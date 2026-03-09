@@ -1645,7 +1645,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend catalog_id = toint(id) | extend breach_title = tostring(title) | extend breach_description = tostring(description) | extend breach_type = tostring(['type']) | extend breach_status = tostring(status) | extend confidence = toint(confidence) | extend num_records = toint(num_records)",
+            "transformKql": "source | extend TimeGenerated = now() | extend catalog_id = toint(['id']) | extend breach_title = tostring(['title']) | extend breach_description = tostring(['description']) | extend breach_type = tostring(['type']) | extend breach_status = tostring(['status']) | extend confidence = toint(confidence) | extend num_records = toint(num_records)",
             "outputStream": "Custom-SpyCloudBreachCatalog_CL"
           },
           {
