@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
-    "title": "SpyCloud Sentinel \u2014 Unified Deployment",
+    "title": "SpyCloud Sentinel — Unified Deployment",
     "description": "Single-template deployment for the complete SpyCloud Threat Intelligence integration with Microsoft Sentinel. Includes: CCF data connector, custom tables, Key Vault for secrets, MDE/CA remediation playbooks, analytics rules, automation rules, action groups for notifications, and optional Entra ID log connectors.",
     "version": "4.0.0",
     "author": "SpyCloud"
@@ -12,14 +12,14 @@
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
-        "description": "PRIMARY AZURE REGION \u2014 This single selection determines the region for ALL deployed resources: the Log Analytics workspace, Data Collection Endpoint (DCE), Data Collection Rule (DCR), custom tables, and all Sentinel solution artifacts. Defaults to your resource group's region. Only change this if you need resources in a different region than your resource group. IMPORTANT: If you have an existing Log Analytics workspace, select the region where it is already deployed. The Azure Portal will dynamically show all available regions for your subscription \u2014 no hardcoded list needed."
+        "description": "PRIMARY AZURE REGION — This single selection determines the region for ALL deployed resources: the Log Analytics workspace, Data Collection Endpoint (DCE), Data Collection Rule (DCR), custom tables, and all Sentinel solution artifacts. Defaults to your resource group's region. Only change this if you need resources in a different region than your resource group. IMPORTANT: If you have an existing Log Analytics workspace, select the region where it is already deployed. The Azure Portal will dynamically show all available regions for your subscription — no hardcoded list needed."
       }
     },
     "workspaceRegionOverride": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "OPTIONAL \u2014 Override the workspace region if it differs from the primary deployment region above. Leave BLANK to use the primary deployment region for everything (recommended for most deployments). Only set this if your Log Analytics workspace is in a different region than your resource group. When set, all workspace-scoped resources (tables, connectors, DCR, DCE) will deploy to this region instead."
+        "description": "OPTIONAL — Override the workspace region if it differs from the primary deployment region above. Leave BLANK to use the primary deployment region for everything (recommended for most deployments). Only set this if your Log Analytics workspace is in a different region than your resource group. When set, all workspace-scoped resources (tables, connectors, DCR, DCE) will deploy to this region instead."
       }
     },
     "subscription": {
@@ -40,21 +40,21 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "REQUIRED \u2014 Name of the Log Analytics workspace for Microsoft Sentinel. If createNewWorkspace is TRUE: enter your desired name (e.g., 'spycloud-supreme-sentinel'). If createNewWorkspace is FALSE: enter the exact name of your existing workspace. To find existing workspaces: Azure Portal \u2192 Log Analytics workspaces, or CLI: az monitor log-analytics workspace list --query '[].name' -o tsv"
+        "description": "REQUIRED — Name of the Log Analytics workspace for Microsoft Sentinel. If createNewWorkspace is TRUE: enter your desired name (e.g., 'spycloud-supreme-sentinel'). If createNewWorkspace is FALSE: enter the exact name of your existing workspace. To find existing workspaces: Azure Portal → Log Analytics workspaces, or CLI: az monitor log-analytics workspace list --query '[].name' -o tsv"
       }
     },
     "dataCollectionEndpointName": {
       "type": "string",
       "defaultValue": "[concat('dce-spycloud-', take(parameters('workspace'), 30))]",
       "metadata": {
-        "description": "Name for the Data Collection Endpoint (DCE) that receives SpyCloud API data. Default: 'dce-spycloud-{workspaceName}' \u2014 follows Azure naming best practices. The DCE is the HTTPS ingestion endpoint that the SpyCloud connector sends data to before it reaches your workspace. If a DCE with this name already exists in your resource group, it will be reused. Example: If workspace is 'law-sentinel-prod', DCE will be 'dce-spycloud-law-sentinel-prod'."
+        "description": "Name for the Data Collection Endpoint (DCE) that receives SpyCloud API data. Default: 'dce-spycloud-{workspaceName}' — follows Azure naming best practices. The DCE is the HTTPS ingestion endpoint that the SpyCloud connector sends data to before it reaches your workspace. If a DCE with this name already exists in your resource group, it will be reused. Example: If workspace is 'law-sentinel-prod', DCE will be 'dce-spycloud-law-sentinel-prod'."
       }
     },
     "dataCollectionRuleName": {
       "type": "string",
       "defaultValue": "[concat('dcr-spycloud-', take(parameters('workspace'), 30))]",
       "metadata": {
-        "description": "Name for the Data Collection Rule (DCR) that transforms and routes SpyCloud data to the correct tables. Default: 'dcr-spycloud-{workspaceName}' \u2014 follows Azure naming best practices. The DCR contains KQL transforms that normalize incoming SpyCloud API data and route it to the appropriate custom table (Watchlist, Breach Catalog, MDE Logs, or Conditional Access Logs). Example: If workspace is 'law-sentinel-prod', DCR will be 'dcr-spycloud-law-sentinel-prod'."
+        "description": "Name for the Data Collection Rule (DCR) that transforms and routes SpyCloud data to the correct tables. Default: 'dcr-spycloud-{workspaceName}' — follows Azure naming best practices. The DCR contains KQL transforms that normalize incoming SpyCloud API data and route it to the appropriate custom table (Watchlist, Breach Catalog, MDE Logs, or Conditional Access Logs). Example: If workspace is 'law-sentinel-prod', DCR will be 'dcr-spycloud-law-sentinel-prod'."
       }
     },
     "retentionInDays": {
@@ -69,7 +69,7 @@
         730
       ],
       "metadata": {
-        "description": "Number of days to retain SpyCloud data in Log Analytics custom tables. Applies to ALL four SpyCloud tables. \u2022 30 days = Minimum retention (GDPR-friendly, lowest storage cost) \u2022 60 days = Short-term investigation window \u2022 90 days = RECOMMENDED \u2014 supports most SOC investigation workflows and SOC2/NIST baselines \u2022 180 days = Extended \u2014 trend analysis, recurring breach pattern detection \u2022 365 days = Full year \u2014 required for PCI DSS, annual SOC2 audits, some cyber insurance policies \u2022 730 days = Maximum (2 years) \u2014 legal hold, regulatory investigations, litigation support COST IMPACT: Each additional 30 days adds ~1x your monthly ingestion volume to storage costs. For HIPAA (6-year requirement), use 730 days here plus Azure Log Analytics archive/export for long-term."
+        "description": "Number of days to retain SpyCloud data in Log Analytics custom tables. Applies to ALL four SpyCloud tables. • 30 days = Minimum retention (GDPR-friendly, lowest storage cost) • 60 days = Short-term investigation window • 90 days = RECOMMENDED — supports most SOC investigation workflows and SOC2/NIST baselines • 180 days = Extended — trend analysis, recurring breach pattern detection • 365 days = Full year — required for PCI DSS, annual SOC2 audits, some cyber insurance policies • 730 days = Maximum (2 years) — legal hold, regulatory investigations, litigation support COST IMPACT: Each additional 30 days adds ~1x your monthly ingestion volume to storage costs. For HIPAA (6-year requirement), use 730 days here plus Azure Log Analytics archive/export for long-term."
       }
     },
     "resourceTags": {
@@ -96,7 +96,7 @@
         "PerNode"
       ],
       "metadata": {
-        "description": "Pricing tier of your Log Analytics workspace (informational \u2014 does not change your workspace tier). \u2022 PerGB2018 = Pay-As-You-Go (most common, ~$2.76/GB ingested) \u2022 CapacityReservation = Committed tier with discounts (100GB/day+, saves 10-25%) \u2022 Free = Limited to 500MB/day ingestion (not recommended for SpyCloud) Typical SpyCloud ingestion: 1-50 MB/day (small), 50-500 MB/day (large enterprise). Check Azure Portal \u2192 Log Analytics \u2192 Usage and estimated costs for your current tier."
+        "description": "Pricing tier of your Log Analytics workspace (informational — does not change your workspace tier). • PerGB2018 = Pay-As-You-Go (most common, ~$2.76/GB ingested) • CapacityReservation = Committed tier with discounts (100GB/day+, saves 10-25%) • Free = Limited to 500MB/day ingestion (not recommended for SpyCloud) Typical SpyCloud ingestion: 1-50 MB/day (small), 50-500 MB/day (large enterprise). Check Azure Portal → Log Analytics → Usage and estimated costs for your current tier."
       }
     },
     "networkAccessMode": {
@@ -107,14 +107,14 @@
         "Disabled"
       ],
       "metadata": {
-        "description": "Public network access setting for the Data Collection Endpoint (DCE). \u2022 'Enabled' (DEFAULT) = DCE accepts data from the public internet (standard for cloud-to-cloud connectors) \u2022 'Disabled' = DCE only accepts data via Private Link (requires Azure Private Link configuration) For most SpyCloud deployments, 'Enabled' is correct because the Sentinel CCF connector sends data from Azure's internal infrastructure to the DCE. Only set to 'Disabled' if your security policy mandates Private Link for all Monitor ingestion."
+        "description": "Public network access setting for the Data Collection Endpoint (DCE). • 'Enabled' (DEFAULT) = DCE accepts data from the public internet (standard for cloud-to-cloud connectors) • 'Disabled' = DCE only accepts data via Private Link (requires Azure Private Link configuration) For most SpyCloud deployments, 'Enabled' is correct because the Sentinel CCF connector sends data from Azure's internal infrastructure to the DCE. Only set to 'Disabled' if your security policy mandates Private Link for all Monitor ingestion."
       }
     },
     "deploymentTimestamp": {
       "type": "string",
       "defaultValue": "[utcNow()]",
       "metadata": {
-        "description": "Auto-generated deployment timestamp in UTC. Do not modify \u2014 ARM populates this automatically at deployment time."
+        "description": "Auto-generated deployment timestamp in UTC. Do not modify — ARM populates this automatically at deployment time."
       }
     },
     "enableMdePlaybook": {
@@ -149,7 +149,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "OPTIONAL \u2014 Object ID of the Entra ID security group to add compromised users to. This group should be targeted by a Conditional Access policy that restricts access. Create the group first: Entra ID \u2192 Groups \u2192 New group \u2192 Security. Leave blank to skip CA group assignment."
+        "description": "OPTIONAL — Object ID of the Entra ID security group to add compromised users to. This group should be targeted by a Conditional Access policy that restricts access. Create the group first: Entra ID → Groups → New group → Security. Leave blank to skip CA group assignment."
       }
     },
     "mdeIsolationType": {
@@ -223,14 +223,14 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "OPTIONAL \u2014 Email address to receive alert notifications for SpyCloud incidents and data health issues. Required if enableNotifications is TRUE."
+        "description": "OPTIONAL — Email address to receive alert notifications for SpyCloud incidents and data health issues. Required if enableNotifications is TRUE."
       }
     },
     "teamsWebhookUrl": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "OPTIONAL \u2014 Microsoft Teams incoming webhook URL for alert notifications. Create one in Teams: Channel \u2192 Connectors \u2192 Incoming Webhook."
+        "description": "OPTIONAL — Microsoft Teams incoming webhook URL for alert notifications. Create one in Teams: Channel → Connectors → Incoming Webhook."
       }
     },
     "enableAnalyticsRulesLibrary": {
@@ -279,7 +279,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "No longer needed \u2014 deployment script and container instance removed. All RBAC and API permissions should be granted when you are ready to enable automated playbook response. See connector Step 6 or run scripts/grant-permissions.sh from Cloud Shell."
+        "description": "No longer needed — deployment script and container instance removed. All RBAC and API permissions should be granted when you are ready to enable automated playbook response. See connector Step 6 or run scripts/grant-permissions.sh from Cloud Shell."
       }
     },
     "enableCredResponsePlaybook": {
@@ -351,7 +351,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Owner tag \u2014 team or individual responsible."
+        "description": "Owner tag — team or individual responsible."
       }
     },
     "tagCostCenter": {
@@ -381,7 +381,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Slack Incoming Webhook URL for SOC notifications. Logic Apps will send alerts here when incidents are created. Leave blank to skip Slack integration. Create at: api.slack.com/apps \u2192 Incoming Webhooks."
+        "description": "Slack Incoming Webhook URL for SOC notifications. Logic Apps will send alerts here when incidents are created. Leave blank to skip Slack integration. Create at: api.slack.com/apps → Incoming Webhooks."
       }
     },
     "jiraWebhookUrl": {
@@ -460,7 +460,8 @@
           "enableLogAccessUsingOnlyResourcePermissions": true
         }
       },
-      "dependsOn": []
+      "dependsOn": [],
+      "condition": "[parameters('createNewWorkspace')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/onboardingStates",
@@ -507,6 +508,1134 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
       ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloud_ConditionalAccessLogs_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloud_ConditionalAccessLogs_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "IncidentId",
+              "type": "string"
+            },
+            {
+              "name": "UserPrincipalName",
+              "type": "string"
+            },
+            {
+              "name": "UserId",
+              "type": "string"
+            },
+            {
+              "name": "Action",
+              "type": "string"
+            },
+            {
+              "name": "ActionStatus",
+              "type": "string"
+            },
+            {
+              "name": "PasswordReset",
+              "type": "boolean"
+            },
+            {
+              "name": "SessionsRevoked",
+              "type": "boolean"
+            },
+            {
+              "name": "AddedToCAGroup",
+              "type": "boolean"
+            },
+            {
+              "name": "CAGroupId",
+              "type": "string"
+            },
+            {
+              "name": "Email",
+              "type": "string"
+            },
+            {
+              "name": "Severity",
+              "type": "int"
+            }
+          ]
+        },
+        "retentionInDays": 90,
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/Spycloud_MDE_Logs_CL')]",
+      "properties": {
+        "schema": {
+          "name": "Spycloud_MDE_Logs_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "IncidentId",
+              "type": "string"
+            },
+            {
+              "name": "DeviceName",
+              "type": "string"
+            },
+            {
+              "name": "DeviceId",
+              "type": "string"
+            },
+            {
+              "name": "MachineId",
+              "type": "string"
+            },
+            {
+              "name": "Action",
+              "type": "string"
+            },
+            {
+              "name": "IsolationType",
+              "type": "string"
+            },
+            {
+              "name": "Tag",
+              "type": "string"
+            },
+            {
+              "name": "ActionStatus",
+              "type": "string"
+            },
+            {
+              "name": "Email",
+              "type": "string"
+            },
+            {
+              "name": "Severity",
+              "type": "int"
+            },
+            {
+              "name": "InfectedMachineId",
+              "type": "string"
+            },
+            {
+              "name": "UserHostname",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": 90,
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudCompassDevices_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudCompassDevices_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "ip_addresses",
+              "type": "dynamic"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "application_count",
+              "type": "int"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": 90,
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudCompassData_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudCompassData_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "document_id",
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "email_username",
+              "type": "string"
+            },
+            {
+              "name": "domain",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "password_plaintext",
+              "type": "string"
+            },
+            {
+              "name": "password_type",
+              "type": "string"
+            },
+            {
+              "name": "severity",
+              "type": "int"
+            },
+            {
+              "name": "sighting",
+              "type": "int"
+            },
+            {
+              "name": "breach_category",
+              "type": "string"
+            },
+            {
+              "name": "breach_title",
+              "type": "string"
+            },
+            {
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "infected_path",
+              "type": "string"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "user_sys_registered_owner",
+              "type": "string"
+            },
+            {
+              "name": "ip_addresses",
+              "type": "dynamic"
+            },
+            {
+              "name": "av_softwares",
+              "type": "dynamic"
+            },
+            {
+              "name": "country_code",
+              "type": "string"
+            },
+            {
+              "name": "display_resolution",
+              "type": "string"
+            },
+            {
+              "name": "keyboard_languages",
+              "type": "string"
+            },
+            {
+              "name": "timezone",
+              "type": "string"
+            },
+            {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": 90,
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudBreachCatalog_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudBreachCatalog_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "short_title",
+              "type": "string"
+            },
+            {
+              "name": "site",
+              "type": "string"
+            },
+            {
+              "name": "site_description",
+              "type": "string"
+            },
+            {
+              "name": "breach_category",
+              "type": "string"
+            },
+            {
+              "name": "breach_main_category",
+              "type": "string"
+            },
+            {
+              "name": "consumer_category",
+              "type": "string"
+            },
+            {
+              "name": "malware_family",
+              "type": "string"
+            },
+            {
+              "name": "confidence",
+              "type": "int"
+            },
+            {
+              "name": "num_records",
+              "type": "int"
+            },
+            {
+              "name": "sensitive_source",
+              "type": "boolean"
+            },
+            {
+              "name": "premium_flag",
+              "type": "string"
+            },
+            {
+              "name": "tlp",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            },
+            {
+              "name": "acquisition_date",
+              "type": "string"
+            },
+            {
+              "name": "assets",
+              "type": "dynamic"
+            }
+          ]
+        },
+        "retentionInDays": 90,
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudBreachWatchlist_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudBreachWatchlist_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "document_id",
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "email_username",
+              "type": "string"
+            },
+            {
+              "name": "domain",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "password_plaintext",
+              "type": "string"
+            },
+            {
+              "name": "password_type",
+              "type": "string"
+            },
+            {
+              "name": "severity",
+              "type": "int"
+            },
+            {
+              "name": "sighting",
+              "type": "int"
+            },
+            {
+              "name": "breach_category",
+              "type": "string"
+            },
+            {
+              "name": "breach_title",
+              "type": "string"
+            },
+            {
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "infected_path",
+              "type": "string"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "user_sys_registered_owner",
+              "type": "string"
+            },
+            {
+              "name": "ip_addresses",
+              "type": "dynamic"
+            },
+            {
+              "name": "av_softwares",
+              "type": "dynamic"
+            },
+            {
+              "name": "country_code",
+              "type": "string"
+            },
+            {
+              "name": "display_resolution",
+              "type": "string"
+            },
+            {
+              "name": "keyboard_languages",
+              "type": "string"
+            },
+            {
+              "name": "timezone",
+              "type": "string"
+            },
+            {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": 90,
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2022-06-01",
+      "name": "[concat('dcr-ccf-', parameters('workspace'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "properties": {
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', concat('dce-spycloud-', parameters('workspace')))]",
+        "streamDeclarations": {
+          "Custom-SpyCloudBreachWatchlist_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "document_id",
+                "type": "string"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "email_username",
+                "type": "string"
+              },
+              {
+                "name": "domain",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_plaintext",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "sighting",
+                "type": "int"
+              },
+              {
+                "name": "breach_category",
+                "type": "string"
+              },
+              {
+                "name": "breach_title",
+                "type": "string"
+              },
+              {
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
+              },
+              {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_path",
+                "type": "string"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "user_sys_registered_owner",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "av_softwares",
+                "type": "dynamic"
+              },
+              {
+                "name": "country_code",
+                "type": "string"
+              },
+              {
+                "name": "display_resolution",
+                "type": "string"
+              },
+              {
+                "name": "keyboard_languages",
+                "type": "string"
+              },
+              {
+                "name": "timezone",
+                "type": "string"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudBreachCatalog_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "uuid",
+                "type": "string"
+              },
+              {
+                "name": "short_title",
+                "type": "string"
+              },
+              {
+                "name": "site",
+                "type": "string"
+              },
+              {
+                "name": "site_description",
+                "type": "string"
+              },
+              {
+                "name": "breach_category",
+                "type": "string"
+              },
+              {
+                "name": "breach_main_category",
+                "type": "string"
+              },
+              {
+                "name": "consumer_category",
+                "type": "string"
+              },
+              {
+                "name": "malware_family",
+                "type": "string"
+              },
+              {
+                "name": "confidence",
+                "type": "int"
+              },
+              {
+                "name": "num_records",
+                "type": "int"
+              },
+              {
+                "name": "sensitive_source",
+                "type": "boolean"
+              },
+              {
+                "name": "premium_flag",
+                "type": "string"
+              },
+              {
+                "name": "tlp",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              },
+              {
+                "name": "acquisition_date",
+                "type": "string"
+              },
+              {
+                "name": "assets",
+                "type": "dynamic"
+              }
+            ]
+          },
+          "Custom-SpyCloudCompassData_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "document_id",
+                "type": "string"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "email_username",
+                "type": "string"
+              },
+              {
+                "name": "domain",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_plaintext",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "sighting",
+                "type": "int"
+              },
+              {
+                "name": "breach_category",
+                "type": "string"
+              },
+              {
+                "name": "breach_title",
+                "type": "string"
+              },
+              {
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
+              },
+              {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_path",
+                "type": "string"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "user_sys_registered_owner",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "av_softwares",
+                "type": "dynamic"
+              },
+              {
+                "name": "country_code",
+                "type": "string"
+              },
+              {
+                "name": "display_resolution",
+                "type": "string"
+              },
+              {
+                "name": "keyboard_languages",
+                "type": "string"
+              },
+              {
+                "name": "timezone",
+                "type": "string"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudCompassDevices_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "application_count",
+                "type": "int"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-Spycloud_MDE_Logs_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "IncidentId",
+                "type": "string"
+              },
+              {
+                "name": "DeviceName",
+                "type": "string"
+              },
+              {
+                "name": "DeviceId",
+                "type": "string"
+              },
+              {
+                "name": "MachineId",
+                "type": "string"
+              },
+              {
+                "name": "Action",
+                "type": "string"
+              },
+              {
+                "name": "IsolationType",
+                "type": "string"
+              },
+              {
+                "name": "Tag",
+                "type": "string"
+              },
+              {
+                "name": "ActionStatus",
+                "type": "string"
+              },
+              {
+                "name": "Email",
+                "type": "string"
+              },
+              {
+                "name": "Severity",
+                "type": "int"
+              },
+              {
+                "name": "InfectedMachineId",
+                "type": "string"
+              },
+              {
+                "name": "UserHostname",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloud_ConditionalAccessLogs_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "IncidentId",
+                "type": "string"
+              },
+              {
+                "name": "UserPrincipalName",
+                "type": "string"
+              },
+              {
+                "name": "UserId",
+                "type": "string"
+              },
+              {
+                "name": "Action",
+                "type": "string"
+              },
+              {
+                "name": "ActionStatus",
+                "type": "string"
+              },
+              {
+                "name": "PasswordReset",
+                "type": "boolean"
+              },
+              {
+                "name": "SessionsRevoked",
+                "type": "boolean"
+              },
+              {
+                "name": "AddedToCAGroup",
+                "type": "boolean"
+              },
+              {
+                "name": "CAGroupId",
+                "type": "string"
+              },
+              {
+                "name": "Email",
+                "type": "string"
+              },
+              {
+                "name": "Severity",
+                "type": "int"
+              }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+              "name": "scWorkspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [
+              "Custom-SpyCloudBreachWatchlist_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend target_domain = tolower(tostring(target_domain))",
+            "outputStream": "Custom-SpyCloudBreachWatchlist_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudBreachCatalog_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend confidence = toint(confidence) | extend num_records = toint(num_records)",
+            "outputStream": "Custom-SpyCloudBreachCatalog_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudCompassData_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
+            "outputStream": "Custom-SpyCloudCompassData_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudCompassDevices_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend application_count = toint(application_count) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses)",
+            "outputStream": "Custom-SpyCloudCompassDevices_CL"
+          },
+          {
+            "streams": [
+              "Custom-Spycloud_MDE_Logs_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
+            "outputStream": "Custom-Spycloud_MDE_Logs_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloud_ConditionalAccessLogs_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
+            "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassDevices_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassData_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachCatalog_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachWatchlist_CL')]"
+      ],
+      "tags": "[variables('allTags')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
@@ -620,7 +1749,7 @@
           ],
           "sampleQueries": [
             {
-              "description": "All Watchlist Exposures \u2014 Most Recent",
+              "description": "All Watchlist Exposures — Most Recent",
               "query": "SpyCloudBreachWatchlist_CL\n| sort by TimeGenerated desc\n| take 100"
             },
             {
@@ -648,11 +1777,11 @@
               "query": "SpyCloudBreachCatalog_CL\n| sort by TimeGenerated desc\n| project TimeGenerated, source_id, breach_title, breach_type, num_records, confidence, status\n| take 50"
             },
             {
-              "description": "MDE Remediation Actions \u2014 Device Isolation & Tagging Audit",
+              "description": "MDE Remediation Actions — Device Isolation & Tagging Audit",
               "query": "Spycloud_MDE_Logs_CL\n| project TimeGenerated, IncidentId, HostName, DeviceId, OSPlatform,\n    IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName,\n    AddedIOCsToDefender, PlaybookName, BreachTitle\n| sort by TimeGenerated desc"
             },
             {
-              "description": "Conditional Access Remediation \u2014 Password Resets & Session Revocations",
+              "description": "Conditional Access Remediation — Password Resets & Session Revocations",
               "query": "SpyCloud_ConditionalAccessLogs_CL\n| project TimeGenerated, IncidentId, Username, UserEmail,\n    ForcedPasswordResetOnNextSignIn, UserSessionsRevoked,\n    CAgroup, UserDisabled, PlaybookName, BreachTitle\n| sort by TimeGenerated desc"
             },
             {
@@ -660,11 +1789,11 @@
               "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(target_domain)\n| summarize ExposureCount = count(), UniqueEmails = dcount(email), AvgSeverity = avg(severity) by target_domain\n| top 10 by ExposureCount desc"
             },
             {
-              "description": "Exposure Timeline \u2014 Daily Ingestion Volume by Severity",
+              "description": "Exposure Timeline — Daily Ingestion Volume by Severity",
               "query": "SpyCloudBreachWatchlist_CL\n| summarize Count = count() by bin(TimeGenerated, 1d), severity\n| render timechart"
             },
             {
-              "description": "Full Health Dashboard \u2014 All 4 SpyCloud Tables",
+              "description": "Full Health Dashboard — All 4 SpyCloud Tables",
               "query": "union\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Breach Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access')\n| project Table, Records, Latest,\n    HoursSinceUpdate = datetime_diff('hour', now(), Latest),\n    Status = case(Records == 0, 'No Data', datetime_diff('hour', now(), Latest) > 24, 'Stale', 'Active')"
             },
             {
@@ -1071,7 +2200,8 @@
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]",
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace')))]"
       ],
       "properties": {
         "contentId": "[variables('_dataConnectorContentIdConnections')]",
@@ -1093,7 +2223,7 @@
               "defaultValue": "",
               "type": "securestring",
               "metadata": {
-                "description": "SpyCloud Enterprise API Key \u2014 sent as 'X-Api-Key: <key>' on every API request. Obtain from portal.spycloud.com \u2192 Settings \u2192 API Keys. Stored securely as a SecureString, never exposed in logs or outputs."
+                "description": "SpyCloud Enterprise API Key — sent as 'X-Api-Key: <key>' on every API request. Obtain from portal.spycloud.com → Settings → API Keys. Stored securely as a SecureString, never exposed in logs or outputs."
               }
             },
             "severity": {
@@ -1206,1113 +2336,6 @@
               }
             },
             {
-              "type": "Microsoft.OperationalInsights/workspaces/tables",
-              "apiVersion": "2022-10-01",
-              "name": "[concat(parameters('workspace'), '/SpyCloud_ConditionalAccessLogs_CL')]",
-              "properties": {
-                "schema": {
-                  "name": "SpyCloud_ConditionalAccessLogs_CL",
-                  "columns": [
-                    {
-                      "name": "TimeGenerated",
-                      "type": "datetime"
-                    },
-                    {
-                      "name": "IncidentId",
-                      "type": "string"
-                    },
-                    {
-                      "name": "UserPrincipalName",
-                      "type": "string"
-                    },
-                    {
-                      "name": "UserId",
-                      "type": "string"
-                    },
-                    {
-                      "name": "Action",
-                      "type": "string"
-                    },
-                    {
-                      "name": "ActionStatus",
-                      "type": "string"
-                    },
-                    {
-                      "name": "PasswordReset",
-                      "type": "boolean"
-                    },
-                    {
-                      "name": "SessionsRevoked",
-                      "type": "boolean"
-                    },
-                    {
-                      "name": "AddedToCAGroup",
-                      "type": "boolean"
-                    },
-                    {
-                      "name": "CAGroupId",
-                      "type": "string"
-                    },
-                    {
-                      "name": "Email",
-                      "type": "string"
-                    },
-                    {
-                      "name": "Severity",
-                      "type": "int"
-                    }
-                  ]
-                },
-                "retentionInDays": 90,
-                "plan": "Analytics"
-              },
-              "dependsOn": []
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces/tables",
-              "apiVersion": "2022-10-01",
-              "name": "[concat(parameters('workspace'), '/Spycloud_MDE_Logs_CL')]",
-              "properties": {
-                "schema": {
-                  "name": "Spycloud_MDE_Logs_CL",
-                  "columns": [
-                    {
-                      "name": "TimeGenerated",
-                      "type": "datetime"
-                    },
-                    {
-                      "name": "IncidentId",
-                      "type": "string"
-                    },
-                    {
-                      "name": "DeviceName",
-                      "type": "string"
-                    },
-                    {
-                      "name": "DeviceId",
-                      "type": "string"
-                    },
-                    {
-                      "name": "MachineId",
-                      "type": "string"
-                    },
-                    {
-                      "name": "Action",
-                      "type": "string"
-                    },
-                    {
-                      "name": "IsolationType",
-                      "type": "string"
-                    },
-                    {
-                      "name": "Tag",
-                      "type": "string"
-                    },
-                    {
-                      "name": "ActionStatus",
-                      "type": "string"
-                    },
-                    {
-                      "name": "Email",
-                      "type": "string"
-                    },
-                    {
-                      "name": "Severity",
-                      "type": "int"
-                    },
-                    {
-                      "name": "InfectedMachineId",
-                      "type": "string"
-                    },
-                    {
-                      "name": "UserHostname",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "retentionInDays": 90,
-                "plan": "Analytics"
-              },
-              "dependsOn": []
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces/tables",
-              "apiVersion": "2022-10-01",
-              "name": "[concat(parameters('workspace'), '/SpyCloudCompassDevices_CL')]",
-              "properties": {
-                "schema": {
-                  "name": "SpyCloudCompassDevices_CL",
-                  "columns": [
-                    {
-                      "name": "TimeGenerated",
-                      "type": "datetime"
-                    },
-                    {
-                      "name": "source_id",
-                      "type": "int"
-                    },
-                    {
-                      "name": "log_id",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_hostname",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_os",
-                      "type": "string"
-                    },
-                    {
-                      "name": "ip_addresses",
-                      "type": "dynamic"
-                    },
-                    {
-                      "name": "infected_time",
-                      "type": "string"
-                    },
-                    {
-                      "name": "application_count",
-                      "type": "int"
-                    },
-                    {
-                      "name": "spycloud_publish_date",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "retentionInDays": 90,
-                "plan": "Analytics"
-              },
-              "dependsOn": []
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces/tables",
-              "apiVersion": "2022-10-01",
-              "name": "[concat(parameters('workspace'), '/SpyCloudCompassData_CL')]",
-              "properties": {
-                "schema": {
-                  "name": "SpyCloudCompassData_CL",
-                  "columns": [
-                    {
-                      "name": "TimeGenerated",
-                      "type": "datetime"
-                    },
-                    {
-                      "name": "document_id",
-                      "type": "string"
-                    },
-                    {
-                      "name": "source_id",
-                      "type": "int"
-                    },
-                    {
-                      "name": "email",
-                      "type": "string"
-                    },
-                    {
-                      "name": "email_domain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "email_username",
-                      "type": "string"
-                    },
-                    {
-                      "name": "domain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "password",
-                      "type": "string"
-                    },
-                    {
-                      "name": "password_plaintext",
-                      "type": "string"
-                    },
-                    {
-                      "name": "password_type",
-                      "type": "string"
-                    },
-                    {
-                      "name": "severity",
-                      "type": "int"
-                    },
-                    {
-                      "name": "sighting",
-                      "type": "int"
-                    },
-                    {
-                      "name": "breach_category",
-                      "type": "string"
-                    },
-                    {
-                      "name": "breach_title",
-                      "type": "string"
-                    },
-                    {
-                      "name": "target_domain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "target_subdomain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "target_url",
-                      "type": "string"
-                    },
-                    {
-                      "name": "infected_machine_id",
-                      "type": "string"
-                    },
-                    {
-                      "name": "infected_path",
-                      "type": "string"
-                    },
-                    {
-                      "name": "infected_time",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_hostname",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_os",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_sys_registered_owner",
-                      "type": "string"
-                    },
-                    {
-                      "name": "ip_addresses",
-                      "type": "dynamic"
-                    },
-                    {
-                      "name": "av_softwares",
-                      "type": "dynamic"
-                    },
-                    {
-                      "name": "country_code",
-                      "type": "string"
-                    },
-                    {
-                      "name": "display_resolution",
-                      "type": "string"
-                    },
-                    {
-                      "name": "keyboard_languages",
-                      "type": "string"
-                    },
-                    {
-                      "name": "timezone",
-                      "type": "string"
-                    },
-                    {
-                      "name": "log_id",
-                      "type": "string"
-                    },
-                    {
-                      "name": "spycloud_publish_date",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "retentionInDays": 90,
-                "plan": "Analytics"
-              },
-              "dependsOn": []
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces/tables",
-              "apiVersion": "2022-10-01",
-              "name": "[concat(parameters('workspace'), '/SpyCloudBreachCatalog_CL')]",
-              "properties": {
-                "schema": {
-                  "name": "SpyCloudBreachCatalog_CL",
-                  "columns": [
-                    {
-                      "name": "TimeGenerated",
-                      "type": "datetime"
-                    },
-                    {
-                      "name": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "name": "short_title",
-                      "type": "string"
-                    },
-                    {
-                      "name": "site",
-                      "type": "string"
-                    },
-                    {
-                      "name": "site_description",
-                      "type": "string"
-                    },
-                    {
-                      "name": "breach_category",
-                      "type": "string"
-                    },
-                    {
-                      "name": "breach_main_category",
-                      "type": "string"
-                    },
-                    {
-                      "name": "consumer_category",
-                      "type": "string"
-                    },
-                    {
-                      "name": "malware_family",
-                      "type": "string"
-                    },
-                    {
-                      "name": "confidence",
-                      "type": "int"
-                    },
-                    {
-                      "name": "num_records",
-                      "type": "int"
-                    },
-                    {
-                      "name": "sensitive_source",
-                      "type": "boolean"
-                    },
-                    {
-                      "name": "premium_flag",
-                      "type": "string"
-                    },
-                    {
-                      "name": "tlp",
-                      "type": "string"
-                    },
-                    {
-                      "name": "spycloud_publish_date",
-                      "type": "string"
-                    },
-                    {
-                      "name": "acquisition_date",
-                      "type": "string"
-                    },
-                    {
-                      "name": "assets",
-                      "type": "dynamic"
-                    }
-                  ]
-                },
-                "retentionInDays": 90,
-                "plan": "Analytics"
-              },
-              "dependsOn": []
-            },
-            {
-              "type": "Microsoft.OperationalInsights/workspaces/tables",
-              "apiVersion": "2022-10-01",
-              "name": "[concat(parameters('workspace'), '/SpyCloudBreachWatchlist_CL')]",
-              "properties": {
-                "schema": {
-                  "name": "SpyCloudBreachWatchlist_CL",
-                  "columns": [
-                    {
-                      "name": "TimeGenerated",
-                      "type": "datetime"
-                    },
-                    {
-                      "name": "document_id",
-                      "type": "string"
-                    },
-                    {
-                      "name": "source_id",
-                      "type": "int"
-                    },
-                    {
-                      "name": "email",
-                      "type": "string"
-                    },
-                    {
-                      "name": "email_domain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "email_username",
-                      "type": "string"
-                    },
-                    {
-                      "name": "domain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "password",
-                      "type": "string"
-                    },
-                    {
-                      "name": "password_plaintext",
-                      "type": "string"
-                    },
-                    {
-                      "name": "password_type",
-                      "type": "string"
-                    },
-                    {
-                      "name": "severity",
-                      "type": "int"
-                    },
-                    {
-                      "name": "sighting",
-                      "type": "int"
-                    },
-                    {
-                      "name": "breach_category",
-                      "type": "string"
-                    },
-                    {
-                      "name": "breach_title",
-                      "type": "string"
-                    },
-                    {
-                      "name": "target_domain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "target_subdomain",
-                      "type": "string"
-                    },
-                    {
-                      "name": "target_url",
-                      "type": "string"
-                    },
-                    {
-                      "name": "infected_machine_id",
-                      "type": "string"
-                    },
-                    {
-                      "name": "infected_path",
-                      "type": "string"
-                    },
-                    {
-                      "name": "infected_time",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_hostname",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_os",
-                      "type": "string"
-                    },
-                    {
-                      "name": "user_sys_registered_owner",
-                      "type": "string"
-                    },
-                    {
-                      "name": "ip_addresses",
-                      "type": "dynamic"
-                    },
-                    {
-                      "name": "av_softwares",
-                      "type": "dynamic"
-                    },
-                    {
-                      "name": "country_code",
-                      "type": "string"
-                    },
-                    {
-                      "name": "display_resolution",
-                      "type": "string"
-                    },
-                    {
-                      "name": "keyboard_languages",
-                      "type": "string"
-                    },
-                    {
-                      "name": "timezone",
-                      "type": "string"
-                    },
-                    {
-                      "name": "log_id",
-                      "type": "string"
-                    },
-                    {
-                      "name": "spycloud_publish_date",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "retentionInDays": 90,
-                "plan": "Analytics"
-              },
-              "dependsOn": []
-            },
-            {
-              "type": "Microsoft.Insights/dataCollectionRules",
-              "apiVersion": "2022-06-01",
-              "name": "[concat('dcr-ccf-', parameters('workspace'))]",
-              "location": "[resourceGroup().location]",
-              "properties": {
-                "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', concat('dce-spycloud-', parameters('workspace')))]",
-                "streamDeclarations": {
-                  "Custom-SpyCloudBreachWatchlist_CL": {
-                    "columns": [
-                      {
-                        "name": "TimeGenerated",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "document_id",
-                        "type": "string"
-                      },
-                      {
-                        "name": "source_id",
-                        "type": "int"
-                      },
-                      {
-                        "name": "email",
-                        "type": "string"
-                      },
-                      {
-                        "name": "email_domain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "email_username",
-                        "type": "string"
-                      },
-                      {
-                        "name": "domain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "password",
-                        "type": "string"
-                      },
-                      {
-                        "name": "password_plaintext",
-                        "type": "string"
-                      },
-                      {
-                        "name": "password_type",
-                        "type": "string"
-                      },
-                      {
-                        "name": "severity",
-                        "type": "int"
-                      },
-                      {
-                        "name": "sighting",
-                        "type": "int"
-                      },
-                      {
-                        "name": "breach_category",
-                        "type": "string"
-                      },
-                      {
-                        "name": "breach_title",
-                        "type": "string"
-                      },
-                      {
-                        "name": "target_domain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "target_subdomain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "target_url",
-                        "type": "string"
-                      },
-                      {
-                        "name": "infected_machine_id",
-                        "type": "string"
-                      },
-                      {
-                        "name": "infected_path",
-                        "type": "string"
-                      },
-                      {
-                        "name": "infected_time",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_hostname",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_os",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_sys_registered_owner",
-                        "type": "string"
-                      },
-                      {
-                        "name": "ip_addresses",
-                        "type": "dynamic"
-                      },
-                      {
-                        "name": "av_softwares",
-                        "type": "dynamic"
-                      },
-                      {
-                        "name": "country_code",
-                        "type": "string"
-                      },
-                      {
-                        "name": "display_resolution",
-                        "type": "string"
-                      },
-                      {
-                        "name": "keyboard_languages",
-                        "type": "string"
-                      },
-                      {
-                        "name": "timezone",
-                        "type": "string"
-                      },
-                      {
-                        "name": "log_id",
-                        "type": "string"
-                      },
-                      {
-                        "name": "spycloud_publish_date",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "Custom-SpyCloudBreachCatalog_CL": {
-                    "columns": [
-                      {
-                        "name": "TimeGenerated",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "uuid",
-                        "type": "string"
-                      },
-                      {
-                        "name": "short_title",
-                        "type": "string"
-                      },
-                      {
-                        "name": "site",
-                        "type": "string"
-                      },
-                      {
-                        "name": "site_description",
-                        "type": "string"
-                      },
-                      {
-                        "name": "breach_category",
-                        "type": "string"
-                      },
-                      {
-                        "name": "breach_main_category",
-                        "type": "string"
-                      },
-                      {
-                        "name": "consumer_category",
-                        "type": "string"
-                      },
-                      {
-                        "name": "malware_family",
-                        "type": "string"
-                      },
-                      {
-                        "name": "confidence",
-                        "type": "int"
-                      },
-                      {
-                        "name": "num_records",
-                        "type": "int"
-                      },
-                      {
-                        "name": "sensitive_source",
-                        "type": "boolean"
-                      },
-                      {
-                        "name": "premium_flag",
-                        "type": "string"
-                      },
-                      {
-                        "name": "tlp",
-                        "type": "string"
-                      },
-                      {
-                        "name": "spycloud_publish_date",
-                        "type": "string"
-                      },
-                      {
-                        "name": "acquisition_date",
-                        "type": "string"
-                      },
-                      {
-                        "name": "assets",
-                        "type": "dynamic"
-                      }
-                    ]
-                  },
-                  "Custom-SpyCloudCompassData_CL": {
-                    "columns": [
-                      {
-                        "name": "TimeGenerated",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "document_id",
-                        "type": "string"
-                      },
-                      {
-                        "name": "source_id",
-                        "type": "int"
-                      },
-                      {
-                        "name": "email",
-                        "type": "string"
-                      },
-                      {
-                        "name": "email_domain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "email_username",
-                        "type": "string"
-                      },
-                      {
-                        "name": "domain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "password",
-                        "type": "string"
-                      },
-                      {
-                        "name": "password_plaintext",
-                        "type": "string"
-                      },
-                      {
-                        "name": "password_type",
-                        "type": "string"
-                      },
-                      {
-                        "name": "severity",
-                        "type": "int"
-                      },
-                      {
-                        "name": "sighting",
-                        "type": "int"
-                      },
-                      {
-                        "name": "breach_category",
-                        "type": "string"
-                      },
-                      {
-                        "name": "breach_title",
-                        "type": "string"
-                      },
-                      {
-                        "name": "target_domain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "target_subdomain",
-                        "type": "string"
-                      },
-                      {
-                        "name": "target_url",
-                        "type": "string"
-                      },
-                      {
-                        "name": "infected_machine_id",
-                        "type": "string"
-                      },
-                      {
-                        "name": "infected_path",
-                        "type": "string"
-                      },
-                      {
-                        "name": "infected_time",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_hostname",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_os",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_sys_registered_owner",
-                        "type": "string"
-                      },
-                      {
-                        "name": "ip_addresses",
-                        "type": "dynamic"
-                      },
-                      {
-                        "name": "av_softwares",
-                        "type": "dynamic"
-                      },
-                      {
-                        "name": "country_code",
-                        "type": "string"
-                      },
-                      {
-                        "name": "display_resolution",
-                        "type": "string"
-                      },
-                      {
-                        "name": "keyboard_languages",
-                        "type": "string"
-                      },
-                      {
-                        "name": "timezone",
-                        "type": "string"
-                      },
-                      {
-                        "name": "log_id",
-                        "type": "string"
-                      },
-                      {
-                        "name": "spycloud_publish_date",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "Custom-SpyCloudCompassDevices_CL": {
-                    "columns": [
-                      {
-                        "name": "TimeGenerated",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "source_id",
-                        "type": "int"
-                      },
-                      {
-                        "name": "log_id",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_hostname",
-                        "type": "string"
-                      },
-                      {
-                        "name": "user_os",
-                        "type": "string"
-                      },
-                      {
-                        "name": "ip_addresses",
-                        "type": "dynamic"
-                      },
-                      {
-                        "name": "infected_time",
-                        "type": "string"
-                      },
-                      {
-                        "name": "application_count",
-                        "type": "int"
-                      },
-                      {
-                        "name": "spycloud_publish_date",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "Custom-Spycloud_MDE_Logs_CL": {
-                    "columns": [
-                      {
-                        "name": "TimeGenerated",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "IncidentId",
-                        "type": "string"
-                      },
-                      {
-                        "name": "DeviceName",
-                        "type": "string"
-                      },
-                      {
-                        "name": "DeviceId",
-                        "type": "string"
-                      },
-                      {
-                        "name": "MachineId",
-                        "type": "string"
-                      },
-                      {
-                        "name": "Action",
-                        "type": "string"
-                      },
-                      {
-                        "name": "IsolationType",
-                        "type": "string"
-                      },
-                      {
-                        "name": "Tag",
-                        "type": "string"
-                      },
-                      {
-                        "name": "ActionStatus",
-                        "type": "string"
-                      },
-                      {
-                        "name": "Email",
-                        "type": "string"
-                      },
-                      {
-                        "name": "Severity",
-                        "type": "int"
-                      },
-                      {
-                        "name": "InfectedMachineId",
-                        "type": "string"
-                      },
-                      {
-                        "name": "UserHostname",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "Custom-SpyCloud_ConditionalAccessLogs_CL": {
-                    "columns": [
-                      {
-                        "name": "TimeGenerated",
-                        "type": "datetime"
-                      },
-                      {
-                        "name": "IncidentId",
-                        "type": "string"
-                      },
-                      {
-                        "name": "UserPrincipalName",
-                        "type": "string"
-                      },
-                      {
-                        "name": "UserId",
-                        "type": "string"
-                      },
-                      {
-                        "name": "Action",
-                        "type": "string"
-                      },
-                      {
-                        "name": "ActionStatus",
-                        "type": "string"
-                      },
-                      {
-                        "name": "PasswordReset",
-                        "type": "boolean"
-                      },
-                      {
-                        "name": "SessionsRevoked",
-                        "type": "boolean"
-                      },
-                      {
-                        "name": "AddedToCAGroup",
-                        "type": "boolean"
-                      },
-                      {
-                        "name": "CAGroupId",
-                        "type": "string"
-                      },
-                      {
-                        "name": "Email",
-                        "type": "string"
-                      },
-                      {
-                        "name": "Severity",
-                        "type": "int"
-                      }
-                    ]
-                  }
-                },
-                "destinations": {
-                  "logAnalytics": [
-                    {
-                      "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-                      "name": "scWorkspace"
-                    }
-                  ]
-                },
-                "dataFlows": [
-                  {
-                    "streams": [
-                      "Custom-SpyCloudBreachWatchlist_CL"
-                    ],
-                    "destinations": [
-                      "scWorkspace"
-                    ],
-                    "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend target_domain = tolower(tostring(target_domain))",
-                    "outputStream": "Custom-SpyCloudBreachWatchlist_CL"
-                  },
-                  {
-                    "streams": [
-                      "Custom-SpyCloudBreachCatalog_CL"
-                    ],
-                    "destinations": [
-                      "scWorkspace"
-                    ],
-                    "transformKql": "source | extend TimeGenerated = now() | extend confidence = toint(confidence) | extend num_records = toint(num_records)",
-                    "outputStream": "Custom-SpyCloudBreachCatalog_CL"
-                  },
-                  {
-                    "streams": [
-                      "Custom-SpyCloudCompassData_CL"
-                    ],
-                    "destinations": [
-                      "scWorkspace"
-                    ],
-                    "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
-                    "outputStream": "Custom-SpyCloudCompassData_CL"
-                  },
-                  {
-                    "streams": [
-                      "Custom-SpyCloudCompassDevices_CL"
-                    ],
-                    "destinations": [
-                      "scWorkspace"
-                    ],
-                    "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend application_count = toint(application_count) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses)",
-                    "outputStream": "Custom-SpyCloudCompassDevices_CL"
-                  },
-                  {
-                    "streams": [
-                      "Custom-Spycloud_MDE_Logs_CL"
-                    ],
-                    "destinations": [
-                      "scWorkspace"
-                    ],
-                    "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
-                    "outputStream": "Custom-Spycloud_MDE_Logs_CL"
-                  },
-                  {
-                    "streams": [
-                      "Custom-SpyCloud_ConditionalAccessLogs_CL"
-                    ],
-                    "destinations": [
-                      "scWorkspace"
-                    ],
-                    "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
-                    "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[concat(parameters('workspace'), '/SpyCloudBreachWatchlist_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloudBreachCatalog_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloudCompassData_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloudCompassDevices_CL')]",
-                "[concat(parameters('workspace'), '/Spycloud_MDE_Logs_CL')]",
-                "[concat(parameters('workspace'), '/SpyCloud_ConditionalAccessLogs_CL')]"
-              ]
-            },
-            {
               "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'SpyCloudWatchlistConnector')]",
               "apiVersion": "2022-12-01-preview",
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
@@ -2362,9 +2385,7 @@
                 },
                 "isActive": true
               },
-              "dependsOn": [
-                "[concat('dcr-ccf-', parameters('workspace'))]"
-              ]
+              "dependsOn": []
             },
             {
               "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'SpyCloudWatchlistConnectorModified')]",
@@ -2417,9 +2438,7 @@
                 },
                 "isActive": true
               },
-              "dependsOn": [
-                "[concat('dcr-ccf-', parameters('workspace'))]"
-              ]
+              "dependsOn": []
             },
             {
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudBreachCatalogConnector')]",
@@ -2468,9 +2487,7 @@
                 },
                 "isActive": true
               },
-              "dependsOn": [
-                "[concat('dcr-ccf-', parameters('workspace'))]"
-              ]
+              "dependsOn": []
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
@@ -2511,9 +2528,7 @@
                   ]
                 }
               },
-              "dependsOn": [
-                "[concat('dcr-ccf-', parameters('workspace'))]"
-              ]
+              "dependsOn": []
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
@@ -2552,9 +2567,7 @@
                   ]
                 }
               },
-              "dependsOn": [
-                "[concat('dcr-ccf-', parameters('workspace'))]"
-              ]
+              "dependsOn": []
             }
           ]
         },
@@ -2610,7 +2623,7 @@
         "contentProductId": "[concat(substring(variables('_solutionId'), 0, 50),'-','sl','-', uniqueString(concat(variables('_solutionId'),'-','Solution','-',variables('_solutionId'),'-', variables('_solutionVersion'))))]",
         "displayName": "[variables('_solutionName')]",
         "publisherDisplayName": "[variables('_solutionAuthor')]",
-        "descriptionHtml": "<p>The <strong>SpyCloud Threat Intelligence Connector</strong> integrates SpyCloud's comprehensive breach and infostealer exposure data with Microsoft Sentinel, enabling security teams to detect compromised credentials, investigate infected devices, and automate identity protection responses.</p><h4>Data Tables</h4><ul><li><strong>SpyCloudBreachWatchlist_CL</strong> \u2014 Compromised credentials, PII, and infostealer-stolen data from your organization's monitored assets (email domains, IP ranges, executive watchlists)</li><li><strong>SpyCloudBreachCatalog_CL</strong> \u2014 Breach source metadata for contextual enrichment, correlation, and impact assessment</li><li><strong>Spycloud_MDE_Logs_CL</strong> \u2014 Audit log of automated Microsoft Defender for Endpoint remediation actions (device isolation, tagging, IOC submission)</li><li><strong>SpyCloud_ConditionalAccessLogs_CL</strong> \u2014 Audit log of automated Azure AD / Entra ID actions (forced password resets, session revocations, Conditional Access group assignments, account disablement)</li></ul><h4>Key Use Cases</h4><ul><li><strong>Compromised Credential Detection</strong> \u2014 Identify employee and customer credentials exposed in breaches or stolen by infostealer malware</li><li><strong>Post-Infection Remediation</strong> \u2014 Automatically isolate infected devices and force credential resets when infostealer activity is detected</li><li><strong>Darknet Exposure Monitoring</strong> \u2014 Continuously monitor for new exposures of corporate assets across SpyCloud's 600B+ recaptured data records</li><li><strong>Account Takeover Prevention</strong> \u2014 Detect and block credential stuffing attempts using real-time exposure intelligence</li><li><strong>Third-Party Risk Assessment</strong> \u2014 Monitor vendor and supply chain credential exposures for risk scoring</li><li><strong>Compliance &amp; Audit</strong> \u2014 Maintain evidence of credential exposure detection and automated remediation for regulatory requirements</li><li><strong>VIP/Executive Protection</strong> \u2014 Prioritized monitoring of high-value targets for both credential and PII exposure</li></ul><p><strong>Requirements:</strong> SpyCloud Enterprise or Enterprise+ API subscription. Contact <a href='mailto:support@spycloud.com'>support@spycloud.com</a> or visit <a href='https://portal.spycloud.com'>portal.spycloud.com</a>.</p>"
+        "descriptionHtml": "<p>The <strong>SpyCloud Threat Intelligence Connector</strong> integrates SpyCloud's comprehensive breach and infostealer exposure data with Microsoft Sentinel, enabling security teams to detect compromised credentials, investigate infected devices, and automate identity protection responses.</p><h4>Data Tables</h4><ul><li><strong>SpyCloudBreachWatchlist_CL</strong> — Compromised credentials, PII, and infostealer-stolen data from your organization's monitored assets (email domains, IP ranges, executive watchlists)</li><li><strong>SpyCloudBreachCatalog_CL</strong> — Breach source metadata for contextual enrichment, correlation, and impact assessment</li><li><strong>Spycloud_MDE_Logs_CL</strong> — Audit log of automated Microsoft Defender for Endpoint remediation actions (device isolation, tagging, IOC submission)</li><li><strong>SpyCloud_ConditionalAccessLogs_CL</strong> — Audit log of automated Azure AD / Entra ID actions (forced password resets, session revocations, Conditional Access group assignments, account disablement)</li></ul><h4>Key Use Cases</h4><ul><li><strong>Compromised Credential Detection</strong> — Identify employee and customer credentials exposed in breaches or stolen by infostealer malware</li><li><strong>Post-Infection Remediation</strong> — Automatically isolate infected devices and force credential resets when infostealer activity is detected</li><li><strong>Darknet Exposure Monitoring</strong> — Continuously monitor for new exposures of corporate assets across SpyCloud's 600B+ recaptured data records</li><li><strong>Account Takeover Prevention</strong> — Detect and block credential stuffing attempts using real-time exposure intelligence</li><li><strong>Third-Party Risk Assessment</strong> — Monitor vendor and supply chain credential exposures for risk scoring</li><li><strong>Compliance &amp; Audit</strong> — Maintain evidence of credential exposure detection and automated remediation for regulatory requirements</li><li><strong>VIP/Executive Protection</strong> — Prioritized monitoring of high-value targets for both credential and PII exposure</li></ul><p><strong>Requirements:</strong> SpyCloud Enterprise or Enterprise+ API subscription. Contact <a href='mailto:support@spycloud.com'>support@spycloud.com</a> or visit <a href='https://portal.spycloud.com'>portal.spycloud.com</a>.</p>"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -2906,7 +2919,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
+                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com → Your Apps → Incoming Webhooks → Add to Channel."
                     },
                     "Notify_Teams": {
                       "type": "If",
@@ -2935,10 +2948,10 @@
                               "@@type": "MessageCard",
                               "@@context": "http://schema.org/extensions",
                               "themeColor": "d63384",
-                              "summary": "SpyCloud MDE \u2014 Device Isolated",
+                              "summary": "SpyCloud MDE — Device Isolated",
                               "sections": [
                                 {
-                                  "activityTitle": "SpyCloud MDE \u2014 Device Isolated",
+                                  "activityTitle": "SpyCloud MDE — Device Isolated",
                                   "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
                                   "text": "Device isolated in Defender due to infostealer infection."
                                 }
@@ -2958,7 +2971,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
+                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams → Channel → Connectors → Incoming Webhook."
                     },
                     "Notify_Email": {
                       "type": "If",
@@ -2985,10 +2998,10 @@
                             },
                             "body": {
                               "message": {
-                                "subject": "SpyCloud MDE \u2014 Device Isolated",
+                                "subject": "SpyCloud MDE — Device Isolated",
                                 "body": {
                                   "contentType": "HTML",
-                                  "content": "<h2>SpyCloud MDE \u2014 Device Isolated</h2><p>Device isolated in Defender due to infostealer infection.</p>"
+                                  "content": "<h2>SpyCloud MDE — Device Isolated</h2><p>Device isolated in Defender due to infostealer infection.</p>"
                                 },
                                 "toRecipients": [
                                   {
@@ -3016,7 +3029,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
+                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication — requires Mail.Send permission."
                     }
                   },
                   "else": {
@@ -3048,7 +3061,7 @@
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud MDE Device Isolation \u2014 Automatically isolates infected devices in Microsoft Defender for Endpoint when SpyCloud detects infostealer malware. Extracts host entities from incidents, searches MDE for matching devices, isolates them (Full or Selective), adds a SpyCloud tag, logs the action, and notifies SOC via Slack, Teams, and Email. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate devices."
+          "description": "SpyCloud MDE Device Isolation — Automatically isolates infected devices in Microsoft Defender for Endpoint when SpyCloud detects infostealer malware. Extracts host entities from incidents, searches MDE for matching devices, isolates them (Full or Selective), adds a SpyCloud tag, logs the action, and notifies SOC via Slack, Teams, and Email. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate devices."
         },
         "parameters": {
           "$connections": {
@@ -3384,7 +3397,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
+                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com → Your Apps → Incoming Webhooks → Add to Channel."
                     },
                     "Notify_Teams": {
                       "type": "If",
@@ -3413,10 +3426,10 @@
                               "@@type": "MessageCard",
                               "@@context": "http://schema.org/extensions",
                               "themeColor": "d63384",
-                              "summary": "SpyCloud CA \u2014 Identity Protected",
+                              "summary": "SpyCloud CA — Identity Protected",
                               "sections": [
                                 {
-                                  "activityTitle": "SpyCloud CA \u2014 Identity Protected",
+                                  "activityTitle": "SpyCloud CA — Identity Protected",
                                   "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
                                   "text": "Password reset and sessions revoked for compromised user."
                                 }
@@ -3436,7 +3449,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
+                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams → Channel → Connectors → Incoming Webhook."
                     },
                     "Notify_Email": {
                       "type": "If",
@@ -3463,10 +3476,10 @@
                             },
                             "body": {
                               "message": {
-                                "subject": "SpyCloud CA \u2014 Identity Protected",
+                                "subject": "SpyCloud CA — Identity Protected",
                                 "body": {
                                   "contentType": "HTML",
-                                  "content": "<h2>SpyCloud CA \u2014 Identity Protected</h2><p>Password reset and sessions revoked for compromised user.</p>"
+                                  "content": "<h2>SpyCloud CA — Identity Protected</h2><p>Password reset and sessions revoked for compromised user.</p>"
                                 },
                                 "toRecipients": [
                                   {
@@ -3494,7 +3507,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
+                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication — requires Mail.Send permission."
                     }
                   },
                   "else": {
@@ -3526,7 +3539,7 @@
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud CA Identity Protection \u2014 Automatically resets passwords and revokes sessions in Entra ID when SpyCloud detects compromised credentials. Looks up users via Microsoft Graph, forces immediate password reset, revokes all active sessions, optionally adds to a Conditional Access security group, logs the action, and notifies SOC. REQUIRES: Entra ID P1/P2. Without it, deploys but cannot reset passwords."
+          "description": "SpyCloud CA Identity Protection — Automatically resets passwords and revokes sessions in Entra ID when SpyCloud detects compromised credentials. Looks up users via Microsoft Graph, forces immediate password reset, revokes all active sessions, optionally adds to a Conditional Access security group, logs the action, and notifies SOC. REQUIRES: Entra ID P1/P2. Without it, deploys but cannot reset passwords."
         },
         "parameters": {
           "$connections": {
@@ -3569,7 +3582,7 @@
       ],
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Infostealer Exposure Detected",
+        "displayName": "SpyCloud — Infostealer Exposure Detected",
         "description": "Detects when SpyCloud identifies credentials stolen by infostealer malware (severity 20+). These are active infections where malware on a device has exfiltrated passwords, cookies, and session tokens. Requires immediate device investigation and credential reset. Creates an incident with the exposed email as an account entity.",
         "severity": "[parameters('analyticsRuleSeverity')]",
         "enabled": false,
@@ -3657,7 +3670,7 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u2014 Data Ingestion Health Alert",
+        "displayName": "SpyCloud — Data Ingestion Health Alert",
         "description": "Fires when no SpyCloud data has been received for more than 2 hours, indicating a potential connector failure or API key issue.",
         "severity": 2,
         "enabled": true,
@@ -3690,7 +3703,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'InfostealerExposureDetected', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Infostealer Credential Exposure Detected",
+        "displayName": "SpyCloud — Infostealer Credential Exposure Detected",
         "description": "Detects new infostealer-sourced credential exposures (severity >= 20) from SpyCloud. These indicate a device was actively infected with malware that stole credentials, cookies, and session tokens. Severity 25 includes stolen application data enabling MFA bypass.",
         "severity": "High",
         "enabled": false,
@@ -3755,7 +3768,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'PlaintextPasswordExposed', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Plaintext Password Exposure (Critical Risk)",
+        "displayName": "SpyCloud — Plaintext Password Exposure (Critical Risk)",
         "description": "Alerts when SpyCloud finds credentials with plaintext (unencrypted) passwords. These credentials can be used immediately by attackers without any cracking. Highest priority for password reset. Check if the password is reused across other services.",
         "severity": "High",
         "enabled": false,
@@ -3809,7 +3822,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'SensitivePIIExposed', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 SSN / Financial / Health Data Exposure (Compliance Alert)",
+        "displayName": "SpyCloud — SSN / Financial / Health Data Exposure (Compliance Alert)",
         "description": "Detects exposure records containing Social Security numbers, bank account numbers, tax IDs, or health insurance IDs. May trigger breach notification obligations under HIPAA, PCI DSS, GDPR, or state privacy laws.",
         "severity": "High",
         "enabled": false,
@@ -3863,7 +3876,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'SessionCookieTheft', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Stolen Session Cookies / Tokens (MFA Bypass Risk)",
+        "displayName": "SpyCloud — Stolen Session Cookies / Tokens (MFA Bypass Risk)",
         "description": "Detects when stolen browser cookies or session tokens are found in SpyCloud data. Attackers can use these to bypass MFA entirely by replaying the authenticated session. Requires immediate session revocation and device investigation. This is the most dangerous exposure type.",
         "severity": "High",
         "enabled": false,
@@ -3928,7 +3941,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'DeviceReinfection', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Device Re-Infection Detected",
+        "displayName": "SpyCloud — Device Re-Infection Detected",
         "description": "Detects when the same infected_machine_id appears in new SpyCloud exposure records after a previous remediation was logged in the MDE table. Indicates the device was re-compromised after initial remediation, suggesting incomplete cleanup or persistent malware.",
         "severity": "High",
         "enabled": false,
@@ -3994,7 +4007,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'MultiDomainCredentialExposure', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 User Credentials Exposed Across Multiple Domains",
+        "displayName": "SpyCloud — User Credentials Exposed Across Multiple Domains",
         "description": "Detects when a single user has credentials stolen for 5 or more different target domains, indicating widespread credential reuse or a heavily infected device. High risk of account takeover across multiple services.",
         "severity": "Medium",
         "enabled": false,
@@ -4049,7 +4062,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'GeographicAnomaly', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Infection from Unusual Geographic Location",
+        "displayName": "SpyCloud — Infection from Unusual Geographic Location",
         "description": "Detects infostealer infections from country codes that are uncommon in your environment (fewer than 3 previous infections from that country). May indicate targeted attacks, compromised travel devices, or unauthorized access from unexpected locations.",
         "severity": "Medium",
         "enabled": false,
@@ -4104,7 +4117,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'HighSightingCredential', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Credential Observed in Multiple Breach Sources",
+        "displayName": "SpyCloud — Credential Observed in Multiple Breach Sources",
         "description": "Detects credentials with a sighting count of 3 or more, meaning the same email/password combination has been observed across multiple independent breach sources. This dramatically increases the probability of active credential stuffing attacks using this pair.",
         "severity": "Medium",
         "enabled": false,
@@ -4158,7 +4171,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'RemediationGap', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 High-Severity Exposure Without Automated Remediation",
+        "displayName": "SpyCloud — High-Severity Exposure Without Automated Remediation",
         "description": "Detects severity 20+ infostealer exposures that have been in the watchlist for over 2 hours but have NO corresponding entry in the Conditional Access remediation logs. This means the automated password reset playbook did not trigger, leaving the compromised credential active.",
         "severity": "High",
         "enabled": false,
@@ -4213,7 +4226,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'AVBypassDetected', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Antivirus Present But Failed to Prevent Infostealer",
+        "displayName": "SpyCloud — Antivirus Present But Failed to Prevent Infostealer",
         "description": "Detects infostealer infections on devices that had antivirus software installed, indicating the AV product failed to prevent the malware. Useful for evaluating endpoint protection effectiveness and identifying products that need updated signatures or configuration changes.",
         "severity": "Informational",
         "enabled": false,
@@ -4253,7 +4266,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'NewMalwareFamilyDetected', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 New Malware Family Appeared in Breach Catalog",
+        "displayName": "SpyCloud — New Malware Family Appeared in Breach Catalog",
         "description": "Fires when a new breach catalog entry appears with a status of 'pending' (newly ingested). This means SpyCloud has identified a new breach or malware source that may contain your organization's data. Early awareness enables proactive response before full ingestion completes.",
         "severity": "Informational",
         "enabled": false,
@@ -4293,7 +4306,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'DataIngestionStopped', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Data Ingestion Health Alert",
+        "displayName": "SpyCloud — Data Ingestion Health Alert",
         "description": "Fires when no new SpyCloud watchlist data has been received for more than 3 hours, indicating a potential connector failure, API key expiration, or rate limiting issue. Check SentinelHealth table and the SpyCloud connector page for errors.",
         "severity": "Medium",
         "enabled": false,
@@ -4329,7 +4342,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'OktaCompromisedCredentialSignIn', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u00d7 Okta \u2014 Compromised Credential Used in Okta Sign-In",
+        "displayName": "SpyCloud × Okta — Compromised Credential Used in Okta Sign-In",
         "description": "Correlates SpyCloud exposed email addresses with Okta sign-in events in Sentinel. Fires when a user with known compromised credentials (from SpyCloud) successfully authenticates through Okta, indicating the stolen credentials may be actively exploited. Requires Okta logs ingested via the Okta SSO connector in Sentinel.",
         "severity": "High",
         "enabled": false,
@@ -4393,7 +4406,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'DuoCompromisedCredentialAuth', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u00d7 Duo \u2014 Compromised Credential in Duo Authentication",
+        "displayName": "SpyCloud × Duo — Compromised Credential in Duo Authentication",
         "description": "Correlates SpyCloud exposed emails with Cisco Duo authentication logs. Fires when a user with known compromised credentials authenticates through Duo. Requires Duo Admin API logs ingested into Sentinel.",
         "severity": "High",
         "enabled": false,
@@ -4457,7 +4470,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'PingCompromisedCredentialAuth', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u00d7 Ping Identity \u2014 Compromised Credential in PingOne Auth",
+        "displayName": "SpyCloud × Ping Identity — Compromised Credential in PingOne Auth",
         "description": "Correlates SpyCloud exposed emails with Ping Identity/PingOne authentication logs. Requires PingOne logs ingested into Sentinel via syslog or API connector.",
         "severity": "High",
         "enabled": false,
@@ -4521,7 +4534,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'EntraCompromisedCredentialSignIn', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u00d7 Entra ID \u2014 Compromised Credential Sign-In Detected",
+        "displayName": "SpyCloud × Entra ID — Compromised Credential Sign-In Detected",
         "description": "Correlates SpyCloud exposed emails with Entra ID (Azure AD) sign-in logs. Fires when a user with known compromised credentials from SpyCloud successfully signs in, especially from unusual locations or with anomalous patterns. Requires Entra ID sign-in logs enabled (enableEntraSignInLogs=true).",
         "severity": "High",
         "enabled": false,
@@ -4786,7 +4799,7 @@
                       "Skipped"
                     ]
                   },
-                  "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
+                  "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com → Your Apps → Incoming Webhooks → Add to Channel."
                 },
                 "Notify_Teams": {
                   "type": "If",
@@ -4880,7 +4893,7 @@
                       "Skipped"
                     ]
                   },
-                  "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
+                  "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams → Channel → Connectors → Incoming Webhook."
                 },
                 "Notify_Email": {
                   "type": "If",
@@ -4938,7 +4951,7 @@
                       "Skipped"
                     ]
                   },
-                  "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
+                  "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication — requires Mail.Send permission."
                 },
                 "Create_ServiceNow_Incident": {
                   "type": "If",
@@ -5045,7 +5058,7 @@
                       "Skipped"
                     ]
                   },
-                  "description": "Create a Jira issue via Automation Webhook. Only fires if jiraWebhookUrl is configured. Configure at: Jira \u2192 Project \u2192 Automation \u2192 Create Rule \u2192 When: Incoming Webhook. Fields: summary, description, issuetype=Bug, priority=High, labels=[spycloud, credential-exposure, security]."
+                  "description": "Create a Jira issue via Automation Webhook. Only fires if jiraWebhookUrl is configured. Configure at: Jira → Project → Automation → Create Rule → When: Incoming Webhook. Fields: summary, description, issuetype=Bug, priority=High, labels=[spycloud, credential-exposure, security]."
                 },
                 "Create_DevOps_WorkItem": {
                   "type": "If",
@@ -5095,7 +5108,7 @@
                       "Skipped"
                     ]
                   },
-                  "description": "Create an Azure DevOps work item via Service Hook. Only fires if azureDevOpsWebhookUrl is configured. Configure at: DevOps \u2192 Project Settings \u2192 Service hooks. Fields: System.Title, System.Description, WorkItemType=Bug, Priority=2, Tags=SpyCloud;Security."
+                  "description": "Create an Azure DevOps work item via Service Hook. Only fires if azureDevOpsWebhookUrl is configured. Configure at: DevOps → Project Settings → Service hooks. Fields: System.Title, System.Description, WorkItemType=Bug, Priority=2, Tags=SpyCloud;Security."
                 }
               },
               "runAfter": {
@@ -5103,13 +5116,13 @@
                   "Succeeded"
                 ]
               },
-              "description": "Full response chain: Graph lookup \u2192 sign-in analysis \u2192 password reset \u2192 session revocation \u2192 incident comment \u2192 Slack \u2192 Teams \u2192 Email \u2192 ServiceNow \u2192 Jira \u2192 Azure DevOps."
+              "description": "Full response chain: Graph lookup → sign-in analysis → password reset → session revocation → incident comment → Slack → Teams → Email → ServiceNow → Jira → Azure DevOps."
             }
           },
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud Credential Response \u2014 Full SOC investigation and remediation workflow. Checks recent sign-in activity for compromised users, forces password reset, revokes sessions, then creates tickets in ServiceNow/Jira/Azure DevOps and sends rich notifications to Slack/Teams/Email. Designed as the primary automated response playbook. REQUIRES: Entra ID P1/P2 for password reset. Notifications work without license."
+          "description": "SpyCloud Credential Response — Full SOC investigation and remediation workflow. Checks recent sign-in activity for compromised users, forces password reset, revokes sessions, then creates tickets in ServiceNow/Jira/Azure DevOps and sends rich notifications to Slack/Teams/Email. Designed as the primary automated response playbook. REQUIRES: Entra ID P1/P2 for password reset. Notifications work without license."
         },
         "parameters": {
           "$connections": {
@@ -5224,7 +5237,7 @@
                 }
               },
               "runAfter": {},
-              "description": "KQL query against SpyCloudBreachWatchlist_CL for severity 25 records with infected_machine_id \u2014 these are active infostealer infections with stolen cookies, sessions, and autofill data."
+              "description": "KQL query against SpyCloudBreachWatchlist_CL for severity 25 records with infected_machine_id — these are active infostealer infections with stolen cookies, sessions, and autofill data."
             },
             "For_each_infection": {
               "type": "Foreach",
@@ -5332,7 +5345,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com \u2192 Your Apps \u2192 Incoming Webhooks \u2192 Add to Channel."
+                      "description": "Send Slack notification via Incoming Webhook. Only fires if slackWebhookUrl is configured (non-empty). Configure at: api.slack.com → Your Apps → Incoming Webhooks → Add to Channel."
                     },
                     "Notify_Teams": {
                       "type": "If",
@@ -5361,10 +5374,10 @@
                               "@@type": "MessageCard",
                               "@@context": "http://schema.org/extensions",
                               "themeColor": "d63384",
-                              "summary": "SpyCloud Blocklist \u2014 Sev25 Isolation",
+                              "summary": "SpyCloud Blocklist — Sev25 Isolation",
                               "sections": [
                                 {
-                                  "activityTitle": "SpyCloud Blocklist \u2014 Sev25 Isolation",
+                                  "activityTitle": "SpyCloud Blocklist — Sev25 Isolation",
                                   "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
                                   "text": "Critical severity 25 infected device automatically isolated."
                                 }
@@ -5384,7 +5397,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams \u2192 Channel \u2192 Connectors \u2192 Incoming Webhook."
+                      "description": "Send Microsoft Teams notification via Incoming Webhook with SpyCloud-branded MessageCard. Only fires if teamsWebhookUrl is configured. Configure at: Teams → Channel → Connectors → Incoming Webhook."
                     },
                     "Notify_Email": {
                       "type": "If",
@@ -5411,10 +5424,10 @@
                             },
                             "body": {
                               "message": {
-                                "subject": "SpyCloud Blocklist \u2014 Sev25 Isolation",
+                                "subject": "SpyCloud Blocklist — Sev25 Isolation",
                                 "body": {
                                   "contentType": "HTML",
-                                  "content": "<h2>SpyCloud Blocklist \u2014 Sev25 Isolation</h2><p>Critical severity 25 infected device automatically isolated.</p>"
+                                  "content": "<h2>SpyCloud Blocklist — Sev25 Isolation</h2><p>Critical severity 25 infected device automatically isolated.</p>"
                                 },
                                 "toRecipients": [
                                   {
@@ -5442,7 +5455,7 @@
                           "Skipped"
                         ]
                       },
-                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication \u2014 requires Mail.Send permission."
+                      "description": "Send email notification via Microsoft Graph sendMail API. Only fires if notificationEmail is configured. Uses the Logic App managed identity for authentication — requires Mail.Send permission."
                     }
                   },
                   "else": {
@@ -5466,7 +5479,7 @@
           "metadata": {
             "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
           },
-          "description": "SpyCloud MDE Blocklist (Scheduled) \u2014 Runs on a configurable schedule (default every 4 hours) to scan for severity 25 critical infostealer infections. Queries SpyCloudBreachWatchlist_CL for the highest severity exposures, searches MDE for matching devices, and isolates them with a 'SpyCloud-Sev25-Infostealer' tag. Proactive defense against the most dangerous infections. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate."
+          "description": "SpyCloud MDE Blocklist (Scheduled) — Runs on a configurable schedule (default every 4 hours) to scan for severity 25 critical infostealer infections. Queries SpyCloudBreachWatchlist_CL for the highest severity exposures, searches MDE for matching devices, and isolates them with a 'SpyCloud-Sev25-Infostealer' tag. Proactive defense against the most dangerous infections. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate."
         },
         "parameters": {
           "slackWebhook": {
@@ -5491,7 +5504,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'CredExposureWithSignIn', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Compromised Credential with Recent Entra Sign-In",
+        "displayName": "SpyCloud — Compromised Credential with Recent Entra Sign-In",
         "description": "Detects when a user whose credentials were exposed by SpyCloud has successfully signed into Entra ID within the last 24 hours. This indicates the compromised credential may still be active and the account is at immediate risk of takeover.",
         "severity": "High",
         "enabled": false,
@@ -5545,7 +5558,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'BreachTitleEnrichment', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 New Exposures with Breach Source Context",
+        "displayName": "SpyCloud — New Exposures with Breach Source Context",
         "description": "Enriches new SpyCloud watchlist records with breach catalog details (breach title, description) by joining on source_id. Fires when new high-severity exposures arrive from known breach sources, providing SOC analysts with the full context of where the data came from.",
         "severity": "Medium",
         "enabled": false,
@@ -5599,8 +5612,8 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'ExecutiveVIPExposure', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Executive / VIP Account Exposure",
-        "description": "Detects when VIP/executive accounts appear in SpyCloud data. Uses the SpyCloud-VIP-Watchlist (editable in Sentinel \u2192 Watchlists) for dynamic matching. Falls back to common executive patterns (ceo, cfo, cto, ciso, admin, root) if watchlist is empty. Edit the watchlist to add your organization's specific executives.",
+        "displayName": "SpyCloud — Executive / VIP Account Exposure",
+        "description": "Detects when VIP/executive accounts appear in SpyCloud data. Uses the SpyCloud-VIP-Watchlist (editable in Sentinel → Watchlists) for dynamic matching. Falls back to common executive patterns (ceo, cfo, cto, ciso, admin, root) if watchlist is empty. Edit the watchlist to add your organization's specific executives.",
         "severity": "High",
         "enabled": false,
         "query": "let vip_list = _GetWatchlist('SpyCloud-VIP-Watchlist') | project Email=tolower(Email);\nlet vip_fallback = datatable(Email:string)[\"ceo@\",\"cfo@\",\"cto@\",\"ciso@\",\"admin@\",\"root@\",\"vp@\",\"director@\",\"president@\"];\nlet vips = union vip_list, (vip_fallback | where Email !in (vip_list | project Email));\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| where tolower(email) in~ (vips | project Email) or email has_any (\"ceo\",\"cfo\",\"cto\",\"ciso\",\"admin\",\"root\",\"vp-\",\"director\")\n| project TimeGenerated, email, severity, breach_title, target_domain, infected_machine_id, password_type",
@@ -5653,8 +5666,8 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'PasswordReuseAcrossTargets', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Same Password Reused Across Multiple Target Domains",
-        "description": "Detects when the same password hash appears in exposures targeting 3 or more different domains for the same user. This indicates dangerous credential reuse \u2014 if one account is compromised, all accounts with the same password are at risk.",
+        "displayName": "SpyCloud — Same Password Reused Across Multiple Target Domains",
+        "description": "Detects when the same password hash appears in exposures targeting 3 or more different domains for the same user. This indicates dangerous credential reuse — if one account is compromised, all accounts with the same password are at risk.",
         "severity": "High",
         "enabled": false,
         "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(password) or isnotempty(password_plaintext)\n| extend pw_hash = hash_sha256(coalesce(password_plaintext, password))\n| summarize TargetDomains = make_set(target_domain, 20), DomainCount = dcount(target_domain) by email, pw_hash\n| where DomainCount >= 3\n| extend AccountCustomEntity = email",
@@ -5708,8 +5721,8 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'StaleRemediationCheck', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud \u2014 Exposure Older Than 7 Days Without Remediation",
-        "description": "Detects high-severity (20+) exposures that have been in the watchlist for more than 7 days but have no corresponding entry in either the MDE or CA remediation logs. This is a compliance and SLA alert \u2014 these exposures should have been remediated within your organization's defined response window.",
+        "displayName": "SpyCloud — Exposure Older Than 7 Days Without Remediation",
+        "description": "Detects high-severity (20+) exposures that have been in the watchlist for more than 7 days but have no corresponding entry in either the MDE or CA remediation logs. This is a compliance and SLA alert — these exposures should have been remediated within your organization's defined response window.",
         "severity": "Medium",
         "enabled": false,
         "query": "let mde_remediated = Spycloud_MDE_Logs_CL | distinct InfectedMachineId;\nlet ca_remediated = SpyCloud_ConditionalAccessLogs_CL | distinct UserEmail;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(7d)\n| where infected_machine_id !in (mde_remediated)\n| where email !in (ca_remediated)\n| summarize DaysExposed = datetime_diff('day', now(), min(TimeGenerated)), ExposureCount = count() by email, infected_machine_id\n| extend AccountCustomEntity = email",
@@ -5778,7 +5791,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxDNS\u2014InfectedUser'))]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxDNS—InfectedUser'))]",
       "apiVersion": "2023-02-01",
       "kind": "Scheduled",
       "location": "[parameters('deploymentRegion')]",
@@ -5788,8 +5801,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 DNS \u2014 Infected User Resolving Malicious Domains",
-        "description": "Cross-data correlation rule: SpyCloud \u00d7 DNS \u2014 Infected User Resolving Malicious Domains",
+        "displayName": "SpyCloud × DNS — Infected User Resolving Malicious Domains",
+        "description": "Cross-data correlation rule: SpyCloud × DNS — Infected User Resolving Malicious Domains",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 20\n| distinct email, target_domain;\nDnsEvents\n| where TimeGenerated > ago(1d)\n| where Name has_any (exposed | project target_domain)\n| join kind=inner exposed on $left.Name == $right.target_domain\n| project TimeGenerated, ClientIP, Name, email, target_domain, QueryType",
@@ -5820,7 +5833,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxNetwork\u2014Infected'))]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxNetwork—Infected'))]",
       "apiVersion": "2023-02-01",
       "kind": "Scheduled",
       "location": "[parameters('deploymentRegion')]",
@@ -5830,8 +5843,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Network \u2014 Infected IP in Device Network Events",
-        "description": "Cross-data correlation rule: SpyCloud \u00d7 Network \u2014 Infected IP in Device Network Events",
+        "displayName": "SpyCloud × Network — Infected IP in Device Network Events",
+        "description": "Cross-data correlation rule: SpyCloud × Network — Infected IP in Device Network Events",
         "severity": "High",
         "enabled": false,
         "query": "let ips = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 20\n| mv-expand ip = ip_addresses\n| extend src_ip = tostring(ip)\n| where isnotempty(src_ip)\n| distinct src_ip, email, infected_machine_id;\nDeviceNetworkEvents\n| where TimeGenerated > ago(1d)\n| where RemoteIP in~ (ips | project src_ip)\n| join kind=inner ips on $left.RemoteIP == $right.src_ip\n| project TimeGenerated, DeviceName, RemoteIP, RemoteUrl, email, infected_machine_id",
@@ -5862,7 +5875,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxMDEDevices\u2014Infec'))]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxMDEDevices—Infec'))]",
       "apiVersion": "2023-02-01",
       "kind": "Scheduled",
       "location": "[parameters('deploymentRegion')]",
@@ -5872,8 +5885,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 MDE Devices \u2014 Infected Machine in Defender Inventory",
-        "description": "Cross-data correlation rule: SpyCloud \u00d7 MDE Devices \u2014 Infected Machine in Defender Inventory",
+        "displayName": "SpyCloud × MDE Devices — Infected Machine in Defender Inventory",
+        "description": "Cross-data correlation rule: SpyCloud × MDE Devices — Infected Machine in Defender Inventory",
         "severity": "High",
         "enabled": false,
         "query": "let devices = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 20 and isnotempty(user_hostname)\n| distinct user_hostname, email, severity, infected_machine_id;\nDeviceInfo\n| where TimeGenerated > ago(1d)\n| join kind=inner devices on $left.DeviceName == $right.user_hostname\n| project TimeGenerated, DeviceName, DeviceId, OSPlatform, email, severity, infected_machine_id",
@@ -5904,7 +5917,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxMDEAlerts\u2014Exposu'))]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxMDEAlerts—Exposu'))]",
       "apiVersion": "2023-02-01",
       "kind": "Scheduled",
       "location": "[parameters('deploymentRegion')]",
@@ -5914,8 +5927,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 MDE Alerts \u2014 Exposure Correlated with Defender Alert",
-        "description": "Cross-data correlation rule: SpyCloud \u00d7 MDE Alerts \u2014 Exposure Correlated with Defender Alert",
+        "displayName": "SpyCloud × MDE Alerts — Exposure Correlated with Defender Alert",
+        "description": "Cross-data correlation rule: SpyCloud × MDE Alerts — Exposure Correlated with Defender Alert",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| distinct email;\nAlertInfo\n| where TimeGenerated > ago(2d)\n| join kind=inner AlertEvidence on AlertId\n| where EntityType == 'User'\n| extend upn = tolower(strcat(AccountName, '@', AccountDomain))\n| where upn in~ (exposed)\n| project TimeGenerated, AlertId, Title, Severity, upn, Category",
@@ -5946,7 +5959,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxCloudApps\u2014Compro'))]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxCloudApps—Compro'))]",
       "apiVersion": "2023-02-01",
       "kind": "Scheduled",
       "location": "[parameters('deploymentRegion')]",
@@ -5956,8 +5969,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Cloud Apps \u2014 Compromised User Accessing SaaS",
-        "description": "Cross-data correlation rule: SpyCloud \u00d7 Cloud Apps \u2014 Compromised User Accessing SaaS",
+        "displayName": "SpyCloud × Cloud Apps — Compromised User Accessing SaaS",
+        "description": "Cross-data correlation rule: SpyCloud × Cloud Apps — Compromised User Accessing SaaS",
         "severity": "Medium",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| distinct email;\nCloudAppEvents\n| where TimeGenerated > ago(2d)\n| where AccountId in~ (exposed)\n| where ActionType in ('FileDownloaded','FileUploaded','FileShared','MailSend')\n| summarize Actions=count(), Apps=dcount(Application) by AccountId, Application, ActionType",
@@ -5988,7 +6001,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxEntraRisk\u2014Expose'))]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxEntraRisk—Expose'))]",
       "apiVersion": "2023-02-01",
       "kind": "Scheduled",
       "location": "[parameters('deploymentRegion')]",
@@ -5998,8 +6011,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Entra Risk \u2014 Exposed User Flagged Risky",
-        "description": "Cross-data correlation rule: SpyCloud \u00d7 Entra Risk \u2014 Exposed User Flagged Risky",
+        "displayName": "SpyCloud × Entra Risk — Exposed User Flagged Risky",
+        "description": "Cross-data correlation rule: SpyCloud × Entra Risk — Exposed User Flagged Risky",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| distinct email;\nAADUserRiskEvents\n| where TimeGenerated > ago(2d)\n| where UserPrincipalName in~ (exposed)\n| project TimeGenerated, UserPrincipalName, RiskLevel, RiskState, RiskDetail",
@@ -6038,8 +6051,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Office 365 \u2014 Compromised User Mail Forwarding",
-        "description": "Cross-data: SpyCloud \u00d7 Office 365 \u2014 Compromised User Mail Forwarding",
+        "displayName": "SpyCloud × Office 365 — Compromised User Mail Forwarding",
+        "description": "Cross-data: SpyCloud × Office 365 — Compromised User Mail Forwarding",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email;\nOfficeActivity | where TimeGenerated > ago(2d) | where Operation in ('New-InboxRule','Set-InboxRule') and UserId in~ (exposed) | where Parameters has 'ForwardTo' or Parameters has 'RedirectTo' | project TimeGenerated, UserId, Operation, Parameters, ClientIP",
@@ -6080,8 +6093,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Email \u2014 Phishing Targeting Exposed Users",
-        "description": "Cross-data: SpyCloud \u00d7 Email \u2014 Phishing Targeting Exposed Users",
+        "displayName": "SpyCloud × Email — Phishing Targeting Exposed Users",
+        "description": "Cross-data: SpyCloud × Email — Phishing Targeting Exposed Users",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;\nEmailEvents | where TimeGenerated > ago(2d) | where RecipientEmailAddress in~ (exposed) and ThreatTypes has 'Phish' | project TimeGenerated, SenderFromAddress, RecipientEmailAddress, Subject, ThreatTypes",
@@ -6120,8 +6133,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Identity \u2014 Lateral Movement by Exposed User",
-        "description": "Cross-data: SpyCloud \u00d7 Identity \u2014 Lateral Movement by Exposed User",
+        "displayName": "SpyCloud × Identity — Lateral Movement by Exposed User",
+        "description": "Cross-data: SpyCloud × Identity — Lateral Movement by Exposed User",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;\nIdentityLogonEvents | where TimeGenerated > ago(2d) | where AccountUpn in~ (exposed) and LogonType in ('Interactive','RemoteInteractive') | where DestinationDeviceName != DeviceName | project TimeGenerated, AccountUpn, DeviceName, DestinationDeviceName, LogonType",
@@ -6160,8 +6173,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 TI \u2014 Infection IPs in Threat Intelligence",
-        "description": "Cross-data: SpyCloud \u00d7 TI \u2014 Infection IPs in Threat Intelligence",
+        "displayName": "SpyCloud × TI — Infection IPs in Threat Intelligence",
+        "description": "Cross-data: SpyCloud × TI — Infection IPs in Threat Intelligence",
         "severity": "High",
         "enabled": false,
         "query": "let ips = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | mv-expand ip = ip_addresses | extend src_ip = tostring(ip) | where isnotempty(src_ip) | distinct src_ip;\nThreatIntelligenceIndicator | where TimeGenerated > ago(7d) and isnotempty(NetworkIP) | where NetworkIP in (ips) | project TimeGenerated, NetworkIP, ThreatType, ConfidenceScore, Description",
@@ -6200,8 +6213,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 UEBA \u2014 Anomalous Behavior from Exposed User",
-        "description": "Cross-data: SpyCloud \u00d7 UEBA \u2014 Anomalous Behavior from Exposed User",
+        "displayName": "SpyCloud × UEBA — Anomalous Behavior from Exposed User",
+        "description": "Cross-data: SpyCloud × UEBA — Anomalous Behavior from Exposed User",
         "severity": "Medium",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email;\nBehaviorAnalytics | where TimeGenerated > ago(2d) | where UserPrincipalName in~ (exposed) | where ActivityInsights has 'True' or InvestigationPriority > 3 | project TimeGenerated, UserPrincipalName, ActivityType, InvestigationPriority",
@@ -6240,8 +6253,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Azure \u2014 Exposed User Modifying Cloud Resources",
-        "description": "Cross-data: SpyCloud \u00d7 Azure \u2014 Exposed User Modifying Cloud Resources",
+        "displayName": "SpyCloud × Azure — Exposed User Modifying Cloud Resources",
+        "description": "Cross-data: SpyCloud × Azure — Exposed User Modifying Cloud Resources",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;\nAzureActivity | where TimeGenerated > ago(2d) | where Caller in~ (exposed) | where OperationNameValue has 'write' or OperationNameValue has 'delete' | where ActivityStatusValue == 'Success' | project TimeGenerated, Caller, OperationNameValue, ResourceGroup",
@@ -6280,8 +6293,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud Compass \u2014 Consumer + Corporate Cross-Reference",
-        "description": "Cross-data: SpyCloud Compass \u2014 Consumer + Corporate Cross-Reference",
+        "displayName": "SpyCloud Compass — Consumer + Corporate Cross-Reference",
+        "description": "Cross-data: SpyCloud Compass — Consumer + Corporate Cross-Reference",
         "severity": "Medium",
         "enabled": false,
         "query": "SpyCloudCompassData_CL | where TimeGenerated > ago(7d) and severity >= 20 | join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) | distinct email, severity) on email | project TimeGenerated, email, breach_title, target_domain, CompassSev=severity, CorporateSev=severity1",
@@ -6321,8 +6334,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Firewall \u2014 Infected IP in Security Logs",
-        "description": "Cross-data: SpyCloud \u00d7 Firewall \u2014 Infected IP in Security Logs",
+        "displayName": "SpyCloud × Firewall — Infected IP in Security Logs",
+        "description": "Cross-data: SpyCloud × Firewall — Infected IP in Security Logs",
         "severity": "High",
         "enabled": false,
         "query": "let ips = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | mv-expand ip = ip_addresses | extend src_ip = tostring(ip) | where isnotempty(src_ip) | distinct src_ip;\nCommonSecurityLog | where TimeGenerated > ago(1d) | where SourceIP in (ips) or DestinationIP in (ips) | project TimeGenerated, SourceIP, DestinationIP, DeviceAction, DeviceVendor",
@@ -6361,8 +6374,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u00d7 Impossible Travel \u2014 Sign-In from Unexpected Country",
-        "description": "Cross-data: SpyCloud \u00d7 Impossible Travel \u2014 Sign-In from Unexpected Country",
+        "displayName": "SpyCloud × Impossible Travel — Sign-In from Unexpected Country",
+        "description": "Cross-data: SpyCloud × Impossible Travel — Sign-In from Unexpected Country",
         "severity": "High",
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email, country_code;\nSigninLogs | where TimeGenerated > ago(2d) and ResultType == 0 | where UserPrincipalName in~ (exposed | project email) | extend cc = tostring(LocationDetails.countryOrRegion) | join kind=inner (exposed | project email, sc_cc=country_code) on $left.UserPrincipalName == $right.email | where cc != sc_cc and isnotempty(cc) | project TimeGenerated, UserPrincipalName, cc, sc_cc, IPAddress",
@@ -6401,8 +6414,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "SpyCloud Compass \u2014 Device Reinfection Detected",
-        "description": "Cross-data: SpyCloud Compass \u2014 Device Reinfection Detected",
+        "displayName": "SpyCloud Compass — Device Reinfection Detected",
+        "description": "Cross-data: SpyCloud Compass — Device Reinfection Detected",
         "severity": "High",
         "enabled": false,
         "query": "SpyCloudCompassDevices_CL | where TimeGenerated > ago(7d) | join kind=inner (SpyCloudCompassDevices_CL | where TimeGenerated between(ago(60d) .. ago(7d)) | distinct user_hostname, user_os) on user_hostname | project TimeGenerated, user_hostname, user_os, application_count, ip_addresses",
@@ -6441,7 +6454,7 @@
         "[resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName'))]"
       ],
       "properties": {
-        "displayName": "SpyCloud \u2014 Auto-Trigger Remediation Playbooks",
+        "displayName": "SpyCloud — Auto-Trigger Remediation Playbooks",
         "description": "Automatically runs SpyCloud playbooks when analytics rules create incidents. MDE isolation for severity 20+, CA password reset for all credential exposures, Credential Response for full investigation workflow.",
         "order": 1,
         "triggeringLogic": {
@@ -6485,7 +6498,7 @@
       ],
       "properties": {
         "displayName": "SpyCloud VIP/Executive Watchlist",
-        "description": "Editable list of VIP and executive email addresses for elevated SpyCloud alerting. Add emails to this watchlist and Rule #20 (Executive/VIP Exposure) will dynamically match against it. Edit in Sentinel \u2192 Watchlists \u2192 SpyCloud-VIP-Watchlist.",
+        "description": "Editable list of VIP and executive email addresses for elevated SpyCloud alerting. Add emails to this watchlist and Rule #20 (Executive/VIP Exposure) will dynamically match against it. Edit in Sentinel → Watchlists → SpyCloud-VIP-Watchlist.",
         "provider": "SpyCloud",
         "source": "SpyCloud Sentinel Solution",
         "itemsSearchKey": "Email",
@@ -6503,13 +6516,13 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Exposed Users with Active Sign-Ins",
+        "displayName": "SpyCloud Hunt — Exposed Users with Active Sign-Ins",
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email, severity, breach_title;\nSigninLogs | where TimeGenerated > ago(2d) and ResultType == 0 | where UserPrincipalName in~ (exposed | project email) | join kind=inner exposed on $left.UserPrincipalName == $right.email | summarize SignIns=count(), Apps=dcount(AppDisplayName), IPs=dcount(IPAddress) by UserPrincipalName, severity, breach_title | order by severity desc",
         "version": 2,
         "tags": [
           {
             "name": "description",
-            "value": "Finds users whose credentials were exposed in SpyCloud AND who have successful Entra ID sign-ins in the last 48 hours. These are the highest-priority accounts \u2014 an attacker may already be using the stolen credentials."
+            "value": "Finds users whose credentials were exposed in SpyCloud AND who have successful Entra ID sign-ins in the last 48 hours. These are the highest-priority accounts — an attacker may already be using the stolen credentials."
           },
           {
             "name": "tactics",
@@ -6532,7 +6545,7 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Infected IPs Across All Network Logs",
+        "displayName": "SpyCloud Hunt — Infected IPs Across All Network Logs",
         "query": "let ips = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | mv-expand ip = ip_addresses | extend src_ip = tostring(ip) | where isnotempty(src_ip) | distinct src_ip;\nunion isfuzzy=true\n(DeviceNetworkEvents | where TimeGenerated > ago(7d) | where RemoteIP in (ips) | summarize Hits=count() by RemoteIP, DeviceName | extend Source=\"MDE\"),\n(DnsEvents | where TimeGenerated > ago(7d) | where ClientIP in (ips) | summarize Hits=count() by ClientIP | extend Source=\"DNS\"),\n(CommonSecurityLog | where TimeGenerated > ago(7d) | where SourceIP in (ips) or DestinationIP in (ips) | summarize Hits=count() by SourceIP, DestinationIP | extend Source=\"Firewall\"),\n(ThreatIntelligenceIndicator | where TimeGenerated > ago(30d) | where NetworkIP in (ips) | summarize Hits=count() by NetworkIP, ThreatType | extend Source=\"TI\")\n| order by Hits desc",
         "version": 2,
         "tags": [
@@ -6561,13 +6574,13 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Password Reuse Across Domains",
+        "displayName": "SpyCloud Hunt — Password Reuse Across Domains",
         "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) and isnotempty(password) | summarize Domains=dcount(target_domain), DomainList=make_set(target_domain, 10), Exposures=count(), MaxSev=max(severity) by email, password | where Domains >= 3 | project email, Domains, DomainList, Exposures, MaxSev | order by Domains desc",
         "version": 2,
         "tags": [
           {
             "name": "description",
-            "value": "Identifies users whose same password hash appears across 3+ different target domains \u2014 indicating dangerous password reuse. These users are vulnerable to credential stuffing attacks across all their accounts."
+            "value": "Identifies users whose same password hash appears across 3+ different target domains — indicating dangerous password reuse. These users are vulnerable to credential stuffing attacks across all their accounts."
           },
           {
             "name": "tactics",
@@ -6590,13 +6603,13 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Devices Infected Multiple Times",
+        "displayName": "SpyCloud Hunt — Devices Infected Multiple Times",
         "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(90d) and isnotempty(infected_machine_id) | summarize Infections=count(), Sources=dcount(source_id), Users=dcount(email), FirstSeen=min(spycloud_publish_date), LastSeen=max(spycloud_publish_date) by infected_machine_id, user_hostname, user_os | where Infections > 1 | order by Infections desc",
         "version": 2,
         "tags": [
           {
             "name": "description",
-            "value": "Finds devices that appear in SpyCloud data across multiple breach sources or time periods \u2014 indicating the device was not properly remediated after the first infection, or the user continues risky behavior."
+            "value": "Finds devices that appear in SpyCloud data across multiple breach sources or time periods — indicating the device was not properly remediated after the first infection, or the user continues risky behavior."
           },
           {
             "name": "tactics",
@@ -6619,7 +6632,7 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Plaintext Passwords by Domain",
+        "displayName": "SpyCloud Hunt — Plaintext Passwords by Domain",
         "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) and isnotempty(password_plaintext) | summarize PlaintextCount=count(), Users=dcount(email), Domains=dcount(target_domain), MaxSev=max(severity) by email_domain | order by PlaintextCount desc",
         "version": 2,
         "tags": [
@@ -6648,13 +6661,13 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Compass Consumer + Corporate Overlap",
+        "displayName": "SpyCloud Hunt — Compass Consumer + Corporate Overlap",
         "query": "SpyCloudCompassData_CL | where TimeGenerated > ago(30d) and severity >= 20 | join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | distinct email, severity) on email | summarize CompassHits=count(), CorporateMaxSev=max(severity1), CompassMaxSev=max(severity), Domains=dcount(target_domain) by email | order by CorporateMaxSev desc",
         "version": 2,
         "tags": [
           {
             "name": "description",
-            "value": "Cross-references SpyCloud Compass (consumer identity) data with corporate watchlist data. Users appearing in both datasets are reusing personal credentials for corporate accounts \u2014 a major risk vector."
+            "value": "Cross-references SpyCloud Compass (consumer identity) data with corporate watchlist data. Users appearing in both datasets are reusing personal credentials for corporate accounts — a major risk vector."
           },
           {
             "name": "tactics",
@@ -6677,13 +6690,13 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Unremediated High-Severity Exposures",
+        "displayName": "SpyCloud Hunt — Unremediated High-Severity Exposures",
         "query": "let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(14d) | distinct tolower(Email);\nSpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | where tolower(email) !in (remediated) | summarize Exposures=count(), MaxSev=max(severity), Domains=dcount(target_domain), LatestExposure=max(TimeGenerated) by email | order by MaxSev desc, Exposures desc",
         "version": 2,
         "tags": [
           {
             "name": "description",
-            "value": "Identifies high-severity (20+) exposures that have NOT been remediated by the CA playbook. These are the most urgent action items \u2014 exposed credentials without a password reset."
+            "value": "Identifies high-severity (20+) exposures that have NOT been remediated by the CA playbook. These are the most urgent action items — exposed credentials without a password reset."
           },
           {
             "name": "tactics",
@@ -6706,7 +6719,7 @@
       "condition": "[parameters('enableAnalyticsRule')]",
       "properties": {
         "category": "SpyCloud Hunting",
-        "displayName": "SpyCloud Hunt \u2014 Risk Score Dashboard",
+        "displayName": "SpyCloud Hunt — Risk Score Dashboard",
         "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize Exposures=count(), MaxSev=max(severity), PlaintextPWs=countif(isnotempty(password_plaintext)), Devices=dcountif(infected_machine_id, isnotempty(infected_machine_id)), Domains=dcount(target_domain), DaysSince=datetime_diff('day',now(),max(TimeGenerated)) by email | extend Score = Exposures*2 + MaxSev*3 + PlaintextPWs*10 + Devices*15 + iff(DaysSince<7,20,iff(DaysSince<30,10,0)) | extend Risk=case(Score>=100,\"CRITICAL\",Score>=50,\"HIGH\",Score>=20,\"MEDIUM\",\"LOW\") | order by Score desc | take 100",
         "version": 2,
         "tags": [
@@ -6797,10 +6810,10 @@
         "step3_sentinel_automation": "REQUIRED (if automation rule enabled): Assign 'Microsoft Sentinel Automation Contributor' to the Sentinel service principal",
         "step4_monitoring_publisher": "REQUIRED (if playbooks enabled): Assign 'Monitoring Metrics Publisher' on the DCR to both Logic App identities",
         "step5_key_vault_access": "OPTIONAL: If using Key Vault with Logic Apps, assign Key Vault Secrets User role to Logic App identities",
-        "step6_defender_xdr": "OPTIONAL: Enable Microsoft Defender XDR connector via Sentinel \u2192 Content Hub",
-        "step7_copilot_plugin": "OPTIONAL: Upload SpyCloud_Copilot_Plugin_Ultimate.yaml to Security Copilot \u2192 Sources \u2192 Custom",
-        "step8_copilot_agent": "OPTIONAL: Upload SpyCloud_Agent_Manifest.yaml via Security Copilot \u2192 Build \u2192 Upload YAML manifest",
-        "step0_dcr_dce": "REQUIRED (if playbooks enabled): Get the DCE Logs Ingestion URI and DCR Immutable ID. Go to Azure Portal \u2192 Monitor \u2192 Data Collection Endpoints \u2192 copy Logs Ingestion URI. Then Monitor \u2192 Data Collection Rules \u2192 JSON View \u2192 copy immutableId. Update the Logic App parameters with these values, or redeploy the template with them filled in."
+        "step6_defender_xdr": "OPTIONAL: Enable Microsoft Defender XDR connector via Sentinel → Content Hub",
+        "step7_copilot_plugin": "OPTIONAL: Upload SpyCloud_Copilot_Plugin_Ultimate.yaml to Security Copilot → Sources → Custom",
+        "step8_copilot_agent": "OPTIONAL: Upload SpyCloud_Agent_Manifest.yaml via Security Copilot → Build → Upload YAML manifest",
+        "step0_dcr_dce": "REQUIRED (if playbooks enabled): Get the DCE Logs Ingestion URI and DCR Immutable ID. Go to Azure Portal → Monitor → Data Collection Endpoints → copy Logs Ingestion URI. Then Monitor → Data Collection Rules → JSON View → copy immutableId. Update the Logic App parameters with these values, or redeploy the template with them filled in."
       }
     },
     "notificationInfo": {
@@ -6827,29 +6840,29 @@
         "allDisabledByDefault": true,
         "spycloudRules": 12,
         "idpCorrelationRules": 4,
-        "note": "ALL rules are deployed DISABLED. Review each rule's KQL logic, then enable individually in Sentinel \u2192 Analytics.",
+        "note": "ALL rules are deployed DISABLED. Review each rule's KQL logic, then enable individually in Sentinel → Analytics.",
         "idpNote": "Identity Provider correlation rules (Okta, Duo, Ping, Entra) require those IdP logs to be ingested into Sentinel first via their respective Content Hub connectors."
       }
     },
     "identityProviderGuidance": {
       "type": "object",
       "value": {
-        "okta": "To ingest Okta logs: Sentinel \u2192 Content Hub \u2192 search 'Okta' \u2192 Install \u2192 Configure with Okta API token. Table: Okta_CL",
-        "duo": "To ingest Duo logs: Sentinel \u2192 Content Hub \u2192 search 'Cisco Duo' \u2192 Install \u2192 Configure with Duo Admin API credentials. Table: Duo_CL",
+        "okta": "To ingest Okta logs: Sentinel → Content Hub → search 'Okta' → Install → Configure with Okta API token. Table: Okta_CL",
+        "duo": "To ingest Duo logs: Sentinel → Content Hub → search 'Cisco Duo' → Install → Configure with Duo Admin API credentials. Table: Duo_CL",
         "ping": "To ingest Ping Identity logs: Configure syslog forwarding from PingFederate to Sentinel via AMA agent, or use the PingOne API connector. Table: PingFederate_CL",
-        "cyberark": "To ingest CyberArk logs: Sentinel \u2192 Content Hub \u2192 search 'CyberArk' \u2192 Install \u2192 Configure CEF/syslog forwarding. Table: CyberArk_CL",
-        "entraId": "Entra ID sign-in/audit logs: Enable via this template's enableEntraSignInLogs and enableEntraAuditLogs parameters, or manually via Entra ID \u2192 Diagnostic Settings.",
-        "defenderXdr": "Defender XDR: Enable via Sentinel \u2192 Content Hub \u2192 Microsoft Defender XDR \u2192 Install & Connect. Provides AlertInfo, DeviceEvents, IdentityLogonEvents tables.",
-        "exchangeOnline": "Exchange/O365: Enable via Sentinel \u2192 Content Hub \u2192 Microsoft 365 \u2192 Install. Provides OfficeActivity, EmailEvents tables for phishing correlation."
+        "cyberark": "To ingest CyberArk logs: Sentinel → Content Hub → search 'CyberArk' → Install → Configure CEF/syslog forwarding. Table: CyberArk_CL",
+        "entraId": "Entra ID sign-in/audit logs: Enable via this template's enableEntraSignInLogs and enableEntraAuditLogs parameters, or manually via Entra ID → Diagnostic Settings.",
+        "defenderXdr": "Defender XDR: Enable via Sentinel → Content Hub → Microsoft Defender XDR → Install & Connect. Provides AlertInfo, DeviceEvents, IdentityLogonEvents tables.",
+        "exchangeOnline": "Exchange/O365: Enable via Sentinel → Content Hub → Microsoft 365 → Install. Provides OfficeActivity, EmailEvents tables for phishing correlation."
       }
     },
     "entraIdSetup": {
       "type": "object",
       "value": {
         "note": "Entra ID diagnostic settings CANNOT be deployed via ARM templates. Configure manually:",
-        "signInLogs": "Entra ID \u2192 Monitoring \u2192 Diagnostic settings \u2192 Add diagnostic setting \u2192 check SignInLogs, NonInteractiveUserSignInLogs \u2192 Send to Log Analytics workspace \u2192 select your workspace",
-        "auditLogs": "Entra ID \u2192 Monitoring \u2192 Diagnostic settings \u2192 Add diagnostic setting \u2192 check AuditLogs \u2192 Send to Log Analytics workspace \u2192 select your workspace",
-        "riskySignIns": "Entra ID \u2192 Monitoring \u2192 Diagnostic settings \u2192 Add diagnostic setting \u2192 check RiskyUsers, UserRiskEvents \u2192 Send to Log Analytics workspace"
+        "signInLogs": "Entra ID → Monitoring → Diagnostic settings → Add diagnostic setting → check SignInLogs, NonInteractiveUserSignInLogs → Send to Log Analytics workspace → select your workspace",
+        "auditLogs": "Entra ID → Monitoring → Diagnostic settings → Add diagnostic setting → check AuditLogs → Send to Log Analytics workspace → select your workspace",
+        "riskySignIns": "Entra ID → Monitoring → Diagnostic settings → Add diagnostic setting → check RiskyUsers, UserRiskEvents → Send to Log Analytics workspace"
       }
     },
     "postDeployResults": {
@@ -6883,7 +6896,7 @@
       "type": "object",
       "value": {
         "name": "SpyCloud Threat Intelligence Dashboard",
-        "location": "Sentinel \u2192 Workbooks \u2192 My workbooks \u2192 SpyCloud Threat Intelligence Dashboard"
+        "location": "Sentinel → Workbooks → My workbooks → SpyCloud Threat Intelligence Dashboard"
       }
     },
     "playbookInfo": {
