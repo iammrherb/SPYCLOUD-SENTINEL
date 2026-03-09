@@ -56,6 +56,27 @@
                 "label": "Workspace & SpyCloud API",
                 "elements": [
                     {
+                        "name": "deploymentMode",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Deployment Mode",
+                        "toolTip": "Full = first-time (creates workspace, DCE, DCR, tables, everything). Update = add/update rules, playbooks, workbook on existing deployment.",
+                        "defaultValue": "Full",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues": [
+                                {
+                                    "label": "Full - First-time deployment",
+                                    "value": "Full"
+                                },
+                                {
+                                    "label": "Update - Add features to existing",
+                                    "value": "Update"
+                                }
+                            ]
+                        },
+                        "visible": true
+                    },
+                    {
                         "name": "sectionWorkspace",
                         "type": "Microsoft.Common.Section",
                         "label": "Log Analytics Workspace",
@@ -595,7 +616,8 @@
             "slackWebhookUrl": "[steps('securityConfig').sectionIntegrations.slackWebhookUrl]",
             "jiraWebhookUrl": "[steps('securityConfig').sectionIntegrations.jiraWebhookUrl]",
             "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]",
-            "apiRegion": "[steps('workspaceConfig').apiRegion]"
+            "apiRegion": "[steps('workspaceConfig').apiRegion]",
+            "deploymentMode": "[steps('workspaceConfig').deploymentMode]"
         }
     }
 }

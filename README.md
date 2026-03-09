@@ -150,6 +150,44 @@ SpyCloud API  ──▶  CCF Pollers  ──▶  DCE  ──▶  DCR (KQL transf
 
 ---
 
+
+## License Requirements
+
+### Works Immediately (No Extra Licenses)
+
+| Component | What You Need | Status |
+|-----------|--------------|--------|
+| Connector + 5 API pollers | SpyCloud Enterprise API key | Required |
+| DCR + 6 custom tables | Azure Monitor (included with Sentinel) | Works immediately |
+| 38 analytics rules + incidents | Microsoft Sentinel | Works immediately |
+| 22-chart workbook dashboard | Microsoft Sentinel | Works immediately |
+| 8 hunting queries | Microsoft Sentinel | Works immediately |
+| 115 Copilot skills | Security Copilot license | If licensed |
+| Slack + Teams + Email notifications | No Azure license needed | Works immediately |
+| ServiceNow + Jira + DevOps tickets | No Azure license needed | Works immediately |
+| Health monitoring alerts | Azure Monitor (included) | Works immediately |
+
+### Requires Additional Licenses (Playbooks)
+
+| Playbook | License Required | What Happens Without It |
+|----------|-----------------|------------------------|
+| MDE Device Isolation | **Defender for Endpoint P1 or P2** | Deploys but cannot isolate devices. MDE service principal won't exist in your tenant. |
+| MDE Blocklist (Scheduled) | **Defender for Endpoint P1 or P2** | Deploys but cannot isolate devices. Notifications still fire. |
+| CA Identity Protection | **Entra ID P1 or P2** | Deploys but cannot reset passwords or revoke sessions. |
+| Credential Response | **Entra ID P1 or P2** | Notifications (Slack/Teams/Email/tickets) work. Password reset does not. |
+
+### Granting Playbook Permissions (When Licensed)
+
+When you have the required licenses, grant API permissions from Cloud Shell:
+
+```bash
+curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/grant-permissions.sh | bash -s -- -g YOUR-RG -w YOUR-WS
+```
+
+Or manually: Entra ID → Enterprise Applications → filter "Managed Identities" → find SpyCloud Logic Apps → Permissions → Grant admin consent.
+
+> **Note:** You won't see SpyCloud entries in App Registrations — the Logic Apps use system-assigned managed identities, which appear under Enterprise Applications → Managed Identities only after permissions are granted.
+
 ## Prerequisites
 
 | Requirement | Details |
