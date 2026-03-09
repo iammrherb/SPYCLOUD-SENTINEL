@@ -1703,7 +1703,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectorDefinitions",
-      "apiVersion": "2022-09-01-preview",
+      "apiVersion": "2024-09-01",
       "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',variables('_dataConnectorContentIdConnectorDefinition'))]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
       "kind": "Customizable",
@@ -2223,10 +2223,6 @@
             }
           ],
           "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
-          "dcrConfig": {
-            "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
-            "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace'))), '2022-06-01').immutableId]"
-          },
           "availability": {
             "status": 1,
             "isPreview": false
@@ -2235,9 +2231,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
-        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
-        "[resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace')))]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ]
     },
     {
@@ -2343,8 +2337,8 @@
             "dcrConfig": {
               "type": "object",
               "defaultValue": {
-                "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
-                "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace'))), '2022-06-01').immutableId]"
+                "dataCollectionEndpoint": "data collection Endpoint",
+                "dataCollectionRuleImmutableId": "data collection rule immutableId"
               }
             },
             "watchlistType": {
@@ -2425,7 +2419,7 @@
             },
             {
               "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'SpyCloudWatchlistConnector')]",
-              "apiVersion": "2022-12-01-preview",
+              "apiVersion": "2024-09-01",
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
@@ -2477,7 +2471,7 @@
             },
             {
               "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'SpyCloudWatchlistConnectorModified')]",
-              "apiVersion": "2022-12-01-preview",
+              "apiVersion": "2024-09-01",
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
@@ -2530,7 +2524,7 @@
             },
             {
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudBreachCatalogConnector')]",
-              "apiVersion": "2022-12-01-preview",
+              "apiVersion": "2024-09-01",
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
@@ -2579,7 +2573,7 @@
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
-              "apiVersion": "2023-02-01",
+              "apiVersion": "2024-09-01",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDataConnector')]",
               "kind": "RestApiPoller",
               "properties": {
@@ -2629,7 +2623,7 @@
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
-              "apiVersion": "2023-02-01",
+              "apiVersion": "2024-09-01",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDevicesConnector')]",
               "kind": "RestApiPoller",
               "properties": {
