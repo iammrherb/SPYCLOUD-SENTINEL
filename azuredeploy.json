@@ -277,7 +277,7 @@
     },
     "enablePostDeployScript": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "This parameter is reserved. Post-deployment configuration (DCE/DCR resolution, RBAC, API permissions) is handled by scripts/post-deploy.sh or scripts/deploy-all.sh. Run one of these scripts after deployment completes."
       }
