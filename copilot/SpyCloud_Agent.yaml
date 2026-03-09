@@ -903,3 +903,69 @@ AgentDefinitions:
     DefaultPollPeriodSeconds: 0
     ProcessSkill: SpyCloud.ThreatIntelligence.SentinelAgent.SpyCloudInvestigationAgent
   PromptSkill: SpyCloud.ThreatIntelligence.SentinelAgent.SpyCloudInvestigationAgent
+
+      # =====================================================================
+      # PHASE 3: ADVANCED INVESTIGATION & RESPONSE
+      # =====================================================================
+
+      - Name: InvestigateFullExposureChain
+        DisplayName: Full exposure investigation chain
+        Description: |
+          Performs a comprehensive multi-table investigation for a user: SpyCloud exposures → sign-in activity → email behavior → device status → remediation history. Provides a complete timeline with risk assessment and recommended actions.
+        Inputs:
+          - Name: UserEmail
+            Description: Email to investigate
+            Required: true
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let user = "{{UserEmail}}";
+            let exposures = SpyCloudBreachWatchlist_CL | where email =~ user and TimeGenerated > ago(90d);
+            let signins = SigninLogs | where UserPrincipalName =~ user and TimeGenerated > ago(30d);
+            let remediated = SpyCloud_ConditionalAccessLogs_CL | where Email =~ user and TimeGenerated > ago(30d);
+            union isfuzzy=true
+            (exposures | summarize Exposures=count(), MaxSev=max(severity), Breaches=dcount(source_id), PlaintextPWs=countif(isnotempty(password_plaintext)), Devices=dcount(infected_machine_id) | extend Phase="1-Exposure"),
+            (signins | where ResultType == 0 | summarize SuccessSignIns=count(), UniqueIPs=dcount(IPAddress), Countries=dcount(tostring(LocationDetails.countryOrRegion)) | extend Phase="2-SignInActivity"),
+            (remediated | summarize Resets=countif(Action=="PasswordReset"), Revokes=countif(Action=="SessionRevoke") | extend Phase="3-Remediation")
+
+      - Name: GenerateIncidentSummary
+        DisplayName: Generate incident summary report
+        Description: |
+          Creates a structured incident summary for a SpyCloud exposure event including affected users, severity assessment, remediation status, and recommended next steps. Designed for SOC handoff or management reporting.
+        Inputs:
+          - Name: HoursBack
+            Description: Hours to look back (default 24)
+            Required: false
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let timeframe = ago({{HoursBack}}h);
+            let new_exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > timeframe;
+            let mde_actions = Spycloud_MDE_Logs_CL | where TimeGenerated > timeframe;
+            let ca_actions = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > timeframe;
+            union isfuzzy=true
+            (new_exposures | summarize v=count() | extend Category="New Exposures"),
+            (new_exposures | where severity == 25 | summarize v=count() | extend Category="Critical (Sev 25)"),
+            (new_exposures | where severity == 20 | summarize v=count() | extend Category="High (Sev 20)"),
+            (new_exposures | summarize v=dcount(email) | extend Category="Unique Users Affected"),
+            (new_exposures | where isnotempty(infected_machine_id) | summarize v=dcount(infected_machine_id) | extend Category="Infected Devices"),
+            (mde_actions | summarize v=count() | extend Category="MDE Isolations Performed"),
+            (ca_actions | summarize v=count() | extend Category="CA Resets Performed"),
+            (new_exposures | where severity >= 20 and email !in~ (ca_actions | distinct Email) | summarize v=dcount(email) | extend Category="⚠️ High-Sev UNREMEDIATED")
+            | project Category, Value=v
+
+      - Name: DetectPermissionGaps
+        DisplayName: Detect missing permissions for playbooks
+        Description: |
+          Checks if SpyCloud playbooks have been executing successfully by analyzing audit logs. Identifies permission gaps by looking for failed actions, missing remediation for high-severity exposures, and playbook execution health.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let exposed_sev20 = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;
+            let mde_acted = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | distinct Email;
+            let ca_acted = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;
+            union isfuzzy=true
+            (exposed_sev20 | where email !in~ (ca_acted) | summarize Unremediated=count() | extend Check="Users sev20+ without CA reset", Status=iff(Unremediated > 0, "⚠️ GAP", "✅ OK")),
+            (Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) and Status != "Success" | summarize Failures=count() | extend Check="MDE playbook failures", Status=iff(Failures > 0, "⚠️ CHECK", "✅ OK")),
+            (SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) and Status != "Success" | summarize Failures=count() | extend Check="CA playbook failures", Status=iff(Failures > 0, "⚠️ CHECK", "✅ OK"))
+            | project Check, Status

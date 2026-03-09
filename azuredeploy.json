@@ -3182,7 +3182,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**A. SpyCloud Account & API Key**\n\n| Requirement | Details |\n\n|-------------|----------|\n\n| Subscription | Active SpyCloud Enterprise or Enterprise+ API plan |\n\n| API Key | Generate from portal.spycloud.com \u2192 Settings \u2192 API Keys |\n\n| API Region | US (api.spycloud.io) \u2014 configured automatically |\n\n**B. Azure Permissions Required**\n\n| Role | Scope |\n\n|------|-------|\n\n| Microsoft Sentinel Contributor | Resource Group |\n\n| Log Analytics Contributor | Workspace |\n\n| Monitoring Metrics Publisher | Data Collection Rule |\n\n**C. Network:** Outbound HTTPS to api.spycloud.io:443 and *.ingest.monitor.azure.com:443\n\n**D. Data Retention:** Set at workspace level during deployment (default 90 days, max 730). Change after deployment: Log Analytics workspace \u2192 Usage and estimated costs \u2192 Data Retention."
+                    "text": "### Pre-Flight Checklist\n\nVerify ALL items before clicking Connect:\n\n| Check | Requirement | How to Verify |\n|-------|-------------|---------------|\n| API Key | SpyCloud Enterprise API key | portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| Permissions | Sentinel Contributor + Log Analytics Contributor | IAM \u2192 Role assignments on resource group |\n| Network | Outbound HTTPS to api.spycloud.io:443 | `curl -s https://api.spycloud.io/health` |\n| DCE Created | Data Collection Endpoint exists | Monitor \u2192 Data Collection Endpoints |\n| DCR Created | Data Collection Rule exists | Monitor \u2192 Data Collection Rules |\n| Tables Created | 6 SpyCloud tables exist | Log Analytics \u2192 Tables \u2192 search 'SpyCloud' |\n| Playbooks | Logic Apps deployed and enabled | Logic Apps \u2192 verify 4 SpyCloud apps |\n| MDE Permissions | Machine.Isolate + Machine.ReadWrite.All | Entra \u2192 Enterprise Apps \u2192 Managed Identities |\n| Graph Permissions | User.ReadWrite.All + Directory.ReadWrite.All | Same as above |\n| Retention | Workspace retention set (recommend 365 days) | Workspace \u2192 Usage \u2192 Data Retention |\n\n**Playbook Permissions:** After deployment, grant admin consent for each Logic App managed identity:\n1. Entra ID \u2192 Enterprise Applications \u2192 filter 'Managed Identities'\n2. Find SpyCloud-MDE-Remediation, SpyCloud-CA-Remediation, SpyCloud-CredResponse\n3. Permissions \u2192 Grant admin consent\n\n**Network:** No inbound rules needed \u2014 this is a pull-based connector."
                   }
                 }
               ]
@@ -3470,7 +3470,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Verify data is flowing:**\n```\nSpyCloudBreachWatchlist_CL | summarize count(), max(TimeGenerated)\n```\n\n**Run full health check:**\n```\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\n**Troubleshooting:** 401 = wrong API key | 403 = not Enterprise tier | No data after 10min = check network to api.spycloud.io"
+                    "text": "### Verify Data Pipeline\n\n```kql\n// Check all 6 tables\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Watchlist\"),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Catalog\"),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Compass Data\"),\n(SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Compass Devices\"),\n(Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"MDE Logs\"),\n(SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"CA Logs\")\n| project Table, Records, Latest\n```\n\n### Automated Health Check\n```bash\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\n### Verify Permissions\n```bash\n# Check Logic App managed identity permissions\naz ad sp show --id $(az logic workflow show -g YOUR-RG -n SpyCloud-MDE-Remediation-YOUR-WS --query identity.principalId -o tsv) --query appRoles\n```\n\n### Troubleshooting\n\n| Symptom | Fix |\n|---------|---------|\n| No data after 10 min | Check DCR exists: Monitor \u2192 Data Collection Rules |\n| 401 on connect | Wrong API key \u2014 must be Enterprise tier |\n| 400 on connect | Check API key at portal.spycloud.com |\n| Playbooks not triggering | Grant admin consent for managed identities |\n| Rules not visible | Check enableAnalyticsRule=true in deployment |\n| Workbook empty | Tables created but no data yet \u2014 wait for first poll |"
                   }
                 }
               ]
@@ -7777,6 +7777,49 @@
             "matchingMethod": "AllEntities"
           }
         }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoResponse'))]",
+      "location": "[parameters('deploymentRegion')]",
+      "condition": "[and(parameters('enableAutomationRule'), parameters('enableAnalyticsRule'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud \u2014 Auto-Trigger Remediation Playbooks",
+        "description": "Automatically runs SpyCloud playbooks when analytics rules create incidents. MDE isolation for severity 20+, CA password reset for all credential exposures, Credential Response for full investigation workflow.",
+        "order": 1,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Equals",
+                "propertyValues": [
+                  "Azure Sentinel"
+                ]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "RunPlaybook",
+            "actionConfiguration": {
+              "logicAppResourceId": "[if(parameters('enableCredResponsePlaybook'), resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName')), '')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          }
+        ]
       }
     }
   ],
