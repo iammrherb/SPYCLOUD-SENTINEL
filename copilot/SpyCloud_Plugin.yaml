@@ -1,7 +1,7 @@
 Descriptor:
   Name: SpyCloud Sentinel Threat Intelligence
   DisplayName: SpyCloud Sentinel Threat Intelligence
-  Description: Comprehensive SpyCloud threat intelligence plugin for Microsoft Sentinel with 96 resources including 44 analytics rules, 15 hunting queries, 5 playbooks, 4 watchlists, 4 automation rules, 4 Sentinel settings (UEBA, Anomalies, EyesOn, EntityAnalytics), Fusion multistage detection, 5 MSIC rules, TI enrichment playbook, and 6 notification channels. Covers all 4 custom tables with 118 total columns. Queries breach credentials, plaintext passwords, infostealer malware forensics, PII including SSN and financial data, MDE device isolation audit logs, Entra ID Conditional Access remediation logs, breach catalog metadata, UEBA anomaly correlation, Fusion multistage incidents, automation rule metrics, session cookie theft detection, lateral movement hunting, data exfiltration detection, malware family tracking, IOC blocklist management, high-value asset monitoring, MSIC incident correlation, and executive reporting. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping.
+  Description: Comprehensive SpyCloud threat intelligence plugin for Microsoft Sentinel with 85 Copilot skills and 96 resources including 44 analytics rules, 15 hunting queries, 5 playbooks, 4 watchlists, 4 automation rules, 4 Sentinel settings (UEBA, Anomalies, EyesOn, EntityAnalytics), Fusion multistage detection, 5 MSIC rules, TI enrichment playbook, and 6 notification channels. Covers all 6 custom tables with 118 total columns. Skills span user credential investigation, password analysis, severity and breach category analysis, sensitive PII and financial data exposure, device and malware forensics, breach catalog intelligence, MDE device remediation audit, Conditional Access identity remediation, cross-table investigation, operational health monitoring, Compass consumer identity, cross-connector threat hunting, risk scoring and prioritization, UEBA correlation, Fusion multistage analysis, TI enrichment, automation rule metrics, session cookie theft detection, lateral movement hunting, data exfiltration detection, malware family tracking, watchlist management, MSIC incident correlation, executive reporting, campaign and threat actor intelligence, advanced user analysis, network and infrastructure hunting, compliance and reporting, incident and alert correlation, proactive threat intelligence, device deep dive forensics, and executive dashboarding. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping.
   Settings:
     - Name: TenantId
       Description: Your Azure Tenant ID where the Sentinel workspace is located.
@@ -1249,3 +1249,1155 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) and ActionStatus=="Success" | summarize Remediations=dcount(UserPrincipalName); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
+
+      # =====================================================================
+      # 24. CAMPAIGN AND THREAT ACTOR INTELLIGENCE
+      # =====================================================================
+
+      - Name: GetMalwareCampaignSummary
+        DisplayName: Summarize a malware campaign's impact
+        Description: |
+          Summarizes the impact of a specific malware campaign or malware family by joining SpyCloud exposure data with the breach catalog. Returns total records stolen, unique victims, affected domains, device count, geographic spread, severity breakdown, and timeline of activity. Use this to understand the full scope of a specific infostealer or breach campaign targeting your organization.
+        ExamplePrompts:
+          - Summarize the Redline campaign impact from SpyCloud
+          - What is the impact of LummaC2 malware on our organization
+          - Show SpyCloud campaign summary for Vidar stealer
+        Inputs:
+          - Name: malwareFamily
+            Description: The malware family or campaign name to summarize (e.g., Redline, LummaC2, Vidar, RisePro, StealC, Raccoon).
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let catalog_sources = SpyCloudBreachCatalog_CL
+            | where breach_title contains "{{malwareFamily}}"
+            | distinct source_id, breach_title, status;
+            SpyCloudBreachWatchlist_CL
+            | where source_id in ((catalog_sources | project source_id))
+            | summarize
+                TotalRecords = count(),
+                UniqueVictims = dcount(email),
+                UniqueTargetDomains = dcount(target_domain),
+                InfectedDevices = dcount(infected_machine_id),
+                Countries = dcount(country_code),
+                PlaintextPasswords = countif(isnotempty(password_plaintext)),
+                AvgSeverity = round(avg(severity), 1),
+                MaxSeverity = max(severity),
+                FirstSeen = min(TimeGenerated),
+                LastSeen = max(TimeGenerated),
+                Sev2Count = countif(severity == 2),
+                Sev5Count = countif(severity == 5),
+                Sev20Count = countif(severity == 20),
+                Sev25Count = countif(severity == 25)
+            | extend CampaignName = "{{malwareFamily}}", DurationDays = datetime_diff('day', LastSeen, FirstSeen)
+
+      - Name: GetBreachCampaignTimeline
+        DisplayName: Timeline of breaches from a campaign or threat actor
+        Description: |
+          Builds a chronological timeline of all breach catalog entries associated with a specific campaign, threat actor, or malware family. Shows when each breach was published, its record count, status, and the volume of exposures affecting your organization over time. Useful for tracking the evolution of a campaign.
+        ExamplePrompts:
+          - Show the timeline of Redline breaches from SpyCloud
+          - Build a campaign timeline for LummaC2
+          - When did each breach from this threat actor appear in SpyCloud
+        Inputs:
+          - Name: campaignName
+            Description: The campaign, threat actor, or malware family name to build a timeline for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachCatalog_CL
+            | where breach_title contains "{{campaignName}}"
+            | join kind=leftouter (
+                SpyCloudBreachWatchlist_CL
+                | summarize OrgExposures = count(), OrgVictims = dcount(email) by source_id
+            ) on source_id
+            | project TimeGenerated, source_id, breach_title, description, status, OrgExposures = coalesce(OrgExposures, 0), OrgVictims = coalesce(OrgVictims, 0)
+            | sort by TimeGenerated asc
+
+      - Name: GetRelatedBreaches
+        DisplayName: Find breaches related to a given breach
+        Description: |
+          Finds breaches related to a given breach source ID by identifying other breaches that share the same malware family, overlap in time window, or have overlapping victim IP addresses. Useful for connecting disparate breach events that may be part of the same campaign.
+        ExamplePrompts:
+          - Find breaches related to this source ID
+          - What other breaches are connected to this one
+          - Show related campaigns for this breach
+        Inputs:
+          - Name: sourceId
+            Description: The SpyCloud source_id of the breach to find related breaches for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let reference = SpyCloudBreachWatchlist_CL
+            | where source_id == {{sourceId}}
+            | summarize RefEmails = make_set(email, 500), RefIPs = make_set(ip_addresses, 200), RefStart = min(TimeGenerated), RefEnd = max(TimeGenerated);
+            let ref_emails = toscalar(reference | project RefEmails);
+            let ref_start = toscalar(reference | project RefStart);
+            let ref_end = toscalar(reference | project RefEnd);
+            SpyCloudBreachWatchlist_CL
+            | where source_id != {{sourceId}}
+            | where TimeGenerated between (datetime_add('day', -30, ref_start) .. datetime_add('day', 30, ref_end))
+            | summarize OverlappingUsers = dcountif(email, email in (ref_emails)), TotalRecords = count(), UniqueUsers = dcount(email) by source_id
+            | where OverlappingUsers > 0
+            | join kind=leftouter (SpyCloudBreachCatalog_CL | summarize arg_max(TimeGenerated, *) by source_id | project source_id, breach_title, status) on source_id
+            | project source_id, breach_title, status, OverlappingUsers, TotalRecords, UniqueUsers
+            | sort by OverlappingUsers desc
+
+      - Name: GetThreatActorProfile
+        DisplayName: Profile activity from a specific source or campaign
+        Description: |
+          Builds a comprehensive profile of a threat actor or campaign based on SpyCloud data. Shows total breach count, record volume, malware families used, unique victims, targeted domains, geographic distribution, severity breakdown, and infection timeline. Provides a complete intelligence picture of the adversary's activity against your organization.
+        ExamplePrompts:
+          - Build a threat actor profile for Redline campaigns
+          - Profile the LummaC2 threat actor from SpyCloud data
+          - Show comprehensive campaign intelligence for this threat
+        Inputs:
+          - Name: actorName
+            Description: The threat actor, campaign, or malware family name to profile.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let sources = SpyCloudBreachCatalog_CL
+            | where breach_title contains "{{actorName}}"
+            | summarize BreachCount = dcount(source_id), BreachTitles = make_set(breach_title, 20), Statuses = make_set(status, 10);
+            let exposures = SpyCloudBreachWatchlist_CL
+            | where source_id in ((SpyCloudBreachCatalog_CL | where breach_title contains "{{actorName}}" | distinct source_id))
+            | summarize
+                TotalRecords = count(),
+                UniqueVictims = dcount(email),
+                UniqueTargets = dcount(target_domain),
+                TopTargets = make_set(target_domain, 10),
+                UniqueDevices = dcount(infected_machine_id),
+                Countries = make_set(country_code, 20),
+                MalwarePaths = make_set(infected_path, 10),
+                PlaintextCreds = countif(isnotempty(password_plaintext)),
+                FirstSeen = min(TimeGenerated),
+                LastSeen = max(TimeGenerated);
+            sources | extend TotalRecords = toscalar(exposures | project TotalRecords), UniqueVictims = toscalar(exposures | project UniqueVictims), UniqueTargets = toscalar(exposures | project UniqueTargets), TopTargets = toscalar(exposures | project TopTargets), UniqueDevices = toscalar(exposures | project UniqueDevices), Countries = toscalar(exposures | project Countries), PlaintextCreds = toscalar(exposures | project PlaintextCreds), FirstSeen = toscalar(exposures | project FirstSeen), LastSeen = toscalar(exposures | project LastSeen)
+
+      - Name: GetCampaignTTPs
+        DisplayName: Enumerate TTPs associated with a malware campaign
+        Description: |
+          Enumerates MITRE ATT&CK TTPs associated with a malware campaign by analyzing SpyCloud detection data cross-referenced with Sentinel analytics rule alerts. Shows which detection rules fired for the campaign, the associated MITRE techniques, and alert volumes. Helps map campaign activity to the ATT&CK framework.
+        ExamplePrompts:
+          - What MITRE TTPs are associated with this malware campaign
+          - Show ATT&CK techniques for Redline from SpyCloud detections
+          - Map this campaign to MITRE framework
+        Inputs:
+          - Name: campaignName
+            Description: The malware campaign or family name to enumerate TTPs for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let campaign_users = SpyCloudBreachWatchlist_CL
+            | where source_id in ((SpyCloudBreachCatalog_CL | where breach_title contains "{{campaignName}}" | distinct source_id))
+            | distinct email;
+            SecurityAlert
+            | where TimeGenerated > ago(30d)
+            | where AlertName has "SpyCloud" or Description has "SpyCloud"
+            | where Entities has_any (campaign_users)
+            | extend Tactics = tostring(parse_json(ExtendedProperties).["Tactics"])
+            | extend Techniques = tostring(parse_json(ExtendedProperties).["Techniques"])
+            | summarize AlertCount = count(), FirstAlert = min(TimeGenerated), LastAlert = max(TimeGenerated) by AlertName, Tactics, Techniques
+            | sort by AlertCount desc
+
+      # =====================================================================
+      # 25. ADVANCED USER ANALYSIS
+      # =====================================================================
+
+      - Name: GetUserAttackTimeline
+        DisplayName: Complete attack timeline for a user
+        Description: |
+          Builds a complete attack timeline for a specific user from initial SpyCloud exposure through sign-in activity, mailbox rule changes, and data access events. Combines SpyCloud exposure data with Entra ID sign-in logs, Office 365 activity, and cloud app events to show the full attack chain from credential theft to potential data exfiltration.
+        ExamplePrompts:
+          - Build an attack timeline for this user
+          - Show the full attack chain for this compromised user
+          - Trace the attack progression for this email from SpyCloud exposure
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to build an attack timeline for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            union
+              (SpyCloudBreachWatchlist_CL
+              | where email =~ "{{targetEmail}}"
+              | project TimeGenerated, Phase = "1-Exposure", Activity = strcat("SpyCloud exposure: sev ", tostring(severity), " on ", target_domain), Detail = strcat("Password type: ", password_type, " | Source: ", tostring(source_id))),
+              (SigninLogs
+              | where TimeGenerated > ago(30d) and UserPrincipalName =~ "{{targetEmail}}"
+              | project TimeGenerated, Phase = "2-SignIn", Activity = strcat("Sign-in to ", AppDisplayName, " from ", IPAddress), Detail = strcat("Result: ", ResultType, " | Location: ", tostring(LocationDetails.countryOrRegion))),
+              (OfficeActivity
+              | where TimeGenerated > ago(30d) and UserId =~ "{{targetEmail}}"
+              | where Operation in ("New-InboxRule", "Set-InboxRule", "Set-Mailbox", "Add-MailboxPermission")
+              | project TimeGenerated, Phase = "3-MailboxRule", Activity = strcat("Mailbox: ", Operation), Detail = strcat("Client: ", ClientIP)),
+              (CloudAppEvents
+              | where TimeGenerated > ago(30d) and AccountId =~ "{{targetEmail}}"
+              | where ActionType in ("FileDownloaded", "FileUploaded", "FileShared")
+              | project TimeGenerated, Phase = "4-DataAccess", Activity = strcat("Cloud: ", ActionType), Detail = tostring(ObjectName))
+            | sort by TimeGenerated asc
+            | take 100
+
+      - Name: GetUserPasswordHistory
+        DisplayName: Track password exposure patterns over time
+        Description: |
+          Tracks password exposure patterns for a specific user over time, showing how many times their credentials were exposed, which password types were seen, sighting growth across breach sources, and temporal distribution. Helps identify password reuse habits and persistent exposure risk.
+        ExamplePrompts:
+          - Show password exposure history for this user
+          - Track how many times this user's password was exposed
+          - What is the password exposure trend for this email
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to track password exposure history for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachWatchlist_CL
+            | where email =~ "{{targetEmail}}"
+            | where isnotempty(password) or isnotempty(password_plaintext)
+            | summarize
+                ExposureCount = count(),
+                PasswordTypes = make_set(password_type, 10),
+                UniquePasswords = dcount(password),
+                UniquePlaintexts = dcount(password_plaintext),
+                MaxSighting = max(sighting),
+                AvgSighting = round(avg(sighting), 1),
+                TargetDomains = make_set(target_domain, 20),
+                Sources = dcount(source_id),
+                FirstExposure = min(TimeGenerated),
+                LastExposure = max(TimeGenerated)
+                by bin(TimeGenerated, 30d)
+            | sort by TimeGenerated asc
+
+      - Name: GetUserDeviceAssociations
+        DisplayName: All devices a user signed in from with infection status
+        Description: |
+          Shows all devices a specific user has signed in from along with their SpyCloud infection status. Joins sign-in device data with SpyCloud infected machine records to identify which devices the user accesses are known to be compromised by infostealers.
+        ExamplePrompts:
+          - Show all devices this user has used and their infection status
+          - Which devices has this user signed in from and are any infected
+          - Correlate user sign-in devices with SpyCloud infections
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to look up device associations for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let user_devices = SigninLogs
+            | where TimeGenerated > ago(30d) and UserPrincipalName =~ "{{targetEmail}}" and ResultType == 0
+            | extend DeviceName = tostring(DeviceDetail.displayName), DeviceOS = tostring(DeviceDetail.operatingSystem), DeviceTrust = tostring(DeviceDetail.trustType)
+            | where isnotempty(DeviceName)
+            | summarize LastSignIn = max(TimeGenerated), SignInCount = count(), IPs = make_set(IPAddress, 10) by DeviceName, DeviceOS, DeviceTrust;
+            let infected = SpyCloudBreachWatchlist_CL
+            | where email =~ "{{targetEmail}}" and severity >= 20
+            | summarize InfectionCount = count(), MalwarePaths = make_set(infected_path, 5), LastInfection = max(infected_time) by user_hostname;
+            user_devices
+            | join kind=leftouter infected on $left.DeviceName == $right.user_hostname
+            | extend IsInfected = isnotempty(InfectionCount)
+            | project DeviceName, DeviceOS, DeviceTrust, LastSignIn, SignInCount, IPs, IsInfected, InfectionCount = coalesce(InfectionCount, 0), MalwarePaths, LastInfection
+
+      - Name: GetUserRemediationHistory
+        DisplayName: Full remediation trail for a user
+        Description: |
+          Shows the complete remediation trail for a specific user including password resets, session revocations, MFA re-registrations, Conditional Access group changes, and MDE device actions. Combines data from Conditional Access logs, MDE logs, and Entra ID audit logs to provide a single view of all remediation actions taken.
+        ExamplePrompts:
+          - Show full remediation history for this user
+          - What remediation actions have been taken for this email
+          - Track all password resets and session revocations for this user
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to retrieve remediation history for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            union
+              (SpyCloud_ConditionalAccessLogs_CL
+              | where UserEmail =~ "{{targetEmail}}" or Username =~ "{{targetEmail}}"
+              | project TimeGenerated, ActionType = "CA Remediation",
+                  Detail = strcat(
+                      iff(ForcedPasswordResetOnNextSignIn == true, "PasswordReset ", ""),
+                      iff(UserSessionsRevoked == true, "SessionRevoked ", ""),
+                      iff(CAgroup == true, "CAGroupAdded ", ""),
+                      iff(UserDisabled == true, "AccountDisabled ", "")),
+                  Source = PlaybookName, IncidentId, BreachTitle),
+              (Spycloud_MDE_Logs_CL
+              | where HostName in ((SpyCloudBreachWatchlist_CL | where email =~ "{{targetEmail}}" | where isnotempty(user_hostname) | distinct user_hostname))
+              | project TimeGenerated, ActionType = "MDE Device Action",
+                  Detail = strcat(
+                      iff(IsolationRequested == true, strcat("Isolation:", tostring(IsolationStatus), " "), ""),
+                      iff(MachineTagAdded == true, strcat("Tag:", MachineTagName, " "), ""),
+                      iff(AddedIOCsToDefender == true, "IOCsAdded ", "")),
+                  Source = PlaybookName, IncidentId, BreachTitle),
+              (AuditLogs
+              | where TimeGenerated > ago(30d)
+              | where TargetResources has "{{targetEmail}}"
+              | where OperationName in ("Reset password", "Revoke sign-in sessions", "Update user", "Add member to group")
+              | project TimeGenerated, ActionType = "Entra ID Audit", Detail = OperationName, Source = InitiatedBy.app.displayName, IncidentId = "", BreachTitle = "")
+            | sort by TimeGenerated desc
+            | take 50
+
+      - Name: GetUserRiskScoreBreakdown
+        DisplayName: Composite risk score with factor breakdown for a user
+        Description: |
+          Calculates a detailed composite risk score for a user with a full breakdown by contributing factor. Scores exposure count, severity, password exposure, device infections, remediation gap, sign-in recency, target domain spread, and breach source diversity. Each factor is weighted and the total produces a 0-100 normalized score with risk level classification.
+        ExamplePrompts:
+          - Show detailed risk score breakdown for this user
+          - Calculate composite risk score with factors for this email
+          - What is the risk score and breakdown for this user
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to calculate a detailed risk score breakdown for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let exposures = SpyCloudBreachWatchlist_CL
+            | where email =~ "{{targetEmail}}"
+            | summarize
+                ExposureCount = count(),
+                MaxSeverity = max(severity),
+                PlaintextPWs = countif(isnotempty(password_plaintext)),
+                DeviceInfections = dcountif(infected_machine_id, isnotempty(infected_machine_id)),
+                TargetDomains = dcount(target_domain),
+                BreachSources = dcount(source_id),
+                DaysSinceLatest = datetime_diff('day', now(), max(TimeGenerated));
+            let remediated = SpyCloud_ConditionalAccessLogs_CL
+            | where UserEmail =~ "{{targetEmail}}" or Username =~ "{{targetEmail}}"
+            | summarize WasRemediated = count();
+            let signins = SigninLogs
+            | where TimeGenerated > ago(7d) and UserPrincipalName =~ "{{targetEmail}}" and ResultType == 0
+            | summarize RecentSignIns = count();
+            exposures
+            | extend
+                ExposureFactor = min_of(toint(ExposureCount) * 2, 20),
+                SeverityFactor = MaxSeverity * 1,
+                PlaintextFactor = min_of(PlaintextPWs * 8, 20),
+                DeviceFactor = min_of(toint(DeviceInfections) * 10, 20),
+                RecencyFactor = iff(DaysSinceLatest < 7, 15, iff(DaysSinceLatest < 30, 8, 0)),
+                SpreadFactor = iff(TargetDomains > 5, 10, toint(TargetDomains)),
+                RemediationGap = iff(toscalar(remediated | project WasRemediated) == 0, 15, 0),
+                ActiveSignInRisk = iff(toscalar(signins | project RecentSignIns) > 0, 10, 0)
+            | extend RawScore = ExposureFactor + SeverityFactor + PlaintextFactor + DeviceFactor + RecencyFactor + SpreadFactor + RemediationGap + ActiveSignInRisk
+            | extend NormalizedScore = min_of(RawScore, 100)
+            | extend RiskLevel = case(NormalizedScore >= 80, "CRITICAL", NormalizedScore >= 50, "HIGH", NormalizedScore >= 25, "MEDIUM", "LOW")
+            | project Email = "{{targetEmail}}", NormalizedScore, RiskLevel, ExposureFactor, SeverityFactor, PlaintextFactor, DeviceFactor, RecencyFactor, SpreadFactor, RemediationGap, ActiveSignInRisk
+
+      # =====================================================================
+      # 26. NETWORK AND INFRASTRUCTURE
+      # =====================================================================
+
+      - Name: GetInfectedIPFirewallActivity
+        DisplayName: Firewall events for SpyCloud infection IPs
+        Description: |
+          Queries all firewall events (allow and deny) for IP addresses associated with SpyCloud infostealer infections. Shows whether infected device IPs are communicating outbound through the firewall, which could indicate active C2 or data exfiltration. Uses CommonSecurityLog (CEF) data from firewall appliances.
+        ExamplePrompts:
+          - Show firewall activity for SpyCloud infected IPs
+          - Are infected device IPs hitting the firewall
+          - Check firewall logs for SpyCloud infection source IPs
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let infected_ips = SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(14d) and severity >= 20 and isnotempty(ip_addresses)
+            | mv-expand ip = ip_addresses
+            | extend src_ip = tostring(ip)
+            | where isnotempty(src_ip)
+            | distinct src_ip;
+            CommonSecurityLog
+            | where TimeGenerated > ago(7d)
+            | where SourceIP in (infected_ips) or DestinationIP in (infected_ips)
+            | summarize AllowCount = countif(DeviceAction == "Allow"), DenyCount = countif(DeviceAction != "Allow"), UniqueDestinations = dcount(DestinationIP), TotalBytes = sum(SentBytes + ReceivedBytes) by SourceIP, DeviceVendor, DeviceProduct
+            | sort by AllowCount desc
+
+      - Name: GetDNSQueriesFromInfectedHosts
+        DisplayName: DNS queries from infected device IPs for C2 detection
+        Description: |
+          Retrieves DNS queries originating from IP addresses associated with SpyCloud-infected devices. Looks for suspicious DNS patterns that may indicate C2 beacon activity such as high-entropy domain names, DGA patterns, or connections to known malicious infrastructure.
+        ExamplePrompts:
+          - Show DNS queries from SpyCloud infected hosts
+          - Hunt for C2 beacons from infected device IPs
+          - Check DNS logs for infected devices
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let infected_ips = SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(14d) and severity >= 20 and isnotempty(ip_addresses)
+            | mv-expand ip = ip_addresses
+            | extend src_ip = tostring(ip)
+            | where isnotempty(src_ip)
+            | distinct src_ip;
+            DnsEvents
+            | where TimeGenerated > ago(7d)
+            | where ClientIP in (infected_ips)
+            | summarize QueryCount = count(), UniqueQueries = dcount(Name), FirstQuery = min(TimeGenerated), LastQuery = max(TimeGenerated) by ClientIP, Name, QueryType
+            | sort by QueryCount desc
+            | take 50
+
+      - Name: GetVPNConnectionsFromExposedUsers
+        DisplayName: VPN and remote access from exposed users
+        Description: |
+          Identifies VPN and remote access connections from users with active SpyCloud credential exposures. Queries sign-in logs for VPN client applications and conditional access policies associated with remote access to detect potentially compromised remote sessions.
+        ExamplePrompts:
+          - Show VPN connections from SpyCloud exposed users
+          - Are exposed users connecting via VPN
+          - Check remote access for users with stolen credentials
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let exposed = SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(14d) and severity >= 5
+            | distinct email;
+            SigninLogs
+            | where TimeGenerated > ago(7d) and ResultType == 0
+            | where UserPrincipalName in~ (exposed)
+            | where AppDisplayName has_any ("VPN", "Cisco", "Palo Alto", "Fortinet", "Pulse", "GlobalProtect", "AnyConnect", "Remote Desktop", "RDP")
+                or ClientAppUsed has_any ("VPN", "Remote")
+                or NetworkLocationDetails has "vpn"
+            | summarize Connections = count(), UniqueIPs = dcount(IPAddress), Countries = make_set(tostring(LocationDetails.countryOrRegion), 10), LastConnection = max(TimeGenerated) by UserPrincipalName, AppDisplayName
+            | sort by Connections desc
+
+      - Name: GetNetworkLateralMovement
+        DisplayName: Track lateral movement from initially compromised accounts
+        Description: |
+          Tracks lateral movement patterns from accounts initially compromised via SpyCloud-detected credential theft. Maps the progression from initial access through network logon events showing source devices, destination devices, and logon types to visualize the attack path through the network.
+        ExamplePrompts:
+          - Track lateral movement from SpyCloud compromised accounts
+          - Map attack paths from initially compromised credentials
+          - Show network movement from infected user accounts
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let compromised = SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(14d) and severity >= 20
+            | distinct email;
+            IdentityLogonEvents
+            | where TimeGenerated > ago(7d)
+            | where AccountUpn in~ (compromised)
+            | where LogonType in ("RemoteInteractive", "Network", "NewCredentials")
+            | project TimeGenerated, AccountUpn, LogonType, DeviceName, DestinationDeviceName, DestinationIPAddress, Protocol, FailureReason
+            | summarize
+                Hops = count(),
+                UniqueSourceDevices = dcount(DeviceName),
+                UniqueDestDevices = dcount(DestinationDeviceName),
+                Destinations = make_set(DestinationDeviceName, 20),
+                LogonTypes = make_set(LogonType, 5),
+                FirstHop = min(TimeGenerated),
+                LastHop = max(TimeGenerated)
+                by AccountUpn
+            | where UniqueDestDevices > 1
+            | sort by UniqueDestDevices desc
+
+      # =====================================================================
+      # 27. COMPLIANCE AND REPORTING
+      # =====================================================================
+
+      - Name: GetExposureComplianceReport
+        DisplayName: Exposure metrics for compliance audits
+        Description: |
+          Generates exposure metrics formatted for compliance audit requirements including SOC2, PCI DSS, and HIPAA. Shows total exposure counts, PII categories affected, remediation rates, mean time to remediate, sensitive data types exposed, and audit-ready counts for regulatory notification assessment.
+        ExamplePrompts:
+          - Generate a compliance report for SpyCloud exposures
+          - Show SOC2 audit metrics for credential exposures
+          - Get PCI and HIPAA exposure metrics from SpyCloud
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let period = ago(30d);
+            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > period;
+            let remediations = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > period;
+            union isfuzzy=true
+            (exposures | summarize v = count() | extend Metric = "Total Exposures (30d)", Category = "Volume"),
+            (exposures | summarize v = dcount(email) | extend Metric = "Unique Users Exposed", Category = "Volume"),
+            (exposures | where isnotempty(password_plaintext) | summarize v = count() | extend Metric = "Plaintext Credentials", Category = "Credential Risk"),
+            (exposures | where isnotempty(social_security_number) or isnotempty(ssn_last_four) | summarize v = dcount(email) | extend Metric = "Users with SSN Exposed (HIPAA/State)", Category = "PII Notification"),
+            (exposures | where isnotempty(bank_number) or isnotempty(taxid) | summarize v = dcount(email) | extend Metric = "Users with Financial Data Exposed (PCI)", Category = "PII Notification"),
+            (exposures | where isnotempty(health_insurance_id) | summarize v = dcount(email) | extend Metric = "Users with Health Data Exposed (HIPAA)", Category = "PII Notification"),
+            (exposures | where isnotempty(dob) or isnotempty(phone) or isnotempty(address_1) | summarize v = dcount(email) | extend Metric = "Users with PII Exposed (General)", Category = "PII Notification"),
+            (remediations | summarize v = dcount(UserEmail) | extend Metric = "Users Remediated", Category = "Remediation"),
+            (remediations | where ForcedPasswordResetOnNextSignIn == true | summarize v = count() | extend Metric = "Password Resets Forced", Category = "Remediation"),
+            (remediations | where UserSessionsRevoked == true | summarize v = count() | extend Metric = "Sessions Revoked", Category = "Remediation")
+            | project Category, Metric, Value = v
+
+      - Name: GetRemediationSLAReport
+        DisplayName: Remediation SLA compliance metrics
+        Description: |
+          Measures remediation SLA compliance by calculating what percentage of SpyCloud exposures were remediated within 24 hours, 48 hours, and 72 hours. Shows mean time to remediate and identifies exposures that exceeded SLA targets. Essential for measuring SOC response effectiveness.
+        ExamplePrompts:
+          - Show remediation SLA compliance metrics
+          - What percentage of exposures were remediated within 24 hours
+          - Calculate mean time to remediate SpyCloud exposures
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let exposures = SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(30d)
+            | summarize ExposureTime = min(TimeGenerated) by email, source_id;
+            let remediations = SpyCloud_ConditionalAccessLogs_CL
+            | where TimeGenerated > ago(30d)
+            | summarize RemediationTime = min(TimeGenerated) by UserEmail;
+            exposures
+            | join kind=leftouter remediations on $left.email == $right.UserEmail
+            | extend TimeToRemediate_Hours = iff(isnotempty(RemediationTime), datetime_diff('hour', RemediationTime, ExposureTime), -1)
+            | summarize
+                TotalExposures = count(),
+                Remediated = countif(TimeToRemediate_Hours >= 0),
+                Within24h = countif(TimeToRemediate_Hours between (0 .. 24)),
+                Within48h = countif(TimeToRemediate_Hours between (0 .. 48)),
+                Within72h = countif(TimeToRemediate_Hours between (0 .. 72)),
+                NotRemediated = countif(TimeToRemediate_Hours == -1),
+                AvgHoursToRemediate = round(avgif(toreal(TimeToRemediate_Hours), TimeToRemediate_Hours >= 0), 1)
+            | extend
+                SLA_24h_Pct = round(100.0 * Within24h / TotalExposures, 1),
+                SLA_48h_Pct = round(100.0 * Within48h / TotalExposures, 1),
+                SLA_72h_Pct = round(100.0 * Within72h / TotalExposures, 1),
+                RemediationRate_Pct = round(100.0 * Remediated / TotalExposures, 1)
+
+      - Name: GetPIIExposureInventory
+        DisplayName: Count exposed PII elements for regulatory notification
+        Description: |
+          Counts and categorizes all exposed PII elements across SpyCloud data for regulatory breach notification assessment. Shows counts of SSNs, dates of birth, phone numbers, addresses, financial data, health data, and other sensitive categories with unique affected user counts per category.
+        ExamplePrompts:
+          - Count exposed PII elements for breach notification
+          - How many SSNs and financial records are exposed
+          - Show PII inventory for regulatory assessment
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachWatchlist_CL
+            | summarize
+                SSN_Full = countif(isnotempty(social_security_number)),
+                SSN_Full_Users = dcountif(email, isnotempty(social_security_number)),
+                SSN_Last4 = countif(isnotempty(ssn_last_four)),
+                SSN_Last4_Users = dcountif(email, isnotempty(ssn_last_four)),
+                DOB = countif(isnotempty(dob)),
+                DOB_Users = dcountif(email, isnotempty(dob)),
+                Phone = countif(isnotempty(phone)),
+                Phone_Users = dcountif(email, isnotempty(phone)),
+                Address = countif(isnotempty(address_1)),
+                Address_Users = dcountif(email, isnotempty(address_1)),
+                BankNumber = countif(isnotempty(bank_number)),
+                BankNumber_Users = dcountif(email, isnotempty(bank_number)),
+                TaxID = countif(isnotempty(taxid)),
+                TaxID_Users = dcountif(email, isnotempty(taxid)),
+                HealthInsurance = countif(isnotempty(health_insurance_id)),
+                HealthInsurance_Users = dcountif(email, isnotempty(health_insurance_id)),
+                FullName = countif(isnotempty(full_name)),
+                FullName_Users = dcountif(email, isnotempty(full_name))
+
+      - Name: GetDataRetentionReport
+        DisplayName: Table sizes and record counts per SpyCloud table
+        Description: |
+          Reports table sizes, record counts, and date ranges for all SpyCloud custom tables in the workspace. Shows oldest and newest records per table, total volume, and data retention span. Useful for capacity planning, compliance documentation, and verifying data lifecycle management.
+        ExamplePrompts:
+          - Show SpyCloud table sizes and retention
+          - How much SpyCloud data is in Sentinel
+          - Report on SpyCloud data retention and volume
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            union
+              (SpyCloudBreachWatchlist_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = dcount(email), UniqueSourceIds = dcount(source_id) | extend TableName = "SpyCloudBreachWatchlist_CL"),
+              (SpyCloudBreachCatalog_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = long(0), UniqueSourceIds = dcount(source_id) | extend TableName = "SpyCloudBreachCatalog_CL"),
+              (Spycloud_MDE_Logs_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = long(0), UniqueSourceIds = long(0) | extend TableName = "Spycloud_MDE_Logs_CL"),
+              (SpyCloud_ConditionalAccessLogs_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = dcount(UserEmail), UniqueSourceIds = long(0) | extend TableName = "SpyCloud_ConditionalAccessLogs_CL")
+            | project TableName, Records, OldestRecord, NewestRecord, RetentionDays = datetime_diff('day', NewestRecord, OldestRecord), UniqueEmails, UniqueSourceIds
+
+      # =====================================================================
+      # 28. INCIDENT AND ALERT CORRELATION
+      # =====================================================================
+
+      - Name: GetIncidentCorrelation
+        DisplayName: Find all correlated SpyCloud data for a Sentinel incident
+        Description: |
+          For a given Sentinel incident ID, finds ALL correlated SpyCloud data including matching exposures, MDE remediation actions, Conditional Access actions, and breach catalog entries. Provides a single-query complete SpyCloud context for any incident under investigation.
+        ExamplePrompts:
+          - Show all SpyCloud data for this incident
+          - Correlate SpyCloud with Sentinel incident 12345
+          - What SpyCloud context exists for this incident
+        Inputs:
+          - Name: incidentId
+            Description: The Sentinel incident ID to correlate with SpyCloud data.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let incident_users = SecurityIncident
+            | where IncidentNumber == {{incidentId}}
+            | mv-expand Entity = parse_json(AdditionalData).alertProductNames
+            | extend Entities = parse_json(tostring(AdditionalData))
+            | project Owner, Title;
+            let mde_data = Spycloud_MDE_Logs_CL | where IncidentId == "{{incidentId}}" | summarize MDEActions = count(), Isolations = countif(IsolationRequested == true) by HostName, DeviceId;
+            let ca_data = SpyCloud_ConditionalAccessLogs_CL | where IncidentId == "{{incidentId}}" | summarize CAActions = count(), Resets = countif(ForcedPasswordResetOnNextSignIn == true), Revocations = countif(UserSessionsRevoked == true) by UserEmail;
+            union
+              (mde_data | extend DataSource = "MDE Remediation"),
+              (ca_data | extend DataSource = "Conditional Access")
+
+      - Name: GetFusionIncidentContext
+        DisplayName: Fusion multistage incident details with SpyCloud alerts
+        Description: |
+          Retrieves Fusion-detected multistage incident details enriched with SpyCloud source alert context. Shows the attack stages detected by Fusion ML correlation and identifies which stages involve SpyCloud-detected credential theft as the initial access vector.
+        ExamplePrompts:
+          - Show Fusion incident details with SpyCloud context
+          - Get multistage incident breakdown with SpyCloud alerts
+          - Which Fusion incidents started from SpyCloud exposures
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SecurityIncident
+            | where TimeGenerated > ago({{Lookback}})
+            | where AdditionalData has "Fusion"
+            | join kind=leftouter (
+                SecurityAlert
+                | where TimeGenerated > ago({{Lookback}})
+                | where AlertName has "SpyCloud"
+                | summarize SpyCloudAlerts = count(), AlertNames = make_set(AlertName, 10) by SystemAlertId
+            ) on $left.IncidentNumber == $right.SystemAlertId
+            | project TimeGenerated, IncidentNumber, Title, Severity, Status, SpyCloudAlerts = coalesce(SpyCloudAlerts, 0), AlertNames, Owner
+            | sort by TimeGenerated desc
+
+      - Name: GetAlertsByAnalyticsRule
+        DisplayName: Show which SpyCloud analytics rules generate the most alerts
+        Description: |
+          Ranks SpyCloud analytics rules by alert volume showing which detection rules are generating the most alerts, their severity distribution, and false positive indicators. Useful for tuning detection rules and understanding which threat categories are most active.
+        ExamplePrompts:
+          - Which SpyCloud analytics rules generate the most alerts
+          - Show alert volume by SpyCloud detection rule
+          - Rank SpyCloud rules by alert count
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 30d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SecurityAlert
+            | where TimeGenerated > ago({{Lookback}})
+            | where AlertName has "SpyCloud" or ProductName has "SpyCloud"
+            | summarize
+                AlertCount = count(),
+                HighSeverity = countif(AlertSeverity == "High"),
+                MediumSeverity = countif(AlertSeverity == "Medium"),
+                LowSeverity = countif(AlertSeverity == "Low"),
+                UniqueEntities = dcount(Entities),
+                FirstAlert = min(TimeGenerated),
+                LastAlert = max(TimeGenerated)
+                by AlertName
+            | sort by AlertCount desc
+
+      - Name: GetIncidentRemediationStatus
+        DisplayName: Remediation action status for each incident
+        Description: |
+          For each SpyCloud-related Sentinel incident, shows what remediation actions have been taken including password resets, session revocations, device isolations, and IOC submissions. Identifies incidents with incomplete or no remediation for follow-up.
+        ExamplePrompts:
+          - Show remediation status for each SpyCloud incident
+          - Which incidents have incomplete remediation
+          - Check if all SpyCloud incidents were remediated
+        Inputs:
+          - Name: Lookback
+            Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 14d.
+            Required: false
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SecurityIncident
+            | where TimeGenerated > ago({{Lookback}})
+            | where Title has "SpyCloud"
+            | join kind=leftouter (
+                SpyCloud_ConditionalAccessLogs_CL
+                | summarize CAResets = countif(ForcedPasswordResetOnNextSignIn == true), CARevocations = countif(UserSessionsRevoked == true), CADisabled = countif(UserDisabled == true) by IncidentId
+            ) on $left.IncidentNumber == $right.IncidentId
+            | join kind=leftouter (
+                Spycloud_MDE_Logs_CL
+                | summarize MDEIsolations = countif(IsolationRequested == true), MDETags = countif(MachineTagAdded == true), MDEIOCs = countif(AddedIOCsToDefender == true) by IncidentId
+            ) on $left.IncidentNumber == $right.IncidentId
+            | extend HasRemediation = (coalesce(CAResets, 0) + coalesce(CARevocations, 0) + coalesce(MDEIsolations, 0)) > 0
+            | project TimeGenerated, IncidentNumber, Title, Severity, Status, HasRemediation, CAResets = coalesce(CAResets, 0), CARevocations = coalesce(CARevocations, 0), CADisabled = coalesce(CADisabled, 0), MDEIsolations = coalesce(MDEIsolations, 0), MDETags = coalesce(MDETags, 0), MDEIOCs = coalesce(MDEIOCs, 0)
+            | sort by HasRemediation asc, Severity desc
+
+      # =====================================================================
+      # 29. PROACTIVE THREAT INTELLIGENCE
+      # =====================================================================
+
+      - Name: GetExposureForecast
+        DisplayName: Trend analysis predicting exposure growth
+        Description: |
+          Performs trend analysis on SpyCloud exposure data to forecast future exposure growth based on historical weekly patterns. Shows week-over-week growth rate, cumulative trend, and projected exposure volume. Useful for capacity planning and demonstrating risk trajectory to leadership.
+        ExamplePrompts:
+          - Show exposure growth trend and forecast
+          - Predict future SpyCloud exposure volume
+          - What is the exposure growth trajectory
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(90d)
+            | summarize WeeklyExposures = count(), UniqueUsers = dcount(email), InfostealerCount = countif(severity >= 20), PlaintextCount = countif(isnotempty(password_plaintext)) by Week = startofweek(TimeGenerated)
+            | sort by Week asc
+            | extend PrevWeek = prev(WeeklyExposures)
+            | extend WoW_Growth_Pct = iff(isnotempty(PrevWeek) and PrevWeek > 0, round(100.0 * (WeeklyExposures - PrevWeek) / PrevWeek, 1), 0.0)
+            | extend CumulativeExposures = row_cumsum(WeeklyExposures)
+
+      - Name: GetHighRiskUserCohort
+        DisplayName: Users with highest composite risk
+        Description: |
+          Identifies the cohort of users with the highest composite risk based on multiple exposures, active sign-ins, and no remediation actions taken. These are users with stolen credentials who are still actively signing in and have not had passwords reset or sessions revoked — the highest priority for immediate remediation.
+        ExamplePrompts:
+          - Show highest risk users needing immediate remediation
+          - Which users have exposures, active sign-ins, and no remediation
+          - List the most critical users to remediate right now
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let remediated = SpyCloud_ConditionalAccessLogs_CL
+            | where TimeGenerated > ago(30d)
+            | where ForcedPasswordResetOnNextSignIn == true or UserSessionsRevoked == true
+            | distinct UserEmail;
+            let active = SigninLogs
+            | where TimeGenerated > ago(7d) and ResultType == 0
+            | summarize RecentSignIns = count(), LastSignIn = max(TimeGenerated), Apps = dcount(AppDisplayName) by UserPrincipalName;
+            SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(30d)
+            | where email !in~ (remediated)
+            | summarize Exposures = count(), MaxSeverity = max(severity), PlaintextPWs = countif(isnotempty(password_plaintext)), Devices = dcount(infected_machine_id), Targets = dcount(target_domain), LatestExposure = max(TimeGenerated) by email
+            | join kind=inner active on $left.email == $right.UserPrincipalName
+            | extend CompositeRisk = Exposures * 2 + MaxSeverity * 3 + PlaintextPWs * 10 + toint(Devices) * 15 + RecentSignIns
+            | project email, CompositeRisk, Exposures, MaxSeverity, PlaintextPWs, Devices, Targets, RecentSignIns, LastSignIn, LatestExposure
+            | top 25 by CompositeRisk desc
+
+      - Name: GetStaleCredentialRisk
+        DisplayName: Credentials exposed 30+ days with no password change
+        Description: |
+          Finds credentials that were exposed more than 30 days ago where the user has not had a password reset via SpyCloud remediation. These represent long-standing credential compromise with no corrective action — attackers have had extended time to exploit these credentials.
+        ExamplePrompts:
+          - Show stale credential exposures with no password change
+          - Which exposed credentials are older than 30 days without reset
+          - Find long-standing unresolved credential exposures
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let remediated = SpyCloud_ConditionalAccessLogs_CL
+            | where ForcedPasswordResetOnNextSignIn == true
+            | summarize LastReset = max(TimeGenerated) by UserEmail;
+            SpyCloudBreachWatchlist_CL
+            | where TimeGenerated < ago(30d)
+            | where isnotempty(password) or isnotempty(password_plaintext)
+            | summarize ExposureCount = count(), EarliestExposure = min(TimeGenerated), LatestExposure = max(TimeGenerated), MaxSeverity = max(severity), PlaintextCount = countif(isnotempty(password_plaintext)), Targets = make_set(target_domain, 10) by email
+            | join kind=leftouter remediated on $left.email == $right.UserEmail
+            | where isnull(LastReset) or LastReset < EarliestExposure
+            | extend DaysExposed = datetime_diff('day', now(), EarliestExposure)
+            | project email, DaysExposed, ExposureCount, MaxSeverity, PlaintextCount, Targets, EarliestExposure, LatestExposure, LastReset
+            | sort by DaysExposed desc
+            | take 25
+
+      - Name: GetPasswordReuseRisk
+        DisplayName: Users with password hash reuse across multiple domains
+        Description: |
+          Identifies users whose exposed password hash appears across multiple target domains in SpyCloud data, indicating password reuse. If the same password hash is used on corporate SSO, email, VPN, and SaaS applications, a single credential compromise enables access to all those services.
+        ExamplePrompts:
+          - Find users reusing passwords across multiple domains
+          - Show password reuse risk from SpyCloud data
+          - Which users have the same password on multiple sites
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachWatchlist_CL
+            | where isnotempty(password)
+            | summarize DomainsWithSamePassword = dcount(target_domain), Domains = make_set(target_domain, 20), Sightings = sum(sighting), MaxSeverity = max(severity), LatestExposure = max(TimeGenerated) by email, password
+            | where DomainsWithSamePassword > 1
+            | summarize MaxReuse = max(DomainsWithSamePassword), TotalReusedPasswords = count(), AllDomains = make_set(Domains, 30), MaxSeverity = max(MaxSeverity) by email
+            | sort by MaxReuse desc
+            | take 25
+
+      - Name: GetNewExposuresLastNHours
+        DisplayName: Real-time feed of new exposures in the last N hours
+        Description: |
+          Returns a real-time feed of all new SpyCloud exposures ingested in the last N hours. Provides a live view of incoming threat intelligence including severity, target domains, password types, and infection details for immediate triage.
+        ExamplePrompts:
+          - Show new SpyCloud exposures in the last 4 hours
+          - What exposures came in the last 24 hours
+          - Get real-time SpyCloud exposure feed
+        Inputs:
+          - Name: hours
+            Description: Number of hours to look back for new exposures (e.g., 1, 4, 8, 24).
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago({{hours}}h)
+            | project TimeGenerated, email, severity, target_domain, password_type, user_hostname, infected_machine_id, country_code, source_id, sighting
+            | sort by TimeGenerated desc
+
+      # =====================================================================
+      # 30. DEVICE DEEP DIVE
+      # =====================================================================
+
+      - Name: GetDeviceForensicProfile
+        DisplayName: Complete forensic profile of an infected device
+        Description: |
+          Builds a complete forensic profile for a specific infected device combining SpyCloud infostealer data with MDE device information. Shows OS details, all IP addresses, all users who logged in, all malware detected, infection timeline, AV software present, keyboard languages, display resolution, and timezone. Provides the complete picture needed for incident response.
+        ExamplePrompts:
+          - Build a complete forensic profile for this infected device
+          - Show full device forensics for this machine ID
+          - Get comprehensive device intelligence for this infection
+        Inputs:
+          - Name: machineId
+            Description: The SpyCloud infected_machine_id to build a forensic profile for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let spycloud_data = SpyCloudBreachWatchlist_CL
+            | where infected_machine_id == "{{machineId}}"
+            | summarize
+                ExposureCount = count(),
+                AffectedUsers = make_set(email, 50),
+                UserCount = dcount(email),
+                TargetDomains = make_set(target_domain, 50),
+                DomainCount = dcount(target_domain),
+                MalwarePaths = make_set(infected_path, 10),
+                IPs = make_set(ip_addresses, 20),
+                AVSoftware = make_set(av_softwares, 10),
+                OS = make_set(user_os, 5),
+                Hostnames = make_set(user_hostname, 5),
+                KeyboardLangs = make_set(keyboard_languages, 10),
+                Countries = make_set(country_code, 5),
+                PlaintextCreds = countif(isnotempty(password_plaintext)),
+                MaxSeverity = max(severity),
+                FirstInfection = min(infected_time),
+                LastInfection = max(infected_time),
+                FirstSeen = min(TimeGenerated),
+                LastSeen = max(TimeGenerated);
+            let mde_data = Spycloud_MDE_Logs_CL
+            | where InfectedMachineId == "{{machineId}}"
+            | summarize MDEActions = count(), WasIsolated = countif(IsolationRequested == true), IsolationSuccess = countif(IsolationStatus == true), DeviceIds = make_set(DeviceId, 5), RiskScores = make_set(RiskScore, 5);
+            spycloud_data
+            | extend MDEActions = toscalar(mde_data | project MDEActions), WasIsolated = toscalar(mde_data | project WasIsolated), IsolationSuccess = toscalar(mde_data | project IsolationSuccess)
+
+      - Name: GetDeviceReinfectionHistory
+        DisplayName: Track reinfection patterns for a specific device
+        Description: |
+          Tracks reinfection patterns for a specific device by analyzing SpyCloud exposure records over time. Identifies whether a device has been infected multiple times, the time between infections, different malware families involved, and whether remediation actions between infections were effective.
+        ExamplePrompts:
+          - Check if this device has been reinfected
+          - Show reinfection history for this machine
+          - Track infection patterns over time for this device
+        Inputs:
+          - Name: machineId
+            Description: The SpyCloud infected_machine_id to check for reinfection history.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudBreachWatchlist_CL
+            | where infected_machine_id == "{{machineId}}"
+            | summarize
+                ExposureCount = count(),
+                UniqueUsers = dcount(email),
+                UniqueSources = dcount(source_id),
+                Sources = make_set(source_id, 20),
+                MalwarePaths = make_set(infected_path, 10),
+                TargetDomains = dcount(target_domain),
+                FirstSeen = min(TimeGenerated),
+                LastSeen = max(TimeGenerated)
+                by bin(TimeGenerated, 7d), user_hostname, user_os
+            | sort by TimeGenerated asc
+            | extend PrevPeriodEnd = prev(TimeGenerated)
+            | extend GapDays = iff(isnotempty(PrevPeriodEnd), datetime_diff('day', TimeGenerated, PrevPeriodEnd), 0)
+            | project TimeGenerated, user_hostname, user_os, ExposureCount, UniqueUsers, UniqueSources, MalwarePaths, TargetDomains, GapDays
+
+      - Name: GetCompassDeviceInventory
+        DisplayName: Full Compass device inventory with infection status
+        Description: |
+          Returns the complete SpyCloud Compass device inventory showing all tracked devices, their operating systems, application counts, infection timeline, and current status. Provides a comprehensive view of all consumer-side devices being monitored for infostealer activity.
+        ExamplePrompts:
+          - Show full Compass device inventory
+          - List all devices tracked by SpyCloud Compass
+          - Get Compass device inventory with infection status
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCompassDevices_CL
+            | summarize
+                InfectionCount = count(),
+                FirstInfection = min(infected_time),
+                LastInfection = max(infected_time),
+                MaxApps = max(application_count),
+                Sources = dcount(source_id),
+                SourceList = make_set(source_id, 10)
+                by user_hostname, user_os
+            | extend DaysSinceLastInfection = datetime_diff('day', now(), todatetime(LastInfection))
+            | extend Status = iff(DaysSinceLastInfection < 7, "ACTIVE", iff(DaysSinceLastInfection < 30, "RECENT", "HISTORICAL"))
+            | sort by DaysSinceLastInfection asc
+            | take 50
+
+      - Name: GetMDEIsolationAudit
+        DisplayName: Audit trail of MDE isolation and release actions
+        Description: |
+          Provides a detailed audit trail of all MDE device isolation and release actions triggered by SpyCloud detections. Shows when each device was isolated, whether isolation succeeded, the breach that triggered it, how long the device was isolated, and whether it was subsequently released. Essential for compliance documentation and incident response review.
+        ExamplePrompts:
+          - Show MDE isolation audit trail for SpyCloud
+          - When were devices isolated and released by SpyCloud
+          - Audit all device isolation actions from SpyCloud playbooks
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            Spycloud_MDE_Logs_CL
+            | where IsolationRequested == true
+            | project TimeGenerated, HostName, NormalizedHostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, BreachTitle, InfectedMachineId, PlaybookName, IncidentId
+            | extend IsolationResult = iff(IsolationStatus == true, "SUCCESS", "FAILED")
+            | sort by TimeGenerated desc
+
+      # =====================================================================
+      # 31. EXECUTIVE DASHBOARDING
+      # =====================================================================
+
+      - Name: GetExecutiveRiskGauge
+        DisplayName: Organization risk score with breakdown by factor
+        Description: |
+          Calculates an organization-wide risk score from 0 to 100 with a breakdown by contributing factor. Factors include total exposure volume, infostealer ratio, plaintext credential percentage, remediation coverage gap, active sign-in risk, device infection density, and breach source diversity. Designed for executive dashboard display.
+        ExamplePrompts:
+          - Show the organization risk score gauge
+          - Calculate enterprise-wide risk score from SpyCloud
+          - What is our current organizational risk level
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let w = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d);
+            let total = toscalar(w | count);
+            let users = toscalar(w | summarize dcount(email));
+            let infostealers = toscalar(w | where severity >= 20 | count);
+            let plaintexts = toscalar(w | where isnotempty(password_plaintext) | count);
+            let devices = toscalar(w | where isnotempty(infected_machine_id) | summarize dcount(infected_machine_id));
+            let remediated_users = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | summarize dcount(UserEmail));
+            let active_exposed = toscalar(
+                SigninLogs | where TimeGenerated > ago(7d) and ResultType == 0
+                | where UserPrincipalName in~ ((w | distinct email))
+                | summarize dcount(UserPrincipalName));
+            print
+                VolumeFactor = min_of(toint(total) / 100, 15),
+                InfostealerFactor = min_of(toint(infostealers) / 20, 20),
+                PlaintextFactor = min_of(toint(plaintexts) / 10, 15),
+                RemediationGap = min_of(iff(users > 0, toint(15 * (1.0 - (1.0 * remediated_users / users))), 0), 15),
+                ActiveRiskFactor = min_of(toint(active_exposed) * 2, 20),
+                DeviceFactor = min_of(toint(devices) * 3, 15)
+            | extend RawScore = VolumeFactor + InfostealerFactor + PlaintextFactor + RemediationGap + ActiveRiskFactor + DeviceFactor
+            | extend NormalizedScore = min_of(RawScore, 100)
+            | extend RiskLevel = case(NormalizedScore >= 80, "CRITICAL", NormalizedScore >= 50, "HIGH", NormalizedScore >= 25, "MEDIUM", "LOW")
+
+      - Name: GetExposureTrendComparison
+        DisplayName: Compare exposure metrics this period vs last period
+        Description: |
+          Compares key SpyCloud exposure metrics between the current period and the previous period (default 30 days each). Shows total exposures, unique users, infostealer percentage, plaintext credentials, device infections, and remediation actions with period-over-period change percentages. Ideal for executive trend reporting.
+        ExamplePrompts:
+          - Compare SpyCloud metrics this month vs last month
+          - Show exposure trend comparison period over period
+          - How are our SpyCloud numbers trending
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let current = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d)
+            | summarize
+                Exposures = count(), Users = dcount(email), Infostealers = countif(severity >= 20),
+                Plaintexts = countif(isnotempty(password_plaintext)), Devices = dcount(infected_machine_id)
+            | extend Period = "Current (0-30d)";
+            let previous = SpyCloudBreachWatchlist_CL | where TimeGenerated between (ago(60d) .. ago(30d))
+            | summarize
+                Exposures = count(), Users = dcount(email), Infostealers = countif(severity >= 20),
+                Plaintexts = countif(isnotempty(password_plaintext)), Devices = dcount(infected_machine_id)
+            | extend Period = "Previous (30-60d)";
+            union current, previous
+            | sort by Period asc
+
+      - Name: GetTopRecommendations
+        DisplayName: Top security recommendations based on current data
+        Description: |
+          Generates the top security recommendations based on analysis of current SpyCloud data, remediation gaps, and risk indicators. Evaluates unremediated critical exposures, plaintext credential volume, device infection rates, stale credentials, password reuse patterns, and remediation SLA gaps to produce prioritized actionable recommendations.
+        ExamplePrompts:
+          - What are the top security recommendations from SpyCloud data
+          - Generate prioritized action items from SpyCloud analysis
+          - Show AI-recommended security actions
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let remediated_emails = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | where ForcedPasswordResetOnNextSignIn == true | distinct UserEmail;
+            let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d) | where IsolationRequested == true | distinct HostName;
+            union isfuzzy=true
+            (SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(7d) and severity >= 25 and email !in~ (remediated_emails)
+            | summarize v = dcount(email)
+            | where v > 0
+            | extend Priority = 1, Recommendation = strcat("CRITICAL: ", v, " users with severity 25 infostealer exposures have NOT been remediated in the last 7 days. Immediately force password reset and revoke sessions.")),
+            (SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(14d) and isnotempty(infected_machine_id)
+            | where user_hostname !in~ (remediated_devices)
+            | summarize v = dcount(infected_machine_id)
+            | where v > 0
+            | extend Priority = 2, Recommendation = strcat("HIGH: ", v, " infected devices have NOT been isolated via MDE. Review and trigger device isolation playbook.")),
+            (SpyCloudBreachWatchlist_CL
+            | where isnotempty(password_plaintext)
+            | summarize v = count()
+            | where v > 0
+            | extend Priority = 3, Recommendation = strcat("HIGH: ", v, " plaintext password exposures detected. These are directly usable by attackers without cracking.")),
+            (SpyCloudBreachWatchlist_CL
+            | where TimeGenerated < ago(30d) and email !in~ (remediated_emails)
+            | where isnotempty(password)
+            | summarize v = dcount(email)
+            | where v > 0
+            | extend Priority = 4, Recommendation = strcat("MEDIUM: ", v, " users have stale credential exposures (30+ days) with no password reset. Initiate bulk remediation.")),
+            (SpyCloudBreachWatchlist_CL
+            | where isnotempty(password)
+            | summarize domains = dcount(target_domain) by email, password
+            | where domains > 1
+            | summarize v = dcount(email)
+            | where v > 0
+            | extend Priority = 5, Recommendation = strcat("MEDIUM: ", v, " users show password reuse across multiple target domains. Enforce unique password policy and deploy password manager."))
+            | project Priority, Recommendation
+            | sort by Priority asc
