@@ -448,7 +448,7 @@
       "type": "Microsoft.OperationalInsights/workspaces",
       "apiVersion": "2022-10-01",
       "name": "[parameters('workspace')]",
-      "location": "[if(empty(parameters('workspaceRegionOverride')), resourceGroup().location, parameters('workspaceRegionOverride'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
       "tags": "[variables('allTags')]",
       "properties": {
         "sku": {
@@ -498,7 +498,6 @@
       "name": "[parameters('dataCollectionEndpointName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
       "tags": "[variables('allTags')]",
-      "kind": "Linux",
       "properties": {
         "networkAcls": {
           "publicNetworkAccess": "[parameters('networkAccessMode')]"
@@ -567,7 +566,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -637,7 +636,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -691,7 +690,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -833,7 +832,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -919,7 +918,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -1061,7 +1060,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -1075,7 +1074,7 @@
       "name": "[concat('dcr-ccf-', parameters('workspace'))]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
       "properties": {
-        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', concat('dce-spycloud-', parameters('workspace')))]",
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
         "streamDeclarations": {
           "Custom-SpyCloudBreachWatchlist_CL": {
             "columns": [
@@ -1825,6 +1824,14 @@
             {
               "name": "SpyCloud_ConditionalAccessLogs_CL",
               "lastDataReceivedQuery": "SpyCloud_ConditionalAccessLogs_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCompassData_CL",
+              "lastDataReceivedQuery": "SpyCloudCompassData_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCompassDevices_CL",
+              "lastDataReceivedQuery": "SpyCloudCompassDevices_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
             }
           ],
           "connectivityCriteria": [
