@@ -14,8 +14,8 @@
   <img src="https://img.shields.io/badge/sentinel-ready-0D1B2A?style=for-the-badge&logo=microsoftazure"/>
   <img src="https://img.shields.io/badge/copilot-AI%20agent-E07A5F?style=for-the-badge&logo=microsoft"/>
   <img src="https://img.shields.io/badge/playbooks-4-2D6A4F?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/analytics-28%20rules-415A77?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/dashboard-19%20charts-6B4C9A?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/analytics-38%20rules-415A77?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/dashboard-22%20charts-6B4C9A?style=for-the-badge"/>
   <img src="https://img.shields.io/badge/integrations-6-D4A843?style=for-the-badge"/>
 </p>
 
@@ -195,7 +195,7 @@ The portal wizard has **3 pages**:
 - Configure MDE isolation type (Full/Selective), device tag name
 - Configure CA security group ID for conditional access
 - Set MDE Blocklist schedule (every 1–24 hours)
-- Enable/disable 28 analytics rules, automation rule, post-deploy script
+- Enable/disable 38 analytics rules, automation rule, post-deploy script
 
 **Page 3 — Security & Integrations**
 - Enable workbook dashboard
@@ -290,7 +290,7 @@ Interactive 9-phase guided deployment with prompts for resource group, workspace
 | CCF REST Pollers | 3 | Watchlist New + Modified + Catalog |
 | Logic App Playbooks | 4 | MDE, CA, CredResponse, MDE Blocklist |
 | Analytics Rules | 28 | 13 core + 4 IdP + 5 advanced + 6 cross-data |
-| Workbook Dashboard | 1 | 19 visualizations across 8 sections |
+| Workbook Dashboard | 1 | 22 visualizations across 8 sections |
 | Action Group | 1 | Email + Teams + Slack health alerts |
 | Health Alert Rule | 1 | Fires when no data received for 2+ hours |
 | Managed Identity | 1 | For deployment script RBAC |
@@ -468,7 +468,7 @@ Schedule Trigger (configurable 1–24h)
 
 ---
 
-## 28 Analytics Rules
+## 38 Analytics Rules
 
 All rules deploy **disabled** — enable individually in Sentinel → Analytics.
 
@@ -549,7 +549,7 @@ All integrations are **conditional** — only fire when the corresponding URL or
 
 ## Sentinel Workbook Dashboard
 
-**19 visualizations** across **8 sections**. Find at: Sentinel → Workbooks → **SpyCloud Threat Intelligence Dashboard**
+**22 visualizations** across **8 sections**. Find at: Sentinel → Workbooks → **SpyCloud Threat Intelligence Dashboard**
 
 > **All charts render gracefully before data flows.** Every query uses `union isfuzzy=true` with typed `datatable()` fallbacks — tiles show zeros, tables show empty, health shows "🔴 No Data" status. Once the connector is activated, real data replaces the defaults within 5–10 minutes.
 
@@ -579,6 +579,11 @@ All integrations are **conditional** — only fire when the corresponding URL or
 - **MDE Timeline** — Area chart of device isolation actions over time
 - **CA Timeline** — Area chart of password reset/revoke actions over time
 
+### Compass Consumer Intelligence
+- **Compass Exposures by Category** — Bar chart of consumer identity exposures by breach type
+- **Top Compass Infected Devices** — Table with hostname, OS, infection count, app count
+- **Compass + Corporate Overlap** — Table showing users in both consumer and corporate datasets
+
 ### Breach Catalog
 - **Recent Entries** — Table showing top 50 breach sources with IDs, titles, status
 
@@ -590,7 +595,7 @@ All integrations are **conditional** — only fire when the corresponding URL or
 
 ## Security Copilot Integration
 
-### Plugin — 28 KQL Skills
+### Plugin — 42 KQL Skills
 
 | Category | Skills | What They Do |
 |----------|--------|-------------|
@@ -607,6 +612,16 @@ All integrations are **conditional** — only fire when the corresponding URL or
 ### Agent — 30 Interactive Skills
 
 **Example prompts:** "Show our dark web exposure" · "Investigate john@company.com" · "Which devices are infected?" · "Do we have plaintext passwords exposed?" · "What users have credentials in 3+ breaches?" · "Show remediation gaps"
+
+### New Skills (v8.5)
+
+| Category | Skills | Capabilities |
+|----------|--------|-------------|
+| Compass Investigation | 4 | Consumer exposure search, device inventory, corporate overlap, reinfection detection |
+| Cross-Connector Hunting | 4 | Sign-in hunting, email activity, Azure resource changes, network-wide IP sweep |
+| Risk Scoring | 3 | Per-user composite risk score, org-wide dashboard, priority action items for SOC |
+
+**Example prompts:** "What's the risk score for john@company.com?" · "Show me priority actions for our SOC right now" · "Hunt all network logs for SpyCloud infection IPs" · "Which Compass devices are reinfected?" · "Show organization risk summary"
 
 Upload: `copilot/SpyCloud_Plugin.yaml` → Sources → Custom Plugin · `copilot/SpyCloud_Agent.yaml` → Build → Upload YAML
 
@@ -699,7 +714,7 @@ SPYCLOUD-SENTINEL/
 │   └── verify-deployment.sh            ← 10-section health check with portal links
 │
 ├── copilot/
-│   ├── SpyCloud_Plugin.yaml            ← Security Copilot plugin (28 KQL skills)
+│   ├── SpyCloud_Plugin.yaml            ← Security Copilot plugin (42 KQL skills)
 │   └── SpyCloud_Agent.yaml             ← Interactive Copilot agent (30 skills)
 │
 ├── workbooks/
@@ -721,13 +736,28 @@ SPYCLOUD-SENTINEL/
 | Status | Feature |
 |--------|---------|
 | 🟢 Shipped | 4 playbooks with Slack + Teams + Email + ServiceNow + Jira + Azure DevOps |
-| 🟢 Shipped | 28 analytics rules (13 core + 4 IdP + 5 advanced + 6 cross-data) |
+| 🟢 Shipped | 38 analytics rules (13 core + 4 IdP + 5 advanced + 6 cross-data) |
 | 🟢 Shipped | 19-chart workbook dashboard across 8 sections |
 | 🟢 Shipped | Health monitoring: Action Group with Email + Teams + Slack |
 | 🟢 Shipped | Security Copilot plugin (28 skills) + agent (30 skills) |
 | 🟢 Shipped | Configurable connector: polling, retries, timeout, lookback (365 days) |
 | 🟢 Shipped | X-Api-Key auth, OnboardingStates, no role assignments, no Key Vault |
 | 🟢 Shipped | GitHub Actions CI/CD, verify script, deploy-all script |
+### Extended Cross-Data Correlation (10 Rules — NEW in v8.5)
+
+| # | Rule | Correlates With | What It Detects |
+|---|------|----------------|-----------------|
+| 29 | SpyCloud × Office 365 | `OfficeActivity` | Exposed user creating mail forwarding rules |
+| 30 | SpyCloud × Email | `EmailEvents` | Phishing campaigns targeting exposed users |
+| 31 | SpyCloud × Identity | `IdentityLogonEvents` | Lateral movement by exposed users |
+| 32 | SpyCloud × TI | `ThreatIntelligenceIndicator` | Infection IPs matching threat intelligence feeds |
+| 33 | SpyCloud × UEBA | `BehaviorAnalytics` | Anomalous behavior from exposed users |
+| 34 | SpyCloud × Azure | `AzureActivity` | Exposed user modifying cloud resources |
+| 35 | SpyCloud Compass | `SpyCloudCompassData_CL` | Consumer + corporate credential overlap |
+| 36 | SpyCloud × Firewall | `CommonSecurityLog` | Infected IPs in CEF/syslog firewall logs |
+| 37 | SpyCloud × Impossible Travel | `SigninLogs` | Sign-in from different country than infection |
+| 38 | SpyCloud Compass Devices | `SpyCloudCompassDevices_CL` | Device reinfection detection |
+
 | 🟡 Next | Jupyter notebooks: Exposure Investigation, Infection Analysis, Org Report |
 | 🟡 Next | Enhanced Copilot: cross-data chained investigation, hunt queries |
 | 🟡 Next | Additional workbooks: Executive Summary, SOC Operations, Compliance |

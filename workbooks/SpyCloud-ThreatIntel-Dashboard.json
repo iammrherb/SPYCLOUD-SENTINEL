@@ -384,6 +384,49 @@
     {
       "type": 1,
       "content": {
+        "json": "---\n## \ud83e\udded Compass Consumer Intelligence"
+      },
+      "name": "headerCompass"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudCompassData_CL\n| where TimeGenerated {TimeRange}\n| summarize Exposures=count(), Users=dcount(email), Devices=dcount(infected_machine_id), MaxSev=max(severity) by breach_category\n| order by Exposures desc)",
+        "size": 0,
+        "title": "Compass Exposures by Category",
+        "queryType": 0,
+        "visualization": "barchart"
+      },
+      "name": "compassByCategory"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudCompassDevices_CL\n| where TimeGenerated {TimeRange}\n| summarize Infections=count(), AvgApps=avg(application_count) by user_hostname, user_os\n| top 20 by Infections desc)",
+        "size": 0,
+        "title": "Top Compass Infected Devices",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "compassDevices"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudCompassData_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | distinct email) on email\n| summarize CompassHits=count(), Domains=dcount(target_domain) by email\n| top 15 by CompassHits desc)",
+        "size": 0,
+        "title": "Compass + Corporate Overlap (Shared Users)",
+        "queryType": 0,
+        "visualization": "table"
+      },
+      "name": "compassCorporateOverlap"
+    },
+    {
+      "type": 1,
+      "content": {
         "json": "---\n## \ud83c\udfe5 Connector Health"
       },
       "name": "headerHealth"
@@ -392,7 +435,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union isfuzzy=true\n(datatable(d:string)[\"SpyCloudBreachWatchlist_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\",\"SpyCloudBreachCatalog_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\",\"Spycloud_MDE_Logs_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\",\"SpyCloud_CA_Logs_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\"]),\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloudBreachWatchlist_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\")),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloudBreachCatalog_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\")),\n(Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"Spycloud_MDE_Logs_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\")),\n(SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloud_CA_Logs_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\"))\n| summarize Records=max(Records), Earliest=max(Earliest), Latest=max(Latest), AgeHours=min(AgeHours), Status=max(Status) by Table\n| order by Records desc",
+        "query": "union isfuzzy=true\n(datatable(d:string)[\"SpyCloudBreachWatchlist_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\",\"SpyCloudBreachCatalog_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\",\"Spycloud_MDE_Logs_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\",\"SpyCloud_CA_Logs_CL\",0,datetime(null),datetime(null),0,\"\ud83d\udd34 No Data\"]),\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloudBreachWatchlist_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\")),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloudBreachCatalog_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\")),\n(Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"Spycloud_MDE_Logs_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\")),\n(SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloud_CA_Logs_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\"))\n| summarize Records=max(Records), Earliest=max(Earliest), Latest=max(Latest), AgeHours=min(AgeHours), Status=max(Status) by Table\n,\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloudCompassData_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\")),\n(SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\"SpyCloudCompassDevices_CL\", AgeHours=datetime_diff('hour',now(),Latest) | extend Status=case(AgeHours<=1,\"\ud83d\udfe2 Active\",AgeHours<=6,\"\ud83d\udfe1 Delayed\",AgeHours<=24,\"\ud83d\udfe0 Stale\",\"\ud83d\udd34 No Data\"))\n| summarize Records=max(Records), Earliest=max(Earliest), Latest=max(Latest), AgeHours=min(AgeHours), Status=max(Status) by Table\n| order by Records desc",
         "size": 0,
         "title": "Data Pipeline Health",
         "queryType": 0,
