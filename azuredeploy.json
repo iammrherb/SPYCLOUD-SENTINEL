@@ -1257,11 +1257,11 @@
                 "type": "datetime"
               },
               {
-                "name": "catalog_id",
+                "name": "id",
                 "type": "int"
               },
               {
-                "name": "breach_title",
+                "name": "title",
                 "type": "string"
               },
               {
@@ -1269,7 +1269,7 @@
                 "type": "string"
               },
               {
-                "name": "breach_description",
+                "name": "description",
                 "type": "string"
               },
               {
@@ -1293,11 +1293,11 @@
                 "type": "string"
               },
               {
-                "name": "breach_type",
+                "name": "type",
                 "type": "string"
               },
               {
-                "name": "breach_status",
+                "name": "status",
                 "type": "string"
               },
               {
@@ -1555,6 +1555,10 @@
               {
                 "name": "UserHostname",
                 "type": "string"
+              },
+              {
+                "name": "Status",
+                "type": "string"
               }
             ]
           },
@@ -1607,6 +1611,10 @@
               {
                 "name": "Severity",
                 "type": "int"
+              },
+              {
+                "name": "Status",
+                "type": "string"
               }
             ]
           }
@@ -1637,7 +1645,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now(), catalog_id = toint(id), breach_title = tostring(title), breach_description = tostring(description), breach_type = tostring(['type']), breach_status = tostring(status), confidence = toint(confidence), num_records = toint(num_records)",
+            "transformKql": "source | extend TimeGenerated = now() | extend catalog_id = toint(id) | extend breach_title = tostring(title) | extend breach_description = tostring(description) | extend breach_type = tostring(['type']) | extend breach_status = tostring(status) | extend confidence = toint(confidence) | extend num_records = toint(num_records)",
             "outputStream": "Custom-SpyCloudBreachCatalog_CL"
           },
           {
@@ -1667,7 +1675,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()), ActionStatus = tostring(Status)",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(Status)",
             "outputStream": "Custom-Spycloud_MDE_Logs_CL"
           },
           {
@@ -1677,7 +1685,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()), ActionStatus = tostring(Status)",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(Status)",
             "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
           }
         ]
