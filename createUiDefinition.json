@@ -56,24 +56,11 @@
                 "label": "Workspace & SpyCloud API",
                 "elements": [
                     {
-                        "name": "deploymentMode",
-                        "type": "Microsoft.Common.DropDown",
-                        "label": "Deployment Mode",
-                        "toolTip": "Full = first-time (creates workspace, DCE, DCR, tables, everything). Update = add/update rules, playbooks, workbook on existing deployment.",
-                        "defaultValue": "Full",
-                        "constraints": {
-                            "required": true,
-                            "allowedValues": [
-                                {
-                                    "label": "Full - First-time deployment",
-                                    "value": "Full"
-                                },
-                                {
-                                    "label": "Update - Add features to existing",
-                                    "value": "Update"
-                                }
-                            ]
-                        },
+                        "name": "existingWorkspace",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "Use existing workspace (do not create new)",
+                        "toolTip": "Check this if your Log Analytics workspace already exists. Unchecked = create a new workspace.",
+                        "defaultValue": false,
                         "visible": true
                     },
                     {
@@ -617,7 +604,7 @@
             "jiraWebhookUrl": "[steps('securityConfig').sectionIntegrations.jiraWebhookUrl]",
             "azureDevOpsWebhookUrl": "[steps('securityConfig').sectionIntegrations.azureDevOpsWebhookUrl]",
             "apiRegion": "[steps('workspaceConfig').apiRegion]",
-            "deploymentMode": "[steps('workspaceConfig').deploymentMode]"
+            "existingWorkspace": "[steps('workspaceConfig').existingWorkspace]"
         }
     }
 }
