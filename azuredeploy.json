@@ -1609,7 +1609,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source\n| extend TimeGenerated = now()\n| extend severity = toint(severity)\n| extend sighting = toint(sighting)\n| extend source_id = toint(source_id)\n| extend ip_addresses = iff(gettype(ip_addresses) == \"string\", parse_json(ip_addresses), ip_addresses)\n| extend av_softwares = iff(gettype(av_softwares) == \"string\", parse_json(av_softwares), av_softwares)\n| extend email = tolower(tostring(email))\n| extend email_domain = tolower(tostring(email_domain))\n| extend target_domain = tolower(tostring(target_domain))",
+            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend target_domain = tolower(tostring(target_domain))",
             "outputStream": "Custom-SpyCloudBreachWatchlist_CL"
           },
           {
@@ -1619,7 +1619,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source\n| extend TimeGenerated = now()\n| extend catalog_id = toint(column_ifexists('id', ''))\n| extend breach_title = tostring(column_ifexists('title', ''))\n| extend breach_description = tostring(column_ifexists('description', ''))\n| extend breach_type = tostring(column_ifexists('type', ''))\n| extend breach_status = tostring(column_ifexists('status', ''))\n| extend confidence = toint(confidence)\n| extend num_records = toint(num_records)\n| extend assets = iff(gettype(assets) == \"string\", parse_json(assets), assets)\n| project-away id, title, description, type, status",
+            "transformKql": "source | extend TimeGenerated = now() | extend catalog_id = toint(column_ifexists('id', '')) | extend breach_title = tostring(column_ifexists('title', '')) | extend breach_description = tostring(column_ifexists('description', '')) | extend breach_type = tostring(column_ifexists('type', '')) | extend breach_status = tostring(column_ifexists('status', '')) | extend confidence = toint(confidence) | extend num_records = toint(num_records) | extend assets = iff(gettype(assets) == 'string', parse_json(assets), assets)",
             "outputStream": "Custom-SpyCloudBreachCatalog_CL"
           },
           {
@@ -1629,7 +1629,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source\n| extend TimeGenerated = now()\n| extend severity = toint(severity)\n| extend sighting = toint(sighting)\n| extend source_id = toint(source_id)\n| extend ip_addresses = iff(gettype(ip_addresses) == \"string\", parse_json(ip_addresses), ip_addresses)\n| extend av_softwares = iff(gettype(av_softwares) == \"string\", parse_json(av_softwares), av_softwares)\n| extend email = tolower(tostring(email))\n| extend target_domain = tolower(tostring(target_domain))",
+            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
             "outputStream": "Custom-SpyCloudCompassData_CL"
           },
           {
@@ -1639,7 +1639,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source\n| extend TimeGenerated = now()\n| extend source_id = toint(source_id)\n| extend application_count = toint(application_count)\n| extend ip_addresses = iff(gettype(ip_addresses) == \"string\", parse_json(ip_addresses), ip_addresses)",
+            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend application_count = toint(application_count) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses)",
             "outputStream": "Custom-SpyCloudCompassDevices_CL"
           },
           {
@@ -1649,7 +1649,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source\n| extend TimeGenerated = coalesce(todatetime(TimeGenerated), now())\n| extend ActionStatus = tostring(column_ifexists('Status', ''))\n| project-away Status",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(column_ifexists('Status', ''))",
             "outputStream": "Custom-Spycloud_MDE_Logs_CL"
           },
           {
@@ -1659,7 +1659,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source\n| extend TimeGenerated = coalesce(todatetime(TimeGenerated), now())\n| extend ActionStatus = tostring(column_ifexists('Status', ''))\n| project-away Status",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend ActionStatus = tostring(column_ifexists('Status', ''))",
             "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
           }
         ]
@@ -7735,6 +7735,7 @@
         "suppressionDuration": "PT5H",
         "suppressionEnabled": false,
         "tactics": [
+          "InitialAccess",
           "CredentialAccess"
         ],
         "techniques": [
