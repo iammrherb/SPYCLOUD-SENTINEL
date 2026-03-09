@@ -1,0 +1,198 @@
+[
+  {
+    "name": "SpyCloud Hunt — Plaintext Passwords Exposed in Last 7 Days",
+    "description": "Identifies users whose plaintext (cleartext) passwords appeared in SpyCloud breach data within the last 7 days. These credentials require no cracking and can be used immediately by attackers. Prioritize immediate password resets and user notification.",
+    "tactics": ["CredentialAccess"],
+    "techniques": ["T1552", "T1552.001"],
+    "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d)\n| where isnotempty(password_plaintext)\n| summarize ExposureCount=count(), TargetDomains=dcount(target_domain), DomainList=make_set(target_domain, 10), MaxSeverity=max(severity), LatestExposure=max(spycloud_publish_date) by email, email_domain\n| extend DaysSinceExposure = datetime_diff('day', now(), LatestExposure)\n| order by MaxSeverity desc, ExposureCount desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Devices Infected Multiple Times (Reinfection Pattern)",
+    "description": "Detects devices appearing in SpyCloud infostealer data across multiple breach sources or time periods, indicating failed remediation or persistent risky user behavior. Reinfected devices are high-priority for endpoint investigation and possible reimaging.",
+    "tactics": ["Persistence", "Execution"],
+    "techniques": ["T1547", "T1059"],
+    "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(90d)\n| where isnotempty(infected_machine_id)\n| summarize InfectionCount=count(), DistinctSources=dcount(source_id), AffectedUsers=dcount(email), UserList=make_set(email, 5), FirstSeen=min(infected_time), LastSeen=max(infected_time), OSList=make_set(user_os, 3) by infected_machine_id, user_hostname\n| where InfectionCount > 1\n| extend DaysBetweenInfections = datetime_diff('day', LastSeen, FirstSeen)\n| order by InfectionCount desc, DistinctSources desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Corporate Emails Exposed on High-Risk Consumer Sites",
+    "description": "Finds corporate email addresses that were registered on consumer or high-risk websites (dating, gambling, adult content, file sharing) and subsequently breached. This indicates shadow IT risk and policy violations that expand the organization's attack surface.",
+    "tactics": ["CredentialAccess", "InitialAccess"],
+    "techniques": ["T1078", "T1078.004"],
+    "query": "let high_risk_keywords = dynamic(['dating', 'adult', 'gambling', 'casino', 'torrent', 'crack', 'warez', 'vpn-free', 'xxx', 'porn', 'bet', 'poker', 'escort']);\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d)\n| where isnotempty(target_domain)\n| where target_domain has_any (high_risk_keywords) or target_url has_any (high_risk_keywords)\n| summarize Exposures=count(), Sites=dcount(target_domain), SiteList=make_set(target_domain, 10), MaxSeverity=max(severity), HasPlaintext=countif(isnotempty(password_plaintext)) by email, email_domain\n| order by MaxSeverity desc, Exposures desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Exposed Credentials with Successful Sign-Ins",
+    "description": "Correlates SpyCloud credential exposures with successful Entra ID sign-ins. Users with active sessions after exposure are the highest-priority accounts — an attacker may already be leveraging stolen credentials for unauthorized access.",
+    "tactics": ["CredentialAccess", "InitialAccess"],
+    "techniques": ["T1078", "T1078.004"],
+    "query": "let exposed_users = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| summarize MaxSev=max(severity), Exposures=count(), HasPlaintext=countif(isnotempty(password_plaintext)) by email;\nSigninLogs\n| where TimeGenerated > ago(48h)\n| where ResultType == 0\n| where UserPrincipalName in~ (exposed_users | project email)\n| join kind=inner exposed_users on $left.UserPrincipalName == $right.email\n| summarize SuccessfulSignIns=count(), DistinctApps=dcount(AppDisplayName), AppList=make_set(AppDisplayName, 5), DistinctIPs=dcount(IPAddress), IPList=make_set(IPAddress, 5), Locations=make_set(Location, 5) by UserPrincipalName, MaxSev, Exposures, HasPlaintext\n| order by MaxSev desc, SuccessfulSignIns desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Session Cookies Stolen — Active Session Hijack Risk",
+    "description": "Identifies infostealer records containing session cookie data (sighting field or cookie-related password types). Stolen session tokens allow attackers to bypass MFA entirely by hijacking existing authenticated sessions.",
+    "tactics": ["CredentialAccess", "DefenseEvasion"],
+    "techniques": ["T1539", "T1550.004"],
+    "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d)\n| where password_type has_any ('cookie', 'session', 'token', 'auth_token') or sighting > 0\n| summarize CookieExposures=count(), TargetDomains=dcount(target_domain), DomainList=make_set(target_domain, 10), MaxSeverity=max(severity), InfectedDevices=dcount(infected_machine_id), LatestSighting=max(spycloud_publish_date) by email, email_domain\n| extend DaysSinceStolen = datetime_diff('day', now(), LatestSighting)\n| where DaysSinceStolen <= 30\n| order by MaxSeverity desc, CookieExposures desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Password Reuse Across Multiple Domains",
+    "description": "Detects users whose same password hash appears across 3 or more different target domains, indicating dangerous password reuse. These users are prime targets for credential stuffing attacks that could compromise multiple corporate and personal accounts simultaneously.",
+    "tactics": ["CredentialAccess"],
+    "techniques": ["T1110", "T1110.004"],
+    "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d)\n| where isnotempty(password)\n| summarize Domains=dcount(target_domain), DomainList=make_set(target_domain, 15), Exposures=count(), MaxSeverity=max(severity), HasPlaintext=countif(isnotempty(password_plaintext)), PasswordTypes=make_set(password_type, 5) by email, password\n| where Domains >= 3\n| project email, password_hash=hash_sha256(password), Domains, DomainList, Exposures, MaxSeverity, HasPlaintext, PasswordTypes\n| order by Domains desc, MaxSeverity desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Executive and VIP Users in Breach Data",
+    "description": "Cross-references SpyCloud breach data against a VIP/executive watchlist to identify high-value targets with exposed credentials. Executive accounts typically have elevated privileges and access to sensitive corporate data, making them priority remediation targets.",
+    "tactics": ["CredentialAccess", "InitialAccess"],
+    "techniques": ["T1078", "T1589.001"],
+    "query": "let vip_users = _GetWatchlist('SpyCloudVIP')\n| project Email=tolower(Email), Name, Title, Priority;\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d)\n| extend email_lower = tolower(email)\n| join kind=inner vip_users on $left.email_lower == $right.Email\n| summarize Exposures=count(), MaxSeverity=max(severity), PlaintextPWs=countif(isnotempty(password_plaintext)), Domains=dcount(target_domain), DomainList=make_set(target_domain, 10), Devices=dcount(infected_machine_id), LatestExposure=max(spycloud_publish_date) by email, Name, Title, Priority\n| order by Priority asc, MaxSeverity desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Exposed Users Creating Mail Forwarding Rules",
+    "description": "Detects compromised users who created or modified mail forwarding rules in Exchange Online. Attackers commonly set up mail forwarding to exfiltrate data persistently from breached mailboxes without repeated sign-ins.",
+    "tactics": ["Collection", "Exfiltration"],
+    "techniques": ["T1114.003", "T1020"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 10\n| distinct email;\nOfficeActivity\n| where TimeGenerated > ago(14d)\n| where Operation in ('New-InboxRule', 'Set-InboxRule', 'Set-Mailbox', 'New-TransportRule', 'UpdateInboxRules')\n| where UserId in~ (exposed)\n| extend ForwardTo = tostring(parse_json(Parameters)[0].Value)\n| project TimeGenerated, UserId, Operation, ForwardTo, ClientIP, SessionId\n| join kind=leftouter (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) | summarize MaxSev=max(severity), Exposures=count() by email) on $left.UserId == $right.email\n| order by TimeGenerated desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Infected Devices Still Active on Network",
+    "description": "Correlates SpyCloud infected device data with Microsoft Defender for Endpoint network events to identify compromised hosts that remain active on the corporate network. These devices may still be exfiltrating data or serving as beachheads for lateral movement.",
+    "tactics": ["CommandAndControl", "LateralMovement"],
+    "techniques": ["T1071", "T1021"],
+    "query": "let infected_hosts = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d) and isnotempty(infected_machine_id)\n| summarize MaxSev=max(severity), Users=dcount(email), InfectedTime=max(infected_time) by user_hostname, infected_machine_id, user_os;\nlet infected_ips = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d) and isnotempty(ip_addresses)\n| mv-expand ip = ip_addresses\n| extend src_ip = tostring(ip)\n| distinct src_ip, infected_machine_id;\nDeviceNetworkEvents\n| where TimeGenerated > ago(7d)\n| where DeviceName in~ (infected_hosts | project user_hostname) or RemoteIP in (infected_ips | project src_ip)\n| summarize Connections=count(), RemoteIPs=dcount(RemoteIP), RemoteURLs=dcount(RemoteUrl), LastActivity=max(TimeGenerated) by DeviceName, LocalIP\n| join kind=leftouter infected_hosts on $left.DeviceName == $right.user_hostname\n| order by MaxSev desc, Connections desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Infected IPs in Firewall Allow Logs",
+    "description": "Searches CommonSecurityLog (CEF) for firewall-allowed traffic involving IP addresses flagged by SpyCloud as associated with infostealer infections. Allowed connections from these IPs indicate potential C2 communication or data exfiltration passing through perimeter defenses.",
+    "tactics": ["CommandAndControl"],
+    "techniques": ["T1071", "T1071.001"],
+    "query": "let spycloud_ips = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d) and isnotempty(ip_addresses)\n| mv-expand ip = ip_addresses\n| extend flagged_ip = tostring(ip)\n| where isnotempty(flagged_ip)\n| distinct flagged_ip;\nCommonSecurityLog\n| where TimeGenerated > ago(7d)\n| where DeviceAction has_any ('allow', 'accept', 'permit', 'pass')\n| where SourceIP in (spycloud_ips) or DestinationIP in (spycloud_ips)\n| summarize Hits=count(), BytesSent=sum(SentBytes), BytesReceived=sum(ReceivedBytes), Protocols=make_set(Protocol, 5), Destinations=dcount(DestinationIP) by SourceIP, DestinationIP, DeviceVendor, DeviceProduct\n| order by Hits desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Exposed Users with Admin Role Assignments",
+    "description": "Identifies users with SpyCloud credential exposures who also hold or were recently assigned privileged Entra ID roles (Global Admin, Exchange Admin, etc.). Compromised admin accounts represent the most critical security risk for total environment takeover.",
+    "tactics": ["CredentialAccess", "PrivilegeEscalation"],
+    "techniques": ["T1078.004", "T1098.003"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 5\n| summarize MaxSev=max(severity), Exposures=count(), HasPlaintext=countif(isnotempty(password_plaintext)) by email;\nAuditLogs\n| where TimeGenerated > ago(30d)\n| where OperationName has_any ('Add member to role', 'Add eligible member to role', 'Add scoped member to role')\n| extend TargetUser = tostring(TargetResources[0].userPrincipalName)\n| extend RoleName = tostring(TargetResources[0].displayName)\n| where TargetUser in~ (exposed | project email)\n| join kind=inner exposed on $left.TargetUser == $right.email\n| project TimeGenerated, TargetUser, RoleName, MaxSev, Exposures, HasPlaintext, InitiatedBy=tostring(InitiatedBy.user.userPrincipalName)\n| order by MaxSev desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Credential Exposure Followed by OAuth App Consent",
+    "description": "Detects exposed users who consented to OAuth application permissions after their credentials appeared in SpyCloud data. Attackers use stolen credentials to sign in and grant malicious OAuth apps persistent access that survives password resets.",
+    "tactics": ["Persistence", "CredentialAccess"],
+    "techniques": ["T1550.001", "T1098.003"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 10\n| summarize ExposureTime=min(spycloud_publish_date), MaxSev=max(severity) by email;\nAuditLogs\n| where TimeGenerated > ago(14d)\n| where OperationName has_any ('Consent to application', 'Add OAuth2PermissionGrant', 'Add app role assignment grant to user')\n| extend ConsentUser = tostring(InitiatedBy.user.userPrincipalName)\n| extend AppName = tostring(TargetResources[0].displayName)\n| where ConsentUser in~ (exposed | project email)\n| join kind=inner exposed on $left.ConsentUser == $right.email\n| where TimeGenerated >= ExposureTime\n| project TimeGenerated, ConsentUser, AppName, OperationName, MaxSev, ExposureTime\n| extend HoursAfterExposure = datetime_diff('hour', TimeGenerated, ExposureTime)\n| order by HoursAfterExposure asc"
+  },
+  {
+    "name": "SpyCloud Hunt — DNS Queries to C2 from Infected Hosts",
+    "description": "Correlates SpyCloud infected host data with DNS query logs to identify DNS-based command-and-control communication originating from compromised devices. Looks for high-entropy domains, unusual TLDs, and known malicious patterns associated with infostealer C2 infrastructure.",
+    "tactics": ["CommandAndControl"],
+    "techniques": ["T1071.004", "T1568"],
+    "query": "let infected_hosts = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d) and isnotempty(infected_machine_id)\n| mv-expand ip = ip_addresses\n| extend host_ip = tostring(ip)\n| summarize MaxSev=max(severity), Users=make_set(email, 3) by user_hostname, host_ip, infected_machine_id;\nDnsEvents\n| where TimeGenerated > ago(7d)\n| where ClientIP in (infected_hosts | project host_ip) or Computer in~ (infected_hosts | project user_hostname)\n| where Name !endswith '.local' and Name !endswith '.internal'\n| where QueryType in ('A', 'AAAA', 'CNAME', 'TXT')\n| summarize QueryCount=count(), UniqueDomains=dcount(Name), DomainSample=make_set(Name, 20), QueryTypes=make_set(QueryType, 5) by ClientIP, Computer\n| where UniqueDomains > 50\n| join kind=leftouter infected_hosts on $left.ClientIP == $right.host_ip\n| order by UniqueDomains desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Fortinet FSSO Sessions from Compromised Users",
+    "description": "Identifies Fortinet FortiGate firewall sessions (via FSSO single sign-on) associated with users whose credentials are in SpyCloud breach data. Attackers leveraging stolen VPN or FSSO credentials can bypass perimeter security and access internal network resources.",
+    "tactics": ["InitialAccess", "LateralMovement"],
+    "techniques": ["T1078", "T1133"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 10\n| summarize MaxSev=max(severity), Exposures=count() by email, email_username;\nCommonSecurityLog\n| where TimeGenerated > ago(7d)\n| where DeviceVendor == \"Fortinet\"\n| where Activity has_any ('FSSO', 'auth', 'login', 'session', 'vpn')\n| extend NormalizedUser = tolower(extract('user=([^\\\\s,;]+)', 1, AdditionalExtensions))\n| where NormalizedUser in~ (exposed | project email_username) or SourceUserName in~ (exposed | project email_username)\n| join kind=inner exposed on $left.NormalizedUser == $right.email_username\n| summarize Sessions=count(), UniqueSourceIPs=dcount(SourceIP), IPList=make_set(SourceIP, 5), DestIPs=dcount(DestinationIP), Actions=make_set(DeviceAction, 5) by NormalizedUser, MaxSev, DeviceProduct\n| order by MaxSev desc, Sessions desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Palo Alto User-ID Traffic from Exposed Users",
+    "description": "Hunts for Palo Alto Networks firewall traffic associated with users identified in SpyCloud breach data via User-ID integration. Compromised users generating network traffic through PAN firewalls may indicate active use of stolen credentials for internal resource access.",
+    "tactics": ["InitialAccess", "LateralMovement"],
+    "techniques": ["T1078", "T1133"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 10\n| summarize MaxSev=max(severity), Exposures=count() by email, email_username;\nCommonSecurityLog\n| where TimeGenerated > ago(7d)\n| where DeviceVendor == \"Palo Alto Networks\"\n| where isnotempty(SourceUserName)\n| extend NormalizedUser = tolower(SourceUserName)\n| where NormalizedUser has_any (exposed | project email_username)\n| join kind=inner exposed on $left.NormalizedUser == $right.email_username\n| summarize Sessions=count(), BytesSent=sum(SentBytes), BytesReceived=sum(ReceivedBytes), UniqueDestIPs=dcount(DestinationIP), DestPorts=make_set(DestinationPort, 10), Apps=make_set(ApplicationProtocol, 5), Actions=make_set(DeviceAction, 5) by NormalizedUser, MaxSev, SourceIP\n| order by MaxSev desc, BytesSent desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Exposed Users Accessing Sensitive SharePoint Sites",
+    "description": "Identifies users with SpyCloud credential exposures who accessed sensitive SharePoint Online sites (finance, HR, legal, executive, confidential). Compromised users accessing high-value document repositories represent significant data exfiltration risk.",
+    "tactics": ["Collection", "InitialAccess"],
+    "techniques": ["T1213.002", "T1078"],
+    "query": "let sensitive_keywords = dynamic(['finance', 'hr', 'human-resources', 'legal', 'executive', 'confidential', 'payroll', 'merger', 'acquisition', 'board', 'strategy', 'restricted']);\nlet exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 10\n| summarize MaxSev=max(severity), Exposures=count() by email;\nOfficeActivity\n| where TimeGenerated > ago(7d)\n| where RecordType in ('SharePointFileOperation', 'SharePoint')\n| where Operation in ('FileAccessed', 'FileDownloaded', 'FilePreviewed', 'FileModified')\n| where Site_Url has_any (sensitive_keywords) or SourceFileName has_any (sensitive_keywords)\n| where UserId in~ (exposed | project email)\n| join kind=inner exposed on $left.UserId == $right.email\n| summarize FileOps=count(), UniqueFiles=dcount(SourceFileName), Sites=make_set(Site_Url, 5), FileSample=make_set(SourceFileName, 10) by UserId, MaxSev, Operation\n| order by MaxSev desc, FileOps desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Remediation Gaps — Exposures Without CA Action Over 48 Hours",
+    "description": "Finds high-severity SpyCloud exposures that have not been addressed by conditional access remediation playbooks within 48 hours. These represent the most urgent remediation gaps where exposed credentials remain active without forced password reset or session revocation.",
+    "tactics": ["InitialAccess"],
+    "techniques": ["T1078", "T1078.004"],
+    "query": "let remediated = SpyCloud_ConditionalAccessLogs_CL\n| where TimeGenerated > ago(14d)\n| where ActionStatus == 'Success'\n| summarize RemediationTime=min(TimeGenerated) by tolower(Email);\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 15\n| extend email_lower = tolower(email)\n| summarize ExposureTime=min(TimeGenerated), MaxSev=max(severity), Exposures=count(), HasPlaintext=countif(isnotempty(password_plaintext)), Domains=dcount(target_domain) by email_lower, email\n| join kind=leftanti remediated on $left.email_lower == $right.Column1\n| extend HoursSinceExposure = datetime_diff('hour', now(), ExposureTime)\n| where HoursSinceExposure > 48\n| project email, MaxSev, Exposures, HasPlaintext, Domains, ExposureTime, HoursSinceExposure\n| order by MaxSev desc, HoursSinceExposure desc"
+  },
+  {
+    "name": "SpyCloud Hunt — New Malware Families Targeting Organization",
+    "description": "Analyzes SpyCloud breach catalog data to identify newly observed malware families appearing in breaches that affect the organization. Tracking emerging infostealer families helps threat intelligence teams update detection signatures and block new malware variants.",
+    "tactics": ["Execution", "Collection"],
+    "techniques": ["T1204", "T1005"],
+    "query": "let org_breaches = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(90d)\n| distinct source_id;\nSpyCloudBreachCatalog_CL\n| where TimeGenerated > ago(90d)\n| where uuid in (org_breaches | project source_id) or uuid in (org_breaches)\n| where isnotempty(malware_family)\n| summarize BreachCount=count(), TotalRecords=sum(num_records), Categories=make_set(breach_category, 5), AvgConfidence=avg(confidence), FirstSeen=min(acquisition_date), LastSeen=max(acquisition_date), Titles=make_set(short_title, 5) by malware_family\n| extend IsNew = iff(FirstSeen > ago(30d), true, false)\n| order by IsNew desc, LastSeen desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Geographic Anomaly — Exposure Country vs Sign-In Country",
+    "description": "Compares the country where SpyCloud detected the credential exposure (infostealer infection location) with the country of subsequent Entra ID sign-ins. Mismatches may indicate an attacker in a different geography using the stolen credentials.",
+    "tactics": ["InitialAccess", "DefenseEvasion"],
+    "techniques": ["T1078", "T1078.004"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and isnotempty(country_code)\n| summarize ExposureCountries=make_set(country_code, 5), MaxSev=max(severity) by email;\nSigninLogs\n| where TimeGenerated > ago(7d) and ResultType == 0\n| extend SignInCountry = tostring(LocationDetails.countryOrRegion)\n| where isnotempty(SignInCountry)\n| where UserPrincipalName in~ (exposed | project email)\n| join kind=inner exposed on $left.UserPrincipalName == $right.email\n| where SignInCountry !in (ExposureCountries)\n| summarize AnomalousSignIns=count(), SignInCountries=make_set(SignInCountry, 5), Apps=make_set(AppDisplayName, 5), IPs=make_set(IPAddress, 5) by UserPrincipalName, ExposureCountries, MaxSev\n| order by MaxSev desc, AnomalousSignIns desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Exposed Users Performing Bulk Data Operations",
+    "description": "Detects users with SpyCloud credential exposures who are performing bulk file downloads, large data transfers, or mass copy operations in SharePoint, OneDrive, or Exchange. This pattern may indicate data exfiltration by an attacker using stolen credentials.",
+    "tactics": ["Exfiltration", "Collection"],
+    "techniques": ["T1530", "T1114"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 10\n| summarize MaxSev=max(severity) by email;\nOfficeActivity\n| where TimeGenerated > ago(7d)\n| where Operation in ('FileDownloaded', 'FileSyncDownloadedFull', 'FileModifiedExtended', 'FileCopied', 'FileRecycled', 'FileMoved')\n| where UserId in~ (exposed | project email)\n| summarize OperationCount=count(), UniqueFiles=dcount(SourceFileName), Sites=dcount(Site_Url), SiteList=make_set(Site_Url, 5) by UserId, Operation, bin(TimeGenerated, 1h)\n| where OperationCount > 50\n| join kind=inner exposed on $left.UserId == $right.email\n| project TimeGenerated, UserId, Operation, OperationCount, UniqueFiles, Sites, SiteList, MaxSev\n| order by OperationCount desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Infected Devices with Disabled Antivirus",
+    "description": "Cross-references SpyCloud infected devices with Microsoft Defender TVM software inventory to find endpoints where antivirus or EDR protection is absent or outdated. Infected devices without working AV are both the source of the original infection and remain vulnerable to reinfection.",
+    "tactics": ["DefenseEvasion", "Persistence"],
+    "techniques": ["T1562.001", "T1547"],
+    "query": "let infected = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d) and isnotempty(user_hostname)\n| summarize MaxSev=max(severity), Users=dcount(email), InfectedTime=max(infected_time) by user_hostname, user_os, infected_machine_id;\nDeviceTvmSoftwareInventory\n| where TimeGenerated > ago(7d)\n| where SoftwareName has_any ('antivirus', 'defender', 'endpoint protection', 'mcafee', 'symantec', 'crowdstrike', 'sentinelone', 'carbon black')\n| summarize AVProducts=make_set(SoftwareName, 5), AVVersions=make_set(SoftwareVersion, 5) by DeviceName\n| join kind=rightanti infected on $left.DeviceName == $right.user_hostname\n| project user_hostname, user_os, infected_machine_id, MaxSev, Users, InfectedTime, AVStatus='No AV Detected'\n| order by MaxSev desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Lateral Movement Indicators from Compromised Accounts",
+    "description": "Identifies lateral movement patterns from accounts with SpyCloud credential exposures, including remote desktop, SMB file shares, WinRM, and PsExec usage. Attackers who obtain valid credentials frequently attempt to move laterally through the network to reach high-value targets.",
+    "tactics": ["LateralMovement"],
+    "techniques": ["T1021", "T1021.001", "T1021.002"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(14d) and severity >= 10\n| summarize MaxSev=max(severity) by email, email_username;\nDeviceNetworkEvents\n| where TimeGenerated > ago(7d)\n| where RemotePort in (3389, 445, 5985, 5986, 22, 135) or InitiatingProcessFileName in~ ('psexec.exe', 'psexec64.exe', 'mstsc.exe', 'wmic.exe')\n| where InitiatingProcessAccountName in~ (exposed | project email_username)\n| join kind=inner exposed on $left.InitiatingProcessAccountName == $right.email_username\n| summarize LateralAttempts=count(), UniqueTargets=dcount(RemoteIP), TargetIPs=make_set(RemoteIP, 10), Ports=make_set(RemotePort, 5), Tools=make_set(InitiatingProcessFileName, 5) by InitiatingProcessAccountName, DeviceName, MaxSev\n| order by UniqueTargets desc, LateralAttempts desc"
+  },
+  {
+    "name": "SpyCloud Hunt — MFA Method Changes After Credential Exposure",
+    "description": "Detects users who modified their MFA authentication methods (added phone, changed authenticator, registered security key) after their credentials appeared in SpyCloud data. Attackers may attempt to register their own MFA device to maintain persistent access even after a password reset.",
+    "tactics": ["Persistence", "CredentialAccess"],
+    "techniques": ["T1556.006", "T1098"],
+    "query": "let exposed = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d) and severity >= 10\n| summarize ExposureTime=min(spycloud_publish_date), MaxSev=max(severity) by email;\nAuditLogs\n| where TimeGenerated > ago(30d)\n| where OperationName has_any ('User registered security info', 'User deleted security info', 'User changed default security info', 'Admin registered security info', 'User registered all required security info')\n| extend TargetUser = tostring(TargetResources[0].userPrincipalName)\n| extend AuthMethod = tostring(TargetResources[0].displayName)\n| where TargetUser in~ (exposed | project email)\n| join kind=inner exposed on $left.TargetUser == $right.email\n| where TimeGenerated >= ExposureTime\n| extend HoursAfterExposure = datetime_diff('hour', TimeGenerated, ExposureTime)\n| project TimeGenerated, TargetUser, OperationName, AuthMethod, MaxSev, ExposureTime, HoursAfterExposure, InitiatedBy=tostring(InitiatedBy.user.userPrincipalName)\n| order by HoursAfterExposure asc"
+  },
+  {
+    "name": "SpyCloud Hunt — VPN Connections from Exposed IPs",
+    "description": "Searches VPN authentication and session logs for connections originating from IP addresses flagged by SpyCloud as associated with infostealer infections. VPN access from compromised IPs may indicate an attacker tunneling into the corporate network using stolen VPN credentials.",
+    "tactics": ["InitialAccess", "CommandAndControl"],
+    "techniques": ["T1133", "T1071"],
+    "query": "let spycloud_ips = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d) and isnotempty(ip_addresses)\n| mv-expand ip = ip_addresses\n| extend flagged_ip = tostring(ip)\n| where isnotempty(flagged_ip)\n| summarize MaxSev=max(severity), Users=make_set(email, 3) by flagged_ip;\nunion isfuzzy=true\n(SigninLogs | where TimeGenerated > ago(7d) | where AppDisplayName has_any ('vpn', 'VPN', 'GlobalProtect', 'AnyConnect', 'Pulse', 'FortiClient', 'Zscaler') | where IPAddress in (spycloud_ips | project flagged_ip) | summarize Hits=count() by IPAddress, AppDisplayName, UserPrincipalName | extend Source='EntraID-VPN-App'),\n(CommonSecurityLog | where TimeGenerated > ago(7d) | where DeviceEventClassID has_any ('vpn', 'tunnel', 'sslvpn', 'ipsec') | where SourceIP in (spycloud_ips | project flagged_ip) | summarize Hits=count() by SourceIP, DeviceVendor, DeviceProduct | extend Source='Firewall-VPN'),\n(AADNonInteractiveUserSignInLogs | where TimeGenerated > ago(7d) | where AppDisplayName has_any ('vpn', 'VPN', 'GlobalProtect', 'AnyConnect') | where IPAddress in (spycloud_ips | project flagged_ip) | summarize Hits=count() by IPAddress, AppDisplayName | extend Source='NonInteractive-VPN')\n| order by Hits desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Cross-Tenant Credential Exposure (Multiple Email Domains)",
+    "description": "Identifies credential exposures spanning multiple email domains within SpyCloud data, indicating cross-tenant or cross-subsidiary risk. Useful for organizations with multiple brands, acquisitions, or partner domains where a single user may have credentials across several corporate tenants.",
+    "tactics": ["CredentialAccess", "InitialAccess"],
+    "techniques": ["T1078", "T1078.004"],
+    "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(30d)\n| summarize Domains=dcount(email_domain), DomainList=make_set(email_domain, 20), Users=dcount(email), MaxSev=max(severity), Exposures=count(), PlaintextCount=countif(isnotempty(password_plaintext)) by email_username\n| where Domains >= 2\n| order by Domains desc, MaxSev desc\n| take 200"
+  },
+  {
+    "name": "SpyCloud Hunt — MDE Isolation Actions with Pending Remediation",
+    "description": "Reviews Microsoft Defender for Endpoint device isolation actions triggered by SpyCloud playbooks and identifies devices where isolation succeeded but full remediation (reimaging, malware scan, credential rotation) has not been completed. Ensures no device remains in isolation limbo.",
+    "tactics": ["Persistence"],
+    "techniques": ["T1547"],
+    "query": "Spycloud_MDE_Logs_CL\n| where TimeGenerated > ago(14d)\n| where Action == 'IsolateDevice' and ActionStatus == 'Success'\n| summarize IsolationTime=min(TimeGenerated), IsolationType=take_any(IsolationType), Severity=max(Severity) by DeviceName, DeviceId, InfectedMachineId, Email\n| join kind=leftanti (\n    Spycloud_MDE_Logs_CL\n    | where TimeGenerated > ago(14d)\n    | where Action in ('ReleaseFromIsolation', 'Remediated') and ActionStatus == 'Success'\n    | distinct DeviceId\n) on DeviceId\n| extend DaysIsolated = datetime_diff('day', now(), IsolationTime)\n| project DeviceName, DeviceId, InfectedMachineId, Email, Severity, IsolationTime, IsolationType, DaysIsolated\n| order by DaysIsolated desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Compass Devices with High Application Exposure Count",
+    "description": "Identifies devices from SpyCloud Compass with abnormally high stolen application credential counts, indicating severe infostealer compromise. Devices with many application credentials exfiltrated pose a wide blast radius risk across SaaS, internal apps, and cloud infrastructure.",
+    "tactics": ["CredentialAccess", "Collection"],
+    "techniques": ["T1555", "T1005"],
+    "query": "SpyCloudCompassDevices_CL\n| where TimeGenerated > ago(30d)\n| where application_count > 10\n| summarize LatestSighting=max(spycloud_publish_date), MaxApps=max(application_count), InfectionTimes=dcount(infected_time), Sources=dcount(source_id) by user_hostname, user_os\n| join kind=leftouter (\n    SpyCloudCompassData_CL\n    | where TimeGenerated > ago(30d)\n    | summarize AffectedUsers=dcount(email), UserList=make_set(email, 5), Domains=dcount(target_domain), DomainList=make_set(target_domain, 10) by user_hostname\n) on user_hostname\n| order by MaxApps desc"
+  },
+  {
+    "name": "SpyCloud Hunt — Breach Catalog High-Confidence Sensitive Sources",
+    "description": "Surfaces breaches from SpyCloud's catalog flagged as sensitive sources with high confidence scores that affect the organization. Sensitive source breaches may carry legal, regulatory, or reputational risk and require executive notification and specialized incident response procedures.",
+    "tactics": ["Reconnaissance"],
+    "techniques": ["T1589", "T1589.001"],
+    "query": "let org_sources = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(90d)\n| distinct source_id;\nSpyCloudBreachCatalog_CL\n| where TimeGenerated > ago(90d)\n| where (sensitive_source == true or premium_flag == true) and confidence >= 3\n| where uuid in (org_sources)\n| project uuid, short_title, site, site_description, breach_category, breach_main_category, malware_family, confidence, num_records, sensitive_source, premium_flag, tlp, acquisition_date, spycloud_publish_date\n| order by confidence desc, num_records desc"
+  }
+]
