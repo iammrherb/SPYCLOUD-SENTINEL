@@ -1712,13 +1712,13 @@
           "id": "SpyCloudCCF",
           "title": "SpyCloud Breach Watchlist/Catalog",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/Logos/SpyCloud_Enterprise_Protection.svg)\n\nThe **SpyCloud Threat Intelligence Connector** ingests breach, infostealer, and consumer identity exposure data from SpyCloud's darknet intelligence into Microsoft Sentinel.\n\n**5 Pollers:** Watchlist New + Modified, Breach Catalog, Compass Data, Compass Devices\n\n**6 Tables:** SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, SpyCloudCompassData_CL, SpyCloudCompassDevices_CL, Spycloud_MDE_Logs_CL, SpyCloud_ConditionalAccessLogs_CL\n\n**38 Analytics Rules** correlating with Entra ID, MDE, Office 365, DNS, TI, UEBA, Okta, Duo, Ping, Firewall, Cloud Apps, Compass, and more.\n\n**4 Playbooks** with Slack + Teams + Email + ServiceNow + Jira + Azure DevOps.\n\n**Copilot** plugin (28+ KQL skills) + AI agent (30+ skills).\n\n**Requires:** SpyCloud Enterprise API key.",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/Logos/SpyCloud_Enterprise_Protection.svg)\n\nThe **SpyCloud Threat Intelligence Connector** for Microsoft Sentinel ingests breach, infostealer, and consumer identity exposure data from SpyCloud's industry-leading darknet intelligence platform. SpyCloud monitors the criminal underground for stolen credentials, session cookies, PII, and device fingerprints — enabling automated detection, investigation, and response before adversaries can weaponize exposed data.\n\n### Data Sources & Pollers\n\n| Poller | Table | Description |\n|--------|-------|-------------|\n| **Watchlist (New)** | `SpyCloudBreachWatchlist_CL` | New employee exposures from breaches and infostealers |\n| **Watchlist (Modified)** | `SpyCloudBreachWatchlist_CL` | Updated records with re-sightings or new data |\n| **Breach Catalog** | `SpyCloudBreachCatalog_CL` | Breach metadata: source, category, record counts |\n| **Compass Data** | `SpyCloudCompassData_CL` | Consumer/partner identity exposures |\n| **Compass Devices** | `SpyCloudCompassDevices_CL` | Infected device fingerprints and malware artifacts |\n\n### Automated Response Playbooks\n\n| Playbook | License Required | Actions |\n|----------|-----------------|---------|\n| **MDE Isolation** | Defender for Endpoint P2 | Isolate compromised devices, apply security tags |\n| **Conditional Access** | Entra ID P1+ | Force password reset, revoke sessions, add to CA group |\n| **Credential Response** | Entra ID P1+ | UPN-based targeted password reset with notifications |\n| **MDE Blocklist** | Defender for Endpoint P2 | Block malicious IPs/domains from infostealer data |\n\n### Analytics & Detection\n\n- **38 Analytics Rules** correlating SpyCloud data with Entra ID sign-ins, MDE alerts, Office 365, DNS, Threat Intelligence, UEBA, Okta, Duo, Ping Identity, firewall logs, Cloud App Security, and Compass data\n- **8 Hunting Queries** for proactive threat hunting across exposed users, infected devices, password reuse, and cross-source correlation\n- **1 Workbook** with 19 interactive visualizations for executive dashboards and operational SOC views\n- **VIP Watchlist** for priority monitoring of high-value accounts\n\n### Notification Channels\n\nSlack, Microsoft Teams, Email, ServiceNow, Jira, and Azure DevOps — all configurable via ARM template parameters.\n\n**Requires:** SpyCloud Enterprise or Enterprise+ API subscription ([portal.spycloud.com](https://portal.spycloud.com)).",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
               "metricName": "Total Watchlist Exposures",
               "legend": "SpyCloud Watchlist Exposures",
-              "baseQuery": "{{graphQueriesTableName}}"
+              "baseQuery": "SpyCloudBreachWatchlist_CL"
             },
             {
               "metricName": "Total Breach Catalog Entries",
@@ -1753,14 +1753,14 @@
             },
             {
               "description": "Infostealer Exposures Only (Severity >= 20)",
-              "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| sort by TimeGenerated desc"
+              "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| sort by TimeGenerated desc\n| project TimeGenerated, email, email_domain, target_domain, password_type, severity, infected_machine_id, user_hostname\n| take 100"
             },
             {
               "description": "Exposure Count by Corporate Email Domain",
               "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(email_domain)\n| summarize ExposureCount = count(), UniqueEmails = dcount(email) by email_domain\n| sort by ExposureCount desc"
             },
             {
-              "description": "Compromised Credentials with Plaintext Passwords (Requires show_plain_password=True)",
+              "description": "Plaintext Password Exposures (Requires show_plain_password=True)",
               "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(password_plaintext)\n| project TimeGenerated, email, target_domain, password_type, severity, source_id\n| sort by TimeGenerated desc"
             },
             {
@@ -1768,44 +1768,44 @@
               "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where isnotempty(infected_machine_id)\n| summarize ExposureCount = count(), DistinctTargets = dcount(target_domain), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, user_os\n| sort by ExposureCount desc"
             },
             {
-              "description": "Exposures Enriched with Breach Catalog Metadata",
-              "query": "SpyCloudBreachWatchlist_CL\n| join kind=inner (\n    SpyCloudBreachCatalog_CL\n    | project source_id, breach_title, breach_type, confidence, status\n) on source_id\n| project TimeGenerated, email, target_domain, severity, breach_title, breach_type, confidence\n| sort by TimeGenerated desc"
+              "description": "Watchlist Exposures Enriched with Breach Catalog Metadata",
+              "query": "SpyCloudBreachWatchlist_CL\n| join kind=inner (\n    SpyCloudBreachCatalog_CL\n    | project source_id=uuid, short_title, breach_category, num_records, confidence\n) on source_id\n| project TimeGenerated, email, short_title, breach_category, severity, num_records, confidence\n| sort by TimeGenerated desc\n| take 100"
             },
             {
               "description": "Recent Breaches from Catalog with Record Counts",
-              "query": "SpyCloudBreachCatalog_CL\n| sort by TimeGenerated desc\n| project TimeGenerated, source_id, breach_title, breach_type, num_records, confidence, status\n| take 50"
+              "query": "SpyCloudBreachCatalog_CL\n| sort by TimeGenerated desc\n| project TimeGenerated, uuid, short_title, breach_category, num_records, confidence, spycloud_publish_date\n| take 50"
             },
             {
-              "description": "MDE Remediation Actions — Device Isolation & Tagging Audit",
-              "query": "Spycloud_MDE_Logs_CL\n| project TimeGenerated, IncidentId, HostName, DeviceId, OSPlatform,\n    IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName,\n    AddedIOCsToDefender, PlaybookName, BreachTitle\n| sort by TimeGenerated desc"
+              "description": "MDE Remediation Actions — Device Isolation and Tagging Audit",
+              "query": "Spycloud_MDE_Logs_CL\n| project TimeGenerated, IncidentId, DeviceName, DeviceId, Action, IsolationType, Tag, ActionStatus, Email, Severity\n| sort by TimeGenerated desc\n| take 100"
             },
             {
-              "description": "Conditional Access Remediation — Password Resets & Session Revocations",
-              "query": "SpyCloud_ConditionalAccessLogs_CL\n| project TimeGenerated, IncidentId, Username, UserEmail,\n    ForcedPasswordResetOnNextSignIn, UserSessionsRevoked,\n    CAgroup, UserDisabled, PlaybookName, BreachTitle\n| sort by TimeGenerated desc"
+              "description": "Conditional Access Remediation — Password Resets and Session Revocations",
+              "query": "SpyCloud_ConditionalAccessLogs_CL\n| project TimeGenerated, IncidentId, UserPrincipalName, Email, Action, PasswordReset, SessionsRevoked, AddedToCAGroup, ActionStatus, Severity\n| sort by TimeGenerated desc\n| take 100"
             },
             {
               "description": "Top 10 Most-Targeted Domains by Exposure Volume",
-              "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(target_domain)\n| summarize ExposureCount = count(), UniqueEmails = dcount(email), AvgSeverity = avg(severity) by target_domain\n| top 10 by ExposureCount desc"
+              "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(target_domain)\n| summarize ExposureCount = count(), UniqueEmails = dcount(email), LatestExposure = max(TimeGenerated) by target_domain\n| sort by ExposureCount desc\n| take 10"
             },
             {
               "description": "Exposure Timeline — Daily Ingestion Volume by Severity",
               "query": "SpyCloudBreachWatchlist_CL\n| summarize Count = count() by bin(TimeGenerated, 1d), severity\n| render timechart"
             },
             {
-              "description": "Full Health Dashboard — All 4 SpyCloud Tables",
-              "query": "union\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Breach Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access')\n| project Table, Records, Latest,\n    HoursSinceUpdate = datetime_diff('hour', now(), Latest),\n    Status = case(Records == 0, 'No Data', datetime_diff('hour', now(), Latest) > 24, 'Stale', 'Active')"
+              "description": "Full Health Dashboard — All 6 SpyCloud Tables",
+              "query": "union\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Logs'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA Logs')\n| project Table, Records, Latest\n| order by Table asc"
             },
             {
-              "description": "Compass exposures by severity",
-              "query": "SpyCloudCompassData_CL | where TimeGenerated > ago(7d) | summarize count() by severity | order by severity desc"
+              "description": "Compass Exposures by Severity (Enterprise+ Only)",
+              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d)\n| summarize Count=count() by severity\n| order by severity asc"
             },
             {
-              "description": "Compass infected devices",
-              "query": "SpyCloudCompassDevices_CL | where TimeGenerated > ago(30d) | top 25 by application_count desc"
+              "description": "Compass Infected Devices — Top 25 by Application Count",
+              "query": "SpyCloudCompassDevices_CL\n| where TimeGenerated > ago(30d)\n| top 25 by application_count desc\n| project TimeGenerated, user_hostname, user_os, ip_addresses, application_count, infected_time"
             },
             {
-              "description": "Compass + Watchlist cross-reference",
-              "query": "SpyCloudCompassData_CL | where TimeGenerated > ago(7d) | join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) | distinct email) on email"
+              "description": "Compass + Watchlist Cross-Reference — Shared Exposures",
+              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d)\n| join kind=inner (\n    SpyCloudBreachWatchlist_CL\n    | where TimeGenerated > ago(7d)\n    | project email, w_severity=severity, w_source=source_id\n) on email\n| summarize CompassHits=count(), WatchlistMatches=dcount(w_source) by email, email_domain\n| sort by CompassHits desc\n| take 25"
             }
           ],
           "dataTypes": [
@@ -1881,37 +1881,48 @@
           },
           "instructionSteps": [
             {
-              "title": "Prerequisites",
-              "description": "Review before connecting.",
+              "title": "Prerequisites & Requirements",
+              "description": "Review all requirements before connecting. Incomplete prerequisites will cause deployment failures or limited functionality.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**What Works Without Extra Licenses:** Data ingestion, 38 analytics rules, workbook, hunting queries, all notifications (Slack/Teams/Email/ServiceNow/Jira/DevOps).\n\n**Requires Defender for Endpoint P2:** MDE device isolation playbooks.\n\n**Requires Entra ID P1+:** Password reset and Conditional Access playbooks.\n\n**Required Permissions:** Sentinel Contributor and Log Analytics Contributor on the resource group.\n\n**Network:** Outbound HTTPS to api.spycloud.io only."
+                    "text": "**Required for All Features:**\n\n1. **SpyCloud Enterprise API Key** — Obtain from [portal.spycloud.com](https://portal.spycloud.com). Contact support@spycloud.com if you need Enterprise+ for Compass data.\n\n2. **Azure Roles** (on the resource group):\n   - **Microsoft Sentinel Contributor** — Create/manage connectors, analytics rules, workbooks\n   - **Log Analytics Contributor** — Create tables, manage data collection rules\n   - **Monitoring Metrics Publisher** — Required on the DCR for data ingestion via DCE\n\n3. **Network Access** — Outbound HTTPS (443) to `api.spycloud.io` from Azure. No inbound rules required.\n\n4. **Log Analytics Workspace** — Existing workspace with Microsoft Sentinel enabled, or the template creates one.\n\n---\n\n**Optional License Requirements:**\n\n| Feature | License | What It Enables |\n|---------|---------|----------------|\n| MDE Isolation Playbook | Defender for Endpoint P2 | Automatic device isolation + security tagging |\n| MDE Blocklist Playbook | Defender for Endpoint P2 | Block malicious IPs/domains from infostealer data |\n| Conditional Access Playbook | Entra ID P1+ | Force password reset, revoke sessions, CA group assignment |\n| Credential Response Playbook | Entra ID P1+ | Targeted UPN-based password reset with notifications |\n| UEBA Anomaly Detection | Sentinel UEBA (free) | Behavioral anomaly detection for exposed user accounts |\n\n**What Works Without Extra Licenses:** All data ingestion (5 pollers, 6 tables), 38 analytics rules, workbook dashboards, hunting queries, all notification channels (Slack/Teams/Email/ServiceNow/Jira/Azure DevOps).\n\n---\n\n**Pre-Deployment Checklist:**\n\n- [ ] SpyCloud API key tested: `curl -H 'X-Api-Key: YOUR_KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1`\n- [ ] Required Azure roles assigned to the deploying user\n- [ ] Target resource group and Log Analytics workspace identified\n- [ ] Decided which playbooks to enable (based on available licenses)\n- [ ] Notification channel URLs ready (Teams webhook, Slack webhook, email addresses) if desired"
                   }
                 }
               ]
             },
             {
-              "title": "Step 1 - API Key",
-              "description": "Enter your SpyCloud Enterprise API key from portal.spycloud.com.",
+              "title": "Step 1 — SpyCloud API Key Configuration",
+              "description": "Enter your SpyCloud Enterprise Protection API key. This key authenticates all 5 pollers against the SpyCloud API.",
               "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "**Where to Find Your API Key:**\n\n1. Log in to [portal.spycloud.com](https://portal.spycloud.com)\n2. Navigate to **Account Settings** → **API Keys**\n3. Copy your **Enterprise API Key** (starts with a long alphanumeric string)\n\n**Important Notes:**\n- The API key is stored securely as a `securestring` parameter and is never exposed in logs or outputs\n- Enterprise tier is required for Watchlist and Breach Catalog pollers\n- Enterprise+ tier is required for Compass Data and Compass Devices pollers\n- If you only have Enterprise (not Enterprise+), Compass pollers will return empty results but will not cause errors\n\n**Validation:** After deployment, you can verify API connectivity in the connector health panel or by checking the Data Collection Rule ingestion metrics in Azure Monitor."
+                  }
+                },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "name": "apiKey",
                     "label": "SpyCloud API Key",
-                    "placeholder": "Enter API key",
-                    "type": "password",
-                    "toolTip": "Enterprise API key from portal.spycloud.com. Sent as X-Api-Key header."
+                    "name": "apiKey",
+                    "placeholder": "Enter your SpyCloud Enterprise API key",
+                    "type": "password"
                   }
                 }
               ]
             },
             {
-              "title": "Step 2 - Data Filters",
-              "description": "Configure what data to ingest.",
+              "title": "Step 2 — Data Filters & Scope",
+              "description": "Configure which exposure data to ingest. These settings control the volume, sensitivity, and scope of data flowing into your Sentinel workspace.",
               "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "**Understanding SpyCloud Severity Levels:**\n\n| Severity | Category | Description | Typical Volume |\n|----------|----------|-------------|---------------|\n| **2** | Breach Credential | Username/password exposed in a data breach | High |\n| **5** | Breach + PII | Breach data enriched with personally identifiable information | Medium |\n| **20** | Infostealer | Credentials stolen by malware (high-risk, active threat) | Medium |\n| **25** | Infostealer + Application | Infostealer with specific application targets (highest risk) | Lower |\n\n**Recommendation:** Start with **all severity levels** selected. After initial ingestion, review volume in the workbook and narrow if needed. Severity 20+ (infostealer) records are the highest priority for SOC response.\n\n**Exposure Types:**\n- **Corporate** — Exposures matching your organization's email domains\n- **Infected** — Exposures from devices infected with infostealer malware (includes session cookies, application credentials)\n\n**Recommendation:** Select both for comprehensive coverage."
+                  }
+                },
                 {
                   "type": "Dropdown",
                   "parameters": {
@@ -1932,14 +1943,17 @@
                       },
                       {
                         "key": "25",
-                        "text": "25 - Infostealer + Cookies/Sessions"
+                        "text": "25 - Infostealer + Application"
                       }
                     ],
-                    "placeholder": "Select severity levels",
+                    "placeholder": "Select severity levels to ingest",
                     "isMultiSelect": true,
-                    "required": true,
-                    "defaultAllSelected": true,
-                    "toolTip": "25=critical (stolen cookies bypass MFA). 20=high (malware). 5=standard. 2=low. Select all recommended."
+                    "defaultValue": [
+                      "2",
+                      "5",
+                      "20",
+                      "25"
+                    ]
                   }
                 },
                 {
@@ -1950,18 +1964,19 @@
                     "options": [
                       {
                         "key": "corporate",
-                        "text": "Corporate"
+                        "text": "Corporate Exposures (email domain matches)"
                       },
                       {
                         "key": "infected",
-                        "text": "Infected Devices"
+                        "text": "Infected Device Exposures (infostealer malware)"
                       }
                     ],
-                    "placeholder": "Select types",
+                    "placeholder": "Select exposure types to ingest",
                     "isMultiSelect": true,
-                    "required": true,
-                    "defaultAllSelected": true,
-                    "toolTip": "Corporate=monitored domains. Infected=malware-stolen credentials."
+                    "defaultValue": [
+                      "corporate",
+                      "infected"
+                    ]
                   }
                 },
                 {
@@ -1972,70 +1987,82 @@
                     "options": [
                       {
                         "key": "False",
-                        "text": "No (recommended)"
+                        "text": "No — Omit plaintext passwords (recommended)"
                       },
                       {
                         "key": "True",
-                        "text": "Yes"
+                        "text": "Yes — Include plaintext passwords (requires data handling policy)"
                       }
                     ],
-                    "placeholder": "Include plaintext?",
+                    "placeholder": "Include plaintext passwords in ingested data?",
                     "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "No excludes cleartext passwords. Yes requires data handling policy."
+                    "defaultValue": [
+                      "False"
+                    ]
+                  }
+                },
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "**Plaintext Password Warning:** Enabling plaintext passwords stores cleartext credentials in your Log Analytics workspace. Before enabling:\n\n1. Ensure your organization has a **data handling policy** for exposed credentials\n2. Configure **table-level RBAC** on `SpyCloudBreachWatchlist_CL` to restrict access\n3. Consider your **data retention** policy (passwords should not be retained longer than needed for remediation)\n4. The `password_plaintext` column is empty when this setting is 'No'\n\n**Use Case:** Plaintext passwords enable password-reuse detection analytics rules and richer hunting queries."
                   }
                 }
               ]
             },
             {
-              "title": "Step 3 - Polling Settings",
-              "description": "Configure polling frequency and retrieval settings.",
+              "title": "Step 3 — Polling & Performance Settings",
+              "description": "Configure how frequently the connector polls SpyCloud and how it handles retries. These settings affect data freshness, API usage, and resilience.",
               "instructions": [
                 {
-                  "type": "Dropdown",
+                  "type": "InfoMessage",
                   "parameters": {
-                    "label": "Polling Interval",
-                    "name": "pollingIntervalMin",
-                    "options": [
-                      {
-                        "key": "5",
-                        "text": "5 min"
-                      },
-                      {
-                        "key": "15",
-                        "text": "15 min"
-                      },
-                      {
-                        "key": "30",
-                        "text": "30 min (recommended)"
-                      },
-                      {
-                        "key": "60",
-                        "text": "1 hour"
-                      },
-                      {
-                        "key": "1440",
-                        "text": "24 hours"
-                      }
-                    ],
-                    "placeholder": "Interval",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "How often to fetch. 30 min recommended."
+                    "text": "**Polling Interval Guidance:**\n\n| Interval | Best For | API Calls/Day | Notes |\n|----------|----------|---------------|-------|\n| **5 min** | Active incident response | ~1,440 | Highest freshness, highest API usage |\n| **15 min** | High-security environments | ~480 | Good balance of freshness and cost |\n| **30 min** | Most organizations (recommended) | ~240 | Standard recommendation |\n| **60 min** | Large environments, cost-sensitive | ~120 | Acceptable for most SOC workflows |\n| **120 min** | Low-priority monitoring | ~60 | May delay detection of active infostealers |\n| **360 min** | Minimal monitoring | ~20 | 6-hour gap between checks |\n\n**Lookback Days:** How far back to retrieve data on first connection. 365 days (recommended) ensures you capture the full year of historical exposures. Reduce to 30-90 days if you want faster initial sync.\n\n**Retry & Timeout:** Default values (5 retries, 120s timeout) work for most deployments. Increase timeout to 180-300s if you have very large watchlists (100K+ records)."
                   }
                 },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Lookback Days",
-                    "name": "lookbackDays",
+                    "label": "Polling Interval (minutes)",
+                    "name": "pollingIntervalMin",
                     "options": [
                       {
-                        "key": "7",
-                        "text": "7 days"
+                        "key": "5",
+                        "text": "5 minutes (highest freshness)"
                       },
+                      {
+                        "key": "15",
+                        "text": "15 minutes"
+                      },
+                      {
+                        "key": "30",
+                        "text": "30 minutes (recommended)"
+                      },
+                      {
+                        "key": "60",
+                        "text": "60 minutes"
+                      },
+                      {
+                        "key": "120",
+                        "text": "2 hours"
+                      },
+                      {
+                        "key": "360",
+                        "text": "6 hours"
+                      }
+                    ],
+                    "placeholder": "Select polling interval",
+                    "isMultiSelect": false,
+                    "defaultValue": [
+                      "30"
+                    ]
+                  }
+                },
+                {
+                  "type": "Dropdown",
+                  "parameters": {
+                    "label": "Initial Lookback Period (days)",
+                    "name": "lookbackDays",
+                    "options": [
                       {
                         "key": "30",
                         "text": "30 days"
@@ -2045,87 +2072,113 @@
                         "text": "90 days"
                       },
                       {
+                        "key": "180",
+                        "text": "180 days"
+                      },
+                      {
                         "key": "365",
-                        "text": "365 days (recommended)"
+                        "text": "365 days (recommended — full year of history)"
                       }
                     ],
-                    "placeholder": "First pull",
+                    "placeholder": "How far back to retrieve on first connection",
                     "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "How far back on first connection."
+                    "defaultValue": [
+                      "365"
+                    ]
                   }
                 },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Retries",
+                    "label": "Retry Count on API Failure",
                     "name": "retryCount",
                     "options": [
                       {
                         "key": "3",
-                        "text": "3"
+                        "text": "3 retries"
                       },
                       {
                         "key": "5",
-                        "text": "5 (recommended)"
+                        "text": "5 retries (recommended)"
                       },
                       {
                         "key": "10",
-                        "text": "10"
+                        "text": "10 retries (high resilience)"
                       }
                     ],
-                    "placeholder": "Retries",
+                    "placeholder": "Number of retries on transient failures",
                     "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Retry count with exponential backoff."
+                    "defaultValue": [
+                      "5"
+                    ]
                   }
                 },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Timeout (seconds)",
+                    "label": "API Timeout (seconds)",
                     "name": "timeoutInSeconds",
                     "options": [
                       {
                         "key": "60",
-                        "text": "60s"
+                        "text": "60 seconds"
                       },
                       {
                         "key": "120",
-                        "text": "120s (recommended)"
+                        "text": "120 seconds (recommended)"
+                      },
+                      {
+                        "key": "180",
+                        "text": "180 seconds"
                       },
                       {
                         "key": "300",
-                        "text": "300s"
+                        "text": "300 seconds (large watchlists)"
                       }
                     ],
-                    "placeholder": "Timeout",
+                    "placeholder": "Timeout per API call",
                     "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Max wait per request."
+                    "defaultValue": [
+                      "120"
+                    ]
                   }
                 }
               ]
             },
             {
-              "title": "Step 4 - Recommendations",
-              "description": "Enable these Sentinel features for maximum SpyCloud value.",
+              "title": "Step 4 — Architecture & Data Flow",
+              "description": "Understand how SpyCloud data flows through your Sentinel environment.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Enable UEBA:** Sentinel > Settings > User and Entity Behavior Analytics > Turn ON. Enables anomaly detection for exposed users.\n\n**Enable Fusion:** Sentinel > Analytics > filter Fusion > Enable. ML-based multi-stage attack detection.\n\n**Install Threat Intelligence:** Content Hub > Threat Intelligence > Install. Matches SpyCloud infection IPs against TI feeds.\n\n**Recommended Connectors (install from Content Hub):**\n\n- **Entra ID** (Critical) - Sign-in correlation. Enable via Entra Diagnostic Settings.\n- **Microsoft 365 Defender** (Critical) - MDE device and alert correlation.\n- **Office 365** (High) - Mail forwarding detection for exposed users.\n- **DNS** (High) - Malicious domain resolution. Enable via AMA.\n- **Azure Activity** (Medium) - Cloud resource modification tracking.\n- **Firewall CEF/Syslog** (Medium) - Infected IP detection in network logs.\n- **Okta SSO** (If applicable) - Okta sign-in correlation.\n- **Cisco Duo** (If applicable) - Duo MFA correlation."
+                    "text": "**Data Pipeline Architecture:**\n\n```\nSpyCloud API (api.spycloud.io)\n    │\n    ▼\nCCF Pollers (5 pollers, Codeless Connector Framework)\n    │\n    ▼\nData Collection Endpoint (DCE) → Data Collection Rule (DCR)\n    │                                    │\n    │                            Transform & Normalize\n    │                                    │\n    ▼                                    ▼\nLog Analytics Workspace (6 Custom Tables)\n    │\n    ├── Analytics Rules (38) → Incidents → Playbooks (4)\n    ├── Hunting Queries (8) → Bookmarks → Investigations\n    ├── Workbook (19 panels) → Dashboards\n    └── Copilot Plugin → Natural Language Queries\n```\n\n**Table Schema Overview:**\n\n| Table | Key Columns | Records Per Poll |\n|-------|------------|------------------|\n| `SpyCloudBreachWatchlist_CL` | email, severity, source_id, password_type, infected_machine_id, target_domain | Varies by org size |\n| `SpyCloudBreachCatalog_CL` | uuid, short_title, breach_category, num_records, confidence | ~50-200 total |\n| `SpyCloudCompassData_CL` | email, severity, breach_title, infected_machine_id, target_url | Enterprise+ only |\n| `SpyCloudCompassDevices_CL` | user_hostname, user_os, ip_addresses, application_count | Enterprise+ only |\n| `Spycloud_MDE_Logs_CL` | DeviceName, DeviceId, Action, IsolationType, ActionStatus | Playbook output |\n| `SpyCloud_ConditionalAccessLogs_CL` | UserPrincipalName, Action, PasswordReset, SessionsRevoked | Playbook output |\n\n**Cost Estimation:** Data ingestion costs depend on your Log Analytics pricing tier and data volume. Most organizations ingest 50MB-500MB/day from SpyCloud. Use the workbook's ingestion volume panel to monitor costs after deployment."
                   }
                 }
               ]
             },
             {
-              "title": "Step 5 - Connect",
-              "description": "Activate all 5 pollers and start data ingestion.",
+              "title": "Step 5 — Sentinel Configuration Recommendations",
+              "description": "Enable these Microsoft Sentinel features to maximize the value of SpyCloud threat intelligence. Each recommendation includes step-by-step instructions.",
               "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "**Critical — Enable These First:**\n\n**1. User and Entity Behavior Analytics (UEBA)**\n   - Navigate to: **Sentinel** → **Settings** → **Settings tab** → **User and Entity Behavior Analytics**\n   - Toggle: **ON**\n   - Select data sources: **Azure Active Directory** (Sign-in Logs, Audit Logs)\n   - Why: UEBA creates behavioral baselines for users. When SpyCloud detects an exposed credential, analytics rules correlate with UEBA anomalies to detect active exploitation (e.g., impossible travel after credential exposure).\n\n**2. Fusion Detection**\n   - Navigate to: **Sentinel** → **Analytics** → filter by 'Fusion' → **Enable**\n   - Why: Fusion uses ML to detect multi-stage attacks. SpyCloud exposure + anomalous sign-in + data exfiltration = high-confidence attack chain.\n\n**3. Threat Intelligence Solution**\n   - Navigate to: **Content Hub** → search 'Threat Intelligence' → **Install**\n   - Why: Matches SpyCloud infostealer IP addresses against global TI feeds for additional context.\n\n---\n\n**Recommended Sentinel Data Connectors (install from Content Hub):**\n\n| Connector | Priority | Why It Matters |\n|-----------|----------|---------------|\n| **Entra ID (Azure AD)** | Critical | Sign-in log correlation — detect logins using exposed credentials |\n| **Microsoft Defender for Endpoint** | Critical | Device correlation — identify infected machines from SpyCloud data |\n| **Office 365** | High | Detect email compromise after credential exposure |\n| **Azure Activity** | High | Track admin actions from compromised accounts |\n| **DNS** | Medium | Detect C2 callbacks from infostealer-infected devices |\n| **Microsoft Cloud App Security** | Medium | Detect OAuth token abuse from stolen session cookies |\n| **Okta SSO / Duo / Ping Identity** | Medium | Correlate MFA bypass with exposed credentials |\n| **AWS CloudTrail / GCP** | Medium | Cross-cloud compromised account detection |\n| **Palo Alto / Fortinet / Zscaler** | Low | Firewall correlation with infostealer C2 traffic |\n\n**Enable Entra ID Connector:**\n1. Content Hub → search 'Microsoft Entra ID' → Install\n2. Data Connectors → Microsoft Entra ID → Open connector page\n3. Enable: Sign-in Logs, Audit Logs, Non-interactive Sign-in Logs, Managed Identity Sign-in Logs\n4. These feed 12+ SpyCloud analytics rules that detect sign-ins using exposed credentials."
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Step 6 — Connect & Activate",
+              "description": "Activate all 5 SpyCloud pollers to begin data ingestion into your Sentinel workspace.",
+              "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "**Before Clicking Connect:**\n\n1. Verify your API key is entered correctly in Step 1\n2. Confirm your severity and exposure type selections in Step 2\n3. Review polling settings in Step 3\n\n**What Happens When You Connect:**\n\n1. All 5 pollers activate simultaneously\n2. Initial data pull begins using your lookback period (default: 365 days)\n3. The first poll may take 5-15 minutes depending on your watchlist size\n4. Subsequent polls run at your configured interval\n5. Data flows through the DCR transform pipeline and appears in your custom tables\n\n**Expected Initial Ingestion Timeline:**\n\n| Phase | Time | What Happens |\n|-------|------|--------------|\n| Connection | Immediate | Pollers registered, authentication verified |\n| First Data | 5-10 min | Watchlist and Catalog data begins appearing |\n| Backfill Complete | 15-60 min | Historical lookback period fully ingested |\n| Steady State | Ongoing | Incremental updates at polling interval |"
+                  }
+                },
                 {
                   "type": "ConnectionToggleButton",
                   "parameters": {}
@@ -2133,26 +2186,48 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "Data appears within 5-10 minutes. Five pollers activate: Watchlist (new), Watchlist (modified), Breach Catalog, Compass Data, Compass Devices."
+                    "text": "After connecting, proceed to Step 7 for verification queries and troubleshooting guidance."
                   }
                 }
               ]
             },
             {
-              "title": "Step 6 - Verification",
-              "description": "Verify data is flowing and review next steps.",
+              "title": "Step 7 — Verification, Validation & Troubleshooting",
+              "description": "Verify data ingestion is working correctly and troubleshoot common issues. Run these queries in your Log Analytics workspace.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Verify data is flowing** - Run this query in Log Analytics:\n\nSpyCloudBreachWatchlist_CL | summarize count() by bin(TimeGenerated, 1h)\n\n**Troubleshooting:**\n- No data after 10 min: Check DCR in Monitor > Data Collection Rules\n- 401 on connect: Wrong API key (needs Enterprise tier)\n- Playbooks not acting: Need MDE or Entra P1+ license, then run grant-permissions.sh\n\n**Upgrade path:** When you get MDE P2 or Entra P1+ licenses, run the grant-permissions.sh script from Cloud Shell to enable automated device isolation and password reset playbooks."
+                    "text": "**Verification Queries — Run in Log Analytics:**\n\n**1. Overall Health Check (run first):**\n```kql\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest\n| order by Table asc\n```\n\n**2. Hourly Ingestion Volume:**\n```kql\nSpyCloudBreachWatchlist_CL\n| summarize count() by bin(TimeGenerated, 1h)\n| render timechart\n```\n\n**3. Severity Distribution:**\n```kql\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(24h)\n| summarize Count=count() by severity\n| order by severity asc\n```\n\n**4. Infostealer-Infected Devices:**\n```kql\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where isnotempty(infected_machine_id)\n| summarize ExposureCount=count(), Domains=dcount(target_domain) by infected_machine_id, user_hostname\n| order by ExposureCount desc\n| take 25\n```\n\n**5. Top Exposed Email Domains:**\n```kql\nSpyCloudBreachWatchlist_CL\n| where isnotempty(email_domain)\n| summarize Exposures=count(), UniqueEmails=dcount(email) by email_domain\n| order by Exposures desc\n| take 10\n```\n\n**Expected Results:**\n- Watchlist table should have records within 10 minutes of connecting\n- Catalog table should have 50-200+ breach records\n- Compass tables require Enterprise+ (empty with standard Enterprise)\n- MDE and CA log tables populate only when playbooks execute"
+                  }
+                },
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "**Troubleshooting Guide:**\n\n| Symptom | Likely Cause | Resolution |\n|---------|-------------|------------|\n| No data after 15 minutes | API key invalid or wrong tier | Verify key: `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` |\n| 401 Unauthorized on connect | API key rejected | Ensure Enterprise (not SaaS) tier key from portal.spycloud.com |\n| Watchlist data but no Catalog | API permissions | Catalog requires separate endpoint access — contact SpyCloud support |\n| Compass tables empty | Enterprise+ required | Compass endpoints need Enterprise+ subscription |\n| Playbooks not triggering | Analytics rule disabled | Check Sentinel → Analytics → verify SpyCloud rules are Enabled |\n| Playbooks failing (403) | Missing permissions | Run `grant-permissions.sh` from Cloud Shell to assign managed identity roles |\n| MDE playbook fails | No MDE P2 license | Device isolation requires Defender for Endpoint Plan 2 |\n| CA playbook fails | No Entra P1+ license | Password reset/CA group requires Entra ID P1 or P2 |\n| High ingestion costs | Large watchlist | Reduce severity levels, increase polling interval, or reduce retention |\n| Duplicate records | Overlapping lookback | Normal during initial sync — deduplication occurs via document_id |\n\n**Advanced Diagnostics:**\n\n1. **Check DCR health:**\n   Azure Monitor → Data Collection Rules → `dcr-ccf-{workspace}` → Metrics → check ingestion success/failure rates\n\n2. **Check connector status:**\n   Sentinel → Data Connectors → SpyCloud → check 'Last log received' timestamps\n\n3. **Check poller logs:**\n   ```kql\n   SentinelHealth\n   | where OperationName contains 'SpyCloud' or OperationName contains 'DataConnector'\n   | where TimeGenerated > ago(1h)\n   | order by TimeGenerated desc\n   ```\n\n4. **Validate DCE endpoint:**\n   Azure Monitor → Data Collection Endpoints → `dce-spycloud-{workspace}` → Overview → verify status is 'Succeeded'\n\n**Support Contacts:**\n- SpyCloud API issues: support@spycloud.com\n- Sentinel connector issues: Open a GitHub issue or contact Microsoft support\n- Playbook permissions: Run `grant-permissions.sh` or manually assign roles in Azure AD → Enterprise Applications"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Step 8 — Post-Deployment Configuration & Best Practices",
+              "description": "Optimize your SpyCloud integration with these post-deployment recommendations for security operations.",
+              "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "**Immediate Post-Deployment Tasks (Day 1):**\n\n1. **Verify all 6 tables receiving data** — Run the health check query from Step 7\n2. **Review analytics rules** — Sentinel → Analytics → filter by 'SpyCloud' → verify all rules are Enabled\n3. **Test a playbook manually** — Create a test incident and run the MDE or CA playbook to verify permissions\n4. **Configure notification channels** — Update playbook parameters with your Teams/Slack webhook URLs\n5. **Review the workbook** — Sentinel → Workbooks → 'SpyCloud Threat Intelligence' → verify panels load\n\n---\n\n**Week 1 Tuning:**\n\n1. **Adjust analytics rule thresholds** — Some rules may generate too many or too few incidents based on your exposure volume\n2. **Configure VIP watchlist** — Add high-value accounts (executives, admins, service accounts) to the `SpyCloud-VIP-Watchlist` for priority alerting\n3. **Review incident volume** — If overwhelmed, increase `spycloudSeverityThreshold` to focus on infostealer (20+) exposures first\n4. **Enable automation rules** — Configure auto-assignment, auto-close, or auto-escalation for SpyCloud incidents\n\n---\n\n**Ongoing Operations:**\n\n- **Daily:** Review SpyCloud incidents in Sentinel, triage infostealer alerts (severity 20+) first\n- **Weekly:** Check the workbook for exposure trends, review top-exposed domains and users\n- **Monthly:** Review playbook execution logs, update VIP watchlist, assess credential remediation rates\n- **Quarterly:** Review data retention settings, assess API usage, evaluate Compass data value\n\n---\n\n**Security Hardening:**\n\n1. **Table-level RBAC** — Restrict `SpyCloudBreachWatchlist_CL` access if plaintext passwords are enabled:\n   ```kql\n   -- Grant read access only to SOC analysts\n   -- Azure Portal → Log Analytics → Tables → SpyCloudBreachWatchlist_CL → Access Control (IAM)\n   ```\n\n2. **Data retention** — Set appropriate retention (90 days recommended for active remediation, 365 for compliance):\n   - Configured via the `retentionInDays` ARM template parameter\n\n3. **API key rotation** — Rotate your SpyCloud API key periodically:\n   - Generate new key in portal.spycloud.com\n   - Update the connector configuration\n   - Verify data continues flowing\n\n4. **Managed Identity permissions** — Review and minimize permissions assigned to playbook managed identities\n\n---\n\n**Upgrade Path:**\n\n- **Enterprise → Enterprise+:** Enables Compass pollers for consumer/partner exposure data\n- **Add MDE P2:** Enables automatic device isolation for infostealer-infected machines\n- **Add Entra P1+:** Enables automatic password reset and Conditional Access enforcement\n- **Enable Copilot for Security:** Natural language queries across all SpyCloud data using the included plugin"
                   }
                 }
               ]
             }
           ],
           "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
-          "dcrConfig": {}
+          "dcrConfig": {},
+          "availability": {
+            "status": 1,
+            "isPreview": false
+          }
         }
       },
       "dependsOn": [
@@ -2246,8 +2321,10 @@
               }
             },
             "show_plain_password": {
-              "defaultValue": "False",
-              "type": "string",
+              "defaultValue": [
+                "False"
+              ],
+              "type": "array",
               "metadata": {
                 "description": "Include cleartext passwords in ingested data. 'False' (recommended) omits passwords. 'True' requires data handling policy and table-level RBAC."
               }
@@ -2277,29 +2354,37 @@
               }
             },
             "lookbackDays": {
-              "type": "string",
-              "defaultValue": "365",
+              "type": "array",
+              "defaultValue": [
+                "365"
+              ],
               "metadata": {
                 "description": "Days to look back on initial data pull (1-365)."
               }
             },
             "pollingIntervalMin": {
-              "type": "string",
-              "defaultValue": "30",
+              "type": "array",
+              "defaultValue": [
+                "30"
+              ],
               "metadata": {
                 "description": "Polling interval in minutes (5-1440). How often the connector fetches new records."
               }
             },
             "retryCount": {
-              "type": "string",
-              "defaultValue": "5",
+              "type": "array",
+              "defaultValue": [
+                "5"
+              ],
               "metadata": {
                 "description": "Number of retry attempts for failed API calls (1-10)."
               }
             },
             "timeoutInSeconds": {
-              "type": "string",
-              "defaultValue": "120",
+              "type": "array",
+              "defaultValue": [
+                "120"
+              ],
               "metadata": {
                 "description": "API request timeout in seconds (30-300)."
               }
@@ -2354,16 +2439,16 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "headers": {
                     "Accept": "application/json"
                   },
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "show_plain_password": "[[toLower(parameters('show_plain_password'))]"
+                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
                   },
-                  "retryCount": "[[int(parameters('retryCount'))]",
-                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]"
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2413,10 +2498,10 @@
                     "since_modification_date": "{_QueryWindowStartTime}",
                     "until_modification_date": "{_QueryWindowEndTime}",
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "show_plain_password": "[[toLower(parameters('show_plain_password'))]"
+                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
                   },
-                  "retryCount": "[[int(parameters('retryCount'))]",
-                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]"
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2459,12 +2544,12 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "headers": {
                     "Accept": "application/json"
                   },
-                  "retryCount": "[[int(parameters('retryCount'))]",
-                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
                   "queryParameters": {}
                 },
                 "response": {
@@ -2512,9 +2597,9 @@
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"
                   },
-                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
-                  "retryCount": "[[int(parameters('retryCount'))]",
-                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
                   "startTimeAttributeName": "since",
                   "rateLimitQPS": 2,
                   "headers": {
@@ -2560,9 +2645,9 @@
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
                   "httpMethod": "GET",
                   "queryParameters": {},
-                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
-                  "retryCount": "[[int(parameters('retryCount'))]",
-                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
                   "startTimeAttributeName": "since",
                   "rateLimitQPS": 2,
                   "headers": {
