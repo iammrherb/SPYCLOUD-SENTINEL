@@ -448,7 +448,7 @@
       "type": "Microsoft.OperationalInsights/workspaces",
       "apiVersion": "2022-10-01",
       "name": "[parameters('workspace')]",
-      "location": "[if(empty(parameters('workspaceRegionOverride')), resourceGroup().location, parameters('workspaceRegionOverride'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
       "tags": "[variables('allTags')]",
       "properties": {
         "sku": {
@@ -498,7 +498,6 @@
       "name": "[parameters('dataCollectionEndpointName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
       "tags": "[variables('allTags')]",
-      "kind": "Linux",
       "properties": {
         "networkAcls": {
           "publicNetworkAccess": "[parameters('networkAccessMode')]"
@@ -567,7 +566,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -637,7 +636,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -691,7 +690,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -833,7 +832,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -919,7 +918,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -1061,7 +1060,7 @@
             }
           ]
         },
-        "retentionInDays": 90,
+        "retentionInDays": "[parameters('retentionInDays')]",
         "plan": "Analytics"
       },
       "dependsOn": [
@@ -1075,7 +1074,7 @@
       "name": "[concat('dcr-ccf-', parameters('workspace'))]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
       "properties": {
-        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', concat('dce-spycloud-', parameters('workspace')))]",
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
         "streamDeclarations": {
           "Custom-SpyCloudBreachWatchlist_CL": {
             "columns": [
@@ -1825,6 +1824,14 @@
             {
               "name": "SpyCloud_ConditionalAccessLogs_CL",
               "lastDataReceivedQuery": "SpyCloud_ConditionalAccessLogs_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCompassData_CL",
+              "lastDataReceivedQuery": "SpyCloudCompassData_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCompassDevices_CL",
+              "lastDataReceivedQuery": "SpyCloudCompassDevices_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
             }
           ],
           "connectivityCriteria": [
@@ -2240,7 +2247,7 @@
             },
             "show_plain_password": {
               "defaultValue": "False",
-              "type": "array",
+              "type": "string",
               "metadata": {
                 "description": "Include cleartext passwords in ingested data. 'False' (recommended) omits passwords. 'True' requires data handling policy and table-level RBAC."
               }
@@ -2270,37 +2277,29 @@
               }
             },
             "lookbackDays": {
-              "type": "array",
-              "defaultValue": [
-                "365"
-              ],
+              "type": "string",
+              "defaultValue": "365",
               "metadata": {
                 "description": "Days to look back on initial data pull (1-365)."
               }
             },
             "pollingIntervalMin": {
-              "type": "array",
-              "defaultValue": [
-                "30"
-              ],
+              "type": "string",
+              "defaultValue": "30",
               "metadata": {
                 "description": "Polling interval in minutes (5-1440). How often the connector fetches new records."
               }
             },
             "retryCount": {
-              "type": "array",
-              "defaultValue": [
-                "5"
-              ],
+              "type": "string",
+              "defaultValue": "5",
               "metadata": {
                 "description": "Number of retry attempts for failed API calls (1-10)."
               }
             },
             "timeoutInSeconds": {
-              "type": "array",
-              "defaultValue": [
-                "120"
-              ],
+              "type": "string",
+              "defaultValue": "120",
               "metadata": {
                 "description": "API request timeout in seconds (30-300)."
               }
@@ -2355,16 +2354,16 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
                   "headers": {
                     "Accept": "application/json"
                   },
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
+                    "show_plain_password": "[[toLower(parameters('show_plain_password'))]"
                   },
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2414,10 +2413,10 @@
                     "since_modification_date": "{_QueryWindowStartTime}",
                     "until_modification_date": "{_QueryWindowEndTime}",
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "show_plain_password": "[[toLower(first(parameters('show_plain_password')))]"
+                    "show_plain_password": "[[toLower(parameters('show_plain_password'))]"
                   },
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]"
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -2460,12 +2459,12 @@
                   "rateLimitQPS": 2,
                   "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ",
                   "startTimeAttributeName": "since",
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
                   "headers": {
                     "Accept": "application/json"
                   },
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
                   "queryParameters": {}
                 },
                 "response": {
@@ -2513,22 +2512,31 @@
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"
                   },
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
                   "startTimeAttributeName": "since",
                   "rateLimitQPS": 2,
                   "headers": {
                     "Accept": "application/json"
-                  }
+                  },
+                  "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ"
                 },
                 "response": {
                   "eventsJsonPaths": [
-                    "$.results"
-                  ]
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
                 }
               },
-              "dependsOn": []
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
@@ -2552,22 +2560,31 @@
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
                   "httpMethod": "GET",
                   "queryParameters": {},
-                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
-                  "retryCount": "[[int(first(parameters('retryCount')))]",
-                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "queryWindowInMin": "[[int(parameters('pollingIntervalMin'))]",
+                  "retryCount": "[[int(parameters('retryCount'))]",
+                  "timeoutInSeconds": "[[int(parameters('timeoutInSeconds'))]",
                   "startTimeAttributeName": "since",
                   "rateLimitQPS": 2,
                   "headers": {
                     "Accept": "application/json"
-                  }
+                  },
+                  "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ"
                 },
                 "response": {
                   "eventsJsonPaths": [
-                    "$.results"
-                  ]
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
                 }
               },
-              "dependsOn": []
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
             }
           ]
         },
@@ -3013,7 +3030,8 @@
                               }
                             },
                             "authentication": {
-                              "type": "ManagedServiceIdentity"
+                              "type": "ManagedServiceIdentity",
+                              "audience": "https://graph.microsoft.com"
                             }
                           },
                           "runAfter": {}
@@ -3491,7 +3509,8 @@
                               }
                             },
                             "authentication": {
-                              "type": "ManagedServiceIdentity"
+                              "type": "ManagedServiceIdentity",
+                              "audience": "https://graph.microsoft.com"
                             }
                           },
                           "runAfter": {}
@@ -4251,7 +4270,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AnyAlert"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "infected_machine_id"
+              }
+            ]
+          }
+        ]
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4681,9 +4720,10 @@
                   "type": "Http",
                   "inputs": {
                     "method": "GET",
-                    "uri": "https://graph.microsoft.com/v1.0/users/@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}",
+                    "uri": "https://graph.microsoft.com/v1.0/users/@{items('For_each_account')?['Name']}@@@{items('For_each_account')?['UPNSuffix']}",
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {}
@@ -4692,9 +4732,10 @@
                   "type": "Http",
                   "inputs": {
                     "method": "GET",
-                    "uri": "https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=userPrincipalName eq '@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}'&$top=10&$orderby=createdDateTime desc",
+                    "uri": "https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=userPrincipalName eq '@{items('For_each_account')?['Name']}@@@{items('For_each_account')?['UPNSuffix']}'&$top=10&$orderby=createdDateTime desc",
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {
@@ -4714,12 +4755,14 @@
                       }
                     },
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {
                     "Check_recent_sign_ins": [
-                      "Succeeded"
+                      "Succeeded",
+                      "Failed"
                     ]
                   }
                 },
@@ -4729,12 +4772,14 @@
                     "method": "POST",
                     "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_user_from_Graph')?['id']}/revokeSignInSessions",
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {
                     "Force_password_reset": [
-                      "Succeeded"
+                      "Succeeded",
+                      "Failed"
                     ]
                   }
                 },
@@ -4749,13 +4794,14 @@
                     "method": "post",
                     "body": {
                       "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud Credential Response Playbook</strong><br>User: @{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}<br>Recent sign-ins checked: @{length(body('Check_recent_sign_ins')?['value'])} events<br>Password reset: Forced on next sign-in<br>Sessions revoked: All active sessions invalidated<br>Teams alert: Sent to SOC channel</p>"
+                      "message": "<p><strong>SpyCloud Credential Response Playbook</strong><br>User: @{items('For_each_account')?['Name']}@@@{items('For_each_account')?['UPNSuffix']}<br>Recent sign-ins checked: @{length(body('Check_recent_sign_ins')?['value'])} events<br>Password reset: Forced on next sign-in<br>Sessions revoked: All active sessions invalidated<br>Teams alert: Sent to SOC channel</p>"
                     },
                     "path": "/Incidents/Comment"
                   },
                   "runAfter": {
                     "Revoke_all_sessions": [
-                      "Succeeded"
+                      "Succeeded",
+                      "Failed"
                     ]
                   }
                 },
@@ -4935,7 +4981,8 @@
                           }
                         },
                         "authentication": {
-                          "type": "ManagedServiceIdentity"
+                          "type": "ManagedServiceIdentity",
+                          "audience": "https://graph.microsoft.com"
                         }
                       },
                       "runAfter": {}
@@ -5439,7 +5486,8 @@
                               }
                             },
                             "authentication": {
-                              "type": "ManagedServiceIdentity"
+                              "type": "ManagedServiceIdentity",
+                              "audience": "https://graph.microsoft.com"
                             }
                           },
                           "runAfter": {}
@@ -5510,7 +5558,7 @@
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where severity >= 20 | where TimeGenerated > ago(7d) | distinct email;\nSigninLogs\n| where TimeGenerated > ago(24h)\n| where ResultType == 0\n| where UserPrincipalName in (exposed)\n| summarize SignInCount = count(), IPs = make_set(IPAddress, 5), Apps = make_set(AppDisplayName, 5) by UserPrincipalName\n| extend AccountCustomEntity = UserPrincipalName",
         "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-        "queryPeriod": "PT24H",
+        "queryPeriod": "P8D",
         "triggerOperator": "GreaterThan",
         "triggerThreshold": 0,
         "suppressionDuration": "PT1H",
@@ -5618,7 +5666,7 @@
         "enabled": false,
         "query": "let vip_list = _GetWatchlist('SpyCloud-VIP-Watchlist') | project Email=tolower(Email);\nlet vip_fallback = datatable(Email:string)[\"ceo@\",\"cfo@\",\"cto@\",\"ciso@\",\"admin@\",\"root@\",\"vp@\",\"director@\",\"president@\"];\nlet vips = union vip_list, (vip_fallback | where Email !in (vip_list | project Email));\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| where tolower(email) in~ (vips | project Email) or email has_any (\"ceo\",\"cfo\",\"cto\",\"ciso\",\"admin\",\"root\",\"vp-\",\"director\")\n| project TimeGenerated, email, severity, breach_title, target_domain, infected_machine_id, password_type",
         "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-        "queryPeriod": "PT24H",
+        "queryPeriod": "P8D",
         "triggerOperator": "GreaterThan",
         "triggerThreshold": 0,
         "suppressionDuration": "PT1H",
@@ -5648,7 +5696,7 @@
             "fieldMappings": [
               {
                 "identifier": "Name",
-                "columnName": "AccountCustomEntity"
+                "columnName": "email"
               }
             ]
           }
@@ -5727,7 +5775,7 @@
         "enabled": false,
         "query": "let mde_remediated = Spycloud_MDE_Logs_CL | distinct InfectedMachineId;\nlet ca_remediated = SpyCloud_ConditionalAccessLogs_CL | distinct UserEmail;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(7d)\n| where infected_machine_id !in (mde_remediated)\n| where email !in (ca_remediated)\n| summarize DaysExposed = datetime_diff('day', now(), min(TimeGenerated)), ExposureCount = count() by email, infected_machine_id\n| extend AccountCustomEntity = email",
         "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-        "queryPeriod": "PT24H",
+        "queryPeriod": "P8D",
         "triggerOperator": "GreaterThan",
         "triggerThreshold": 0,
         "suppressionDuration": "PT1H",
@@ -5828,7 +5876,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "DNS",
+            "fieldMappings": [
+              {
+                "identifier": "DomainName",
+                "columnName": "target_domain"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5870,7 +5938,36 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "ip_addresses"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "DeviceName"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5912,7 +6009,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "DeviceName"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5954,7 +6071,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5996,7 +6124,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6036,7 +6175,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6078,7 +6228,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6118,7 +6279,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6158,7 +6330,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "DeviceName"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6198,7 +6390,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "ip_addresses"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6238,7 +6441,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6278,7 +6492,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6319,7 +6544,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "DNS",
+            "fieldMappings": [
+              {
+                "identifier": "DomainName",
+                "columnName": "target_domain"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6359,7 +6604,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "SourceIP"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6399,7 +6655,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPAddress"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6439,7 +6715,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "ip_addresses"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "user_hostname"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6471,6 +6767,16 @@
                   "Azure Sentinel"
                 ]
               }
+            },
+            {
+              "conditionProperties": {
+                "operator": "Contains",
+                "propertyName": "IncidentTitle",
+                "propertyValues": [
+                  "SpyCloud"
+                ]
+              },
+              "conditionType": "Property"
             }
           ]
         },
