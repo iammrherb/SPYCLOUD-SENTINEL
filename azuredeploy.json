@@ -507,6 +507,769 @@
       ]
     },
     {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudBreachWatchlist_CL')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "properties": {
+        "schema": {
+          "name": "SpyCloudBreachWatchlist_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "document_id",
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "email_username",
+              "type": "string"
+            },
+            {
+              "name": "domain",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "password_plaintext",
+              "type": "string"
+            },
+            {
+              "name": "password_type",
+              "type": "string"
+            },
+            {
+              "name": "severity",
+              "type": "int"
+            },
+            {
+              "name": "sighting",
+              "type": "int"
+            },
+            {
+              "name": "breach_category",
+              "type": "string"
+            },
+            {
+              "name": "breach_title",
+              "type": "string"
+            },
+            {
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "infected_path",
+              "type": "string"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "user_sys_registered_owner",
+              "type": "string"
+            },
+            {
+              "name": "ip_addresses",
+              "type": "dynamic"
+            },
+            {
+              "name": "av_softwares",
+              "type": "dynamic"
+            },
+            {
+              "name": "country_code",
+              "type": "string"
+            },
+            {
+              "name": "display_resolution",
+              "type": "string"
+            },
+            {
+              "name": "keyboard_languages",
+              "type": "string"
+            },
+            {
+              "name": "timezone",
+              "type": "string"
+            },
+            {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudBreachCatalog_CL')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "properties": {
+        "schema": {
+          "name": "SpyCloudBreachCatalog_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "id",
+              "type": "int"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "short_title",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "site",
+              "type": "string"
+            },
+            {
+              "name": "site_description",
+              "type": "string"
+            },
+            {
+              "name": "breach_category",
+              "type": "string"
+            },
+            {
+              "name": "breach_main_category",
+              "type": "string"
+            },
+            {
+              "name": "consumer_category",
+              "type": "string"
+            },
+            {
+              "name": "type",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "string"
+            },
+            {
+              "name": "confidence",
+              "type": "int"
+            },
+            {
+              "name": "num_records",
+              "type": "int"
+            },
+            {
+              "name": "sensitive_source",
+              "type": "boolean"
+            },
+            {
+              "name": "tlp",
+              "type": "string"
+            },
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            },
+            {
+              "name": "acquisition_date",
+              "type": "string"
+            },
+            {
+              "name": "assets",
+              "type": "dynamic"
+            }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/Spycloud_MDE_Logs_CL')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "properties": {
+        "schema": {
+          "name": "Spycloud_MDE_Logs_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "IncidentId",
+              "type": "string"
+            },
+            {
+              "name": "DeviceName",
+              "type": "string"
+            },
+            {
+              "name": "DeviceId",
+              "type": "string"
+            },
+            {
+              "name": "MachineId",
+              "type": "string"
+            },
+            {
+              "name": "Action",
+              "type": "string"
+            },
+            {
+              "name": "IsolationType",
+              "type": "string"
+            },
+            {
+              "name": "Tag",
+              "type": "string"
+            },
+            {
+              "name": "Status",
+              "type": "string"
+            },
+            {
+              "name": "Email",
+              "type": "string"
+            },
+            {
+              "name": "Severity",
+              "type": "int"
+            },
+            {
+              "name": "InfectedMachineId",
+              "type": "string"
+            },
+            {
+              "name": "UserHostname",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloud_ConditionalAccessLogs_CL')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "properties": {
+        "schema": {
+          "name": "SpyCloud_ConditionalAccessLogs_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "IncidentId",
+              "type": "string"
+            },
+            {
+              "name": "UserPrincipalName",
+              "type": "string"
+            },
+            {
+              "name": "UserId",
+              "type": "string"
+            },
+            {
+              "name": "Action",
+              "type": "string"
+            },
+            {
+              "name": "Status",
+              "type": "string"
+            },
+            {
+              "name": "PasswordReset",
+              "type": "boolean"
+            },
+            {
+              "name": "SessionsRevoked",
+              "type": "boolean"
+            },
+            {
+              "name": "AddedToCAGroup",
+              "type": "boolean"
+            },
+            {
+              "name": "CAGroupId",
+              "type": "string"
+            },
+            {
+              "name": "Email",
+              "type": "string"
+            },
+            {
+              "name": "Severity",
+              "type": "int"
+            }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2022-06-01",
+      "name": "[parameters('dataCollectionRuleName')]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "tags": "[variables('allTags')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachWatchlist_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachCatalog_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]"
+      ],
+      "properties": {
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
+        "description": "[variables('_dcrDisplayName')]",
+        "streamDeclarations": {
+          "Custom-SpyCloudBreachWatchlist_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "document_id",
+                "type": "string"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "email_username",
+                "type": "string"
+              },
+              {
+                "name": "domain",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_plaintext",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "sighting",
+                "type": "int"
+              },
+              {
+                "name": "breach_category",
+                "type": "string"
+              },
+              {
+                "name": "breach_title",
+                "type": "string"
+              },
+              {
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
+              },
+              {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_path",
+                "type": "string"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "user_sys_registered_owner",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "av_softwares",
+                "type": "dynamic"
+              },
+              {
+                "name": "country_code",
+                "type": "string"
+              },
+              {
+                "name": "display_resolution",
+                "type": "string"
+              },
+              {
+                "name": "keyboard_languages",
+                "type": "string"
+              },
+              {
+                "name": "timezone",
+                "type": "string"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudBreachCatalog_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "id",
+                "type": "int"
+              },
+              {
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "name": "short_title",
+                "type": "string"
+              },
+              {
+                "name": "description",
+                "type": "string"
+              },
+              {
+                "name": "site",
+                "type": "string"
+              },
+              {
+                "name": "site_description",
+                "type": "string"
+              },
+              {
+                "name": "breach_category",
+                "type": "string"
+              },
+              {
+                "name": "breach_main_category",
+                "type": "string"
+              },
+              {
+                "name": "consumer_category",
+                "type": "string"
+              },
+              {
+                "name": "type",
+                "type": "string"
+              },
+              {
+                "name": "status",
+                "type": "string"
+              },
+              {
+                "name": "confidence",
+                "type": "int"
+              },
+              {
+                "name": "num_records",
+                "type": "int"
+              },
+              {
+                "name": "sensitive_source",
+                "type": "boolean"
+              },
+              {
+                "name": "tlp",
+                "type": "string"
+              },
+              {
+                "name": "uuid",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              },
+              {
+                "name": "acquisition_date",
+                "type": "string"
+              },
+              {
+                "name": "assets",
+                "type": "dynamic"
+              }
+            ]
+          },
+          "Custom-Spycloud_MDE_Logs_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "IncidentId",
+                "type": "string"
+              },
+              {
+                "name": "DeviceName",
+                "type": "string"
+              },
+              {
+                "name": "DeviceId",
+                "type": "string"
+              },
+              {
+                "name": "MachineId",
+                "type": "string"
+              },
+              {
+                "name": "Action",
+                "type": "string"
+              },
+              {
+                "name": "IsolationType",
+                "type": "string"
+              },
+              {
+                "name": "Tag",
+                "type": "string"
+              },
+              {
+                "name": "Status",
+                "type": "string"
+              },
+              {
+                "name": "Email",
+                "type": "string"
+              },
+              {
+                "name": "Severity",
+                "type": "int"
+              },
+              {
+                "name": "InfectedMachineId",
+                "type": "string"
+              },
+              {
+                "name": "UserHostname",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloud_ConditionalAccessLogs_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "IncidentId",
+                "type": "string"
+              },
+              {
+                "name": "UserPrincipalName",
+                "type": "string"
+              },
+              {
+                "name": "UserId",
+                "type": "string"
+              },
+              {
+                "name": "Action",
+                "type": "string"
+              },
+              {
+                "name": "Status",
+                "type": "string"
+              },
+              {
+                "name": "PasswordReset",
+                "type": "boolean"
+              },
+              {
+                "name": "SessionsRevoked",
+                "type": "boolean"
+              },
+              {
+                "name": "AddedToCAGroup",
+                "type": "boolean"
+              },
+              {
+                "name": "CAGroupId",
+                "type": "string"
+              },
+              {
+                "name": "Email",
+                "type": "string"
+              },
+              {
+                "name": "Severity",
+                "type": "int"
+              }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[variables('workspaceResourceId')]",
+              "name": "scWorkspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [
+              "Custom-SpyCloudBreachWatchlist_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now()",
+            "outputStream": "Custom-SpyCloudBreachWatchlist_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudBreachCatalog_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now()",
+            "outputStream": "Custom-SpyCloudBreachCatalog_CL"
+          },
+          {
+            "streams": [
+              "Custom-Spycloud_MDE_Logs_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = coalesce(todatetime(TimeGenerated), now())",
+            "outputStream": "Custom-Spycloud_MDE_Logs_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloud_ConditionalAccessLogs_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = coalesce(todatetime(TimeGenerated), now())",
+            "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
+          }
+        ]
+      }
+    },
+    {
       "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
       "apiVersion": "2023-04-01-preview",
       "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('dataConnectorTemplateNameConnectorDefinition'), variables('dataConnectorVersionConnectorDefinition'))]",
@@ -2307,7 +3070,11 @@
               ]
             }
           ],
-          "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+          "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+          "dcrConfig": {
+            "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
+            "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName')), '2022-06-01').immutableId]"
+          }
         }
       },
       "dependsOn": [
@@ -2414,13 +3181,10 @@
               }
             },
             "dcrConfig": {
-              "defaultValue": {
-                "dataCollectionEndpoint": "auto-populated by connector framework",
-                "dataCollectionRuleImmutableId": "auto-populated by connector framework"
-              },
               "type": "object",
-              "metadata": {
-                "description": "Data Collection Rule configuration (DCE endpoint + DCR immutable ID). Auto-populated by the Sentinel CCF framework."
+              "defaultValue": {
+                "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
+                "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName')), '2022-06-01').immutableId]"
               }
             },
             "watchlistType": {
