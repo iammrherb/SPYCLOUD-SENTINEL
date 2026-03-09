@@ -2223,10 +2223,6 @@
             }
           ],
           "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
-          "dcrConfig": {
-            "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
-            "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace'))), '2022-06-01').immutableId]"
-          },
           "availability": {
             "status": 1,
             "isPreview": false
@@ -2235,9 +2231,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
-        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
-        "[resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace')))]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ]
     },
     {
@@ -2343,8 +2337,8 @@
             "dcrConfig": {
               "type": "object",
               "defaultValue": {
-                "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
-                "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace'))), '2022-06-01').immutableId]"
+                "dataCollectionEndpoint": "data collection Endpoint",
+                "dataCollectionRuleImmutableId": "data collection rule immutableId"
               }
             },
             "watchlistType": {
