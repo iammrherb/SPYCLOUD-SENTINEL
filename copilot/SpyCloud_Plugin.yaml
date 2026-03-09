@@ -737,3 +737,197 @@ SkillGroups:
               (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),
               (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access')
             | project Table, Records, Latest, HoursSinceUpdate = datetime_diff('hour', now(), Latest)
+
+      # =====================================================================
+      # 10. COMPASS CONSUMER IDENTITY INVESTIGATION
+      # =====================================================================
+
+      - Name: GetCompassExposures
+        DisplayName: Search Compass consumer exposures
+        Description: Finds all consumer identity exposures from SpyCloud Compass for a specific email or domain.
+        Inputs:
+          - Name: SearchTerm
+            Description: Email address or email domain to search
+            Required: true
+        Settings:
+          Target: Sentinel
+          Template: |-
+            SpyCloudCompassData_CL
+            | where TimeGenerated > ago(30d)
+            | where email has "{{SearchTerm}}" or email_domain has "{{SearchTerm}}"
+            | summarize Exposures=count(), MaxSev=max(severity), Domains=dcount(target_domain), Devices=dcount(infected_machine_id), LatestExposure=max(TimeGenerated) by email
+            | order by MaxSev desc, Exposures desc
+
+      - Name: GetCompassDevices
+        DisplayName: List Compass infected devices
+        Description: Shows all infected devices tracked by SpyCloud Compass including OS, application count, and infection timeline.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            SpyCloudCompassDevices_CL
+            | where TimeGenerated > ago(30d)
+            | summarize Infections=count(), LatestInfection=max(infected_time), Apps=max(application_count) by user_hostname, user_os
+            | order by Infections desc
+            | take 50
+
+      - Name: GetCompassCorporateOverlap
+        DisplayName: Find Compass + Corporate credential overlap
+        Description: Identifies users whose consumer identity exposures in Compass also appear in corporate breach watchlist — indicating personal credential reuse risk.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            SpyCloudCompassData_CL
+            | where TimeGenerated > ago(30d) and severity >= 20
+            | join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | distinct email, severity) on email
+            | summarize CompassHits=count(), CorporateMaxSev=max(severity1), CompassMaxSev=max(severity), Domains=dcount(target_domain) by email
+            | order by CorporateMaxSev desc
+
+      - Name: GetDeviceReinfections
+        DisplayName: Detect device reinfections via Compass
+        Description: Identifies devices that appear in Compass multiple times across different time periods, indicating failed remediation or persistent compromise.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            SpyCloudCompassDevices_CL
+            | where TimeGenerated > ago(90d)
+            | summarize InfectionCount=count(), FirstSeen=min(infected_time), LastSeen=max(infected_time), Sources=dcount(source_id) by user_hostname, user_os
+            | where InfectionCount > 1
+            | extend DaysBetween=datetime_diff('day', todatetime(LastSeen), todatetime(FirstSeen))
+            | order by InfectionCount desc
+
+      # =====================================================================
+      # 11. CROSS-CONNECTOR THREAT HUNTING
+      # =====================================================================
+
+      - Name: HuntExposedUserSignIns
+        DisplayName: Hunt sign-in activity for exposed users
+        Description: Correlates SpyCloud exposed credentials with Entra ID sign-in logs to identify potential account takeover. Shows successful sign-ins from exposed users with location and app context.
+        Inputs:
+          - Name: DaysBack
+            Description: Number of days to look back (default 7)
+            Required: false
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let lookback = ago({{DaysBack}}d);
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > lookback and severity >= 5 | distinct email, severity, breach_title;
+            SigninLogs
+            | where TimeGenerated > lookback and ResultType == 0
+            | where UserPrincipalName in~ (exposed | project email)
+            | join kind=inner exposed on $left.UserPrincipalName == $right.email
+            | summarize SignIns=count(), Apps=dcount(AppDisplayName), IPs=dcount(IPAddress), Countries=dcount(tostring(LocationDetails.countryOrRegion)) by UserPrincipalName, severity, breach_title
+            | order by severity desc, SignIns desc
+
+      - Name: HuntExposedUserEmailActivity
+        DisplayName: Hunt email activity for exposed users
+        Description: Checks Office 365 for suspicious email activity by users with exposed credentials — forwarding rules, delegation changes, and mass sends.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email;
+            OfficeActivity
+            | where TimeGenerated > ago(7d)
+            | where UserId in~ (exposed)
+            | where Operation in ('New-InboxRule','Set-InboxRule','Set-Mailbox','Add-MailboxPermission','New-TransportRule','Send')
+            | summarize Actions=count() by UserId, Operation, ClientIP
+            | order by Actions desc
+
+      - Name: HuntExposedUserAzureActivity
+        DisplayName: Hunt Azure resource changes by exposed users
+        Description: Shows Azure subscription activity (creates, deletes, role assignments) by users whose credentials were exposed in SpyCloud.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;
+            AzureActivity
+            | where TimeGenerated > ago(7d)
+            | where Caller in~ (exposed) and ActivityStatusValue == 'Success'
+            | where OperationNameValue has_any ('write','delete','action','roleAssignment')
+            | summarize Ops=count() by Caller, OperationNameValue, ResourceGroup
+            | order by Ops desc
+
+      - Name: HuntInfectedIPsInNetwork
+        DisplayName: Hunt infected IPs across all network logs
+        Description: Searches for SpyCloud infection source IPs in device network events, DNS, firewall (CEF), and threat intelligence — comprehensive network sweep.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let ips = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | mv-expand ip = ip_addresses | extend src_ip = tostring(ip) | where isnotempty(src_ip) | distinct src_ip;
+            union isfuzzy=true
+            (DeviceNetworkEvents | where TimeGenerated > ago(7d) | where RemoteIP in (ips) | summarize Hits=count() by RemoteIP, DeviceName | extend Source="MDE Network"),
+            (DnsEvents | where TimeGenerated > ago(7d) | where ClientIP in (ips) | summarize Hits=count() by ClientIP, Name | extend Source="DNS"),
+            (CommonSecurityLog | where TimeGenerated > ago(7d) | where SourceIP in (ips) or DestinationIP in (ips) | summarize Hits=count() by SourceIP, DestinationIP, DeviceVendor | extend Source="Firewall"),
+            (ThreatIntelligenceIndicator | where TimeGenerated > ago(30d) | where NetworkIP in (ips) | summarize Hits=count() by NetworkIP, ThreatType | extend Source="ThreatIntel")
+            | order by Hits desc
+
+      # =====================================================================
+      # 12. RISK SCORING AND PRIORITIZATION
+      # =====================================================================
+
+      - Name: GetUserRiskScore
+        DisplayName: Calculate SpyCloud risk score for a user
+        Description: Calculates a composite risk score for a user based on exposure severity, number of breaches, plaintext passwords, device infections, password reuse, and recency.
+        Inputs:
+          - Name: UserEmail
+            Description: User email to score
+            Required: true
+        Settings:
+          Target: Sentinel
+          Template: |-
+            SpyCloudBreachWatchlist_CL
+            | where TimeGenerated > ago(90d) and email =~ "{{UserEmail}}"
+            | summarize
+                TotalExposures=count(),
+                MaxSeverity=max(severity),
+                PlaintextPWs=countif(isnotempty(password_plaintext)),
+                UniquePasswords=dcount(password),
+                TargetDomains=dcount(target_domain),
+                BreachSources=dcount(source_id),
+                DeviceInfections=dcountif(infected_machine_id, isnotempty(infected_machine_id)),
+                MostRecent=max(TimeGenerated),
+                DaysSinceLatest=datetime_diff('day', now(), max(TimeGenerated))
+            | extend RiskScore = TotalExposures * 2
+                + MaxSeverity * 3
+                + PlaintextPWs * 10
+                + DeviceInfections * 15
+                + iff(DaysSinceLatest < 7, 20, iff(DaysSinceLatest < 30, 10, 0))
+                + iff(TargetDomains > 5, 15, 0)
+            | extend RiskLevel = case(RiskScore >= 100, "CRITICAL", RiskScore >= 50, "HIGH", RiskScore >= 20, "MEDIUM", "LOW")
+            | project email="{{UserEmail}}", RiskScore, RiskLevel, TotalExposures, MaxSeverity, PlaintextPWs, DeviceInfections, TargetDomains, BreachSources, DaysSinceLatest
+
+      - Name: GetOrgRiskDashboard
+        DisplayName: Organization-wide risk summary
+        Description: Provides an executive-level risk summary of the entire organization — total exposures, critical users, unresolved infections, password hygiene, and breach source diversity.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let w = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d);
+            let mde = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d);
+            let ca = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d);
+            union isfuzzy=true
+            (w | summarize v=count() | extend Metric="Total Exposures (30d)"),
+            (w | summarize v=dcount(email) | extend Metric="Unique Users Exposed"),
+            (w | where severity >= 20 | summarize v=dcount(email) | extend Metric="Critical/High Users (sev 20+)"),
+            (w | where severity == 25 | summarize v=dcount(infected_machine_id) | extend Metric="Devices with Sev 25"),
+            (w | where isnotempty(password_plaintext) | summarize v=count() | extend Metric="Plaintext Password Exposures"),
+            (w | summarize v=dcount(target_domain) | extend Metric="Target Domains"),
+            (w | summarize v=dcount(source_id) | extend Metric="Unique Breach Sources"),
+            (mde | summarize v=count() | extend Metric="MDE Isolations Performed"),
+            (ca | summarize v=count() | extend Metric="CA Resets Performed")
+            | project Metric, Value=v
+
+      - Name: GetTopPriorityActions
+        DisplayName: Priority action items for SOC
+        Description: Lists the highest-priority remediation actions needed right now — unremediated critical exposures, exposed executives, reinfected devices, and stale incidents.
+        Settings:
+          Target: Sentinel
+          Template: |-
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d);
+            let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;
+            let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | distinct DeviceName;
+            union isfuzzy=true
+            (exposed | where severity == 25 and email !in~ (remediated_users) | summarize Users=dcount(email) | extend Priority="CRITICAL", Action="Sev 25 users NOT yet remediated — immediate password reset + device isolation needed"),
+            (exposed | where severity >= 20 and isnotempty(infected_machine_id) | where user_hostname !in~ (remediated_devices) | summarize Devices=dcount(infected_machine_id) | extend Priority="HIGH", Action="Infected devices NOT yet isolated in MDE"),
+            (exposed | where isnotempty(password_plaintext) and email !in~ (remediated_users) | summarize Users=dcount(email) | extend Priority="HIGH", Action="Plaintext password exposures without password reset"),
+            (exposed | where severity >= 5 | summarize v=dcount(email) | where v > 0 | extend Priority="MEDIUM", Action="Users exposed in last 7d — review for password reuse patterns")
+            | project Priority, Action
