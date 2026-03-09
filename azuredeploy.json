@@ -439,6 +439,513 @@
       "metadata": {
         "description": "Azure DevOps Service Hook URL for auto-creating work items. Leave blank to skip."
       }
+    },
+    "deploymentMode": {
+      "type": "string",
+      "defaultValue": "Full",
+      "allowedValues": [
+        "Full",
+        "Upgrade",
+        "RulesOnly",
+        "PlaybooksOnly",
+        "ConnectorOnly"
+      ],
+      "metadata": {
+        "description": "Deployment mode: Full (first install), Upgrade (add features), or selective component deployment."
+      }
+    },
+    "enableCoreDetectionRules": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy core SpyCloud detection analytics rules sc-001 through sc-012. These are the foundational infostealer and credential exposure detection rules recommended for all deployments."
+      }
+    },
+    "enableO365EntraRules": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy Office 365 and Entra ID analytics rules sc-020 through sc-029. REQUIRES: SigninLogs and AuditLogs data connectors enabled in Sentinel. These rules correlate SpyCloud exposures with Entra sign-in and audit activity."
+      }
+    },
+    "enableUebaFirewallRules": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy UEBA and Firewall analytics rules sc-030 through sc-039. REQUIRES: BehaviorAnalytics and CommonSecurityLog tables populated via UEBA and a firewall/CEF connector. These rules correlate SpyCloud exposures with behavioral anomalies and network activity."
+      }
+    },
+    "enableAdvancedThreatRules": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy advanced threat hunting analytics rules sc-040 through sc-049. These rules detect sophisticated attack patterns such as credential stuffing campaigns, lateral movement using exposed credentials, and multi-stage attack chains."
+      }
+    },
+    "enableMsicRules": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy 5 Microsoft Security Incident Creation (MSIC) rules that auto-create Sentinel incidents from Defender XDR, Entra ID Protection, Defender for Cloud, Microsoft Cloud App Security, and Azure Active Directory Identity Protection alerts."
+      }
+    },
+    "enableFusionDetection": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy the Fusion Advanced Multistage Attack Detection rule. Uses ML to correlate low-fidelity alerts across multiple data sources into high-confidence multi-stage attack incidents spanning the kill chain."
+      }
+    },
+    "enableForcePasswordResetPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Force Password Reset playbook. Automatically resets the compromised user's password in Entra ID upon incident creation. REQUIRES: Entra ID P1/P2 license and User Administrator or Password Administrator role assigned to the playbook's managed identity. Post-deployment: grant API permissions via scripts/grant-permissions.sh."
+      }
+    },
+    "enableRevokeSessionsPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Revoke Sessions playbook. Revokes all active refresh tokens and sign-in sessions for the compromised user in Entra ID. REQUIRES: Entra ID P1/P2 license. Post-deployment: grant User.ReadWrite.All API permission to the playbook's managed identity."
+      }
+    },
+    "enableEnforceMfaPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Enforce MFA playbook. Forces MFA re-registration for the compromised user by resetting their authentication methods. REQUIRES: Entra ID P1/P2 with Conditional Access. Post-deployment: grant UserAuthenticationMethod.ReadWrite.All API permission to the playbook's managed identity."
+      }
+    },
+    "enableBlockConditionalAccessPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Block via Conditional Access playbook. Adds compromised users to a designated Entra ID security group targeted by a blocking Conditional Access policy. REQUIRES: Entra ID P1/P2 with a pre-configured Conditional Access policy and security group. Post-deployment: configure the caSecurityGroupId parameter and grant Group.ReadWrite.All API permission."
+      }
+    },
+    "enableBlockFirewallPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Block at Firewall playbook. Sends IP block requests to your firewall management API for source IPs found in SpyCloud infostealer data. REQUIRES: Firewall API integration (Palo Alto, Fortinet, or Azure Firewall). Post-deployment: configure the firewall API connection in the Logic App designer."
+      }
+    },
+    "enableIsolateDevicePlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Isolate Device playbook. Isolates compromised devices via Microsoft Defender for Endpoint API. REQUIRES: Defender for Endpoint P1/P2 license. Post-deployment: grant Machine.Isolate API permission to the playbook's managed identity."
+      }
+    },
+    "enableNotifyUserPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Notify User playbook. Sends an email notification to the compromised user informing them of the credential exposure and required remediation steps. REQUIRES: Office 365 or Exchange Online connector configured in Logic Apps. Post-deployment: authorize the Office 365 API connection."
+      }
+    },
+    "enableNotifySOCPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Notify SOC playbook. Sends detailed incident notifications to the SOC team via email, Teams, or Slack with full exposure context and recommended response actions. Post-deployment: configure at least one notification channel (email, Teams webhook, or Slack webhook)."
+      }
+    },
+    "enableEnrichIncidentPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Enrich Incident playbook. Automatically enriches Sentinel incidents with additional SpyCloud context including breach source details, historical exposure count, password reuse analysis, and infected device information. Post-deployment: grant Sentinel Responder role to the playbook's managed identity."
+      }
+    },
+    "enableFullRemediationPlaybook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the Full Remediation orchestrator playbook. Chains together password reset, session revocation, MFA enforcement, device isolation, and user notification into a single automated response workflow. REQUIRES: All prerequisite licenses for individual playbooks. Post-deployment: grant all required API permissions and enable the individual playbooks this orchestrator calls."
+      }
+    },
+    "enableServiceNow": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable ServiceNow integration for automatic ticket creation when SpyCloud incidents are generated. When enabled, configure the serviceNow* parameters below."
+      }
+    },
+    "serviceNowInstanceUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ServiceNow instance URL (e.g., https://your-instance.service-now.com). Required when enableServiceNow is TRUE."
+      }
+    },
+    "serviceNowAuthType": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "OAuth",
+        "ApiKey"
+      ],
+      "metadata": {
+        "description": "Authentication method for the ServiceNow API connection. Basic = username/password, OAuth = OAuth 2.0 client credentials, ApiKey = ServiceNow API key header."
+      }
+    },
+    "serviceNowUsername": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ServiceNow username for Basic authentication. Must have permissions to create records in the target table. Required when serviceNowAuthType is 'Basic'."
+      }
+    },
+    "serviceNowPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "ServiceNow password for Basic authentication. Stored securely and never exposed in deployment outputs or logs. Required when serviceNowAuthType is 'Basic'."
+      }
+    },
+    "serviceNowTable": {
+      "type": "string",
+      "defaultValue": "incident",
+      "allowedValues": [
+        "incident",
+        "sn_si_incident",
+        "change_request",
+        "problem"
+      ],
+      "metadata": {
+        "description": "ServiceNow table to create records in. 'incident' = standard IT incidents, 'sn_si_incident' = Security Incident Response (requires SIR plugin), 'change_request' = change records, 'problem' = problem records."
+      }
+    },
+    "serviceNowAssignmentGroup": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ServiceNow assignment group name for created tickets (e.g., 'SOC Team', 'Security Operations'). Leave blank to use the default assignment group for the target table."
+      }
+    },
+    "serviceNowCategory": {
+      "type": "string",
+      "defaultValue": "Security",
+      "allowedValues": [
+        "Security",
+        "Network",
+        "Software",
+        "Hardware"
+      ],
+      "metadata": {
+        "description": "ServiceNow ticket category for created records. 'Security' is recommended for SpyCloud credential exposure incidents."
+      }
+    },
+    "serviceNowShortDescriptionTemplate": {
+      "type": "string",
+      "defaultValue": "SpyCloud: {severity} exposure detected for {email}",
+      "metadata": {
+        "description": "Template for the ServiceNow short description field. Supports placeholders: {severity}, {email}, {breach_source}, {exposure_count}, {severity_label}. Example: 'SpyCloud: {severity} exposure detected for {email}'."
+      }
+    },
+    "serviceNowCustomFields": {
+      "type": "string",
+      "defaultValue": "{}",
+      "metadata": {
+        "description": "JSON string of custom ServiceNow field mappings. Use to set additional fields not covered by the standard parameters. Example: {\"u_risk_score\": \"{severity}\", \"u_source\": \"SpyCloud\"}. Leave as '{}' if no custom fields are needed."
+      }
+    },
+    "enableJira": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable Jira integration for automatic issue creation when SpyCloud incidents are generated. When enabled, configure the jira* parameters below."
+      }
+    },
+    "jiraInstanceUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Jira instance URL (e.g., https://your-org.atlassian.net). Required when enableJira is TRUE."
+      }
+    },
+    "jiraAuthType": {
+      "type": "string",
+      "defaultValue": "ApiToken",
+      "allowedValues": [
+        "ApiToken",
+        "OAuth",
+        "PAT"
+      ],
+      "metadata": {
+        "description": "Authentication method for the Jira API connection. ApiToken = email + API token (Jira Cloud), OAuth = OAuth 2.0, PAT = Personal Access Token (Jira Data Center/Server)."
+      }
+    },
+    "jiraEmail": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Jira account email for ApiToken authentication. Must have permissions to create issues in the target project. Required when jiraAuthType is 'ApiToken'."
+      }
+    },
+    "jiraApiToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Jira API token for authentication. Generate at: https://id.atlassian.net/manage-profile/security/api-tokens. Stored securely and never exposed in deployment outputs or logs."
+      }
+    },
+    "jiraProjectKey": {
+      "type": "string",
+      "defaultValue": "SEC",
+      "metadata": {
+        "description": "Jira project key where issues will be created (e.g., 'SEC', 'SOC', 'SECOPS'). The project must already exist in your Jira instance."
+      }
+    },
+    "jiraIssueType": {
+      "type": "string",
+      "defaultValue": "Task",
+      "allowedValues": [
+        "Task",
+        "Bug",
+        "Story",
+        "Epic",
+        "Sub-task"
+      ],
+      "metadata": {
+        "description": "Jira issue type for created issues. 'Task' is recommended for SpyCloud credential exposure response work items."
+      }
+    },
+    "jiraLabels": {
+      "type": "string",
+      "defaultValue": "spycloud,credential-exposure,automated",
+      "metadata": {
+        "description": "Comma-separated Jira labels applied to created issues. Used for filtering and reporting. Example: 'spycloud,credential-exposure,automated'."
+      }
+    },
+    "jiraSummaryTemplate": {
+      "type": "string",
+      "defaultValue": "[SpyCloud] {severity_label} credential exposure - {email}",
+      "metadata": {
+        "description": "Template for the Jira issue summary field. Supports placeholders: {severity}, {severity_label}, {email}, {breach_source}, {exposure_count}. Example: '[SpyCloud] {severity_label} credential exposure - {email}'."
+      }
+    },
+    "jiraCustomFields": {
+      "type": "string",
+      "defaultValue": "{}",
+      "metadata": {
+        "description": "JSON string of custom Jira field mappings. Use to set additional fields not covered by standard parameters. Example: {\"customfield_10001\": \"{severity}\", \"customfield_10002\": \"SpyCloud\"}. Leave as '{}' if no custom fields are needed."
+      }
+    },
+    "enableAzureDevOps": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable Azure DevOps integration for automatic work item creation when SpyCloud incidents are generated. When enabled, configure the azureDevOps* parameters below."
+      }
+    },
+    "azureDevOpsOrgUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps organization URL (e.g., https://dev.azure.com/your-org). Required when enableAzureDevOps is TRUE."
+      }
+    },
+    "azureDevOpsProject": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps project name where work items will be created. The project must already exist in your Azure DevOps organization. Required when enableAzureDevOps is TRUE."
+      }
+    },
+    "azureDevOpsWorkItemType": {
+      "type": "string",
+      "defaultValue": "Issue",
+      "allowedValues": [
+        "Issue",
+        "Task",
+        "Bug",
+        "Epic",
+        "User Story"
+      ],
+      "metadata": {
+        "description": "Azure DevOps work item type for created items. 'Issue' is recommended for SpyCloud credential exposure tracking in Basic process; use 'Task' or 'Bug' for Agile/Scrum processes."
+      }
+    },
+    "azureDevOpsAreaPath": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps area path for created work items (e.g., 'ProjectName\\Security\\Incidents'). Leave blank to use the project root area path."
+      }
+    },
+    "azureDevOpsIterationPath": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps iteration path for created work items (e.g., 'ProjectName\\Sprint 1'). Leave blank to use the project default iteration."
+      }
+    },
+    "azureDevOpsAssignedTo": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps user email or display name to assign created work items to. Leave blank to leave unassigned."
+      }
+    },
+    "azureDevOpsTags": {
+      "type": "string",
+      "defaultValue": "SpyCloud;Credential-Exposure;Automated",
+      "metadata": {
+        "description": "Semicolon-separated tags applied to created Azure DevOps work items. Used for filtering and reporting."
+      }
+    },
+    "azureDevOpsTitleTemplate": {
+      "type": "string",
+      "defaultValue": "[SpyCloud] {severity_label} - {email}",
+      "metadata": {
+        "description": "Template for the Azure DevOps work item title. Supports placeholders: {severity}, {severity_label}, {email}, {breach_source}, {exposure_count}. Example: '[SpyCloud] {severity_label} - {email}'."
+      }
+    },
+    "enableSlackNotifications": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable enhanced Slack notifications for SpyCloud incidents. Sends formatted alert messages to a designated Slack channel via webhook. When enabled, configure the slack* parameters below."
+      }
+    },
+    "slackChannel": {
+      "type": "string",
+      "defaultValue": "#soc-alerts",
+      "metadata": {
+        "description": "Slack channel for SpyCloud alert notifications (e.g., '#soc-alerts'). The Slack app must be invited to this channel. Required when enableSlackNotifications is TRUE."
+      }
+    },
+    "slackBotName": {
+      "type": "string",
+      "defaultValue": "SpyCloud Sentinel",
+      "metadata": {
+        "description": "Display name for the Slack bot that posts SpyCloud alert notifications."
+      }
+    },
+    "slackMessageFormat": {
+      "type": "string",
+      "defaultValue": "Rich",
+      "allowedValues": [
+        "Rich",
+        "Simple"
+      ],
+      "metadata": {
+        "description": "Slack message format. 'Rich' = Block Kit formatted messages with sections, fields, and action buttons. 'Simple' = plain text messages with minimal formatting."
+      }
+    },
+    "slackSeverityFilter": {
+      "type": "string",
+      "defaultValue": "All",
+      "allowedValues": [
+        "All",
+        "HighCritical",
+        "CriticalOnly"
+      ],
+      "metadata": {
+        "description": "Filter which incidents are sent to Slack by severity. 'All' = all severities, 'HighCritical' = High and Critical only, 'CriticalOnly' = Critical severity only. Use to reduce notification noise."
+      }
+    },
+    "slackIncludeUserDetails": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Include compromised user details (email, department, manager) in Slack notifications. Set to FALSE if your Slack channel has broad visibility and PII should be minimized."
+      }
+    },
+    "enableTeamsNotifications": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable enhanced Microsoft Teams notifications for SpyCloud incidents. Sends formatted cards to a designated Teams channel. When enabled, configure the teams* parameters below."
+      }
+    },
+    "teamsChannelName": {
+      "type": "string",
+      "defaultValue": "SOC Alerts",
+      "metadata": {
+        "description": "Microsoft Teams channel name for SpyCloud alert notifications. The Teams webhook must be configured for this channel. Required when enableTeamsNotifications is TRUE."
+      }
+    },
+    "teamsCardFormat": {
+      "type": "string",
+      "defaultValue": "AdaptiveCard",
+      "allowedValues": [
+        "AdaptiveCard",
+        "MessageCard"
+      ],
+      "metadata": {
+        "description": "Teams card format. 'AdaptiveCard' = modern rich cards with actions and dynamic content (recommended). 'MessageCard' = legacy Office 365 connector card format for backward compatibility."
+      }
+    },
+    "teamsSeverityFilter": {
+      "type": "string",
+      "defaultValue": "All",
+      "allowedValues": [
+        "All",
+        "HighCritical",
+        "CriticalOnly"
+      ],
+      "metadata": {
+        "description": "Filter which incidents are sent to Teams by severity. 'All' = all severities, 'HighCritical' = High and Critical only, 'CriticalOnly' = Critical severity only."
+      }
+    },
+    "teamsIncludeRemediationActions": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Include actionable remediation buttons in Teams Adaptive Cards (e.g., 'Reset Password', 'Revoke Sessions', 'View in Sentinel'). Only applicable when teamsCardFormat is 'AdaptiveCard'."
+      }
+    },
+    "enableEmailNotifications": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable enhanced email notifications for SpyCloud incidents. Sends formatted HTML emails with breach details, affected user information, and recommended remediation actions. When enabled, configure the email* parameters below."
+      }
+    },
+    "emailFromAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Sender email address for SpyCloud alert notifications (e.g., 'sentinel-alerts@company.com'). Must be a valid mailbox in your Office 365 or Exchange Online tenant. Required when enableEmailNotifications is TRUE."
+      }
+    },
+    "emailToAddresses": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Comma-separated list of recipient email addresses for SpyCloud alert notifications (e.g., 'soc@company.com,security-leads@company.com'). Required when enableEmailNotifications is TRUE."
+      }
+    },
+    "emailCcAddresses": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Comma-separated list of CC email addresses for SpyCloud alert notifications. Leave blank if no CC recipients are needed."
+      }
+    },
+    "emailSubjectTemplate": {
+      "type": "string",
+      "defaultValue": "[SpyCloud Alert] {severity_label} - {email}",
+      "metadata": {
+        "description": "Template for the email subject line. Supports placeholders: {severity}, {severity_label}, {email}, {breach_source}, {exposure_count}. Example: '[SpyCloud Alert] {severity_label} - {email}'."
+      }
+    },
+    "emailIncludeBreachDetails": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Include detailed breach source information in email notifications (breach name, date, data types exposed). Provides SOC analysts with full context for triage."
+      }
+    },
+    "emailIncludeRecommendedActions": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Include recommended remediation actions in email notifications based on the exposure type and severity (e.g., password reset, session revocation, MFA enforcement, device scan)."
+      }
     }
   },
   "variables": {
