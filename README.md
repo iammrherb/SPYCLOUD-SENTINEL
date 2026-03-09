@@ -593,6 +593,29 @@ All integrations are **conditional** — only fire when the corresponding URL or
 
 ---
 
+## Sentinel Hunting Queries
+
+**8 saved hunting queries** available in Sentinel → Hunting → filter "SpyCloud":
+
+| Hunt | What It Finds | Tables |
+|------|-------------|--------|
+| Exposed Users with Active Sign-Ins | Highest priority — stolen creds + recent logins | Watchlist + SigninLogs |
+| Infected IPs Across Network | Network-wide sweep across MDE, DNS, firewall, TI | Watchlist + 4 network tables |
+| Password Reuse Across Domains | Same password hash on 3+ domains | Watchlist |
+| Devices Infected Multiple Times | Failed remediation or persistent compromise | Watchlist |
+| Plaintext Passwords by Domain | Immediate-access credentials by organization | Watchlist |
+| Compass + Corporate Overlap | Consumer credential reuse in corporate accounts | Compass + Watchlist |
+| Unremediated High-Severity | Sev 20+ without password reset | Watchlist + CA Logs |
+| Risk Score Dashboard | Composite score per user: severity + plaintext + devices + recency | Watchlist |
+
+## VIP/Executive Watchlist
+
+Editable Sentinel Watchlist (`SpyCloud-VIP-Watchlist`) for executive email monitoring. Rule #20 dynamically queries this list — add/remove VIPs in Sentinel → Watchlists without editing KQL.
+
+Default entries: CEO, CFO, CTO, CISO, IT Admin. Edit to match your organization.
+
+---
+
 ## Security Copilot Integration
 
 ### Plugin — 42 KQL Skills
