@@ -1,0 +1,385 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-EnrichIncident",
+      "metadata": { "description": "Name of the Logic App playbook" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "SpyCloudApiKey": {
+      "type": "securestring",
+      "metadata": { "description": "SpyCloud API key for breach data lookups" }
+    },
+    "SpyCloudApiUrl": {
+      "type": "string",
+      "defaultValue": "https://api.spycloud.io/enterprise-v2",
+      "metadata": { "description": "SpyCloud Enterprise API base URL" }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Entities_-_Get_Accounts": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/entities/account",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Initialize_MaxSeverity": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "MaxSpyCloudSeverity",
+                    "type": "integer",
+                    "value": 0
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Initialize_EnrichmentData": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "EnrichmentData",
+                    "type": "array",
+                    "value": []
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Initialize_Tags": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "IncidentTags",
+                    "type": "array",
+                    "value": ["SpyCloud-Enriched"]
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Process_Each_Account": {
+              "type": "Foreach",
+              "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
+              "actions": {
+                "Enrich_Scope": {
+                  "type": "Scope",
+                  "actions": {
+                    "Resolve_Email": {
+                      "type": "Compose",
+                      "inputs": "@concat(items('Process_Each_Account')?['Name'], if(not(empty(items('Process_Each_Account')?['UPNSuffix'])), concat('@', items('Process_Each_Account')?['UPNSuffix']), ''))",
+                      "runAfter": {}
+                    },
+                    "Query_SpyCloud_Breach_Data": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "GET",
+                        "uri": "@{parameters('SpyCloudApiUrl')}/breach/data/emails/@{outputs('Resolve_Email')}",
+                        "headers": {
+                          "X-API-Key": "@parameters('SpyCloudApiKey')",
+                          "Accept": "application/json"
+                        }
+                      },
+                      "runAfter": {
+                        "Resolve_Email": ["Succeeded"]
+                      }
+                    },
+                    "Parse_SpyCloud_Response": {
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@body('Query_SpyCloud_Breach_Data')",
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "hits": { "type": "integer" },
+                            "results": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "severity": { "type": "integer" },
+                                  "source_id": { "type": "integer" },
+                                  "email": { "type": "string" },
+                                  "document_id": { "type": "string" },
+                                  "spycloud_publish_date": { "type": "string" },
+                                  "infected_machine_id": { "type": "string" },
+                                  "infected_path": { "type": "string" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Query_SpyCloud_Breach_Data": ["Succeeded"]
+                      }
+                    },
+                    "Process_Each_Breach_Record": {
+                      "type": "Foreach",
+                      "foreach": "@body('Parse_SpyCloud_Response')?['results']",
+                      "actions": {
+                        "Update_Max_Severity": {
+                          "type": "If",
+                          "expression": {
+                            "and": [
+                              {
+                                "greater": ["@items('Process_Each_Breach_Record')?['severity']", "@variables('MaxSpyCloudSeverity')"]
+                              }
+                            ]
+                          },
+                          "actions": {
+                            "Set_New_Max_Severity": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "MaxSpyCloudSeverity",
+                                "value": "@items('Process_Each_Breach_Record')?['severity']"
+                              },
+                              "runAfter": {}
+                            }
+                          },
+                          "else": { "actions": {} },
+                          "runAfter": {}
+                        },
+                        "Check_Malware_Source": {
+                          "type": "If",
+                          "expression": {
+                            "and": [
+                              {
+                                "not": {
+                                  "equals": ["@coalesce(items('Process_Each_Breach_Record')?['infected_machine_id'], '')", ""]
+                                }
+                              }
+                            ]
+                          },
+                          "actions": {
+                            "Add_Malware_Tag": {
+                              "type": "AppendToArrayVariable",
+                              "inputs": {
+                                "name": "IncidentTags",
+                                "value": "SpyCloud-Malware-Sourced"
+                              },
+                              "runAfter": {}
+                            }
+                          },
+                          "else": { "actions": {} },
+                          "runAfter": {}
+                        }
+                      },
+                      "runAfter": {
+                        "Parse_SpyCloud_Response": ["Succeeded"]
+                      }
+                    },
+                    "Append_User_Enrichment": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "EnrichmentData",
+                        "value": {
+                          "email": "@outputs('Resolve_Email')",
+                          "totalExposures": "@body('Parse_SpyCloud_Response')?['hits']",
+                          "maxSeverity": "@variables('MaxSpyCloudSeverity')"
+                        }
+                      },
+                      "runAfter": {
+                        "Process_Each_Breach_Record": ["Succeeded"]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Catch_Enrich_Errors": {
+                  "type": "Scope",
+                  "actions": {
+                    "Append_Error_Enrichment": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "EnrichmentData",
+                        "value": {
+                          "email": "@items('Process_Each_Account')?['Name']",
+                          "error": "Failed to query SpyCloud API"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "Enrich_Scope": ["Failed", "TimedOut"]
+                  }
+                }
+              },
+              "runAfter": {
+                "Entities_-_Get_Accounts": ["Succeeded"],
+                "Initialize_MaxSeverity": ["Succeeded"],
+                "Initialize_EnrichmentData": ["Succeeded"],
+                "Initialize_Tags": ["Succeeded"]
+              }
+            },
+            "Map_Severity_To_Sentinel": {
+              "type": "Compose",
+              "inputs": "@if(greaterOrEquals(variables('MaxSpyCloudSeverity'), 25), 'High', if(greaterOrEquals(variables('MaxSpyCloudSeverity'), 20), 'Medium', 'Low'))",
+              "runAfter": {
+                "Process_Each_Account": ["Succeeded"]
+              }
+            },
+            "Update_Incident": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "put",
+                "path": "/incident",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "severity": "@outputs('Map_Severity_To_Sentinel')",
+                  "tagsToAdd": {
+                    "TagsToAdd": "@variables('IncidentTags')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Map_Severity_To_Sentinel": ["Succeeded"]
+              }
+            },
+            "Add_Enrichment_Comment": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/incident-comments",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "message": "<p><strong>SpyCloud-EnrichIncident:</strong> Enrichment complete.<br/><strong>Max SpyCloud Severity:</strong> @{variables('MaxSpyCloudSeverity')}<br/><strong>Sentinel Severity Set To:</strong> @{outputs('Map_Severity_To_Sentinel')}<br/><strong>Tags Added:</strong> @{join(variables('IncidentTags'), ', ')}<br/><strong>Details:</strong><br/>@{variables('EnrichmentData')}</p>"
+                }
+              },
+              "runAfter": {
+                "Update_Incident": ["Succeeded"]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "SpyCloudApiKey": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('SpyCloudApiKey')]"
+            },
+            "SpyCloudApiUrl": {
+              "type": "String",
+              "defaultValue": "[parameters('SpyCloudApiUrl')]"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  }
+}

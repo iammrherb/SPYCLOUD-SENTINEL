@@ -1,0 +1,251 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-NotifySOC",
+      "metadata": { "description": "Name of the Logic App playbook" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "TeamsChannelId": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Teams channel ID for SOC alerts" }
+    },
+    "TeamsGroupId": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Teams group (team) ID" }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "teamsConnectionName": "[concat('teams-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]",
+    "teamsConnectionId": "[resourceId('Microsoft.Web/connections', variables('teamsConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('teamsConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('teamsConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'teams')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]",
+        "[variables('teamsConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Entities_-_Get_Accounts": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/entities/account",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Build_Affected_Users_List": {
+              "type": "Select",
+              "inputs": {
+                "from": "@body('Entities_-_Get_Accounts')?['Accounts']",
+                "select": "@concat(item()?['Name'], if(not(empty(item()?['UPNSuffix'])), concat('@', item()?['UPNSuffix']), ''))"
+              },
+              "runAfter": {
+                "Entities_-_Get_Accounts": ["Succeeded"]
+              }
+            },
+            "Compose_Severity_Emoji": {
+              "type": "Compose",
+              "inputs": "@if(equals(triggerBody()?['object']?['properties']?['severity'], 'High'), 'HIGH', if(equals(triggerBody()?['object']?['properties']?['severity'], 'Medium'), 'MEDIUM', 'LOW'))",
+              "runAfter": {}
+            },
+            "Post_To_Teams_Scope": {
+              "type": "Scope",
+              "actions": {
+                "Post_Adaptive_Card_To_Teams": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['teams']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/v1.0/teams/@{parameters('TeamsGroupId')}/channels/@{parameters('TeamsChannelId')}/messages",
+                    "body": {
+                      "messageType": "all",
+                      "body": {
+                        "contentType": "html",
+                        "content": "<h2>SpyCloud Credential Exposure Alert - @{outputs('Compose_Severity_Emoji')}</h2><table><tr><td><strong>Incident #:</strong></td><td>@{triggerBody()?['object']?['properties']?['incidentNumber']}</td></tr><tr><td><strong>Title:</strong></td><td>@{triggerBody()?['object']?['properties']?['title']}</td></tr><tr><td><strong>Severity:</strong></td><td>@{triggerBody()?['object']?['properties']?['severity']}</td></tr><tr><td><strong>Created:</strong></td><td>@{triggerBody()?['object']?['properties']?['createdTimeUtc']}</td></tr><tr><td><strong>Affected Users:</strong></td><td>@{join(body('Build_Affected_Users_List'), ', ')}</td></tr><tr><td><strong>Alert Count:</strong></td><td>@{length(triggerBody()?['object']?['properties']?['alerts'])}</td></tr></table><h3>Recommended Actions</h3><ul><li>Verify exposed credentials scope with SpyCloud portal</li><li>Force password reset for all affected accounts</li><li>Revoke active sessions immediately</li><li>Review sign-in logs for suspicious activity</li><li>Check for lateral movement indicators</li><li>Escalate if severity is HIGH or malware-sourced</li></ul><p><a href='@{triggerBody()?['object']?['properties']?['incidentUrl']}'>Open Incident in Sentinel</a></p>"
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Comment_Teams_Sent": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/incident-comments",
+                    "body": {
+                      "incidentArmId": "@triggerBody()?['object']?['id']",
+                      "message": "<p><strong>SpyCloud-NotifySOC:</strong> Teams notification sent to SOC channel.</p>"
+                    }
+                  },
+                  "runAfter": {
+                    "Post_Adaptive_Card_To_Teams": ["Succeeded"]
+                  }
+                }
+              },
+              "runAfter": {
+                "Build_Affected_Users_List": ["Succeeded"],
+                "Compose_Severity_Emoji": ["Succeeded"]
+              }
+            },
+            "Catch_Teams_Errors": {
+              "type": "Scope",
+              "actions": {
+                "Comment_Teams_Failed": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/incident-comments",
+                    "body": {
+                      "incidentArmId": "@triggerBody()?['object']?['id']",
+                      "message": "<p><strong>SpyCloud-NotifySOC:</strong> Failed to post Teams notification. Manual SOC notification required for incident @{triggerBody()?['object']?['properties']?['incidentNumber']}.</p>"
+                    }
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": {
+                "Post_To_Teams_Scope": ["Failed", "TimedOut"]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "TeamsChannelId": {
+              "type": "String",
+              "defaultValue": "[parameters('TeamsChannelId')]"
+            },
+            "TeamsGroupId": {
+              "type": "String",
+              "defaultValue": "[parameters('TeamsGroupId')]"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              },
+              "teams": {
+                "connectionId": "[variables('teamsConnectionId')]",
+                "connectionName": "[variables('teamsConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'teams')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  }
+}

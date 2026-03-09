@@ -2427,8 +2427,8 @@
             "dcrConfig": {
               "type": "object",
               "defaultValue": {
-                "dataCollectionEndpoint": "data collection Endpoint",
-                "dataCollectionRuleImmutableId": "data collection rule immutableId"
+                "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
+                "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace'))), '2022-06-01').immutableId]"
               }
             },
             "watchlistType": {

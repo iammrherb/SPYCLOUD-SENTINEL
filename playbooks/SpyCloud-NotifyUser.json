@@ -1,0 +1,249 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-NotifyUser",
+      "metadata": { "description": "Name of the Logic App playbook" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "SenderAddress": {
+      "type": "string",
+      "defaultValue": "security@contoso.com",
+      "metadata": { "description": "Email address to send notifications from" }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "office365ConnectionName": "[concat('office365-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]",
+    "office365ConnectionId": "[resourceId('Microsoft.Web/connections', variables('office365ConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('office365ConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('office365ConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'office365')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]",
+        "[variables('office365ConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Entities_-_Get_Accounts": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/entities/account",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Compose_Incident_Details": {
+              "type": "Compose",
+              "inputs": {
+                "incidentNumber": "@triggerBody()?['object']?['properties']?['incidentNumber']",
+                "title": "@triggerBody()?['object']?['properties']?['title']",
+                "severity": "@triggerBody()?['object']?['properties']?['severity']",
+                "createdTime": "@triggerBody()?['object']?['properties']?['createdTimeUtc']"
+              },
+              "runAfter": {}
+            },
+            "Process_Each_Account": {
+              "type": "Foreach",
+              "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
+              "actions": {
+                "Notify_User_Scope": {
+                  "type": "Scope",
+                  "actions": {
+                    "Resolve_User_Email": {
+                      "type": "Compose",
+                      "inputs": "@concat(items('Process_Each_Account')?['Name'], if(not(empty(items('Process_Each_Account')?['UPNSuffix'])), concat('@', items('Process_Each_Account')?['UPNSuffix']), ''))",
+                      "runAfter": {}
+                    },
+                    "Send_Notification_Email": {
+                      "type": "ApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['office365']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/v2/Mail",
+                        "body": {
+                          "To": "@outputs('Resolve_User_Email')",
+                          "Subject": "SECURITY ALERT: Your credentials may have been exposed - Action Required",
+                          "Body": "<html><body><h2>Security Alert - Credential Exposure Detected</h2><p>Dear @{items('Process_Each_Account')?['Name']},</p><p>Our security monitoring systems have detected that credentials associated with your account may have been exposed in a data breach.</p><h3>Incident Details</h3><table border='1' cellpadding='8' cellspacing='0' style='border-collapse:collapse;'><tr><td><strong>Incident ID</strong></td><td>@{outputs('Compose_Incident_Details')?['incidentNumber']}</td></tr><tr><td><strong>Severity</strong></td><td>@{outputs('Compose_Incident_Details')?['severity']}</td></tr><tr><td><strong>Detected On</strong></td><td>@{outputs('Compose_Incident_Details')?['createdTime']}</td></tr></table><h3>Required Actions</h3><ol><li><strong>Change your password immediately</strong> at <a href='https://mysignins.microsoft.com/security-info'>https://mysignins.microsoft.com/security-info</a></li><li><strong>Review your recent sign-in activity</strong> at <a href='https://mysignins.microsoft.com'>https://mysignins.microsoft.com</a></li><li><strong>Enable multi-factor authentication</strong> if not already configured</li><li><strong>Do not reuse</strong> the exposed password on any other service</li></ol><p>If you did not initiate any unusual activity, please contact the IT Security team immediately.</p><p style='color:gray;font-size:12px;'>This is an automated notification from the Security Operations Center. Do not reply to this email.</p></body></html>",
+                          "Importance": "High",
+                          "IsHtml": true
+                        }
+                      },
+                      "runAfter": {
+                        "Resolve_User_Email": ["Succeeded"]
+                      }
+                    },
+                    "Comment_Email_Sent": {
+                      "type": "ApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/incident-comments",
+                        "body": {
+                          "incidentArmId": "@triggerBody()?['object']?['id']",
+                          "message": "<p><strong>SpyCloud-NotifyUser:</strong> Notification email sent to <strong>@{outputs('Resolve_User_Email')}</strong>.</p>"
+                        }
+                      },
+                      "runAfter": {
+                        "Send_Notification_Email": ["Succeeded"]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Catch_Notify_Errors": {
+                  "type": "Scope",
+                  "actions": {
+                    "Comment_Email_Failed": {
+                      "type": "ApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/incident-comments",
+                        "body": {
+                          "incidentArmId": "@triggerBody()?['object']?['id']",
+                          "message": "<p><strong>SpyCloud-NotifyUser:</strong> Failed to send email to <strong>@{items('Process_Each_Account')?['Name']}</strong>. Manual notification required.</p>"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "Notify_User_Scope": ["Failed", "TimedOut"]
+                  }
+                }
+              },
+              "runAfter": {
+                "Entities_-_Get_Accounts": ["Succeeded"],
+                "Compose_Incident_Details": ["Succeeded"]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              },
+              "office365": {
+                "connectionId": "[variables('office365ConnectionId')]",
+                "connectionName": "[variables('office365ConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'office365')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  }
+}
