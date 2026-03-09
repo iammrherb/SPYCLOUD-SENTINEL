@@ -277,9 +277,9 @@
     },
     "enablePostDeployScript": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
-        "description": "Run the post-deployment script to grant API permissions (MDE Machine.Isolate, Graph User.ReadWrite.All, RBAC) to Logic App managed identities. Required for playbooks to function. Triggers a 'trust authors' prompt in the Azure Portal \u2014 click 'Yes, I trust the authors' to proceed. Without this, playbooks deploy but cannot isolate devices or reset passwords."
+        "description": "Deprecated \u2014 no longer needed. The deployment script and container instance have been removed. RBAC is now handled by native ARM role assignments. API permissions (MDE + Graph) must be granted manually via Cloud Shell or Entra portal \u2014 see connector Step 6 for instructions."
       }
     },
     "enableCredResponsePlaybook": {
@@ -3490,13 +3490,13 @@
               ]
             },
             {
-              "title": "Step 6 \u2014 Verification & Troubleshooting",
+              "title": "Step 6 \u2014 Permissions, Verification & Troubleshooting",
               "description": "### Quick Health Check (run 5-10 minutes after connecting)\n\n```kusto\nSpyCloudBreachWatchlist_CL\n| summarize TotalRecords=count(), Newest=max(TimeGenerated), Oldest=min(TimeGenerated), Domains=dcount(email_domain), Breaches=dcount(source_id)\n| extend Status = iff(TotalRecords > 0, 'RECEIVING DATA', 'WAITING')\n```\n\n### Full 4-Table Health Dashboard\n\n```kusto\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA')\n| project Table, Records, Latest, HoursSince=datetime_diff('hour', now(), Latest)\n```\n\n### Troubleshooting\n\n| Symptom | Cause | Fix |\n|---------|-------|-----|\n| No data after 30 min | Invalid API key | Regenerate at portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| No data after 30 min | Wrong severity filter | Ensure at least one severity level selected |\n| Partial data | Rate limited (HTTP 429) | Contact SpyCloud to verify your API tier |\n| Timeouts | Large watchlist | Contact SpyCloud support \u2014 may need Enterprise+ tier |\n| Watchlist but no Catalog | Both should activate together | Disconnect and reconnect |\n| No MDE/CA logs | Normal \u2014 these are populated by playbooks | Enable playbooks + create test incident |\n\n### Support\n\n| Issue | Contact |\n|-------|----------|\n| SpyCloud API / Data | support@spycloud.com or portal.spycloud.com |\n| Azure / Sentinel | Azure Portal \u2192 Help + Support |\n| This Integration | github.com/iammrherb/SPYCLOUD-SENTINEL/issues |",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "### Verify Data Pipeline\n\n```kql\n// Check all 6 tables\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Watchlist\"),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Catalog\"),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Compass Data\"),\n(SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"Compass Devices\"),\n(Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"MDE Logs\"),\n(SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table=\"CA Logs\")\n| project Table, Records, Latest\n```\n\n### Automated Health Check\n```bash\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\n### Verify Permissions\n```bash\n# Check Logic App managed identity permissions\naz ad sp show --id $(az logic workflow show -g YOUR-RG -n SpyCloud-MDE-Remediation-YOUR-WS --query identity.principalId -o tsv) --query appRoles\n```\n\n### Troubleshooting\n\n| Symptom | Fix |\n|---------|---------|\n| No data after 10 min | Check DCR exists: Monitor \u2192 Data Collection Rules |\n| 401 on connect | Wrong API key \u2014 must be Enterprise tier |\n| 400 on connect | Check API key at portal.spycloud.com |\n| Playbooks not triggering | Grant admin consent for managed identities |\n| Rules not visible | Check enableAnalyticsRule=true in deployment |\n| Workbook empty | Tables created but no data yet \u2014 wait for first poll |"
+                    "text": "### Grant API Permissions (Required for Playbooks)\n\nRBAC roles (Monitoring Metrics Publisher + Sentinel Responder) are granted automatically during deployment. MDE and Graph API permissions must be granted manually:\n\n**Option A: Cloud Shell (recommended)**\n```bash\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/grant-permissions.sh | bash -s -- -g YOUR-RG -w YOUR-WS\n```\n\n**Option B: Entra Portal**\n1. Go to Entra ID \u2192 Enterprise Applications \u2192 filter 'Managed Identities'\n2. Find each SpyCloud Logic App (MDE-Remediation, CA-Remediation, CredResponse)\n3. Permissions \u2192 Grant admin consent\n\n**Permissions Needed:**\n\n| Playbook | API | Permission | Purpose |\n|----------|-----|------------|----------|\n| MDE + Blocklist | MDE | Machine.Isolate | Isolate infected devices |\n| MDE + Blocklist | MDE | Machine.ReadWrite.All | Search device inventory |\n| CA + CredResponse | Graph | User.ReadWrite.All | Reset passwords |\n| CA + CredResponse | Graph | Directory.ReadWrite.All | Manage CA groups |\n\n### Verify Data Pipeline\n```kql\nunion isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass')\n| project Table, Records, Latest\n```\n\n### Troubleshooting\n| Symptom | Fix |\n|---------|-----|\n| No data after 10 min | Check DCR exists: Monitor \u2192 Data Collection Rules |\n| Playbooks not acting | Grant API permissions above |\n| 401 on connect | Wrong API key tier |\n| 400 on connect | API key format issue |"
                   }
                 }
               ]
@@ -7147,79 +7147,6 @@
       ]
     },
     {
-      "condition": "[parameters('enablePostDeployScript')]",
-      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "apiVersion": "2023-01-31",
-      "name": "[concat('id-spycloud-deploy-', uniqueString(resourceGroup().id))]",
-      "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": "[variables('allTags')]"
-    },
-    {
-      "condition": "[parameters('enablePostDeployScript')]",
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2023-08-01",
-      "name": "spycloud-post-deploy",
-      "location": "[variables('_effectiveWorkspaceLocation')]",
-      "kind": "AzureCLI",
-      "tags": "[variables('allTags')]",
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]": {}
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('id-spycloud-deploy-', uniqueString(resourceGroup().id)))]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
-      ],
-      "properties": {
-        "azCliVersion": "2.60.0",
-        "timeout": "PT15M",
-        "retentionInterval": "PT1H",
-        "cleanupPreference": "OnSuccess",
-        "environmentVariables": [
-          {
-            "name": "RG",
-            "value": "[resourceGroup().name]"
-          },
-          {
-            "name": "WS",
-            "value": "[parameters('workspace')]"
-          },
-          {
-            "name": "DCE_NAME",
-            "value": "[parameters('dataCollectionEndpointName')]"
-          },
-          {
-            "name": "DCR_NAME",
-            "value": "[parameters('dataCollectionRuleName')]"
-          },
-          {
-            "name": "MDE_PB",
-            "value": "[concat('SpyCloud-MDE-Remediation-', parameters('workspace'))]"
-          },
-          {
-            "name": "CA_PB",
-            "value": "[concat('SpyCloud-CA-Remediation-', parameters('workspace'))]"
-          },
-          {
-            "name": "CRED_PB",
-            "value": "[concat('SpyCloud-CredResponse-', parameters('workspace'))]"
-          },
-          {
-            "name": "BL_PB",
-            "value": "[concat('SpyCloud-MDE-Blocklist-', parameters('workspace'))]"
-          },
-          {
-            "name": "IDENTITY_NAME",
-            "value": "[concat('id-spycloud-deploy-', uniqueString(resourceGroup().id))]"
-          }
-        ],
-        "scriptContent": "#!/bin/bash\n# SpyCloud Sentinel \u2014 Post-Deployment (all steps non-fatal)\n# If the managed identity lacks permissions, steps will skip gracefully.\n# Run verify-deployment.sh from Cloud Shell to check + fix anything missed.\n\necho \"SpyCloud Sentinel \u2014 Post-Deployment\"\n\necho \"[1/7] Waiting 90s for resource provisioning...\"\nsleep 90\n\necho \"[2/7] Resolving DCE...\"\nDCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null) || true\nfor i in 1 2 3 4; do\n  [ -n \"$DCE_URI\" ] && break\n  sleep 20\n  DCE_URI=$(az monitor data-collection endpoint show --name \"$DCE_NAME\" -g \"$RG\" --query \"logsIngestion.endpoint\" -o tsv 2>/dev/null) || true\ndone\necho \"  DCE=${DCE_URI:-NOT_RESOLVED}\"\n\necho \"[3/7] Resolving DCR...\"\nDCR_ID=\"\"\nDCR_RID=\"\"\nfor i in 1 2 3 4 5; do\n  DCR_ID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" --query \"immutableId\" -o tsv 2>/dev/null) || true\n  DCR_RID=$(az monitor data-collection rule show --name \"$DCR_NAME\" -g \"$RG\" --query \"id\" -o tsv 2>/dev/null) || true\n  [ -n \"$DCR_ID\" ] && break\n  sleep 20\ndone\necho \"  DCR=${DCR_ID:-NOT_RESOLVED}\"\n\necho \"[4/7] Assigning Monitoring Metrics Publisher...\"\nif [ -n \"$DCR_RID\" ]; then\n  for PB in $MDE_PB $CA_PB $CRED_PB $BL_PB; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    if [ -n \"$PID\" ]; then\n      az role assignment create --assignee-object-id \"$PID\" --assignee-principal-type ServicePrincipal         --role \"3913510d-42f4-4e42-8a64-420c390055eb\" --scope \"$DCR_RID\" 2>/dev/null         && echo \"  $PB \u2713\" || echo \"  $PB: exists or no permission\"\n    fi\n  done\nfi\n\necho \"[5/7] MDE API permissions...\"\nMDE_SP=$(az ad sp show --id \"fc780465-2017-40d4-a0c5-307022471b92\" --query \"id\" -o tsv 2>/dev/null) || true\nif [ -n \"$MDE_SP\" ]; then\n  for PB in \"$MDE_PB\" \"$BL_PB\"; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    [ -z \"$PID\" ] && continue\n    for PERM in \"Machine.Isolate\" \"Machine.ReadWrite.All\"; do\n      RID=$(az ad sp show --id \"fc780465-2017-40d4-a0c5-307022471b92\" --query \"appRoles[?value=='$PERM'].id | [0]\" -o tsv 2>/dev/null) || true\n      [ -n \"$RID\" ] && az rest --method POST         --uri \"https://graph.microsoft.com/v1.0/servicePrincipals/$MDE_SP/appRoleAssignedTo\"         --body \"{\\\"principalId\\\":\\\"$PID\\\",\\\"resourceId\\\":\\\"$MDE_SP\\\",\\\"appRoleId\\\":\\\"$RID\\\"}\"         2>/dev/null && echo \"  $PERM \u2192 $PB \u2713\" || echo \"  $PERM: exists or no permission\"\n    done\n  done\nfi\n\necho \"[6/7] Graph API permissions...\"\nGRAPH_SP=$(az ad sp show --id \"00000003-0000-0000-c000-000000000000\" --query \"id\" -o tsv 2>/dev/null) || true\nif [ -n \"$GRAPH_SP\" ]; then\n  for PB in \"$CA_PB\" \"$CRED_PB\"; do\n    PID=$(az logic workflow show --name \"$PB\" -g \"$RG\" --query \"identity.principalId\" -o tsv 2>/dev/null) || true\n    [ -z \"$PID\" ] && continue\n    for PERM in \"User.ReadWrite.All\" \"Directory.ReadWrite.All\"; do\n      RID=$(az ad sp show --id \"00000003-0000-0000-c000-000000000000\" --query \"appRoles[?value=='$PERM'].id | [0]\" -o tsv 2>/dev/null) || true\n      [ -n \"$RID\" ] && az rest --method POST         --uri \"https://graph.microsoft.com/v1.0/servicePrincipals/$GRAPH_SP/appRoleAssignedTo\"         --body \"{\\\"principalId\\\":\\\"$PID\\\",\\\"resourceId\\\":\\\"$GRAPH_SP\\\",\\\"appRoleId\\\":\\\"$RID\\\"}\"         2>/dev/null && echo \"  $PERM \u2192 $PB \u2713\" || echo \"  $PERM: exists or no permission\"\n    done\n  done\nfi\n\necho \"[7/7] Automation rule...\"\nMDE_LA=$(az logic workflow show --name \"$MDE_PB\" -g \"$RG\" --query id -o tsv 2>/dev/null) || true\nWS_ID=$(az monitor log-analytics workspace show --workspace-name \"$WS\" -g \"$RG\" --query id -o tsv 2>/dev/null) || true\nTID=$(az account show --query tenantId -o tsv 2>/dev/null) || true\nif [ -n \"$MDE_LA\" ] && [ -n \"$WS_ID\" ]; then\n  az rest --method PUT     --uri \"https://management.azure.com${WS_ID}/providers/Microsoft.SecurityInsights/automationRules/spycloud-auto-rule?api-version=2023-02-01-preview\"     --body \"{\\\"properties\\\":{\\\"displayName\\\":\\\"SpyCloud Auto Remediation\\\",\\\"order\\\":1,\\\"triggeringLogic\\\":{\\\"isEnabled\\\":true,\\\"triggersOn\\\":\\\"Incidents\\\",\\\"triggersWhen\\\":\\\"Created\\\",\\\"conditions\\\":[]},\\\"actions\\\":[{\\\"order\\\":1,\\\"actionType\\\":\\\"RunPlaybook\\\",\\\"actionConfiguration\\\":{\\\"logicAppResourceId\\\":\\\"$MDE_LA\\\",\\\"tenantId\\\":\\\"$TID\\\"}}]}}\"     2>/dev/null && echo \"  Automation rule \u2713\" || echo \"  Automation rule: needs manual setup\"\nfi\n\necho \"\"\necho \"DONE. DCE=$DCE_URI DCR=$DCR_ID\"\necho \"Verify: curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/verify-deployment.sh | bash -s -- -g $RG -w $WS\"\n"
-      }
-    },
-    {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloudxDNS\u2014InfectedUser'))]",
       "apiVersion": "2023-02-01",
@@ -8165,6 +8092,126 @@
             "value": "T1078"
           }
         ]
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('mdePlaybookName'), 'MonMetricsPub'))]",
+      "scope": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]",
+      "condition": "[parameters('enableMdePlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('caPlaybookName'), 'MonMetricsPub'))]",
+      "scope": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]",
+      "condition": "[parameters('enableCaPlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('caPlaybookName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('credResponsePlaybookName'), 'MonMetricsPub'))]",
+      "scope": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]",
+      "condition": "[parameters('enableCredResponsePlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('mdeBlocklistPlaybookName'), 'MonMetricsPub'))]",
+      "scope": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]",
+      "condition": "[parameters('enableMdeBlocklistPlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('mdeBlocklistPlaybookName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('mdeBlocklistPlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('mdePlaybookName'), 'SentinelResp'))]",
+      "condition": "[parameters('enableMdePlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3e150937-b8fe-4cfb-8069-0eaf05ecd056')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('mdePlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('caPlaybookName'), 'SentinelResp'))]",
+      "condition": "[parameters('enableCaPlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('caPlaybookName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3e150937-b8fe-4cfb-8069-0eaf05ecd056')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('caPlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('credResponsePlaybookName'), 'SentinelResp'))]",
+      "condition": "[parameters('enableCredResponsePlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3e150937-b8fe-4cfb-8069-0eaf05ecd056')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('credResponsePlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(concat(resourceGroup().id, variables('mdeBlocklistPlaybookName'), 'SentinelResp'))]",
+      "condition": "[parameters('enableMdeBlocklistPlaybook')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', variables('mdeBlocklistPlaybookName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3e150937-b8fe-4cfb-8069-0eaf05ecd056')]",
+        "principalId": "[reference(resourceId('Microsoft.Logic/workflows', variables('mdeBlocklistPlaybookName')), '2019-05-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
       }
     }
   ],
