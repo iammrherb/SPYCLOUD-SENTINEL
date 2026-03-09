@@ -277,9 +277,9 @@
     },
     "enablePostDeployScript": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "This parameter is reserved. Post-deployment configuration (DCE/DCR resolution, RBAC, API permissions) is handled by scripts/post-deploy.sh or scripts/deploy-all.sh. Run one of these scripts after deployment completes."
+        "description": "Run the post-deployment script to grant API permissions (MDE Machine.Isolate, Graph User.ReadWrite.All, RBAC) to Logic App managed identities. Required for playbooks to function. Triggers a 'trust authors' prompt in the Azure Portal \u2014 click 'Yes, I trust the authors' to proceed. Without this, playbooks deploy but cannot isolate devices or reset passwords."
       }
     },
     "enableCredResponsePlaybook": {
