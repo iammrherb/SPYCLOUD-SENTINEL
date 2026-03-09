@@ -2013,7 +2013,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**A. SpyCloud Account & API Key**\n\n| Requirement | Details |\n|-------------|----------|\n| Subscription | Active SpyCloud Enterprise or Enterprise+ API plan |\n| API Key | Generate from portal.spycloud.com \u2192 Settings \u2192 API Keys |\n| API Region | US (api.spycloud.io) \u2014 configured automatically |\n\n**B. Azure Permissions Required**\n\n| Role | Scope |\n|------|-------|\n| Microsoft Sentinel Contributor | Resource Group |\n| Log Analytics Contributor | Workspace |\n| Monitoring Metrics Publisher | Data Collection Rule |\n\n**C. Network:** Outbound HTTPS to api.spycloud.io:443 and *.ingest.monitor.azure.com:443\n\n**D. Data Retention:** Set at workspace level during deployment (default 90 days, max 730). Change after deployment: Log Analytics workspace \u2192 Usage and estimated costs \u2192 Data Retention."
+                    "text": "**A. SpyCloud Account & API Key**\n\n| Requirement | Details |\n\n|-------------|----------|\n\n| Subscription | Active SpyCloud Enterprise or Enterprise+ API plan |\n\n| API Key | Generate from portal.spycloud.com \u2192 Settings \u2192 API Keys |\n\n| API Region | US (api.spycloud.io) \u2014 configured automatically |\n\n**B. Azure Permissions Required**\n\n| Role | Scope |\n\n|------|-------|\n\n| Microsoft Sentinel Contributor | Resource Group |\n\n| Log Analytics Contributor | Workspace |\n\n| Monitoring Metrics Publisher | Data Collection Rule |\n\n**C. Network:** Outbound HTTPS to api.spycloud.io:443 and *.ingest.monitor.azure.com:443\n\n**D. Data Retention:** Set at workspace level during deployment (default 90 days, max 730). Change after deployment: Log Analytics workspace \u2192 Usage and estimated costs \u2192 Data Retention."
                   }
                 }
               ]
@@ -2276,7 +2276,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**After connecting, enable analytics rules:** Sentinel \u2192 Analytics \u2192 filter 'SpyCloud' \u2192 enable rules individually.\n\n| Use Case | Rule/Resource |\n|----------|---------------|\n| Infostealer detection | Analytics Rules #1-6 |\n| Automated device isolation | MDE Remediation playbook |\n| Automated password reset | CA Remediation playbook |\n| IdP cross-correlation | Rules #14-17 (Okta/Duo/Ping/Entra) |\n| Executive monitoring | Rule #20 |\n| Copilot investigation | Plugin: 28 KQL skills |\n\n**Data streams created automatically:** SpyCloudBreachWatchlist_CL (73 cols), SpyCloudBreachCatalog_CL (5 cols), plus 2 audit tables populated by playbooks."
+                    "text": "**After connecting, enable analytics rules:** Sentinel \u2192 Analytics \u2192 filter 'SpyCloud' \u2192 enable rules individually.\n\n| Use Case | Rule/Resource |\n\n|----------|---------------|\n\n| Infostealer detection | Analytics Rules #1-6 |\n\n| Automated device isolation | MDE Remediation playbook |\n\n| Automated password reset | CA Remediation playbook |\n\n| IdP cross-correlation | Rules #14-17 (Okta/Duo/Ping/Entra) |\n\n| Executive monitoring | Rule #20 |\n\n| Copilot investigation | Plugin: 28 KQL skills |\n\n**Data streams created automatically:** SpyCloudBreachWatchlist_CL (73 cols), SpyCloudBreachCatalog_CL (5 cols), plus 2 audit tables populated by playbooks."
                   }
                 }
               ]
@@ -3643,7 +3643,7 @@
     {
       "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', variables('analyticsRuleName'))]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -3703,7 +3703,8 @@
             ]
           }
         ]
-      }
+      },
+      "location": "[parameters('deploymentRegion')]"
     },
     {
       "condition": "[parameters('enableNotifications')]",
@@ -3764,9 +3765,9 @@
       }
     },
     {
-      "condition": "[or(parameters('enableAnalyticsRule'), parameters('enableAnalyticsRulesLibrary'))]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'InfostealerExposureDetected', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -3825,12 +3826,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'PlaintextPasswordExposed', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -3878,12 +3880,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'SensitivePIIExposed', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -3931,12 +3934,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[or(parameters('enableSessionCookieDetection'), parameters('enableAnalyticsRulesLibrary'))]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'SessionCookieTheft', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -3996,12 +4000,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'DeviceReinfection', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4061,12 +4066,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'MultiDomainCredentialExposure', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4115,12 +4121,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'GeographicAnomaly', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4169,12 +4176,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'HighSightingCredential', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4222,12 +4230,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'RemediationGap', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4276,12 +4285,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'AVBypassDetected', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4315,12 +4325,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'NewMalwareFamilyDetected', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4354,12 +4365,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'DataIngestionStopped', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4389,12 +4401,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableIdentityProviderAlerts')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'OktaCompromisedCredentialSignIn', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4452,12 +4465,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableIdentityProviderAlerts')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'DuoCompromisedCredentialAuth', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4515,12 +4529,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableIdentityProviderAlerts')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'PingCompromisedCredentialAuth', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4578,12 +4593,13 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableIdentityProviderAlerts')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'EntraCompromisedCredentialSignIn', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -4632,7 +4648,8 @@
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
       "condition": "[parameters('enableCredResponsePlaybook')]",
@@ -5493,9 +5510,9 @@
       }
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'CredExposureWithSignIn', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -5543,12 +5560,13 @@
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'BreachTitleEnrichment', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -5596,12 +5614,13 @@
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'ExecutiveVIPExposure', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -5651,12 +5670,13 @@
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'PasswordReuseAcrossTargets', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -5705,12 +5725,13 @@
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableAnalyticsRulesLibrary')]",
+      "condition": "[parameters('enableAnalyticsRule')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
+      "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', concat(variables('rulesPrefix'), 'StaleRemediationCheck', '-', uniqueString(resourceGroup().id)))]",
       "kind": "Scheduled",
       "properties": {
@@ -5758,7 +5779,8 @@
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ]
+      ],
+      "location": "[parameters('deploymentRegion')]"
     },
     {
       "condition": "[parameters('enableWorkbook')]",
