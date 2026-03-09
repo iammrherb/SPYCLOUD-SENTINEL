@@ -1275,7 +1275,10 @@
                 },
                 "retentionInDays": 90,
                 "plan": "Analytics"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -1341,7 +1344,10 @@
                 },
                 "retentionInDays": 90,
                 "plan": "Analytics"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -1391,7 +1397,10 @@
                 },
                 "retentionInDays": 90,
                 "plan": "Analytics"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -1529,7 +1538,10 @@
                 },
                 "retentionInDays": 90,
                 "plan": "Analytics"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -1611,7 +1623,10 @@
                 },
                 "retentionInDays": 90,
                 "plan": "Analytics"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -1749,7 +1764,10 @@
                 },
                 "retentionInDays": 90,
                 "plan": "Analytics"
-              }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.Insights/dataCollectionRules",
@@ -1757,7 +1775,7 @@
               "name": "[concat('dcr-ccf-', parameters('workspace'))]",
               "location": "[resourceGroup().location]",
               "properties": {
-                "dataCollectionEndpointId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Insights/dataCollectionEndpoints/', parameters('dataCollectionEndpointName'))]",
+                "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', concat('dce-spycloud-', parameters('workspace')))]",
                 "streamDeclarations": {
                   "Custom-SpyCloudBreachWatchlist_CL": {
                     "columns": [
@@ -2306,7 +2324,16 @@
                     "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
                   }
                 ]
-              }
+              },
+              "dependsOn": [
+                "[concat(parameters('workspace'), '/SpyCloud_ConditionalAccessLogs_CL')]",
+                "[concat(parameters('workspace'), '/Spycloud_MDE_Logs_CL')]",
+                "[concat(parameters('workspace'), '/SpyCloudCompassDevices_CL')]",
+                "[concat(parameters('workspace'), '/SpyCloudCompassData_CL')]",
+                "[concat(parameters('workspace'), '/SpyCloudBreachCatalog_CL')]",
+                "[concat(parameters('workspace'), '/SpyCloudBreachWatchlist_CL')]",
+                "[resourceId('Microsoft.Insights/dataCollectionEndpoints', concat('dce-spycloud-', parameters('workspace')))]"
+              ]
             },
             {
               "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'SpyCloudWatchlistConnector')]",
@@ -2357,7 +2384,10 @@
                   "streamName": "Custom-SpyCloudBreachWatchlist_CL"
                 },
                 "isActive": true
-              }
+              },
+              "dependsOn": [
+                "[concat('dcr-ccf-', parameters('workspace'))]"
+              ]
             },
             {
               "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'SpyCloudWatchlistConnectorModified')]",
@@ -2409,7 +2439,10 @@
                   "streamName": "Custom-SpyCloudBreachWatchlist_CL"
                 },
                 "isActive": true
-              }
+              },
+              "dependsOn": [
+                "[concat('dcr-ccf-', parameters('workspace'))]"
+              ]
             },
             {
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudBreachCatalogConnector')]",
@@ -2457,7 +2490,10 @@
                   "streamName": "Custom-SpyCloudBreachCatalog_CL"
                 },
                 "isActive": true
-              }
+              },
+              "dependsOn": [
+                "[concat('dcr-ccf-', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
@@ -2497,7 +2533,10 @@
                     "$.results"
                   ]
                 }
-              }
+              },
+              "dependsOn": [
+                "[concat('dcr-ccf-', parameters('workspace'))]"
+              ]
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
@@ -2535,7 +2574,10 @@
                     "$.results"
                   ]
                 }
-              }
+              },
+              "dependsOn": [
+                "[concat('dcr-ccf-', parameters('workspace'))]"
+              ]
             }
           ]
         },
