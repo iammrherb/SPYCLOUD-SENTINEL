@@ -2270,10 +2270,8 @@
               }
             },
             "lookbackDays": {
-              "type": "array",
-              "defaultValue": [
-                "365"
-              ],
+              "type": "string",
+              "defaultValue": "365",
               "metadata": {
                 "description": "Days to look back on initial data pull (1-365)."
               }
@@ -2514,15 +2512,24 @@
                   "rateLimitQPS": 2,
                   "headers": {
                     "Accept": "application/json"
-                  }
+                  },
+                  "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ"
                 },
                 "response": {
                   "eventsJsonPaths": [
-                    "$.results"
-                  ]
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
                 }
               },
-              "dependsOn": []
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
             },
             {
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
@@ -2553,15 +2560,24 @@
                   "rateLimitQPS": 2,
                   "headers": {
                     "Accept": "application/json"
-                  }
+                  },
+                  "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ"
                 },
                 "response": {
                   "eventsJsonPaths": [
-                    "$.results"
-                  ]
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
                 }
               },
-              "dependsOn": []
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
             }
           ]
         },
@@ -3007,7 +3023,8 @@
                               }
                             },
                             "authentication": {
-                              "type": "ManagedServiceIdentity"
+                              "type": "ManagedServiceIdentity",
+                              "audience": "https://graph.microsoft.com"
                             }
                           },
                           "runAfter": {}
@@ -3485,7 +3502,8 @@
                               }
                             },
                             "authentication": {
-                              "type": "ManagedServiceIdentity"
+                              "type": "ManagedServiceIdentity",
+                              "audience": "https://graph.microsoft.com"
                             }
                           },
                           "runAfter": {}
@@ -4245,7 +4263,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AnyAlert"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "infected_machine_id"
+              }
+            ]
+          }
+        ]
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4675,9 +4713,10 @@
                   "type": "Http",
                   "inputs": {
                     "method": "GET",
-                    "uri": "https://graph.microsoft.com/v1.0/users/@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}",
+                    "uri": "https://graph.microsoft.com/v1.0/users/@{items('For_each_account')?['Name']}@@@{items('For_each_account')?['UPNSuffix']}",
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {}
@@ -4686,9 +4725,10 @@
                   "type": "Http",
                   "inputs": {
                     "method": "GET",
-                    "uri": "https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=userPrincipalName eq '@{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}'&$top=10&$orderby=createdDateTime desc",
+                    "uri": "https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=userPrincipalName eq '@{items('For_each_account')?['Name']}@@@{items('For_each_account')?['UPNSuffix']}'&$top=10&$orderby=createdDateTime desc",
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {
@@ -4708,12 +4748,14 @@
                       }
                     },
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {
                     "Check_recent_sign_ins": [
-                      "Succeeded"
+                      "Succeeded",
+                      "Failed"
                     ]
                   }
                 },
@@ -4723,12 +4765,14 @@
                     "method": "POST",
                     "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_user_from_Graph')?['id']}/revokeSignInSessions",
                     "authentication": {
-                      "type": "ManagedServiceIdentity"
+                      "type": "ManagedServiceIdentity",
+                      "audience": "https://graph.microsoft.com"
                     }
                   },
                   "runAfter": {
                     "Force_password_reset": [
-                      "Succeeded"
+                      "Succeeded",
+                      "Failed"
                     ]
                   }
                 },
@@ -4743,13 +4787,14 @@
                     "method": "post",
                     "body": {
                       "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud Credential Response Playbook</strong><br>User: @{items('For_each_account')?['Name']}@{items('For_each_account')?['UPNSuffix']}<br>Recent sign-ins checked: @{length(body('Check_recent_sign_ins')?['value'])} events<br>Password reset: Forced on next sign-in<br>Sessions revoked: All active sessions invalidated<br>Teams alert: Sent to SOC channel</p>"
+                      "message": "<p><strong>SpyCloud Credential Response Playbook</strong><br>User: @{items('For_each_account')?['Name']}@@@{items('For_each_account')?['UPNSuffix']}<br>Recent sign-ins checked: @{length(body('Check_recent_sign_ins')?['value'])} events<br>Password reset: Forced on next sign-in<br>Sessions revoked: All active sessions invalidated<br>Teams alert: Sent to SOC channel</p>"
                     },
                     "path": "/Incidents/Comment"
                   },
                   "runAfter": {
                     "Revoke_all_sessions": [
-                      "Succeeded"
+                      "Succeeded",
+                      "Failed"
                     ]
                   }
                 },
@@ -4929,7 +4974,8 @@
                           }
                         },
                         "authentication": {
-                          "type": "ManagedServiceIdentity"
+                          "type": "ManagedServiceIdentity",
+                          "audience": "https://graph.microsoft.com"
                         }
                       },
                       "runAfter": {}
@@ -5433,7 +5479,8 @@
                               }
                             },
                             "authentication": {
-                              "type": "ManagedServiceIdentity"
+                              "type": "ManagedServiceIdentity",
+                              "audience": "https://graph.microsoft.com"
                             }
                           },
                           "runAfter": {}
@@ -5504,7 +5551,7 @@
         "enabled": false,
         "query": "let exposed = SpyCloudBreachWatchlist_CL | where severity >= 20 | where TimeGenerated > ago(7d) | distinct email;\nSigninLogs\n| where TimeGenerated > ago(24h)\n| where ResultType == 0\n| where UserPrincipalName in (exposed)\n| summarize SignInCount = count(), IPs = make_set(IPAddress, 5), Apps = make_set(AppDisplayName, 5) by UserPrincipalName\n| extend AccountCustomEntity = UserPrincipalName",
         "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-        "queryPeriod": "PT24H",
+        "queryPeriod": "P8D",
         "triggerOperator": "GreaterThan",
         "triggerThreshold": 0,
         "suppressionDuration": "PT1H",
@@ -5612,7 +5659,7 @@
         "enabled": false,
         "query": "let vip_list = _GetWatchlist('SpyCloud-VIP-Watchlist') | project Email=tolower(Email);\nlet vip_fallback = datatable(Email:string)[\"ceo@\",\"cfo@\",\"cto@\",\"ciso@\",\"admin@\",\"root@\",\"vp@\",\"director@\",\"president@\"];\nlet vips = union vip_list, (vip_fallback | where Email !in (vip_list | project Email));\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 5\n| where tolower(email) in~ (vips | project Email) or email has_any (\"ceo\",\"cfo\",\"cto\",\"ciso\",\"admin\",\"root\",\"vp-\",\"director\")\n| project TimeGenerated, email, severity, breach_title, target_domain, infected_machine_id, password_type",
         "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-        "queryPeriod": "PT24H",
+        "queryPeriod": "P8D",
         "triggerOperator": "GreaterThan",
         "triggerThreshold": 0,
         "suppressionDuration": "PT1H",
@@ -5642,7 +5689,7 @@
             "fieldMappings": [
               {
                 "identifier": "Name",
-                "columnName": "AccountCustomEntity"
+                "columnName": "email"
               }
             ]
           }
@@ -5721,7 +5768,7 @@
         "enabled": false,
         "query": "let mde_remediated = Spycloud_MDE_Logs_CL | distinct InfectedMachineId;\nlet ca_remediated = SpyCloud_ConditionalAccessLogs_CL | distinct UserEmail;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(7d)\n| where infected_machine_id !in (mde_remediated)\n| where email !in (ca_remediated)\n| summarize DaysExposed = datetime_diff('day', now(), min(TimeGenerated)), ExposureCount = count() by email, infected_machine_id\n| extend AccountCustomEntity = email",
         "queryFrequency": "[parameters('analyticsRuleFrequency')]",
-        "queryPeriod": "PT24H",
+        "queryPeriod": "P8D",
         "triggerOperator": "GreaterThan",
         "triggerThreshold": 0,
         "suppressionDuration": "PT1H",
@@ -5822,7 +5869,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "DNS",
+            "fieldMappings": [
+              {
+                "identifier": "DomainName",
+                "columnName": "target_domain"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5864,7 +5931,36 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "ip_addresses"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "DeviceName"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5906,7 +6002,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "DeviceName"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5948,7 +6064,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -5990,7 +6117,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6030,7 +6168,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6072,7 +6221,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6112,7 +6272,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6152,7 +6323,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "DeviceName"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6192,7 +6383,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "ip_addresses"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6232,7 +6434,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6272,7 +6485,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6313,7 +6537,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "DNS",
+            "fieldMappings": [
+              {
+                "identifier": "DomainName",
+                "columnName": "target_domain"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6353,7 +6597,18 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "SourceIP"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6393,7 +6648,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPAddress"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6433,7 +6708,27 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
           }
-        }
+        },
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "ip_addresses"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "user_hostname"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -6465,6 +6760,16 @@
                   "Azure Sentinel"
                 ]
               }
+            },
+            {
+              "conditionProperties": {
+                "operator": "Contains",
+                "propertyName": "IncidentTitle",
+                "propertyValues": [
+                  "SpyCloud"
+                ]
+              },
+              "conditionType": "Property"
             }
           ]
         },
