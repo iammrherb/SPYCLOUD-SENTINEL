@@ -7413,17 +7413,16 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2024-09-01",
+      "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-Fusion-Multistage')]",
       "kind": "Fusion",
+      "etag": "*",
       "condition": "[parameters('enableFusionRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "displayName": "Advanced Multistage Attack Detection",
-        "description": "Fusion uses patented ML algorithms to automatically detect multistage attacks by correlating anomalous behaviors and suspicious activities across the kill chain. Fusion combines SpyCloud credential exposure alerts with sign-in anomalies, MDE alerts, and network events to surface advanced persistent threats.",
         "alertRuleTemplateName": "f71aba3d-28fb-450b-b192-4e76a83015c8",
         "enabled": true,
         "sourceSettings": [
@@ -7638,31 +7637,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2024-09-01",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderXDR')]",
-      "kind": "MicrosoftSecurityIncidentCreation",
-      "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ],
-      "properties": {
-        "displayName": "Create incidents from Microsoft Defender XDR alerts",
-        "description": "Auto-creates Sentinel incidents from Defender XDR (Defender for Endpoint, Identity, Office 365, Cloud Apps) alerts. Ensures all Microsoft 365 security alerts are unified in Sentinel for cross-correlation with SpyCloud exposure data.",
-        "enabled": true,
-        "productFilter": "Microsoft 365 Defender",
-        "severitiesFilter": [
-          "High",
-          "Medium",
-          "Low",
-          "Informational"
-        ],
-        "displayNamesFilter": []
-      }
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2024-09-01",
+      "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-EntraProtection')]",
       "kind": "MicrosoftSecurityIncidentCreation",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
@@ -7680,12 +7655,12 @@
           "Medium",
           "Low"
         ],
-        "displayNamesFilter": []
+        "displayNamesFilter": null
       }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2024-09-01",
+      "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderCloud')]",
       "kind": "MicrosoftSecurityIncidentCreation",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
@@ -7703,12 +7678,12 @@
           "Medium",
           "Low"
         ],
-        "displayNamesFilter": []
+        "displayNamesFilter": null
       }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2024-09-01",
+      "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-MCAS')]",
       "kind": "MicrosoftSecurityIncidentCreation",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
@@ -7726,12 +7701,12 @@
           "Medium",
           "Low"
         ],
-        "displayNamesFilter": []
+        "displayNamesFilter": null
       }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2024-09-01",
+      "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderIdentity')]",
       "kind": "MicrosoftSecurityIncidentCreation",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
@@ -7750,7 +7725,7 @@
           "Low",
           "Informational"
         ],
-        "displayNamesFilter": []
+        "displayNamesFilter": null
       }
     },
     {
@@ -8130,7 +8105,8 @@
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
       "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-AutoTriage-HighSeverity')]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoEscalate'))]",
+      "location": "[parameters('deploymentRegion')]",
       "condition": "[parameters('enableAutomationRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -8175,7 +8151,8 @@
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
       "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-AutoTriage-InfostelaerDevice')]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoTriageDevice'))]",
+      "location": "[parameters('deploymentRegion')]",
       "condition": "[parameters('enableAutomationRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -8229,7 +8206,8 @@
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
       "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-AutoClose-InfoOnly')]",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoClose'))]",
+      "location": "[parameters('deploymentRegion')]",
       "condition": "[parameters('enableAutomationRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
