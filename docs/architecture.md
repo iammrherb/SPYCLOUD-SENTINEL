@@ -1,283 +1,135 @@
-# SpyCloud Sentinel — Unified Deployment Architecture
+# SpyCloud Sentinel v6.0 — Architecture & Quick Reference
 
-## Single Template, Full Automation
+## Deployment Architecture
 
-This document describes the architecture for the unified ARM template that consolidates
-the connector, playbooks, Key Vault, analytics rules, and all optional Microsoft service
-integrations into a single deployment.
+```mermaid
+graph TB
+    subgraph "SpyCloud Intelligence"
+        API["SpyCloud Enterprise API<br/>api.spycloud.io"]
+    end
 
----
+    subgraph "Tier 1: Data Pipeline"
+        CCF["CCF Connector<br/>5 REST API Pollers"]
+        DCE["Data Collection Endpoint"]
+        DCR["Data Collection Rule<br/>KQL Transforms"]
+    end
+
+    subgraph "Tier 2: Custom Tables"
+        T1["SpyCloudBreachWatchlist_CL<br/>73 columns"]
+        T2["SpyCloudBreachCatalog_CL<br/>13 columns"]
+        T3["SpyCloudCompassData_CL<br/>29 columns"]
+        T4["SpyCloudCompassDevices_CL<br/>8 columns"]
+        T5["SpyCloud_ConditionalAccessLogs_CL"]
+        T6["Spycloud_MDE_Logs_CL"]
+    end
+
+    subgraph "Tier 3: Detection"
+        RULES["49 Analytics Rules<br/>6 categories"]
+        HUNT["28 Hunting Queries"]
+        FUSION["Fusion ML + UEBA + Anomaly"]
+    end
+
+    subgraph "Tier 4: Response"
+        PB["10+ Playbooks"]
+        AUTO["Automation Rules"]
+    end
+
+    subgraph "Tier 5: Integrations"
+        SNOW["ServiceNow / Jira / ADO"]
+        NOTIFY["Teams / Slack / Email"]
+        COPILOT["85 Copilot Skills"]
+    end
+
+    API --> CCF --> DCE --> DCR
+    DCR --> T1 & T2 & T3 & T4
+    T1 & T2 --> RULES & HUNT
+    RULES --> FUSION
+    RULES --> AUTO --> PB
+    PB --> T5 & T6
+    PB --> SNOW & NOTIFY
+    T1 & T2 --> COPILOT
+```
 
 ## What Gets Deployed
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    UNIFIED ARM TEMPLATE                             │
-│                    spycloud_unified_deployment.json                 │
-│                                                                     │
-│  ┌─ TIER 1: FOUNDATION (Always deployed) ──────────────────────┐   │
-│  │                                                              │   │
-│  │  □ Log Analytics Workspace (optional — use existing)         │   │
-│  │  □ Microsoft Sentinel (optional — enable on workspace)       │   │
-│  │  □ Data Collection Endpoint (DCE)                            │   │
-│  │  □ Data Collection Rule (DCR) — 4 stream transforms          │   │
-│  │  □ 4 Custom Tables:                                          │   │
-│  │     • SpyCloudBreachWatchlist_CL (73 columns)                │   │
-│  │     • SpyCloudBreachCatalog_CL (13 columns)                  │   │
-│  │     • Spycloud_MDE_Logs_CL (19 columns)                     │   │
-│  │     • SpyCloud_ConditionalAccessLogs_CL (14 columns)         │   │
-│  │  □ CCF Connector Definition + 3 REST API Pollers             │   │
-│  │  □ Content Package                                           │   │
-│  │                                                              │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  ┌─ TIER 2: SECURITY (Optional per toggle) ────────────────────┐   │
-│  │                                                              │   │
-│  │  □ Azure Key Vault (enableKeyVault=true)                     │   │
-│  │     • Stores SpyCloud API key as a secret                    │   │
-│  │     • Access policy for Logic App managed identities         │   │
-│  │     • Access policy for DCE/connector                        │   │
-│  │                                                              │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  ┌─ TIER 3: AUTOMATION (Optional per toggle) ──────────────────┐   │
-│  │                                                              │   │
-│  │  □ Sentinel API Connection (managed identity)                │   │
-│  │  □ MDE Remediation Logic App (enableMdePlaybook=true)        │   │
-│  │     • Device isolation via Defender API                       │   │
-│  │     • Machine tagging                                        │   │
-│  │     • IOC submission                                         │   │
-│  │     • Audit logging to Spycloud_MDE_Logs_CL via DCE          │   │
-│  │  □ CA Remediation Logic App (enableCaPlaybook=true)           │   │
-│  │     • Force password reset via Graph API                      │   │
-│  │     • Revoke all sessions                                    │   │
-│  │     • Add to CA security group                               │   │
-│  │     • Audit logging to SpyCloud_ConditionalAccessLogs_CL      │   │
-│  │  □ Analytics Rule — Infostealer Detection (enableAnalytics)   │   │
-│  │  □ Automation Rule — Auto-trigger playbooks (enableAutomation)│   │
-│  │  □ RBAC Role Assignments for Logic App identities             │   │
-│  │                                                              │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  ┌─ TIER 4: NOTIFICATIONS (Optional per toggle) ───────────────┐   │
-│  │                                                              │   │
-│  │  □ Action Group (enableNotifications=true)                    │   │
-│  │     • Email notification for high-severity incidents          │   │
-│  │     • Optional webhook for Teams/Slack                       │   │
-│  │  □ Alert Rule — Data ingestion health monitor                │   │
-│  │     • Fires when SpyCloud data stops flowing for >2 hours    │   │
-│  │                                                              │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  ┌─ TIER 5: MICROSOFT SERVICE CONNECTORS (Optional) ───────────┐   │
-│  │                                                              │   │
-│  │  These enable CORRELATION between SpyCloud exposure data     │   │
-│  │  and Microsoft security signals in your Sentinel workspace:  │   │
-│  │                                                              │   │
-│  │  □ Entra ID Sign-In Logs (enableEntraSignIn=true)            │   │
-│  │     • Diagnostic setting: SignInLogs → workspace              │   │
-│  │     • Correlate stolen credentials with actual sign-in        │   │
-│  │       attempts from anomalous locations                      │   │
-│  │                                                              │   │
-│  │  □ Entra ID Audit Logs (enableEntraAudit=true)               │   │
-│  │     • Diagnostic setting: AuditLogs → workspace               │   │
-│  │     • Track password changes, MFA registration after          │   │
-│  │       SpyCloud-triggered resets                              │   │
-│  │                                                              │   │
-│  │  □ Entra ID Risky Users/Sign-Ins (enableEntraRisk=true)      │   │
-│  │     • Diagnostic setting: RiskyUsers, RiskySignIns            │   │
-│  │     • Correlate SpyCloud severity with Entra risk scores     │   │
-│  │                                                              │   │
-│  │  NOTE: Defender XDR and Exchange/O365 connectors are          │   │
-│  │  configured through Sentinel Content Hub, not ARM. The        │   │
-│  │  template will output instructions for enabling these.       │   │
-│  │                                                              │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-```
+| Tier | Components | Count | Default |
+|------|-----------|-------|---------|
+| **Foundation** | Workspace, Sentinel, DCE, DCR, 6 Custom Tables, CCF Connector, Content Package | 12 | Always |
+| **Detection** | Analytics Rules (Core, O365, UEBA, Advanced, MSIC, Fusion) | 49 | All ON |
+| **Playbooks** | Identity, Device, Network, Notification, Enrichment, Orchestration | 10+ | All ON |
+| **Dashboards** | Executive Dashboard, SOC Operations, Threat Intel | 3 | All ON |
+| **Investigation** | Hunting Queries, Jupyter Notebooks, Copilot Skills | 85+ | All ON |
+| **Integrations** | ServiceNow, Jira, Azure DevOps, Slack, Teams, Email | 6 | Configure |
+| **Platform** | UEBA, Anomaly Detection, Fusion ML, MSIC Rules | 4 | All ON |
 
----
-
-## Parameter Groups
-
-### Group 1: Workspace & Region
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| workspace | string | (required) | Log Analytics workspace name |
-| deploymentRegion | string | [resourceGroup().location] | Primary deployment region |
-| createNewWorkspace | bool | false | Create new workspace + enable Sentinel |
-| subscription | string | [auto-detected] | Subscription ID |
-| resourceGroupName | string | [auto-detected] | Resource group name |
-
-### Group 2: SpyCloud API Configuration
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| spycloudApiKey | securestring | (required) | SpyCloud Enterprise API key |
-| spycloudApiRegion | string | us | API region (us/eu) |
-| severityFilter | array | [2,5,20,25] | Severity levels to ingest |
-| watchlistType | array | [corporate,infected,compass] | Exposure types |
-| showPlainPassword | string | False | Include cleartext passwords |
-| queryWindowInMin | int | 40 | Polling frequency |
-| rateLimitQPS | int | 2 | API rate limit |
-| initialLookbackDays | int | 30 | Historical backfill days |
-
-### Group 3: Key Vault
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| enableKeyVault | bool | true | Create Key Vault for API key |
-| keyVaultName | string | kv-spycloud-{workspace} | Key Vault name |
-
-### Group 4: Automation & Playbooks
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| enableMdePlaybook | bool | true | Deploy MDE device isolation playbook |
-| enableCaPlaybook | bool | true | Deploy CA identity protection playbook |
-| enableAnalyticsRule | bool | true | Deploy infostealer detection rule |
-| enableAutomationRule | bool | true | Auto-trigger playbooks on incidents |
-| mdeIsolationType | string | Full | Full or Selective isolation |
-| mdeTagName | string | SpyCloud-Compromised | MDE device tag |
-| caSecurityGroupId | string | (optional) | Entra ID security group for CA |
-| spycloudSeverityThreshold | int | 20 | Min severity for analytics rule |
-| analyticsRuleFrequency | string | PT1H | How often the rule runs |
-
-### Group 5: Notifications
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| enableNotifications | bool | true | Create action group for alerts |
-| notificationEmail | string | (optional) | Email for alert notifications |
-| teamsWebhookUrl | string | (optional) | Teams incoming webhook URL |
-
-### Group 6: Microsoft Service Connectors
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| enableEntraSignInLogs | bool | false | Stream Entra sign-in logs to workspace |
-| enableEntraAuditLogs | bool | false | Stream Entra audit logs to workspace |
-| enableEntraRiskLogs | bool | false | Stream risky users/sign-ins to workspace |
-
-### Group 7: Data Retention & Compliance
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| retentionInDays | int | 90 | Data retention period |
-| resourceTags | object | (defaults) | Tags for all resources |
-
----
-
-## Data Flow Architecture
+## Data Flow
 
 ```
-                    SpyCloud API
-                    (api.spycloud.io)
-                         │
-                         │ Bearer token auth
-                         │ (from Key Vault secret)
-                         ▼
-              ┌─────────────────────┐
-              │  CCF REST API Poller│
-              │  (3 pollers)        │
-              │  • Watchlist New    │
-              │  • Watchlist Mod    │
-              │  • Breach Catalog   │
-              └────────┬────────────┘
-                       │
-                       ▼
-              ┌─────────────────────┐
-              │  Data Collection    │
-              │  Endpoint (DCE)     │
-              └────────┬────────────┘
-                       │
-                       ▼
-              ┌─────────────────────┐
-              │  Data Collection    │
-              │  Rule (DCR)         │
-              │  KQL Transforms     │
-              └────────┬────────────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-   ┌──────────┐ ┌──────────┐ ┌──────────┐
-   │Watchlist │ │ Catalog  │ │ MDE/CA   │
-   │  _CL     │ │  _CL     │ │ Logs _CL │
-   └────┬─────┘ └──────────┘ └────┬─────┘
-        │                          ▲
-        ▼                          │
-   ┌──────────┐              ┌──────────┐
-   │ Analytics│──Incident──→│ Playbooks│
-   │ Rule     │              │ MDE + CA │
-   └────┬─────┘              └──────────┘
-        │
-        ▼
-   ┌──────────┐    ┌──────────┐
-   │Automation│───→│ Action   │
-   │ Rule     │    │ Group    │
-   └──────────┘    │ (email/  │
-                   │  Teams)  │
-                   └──────────┘
+SpyCloud API (5 endpoints)
+    ↓ X-Api-Key header auth
+CCF REST API Pollers (5 independent pollers)
+    ↓ HTTPS POST
+Data Collection Endpoint (DCE)
+    ↓ Routing
+Data Collection Rule (DCR) — KQL transforms
+    ↓ Normalized & routed
+6 Custom Tables in Log Analytics
+    ↓ Correlated with SigninLogs, AuditLogs, UEBA, Firewalls, DNS
+49 Analytics Rules → Sentinel Incidents
+    ↓ Automation Rules
+10+ Playbooks → Password Reset, Session Revocation, MFA, Device Isolation, CA, Notifications
 ```
 
----
+## API Endpoints
 
-## Key Vault Integration
+| Endpoint | Table | Tier |
+|----------|-------|------|
+| `/enterprise-v2/breach/data/watchlist` (new) | SpyCloudBreachWatchlist_CL | Enterprise |
+| `/enterprise-v2/breach/data/watchlist` (modified) | SpyCloudBreachWatchlist_CL | Enterprise |
+| `/enterprise-v2/breach/catalog` | SpyCloudBreachCatalog_CL | Enterprise |
+| `/enterprise-v2/compass/data` | SpyCloudCompassData_CL | Enterprise+ |
+| `/enterprise-v2/compass/devices` | SpyCloudCompassDevices_CL | Enterprise+ |
 
-When enableKeyVault=true:
-1. ARM creates an Azure Key Vault
-2. Stores the SpyCloud API key as a secret named 'spycloud-api-key'
-3. Grants access to the Logic App managed identities
-4. Logic Apps retrieve the API key at runtime via Key Vault reference
-5. The CCF connector still uses the securestring parameter directly
-   (CCF doesn't support Key Vault references natively)
+## Severity Levels
 
----
+| Level | Meaning | Auto-Response |
+|-------|---------|--------------|
+| **25** | Session cookies/tokens stolen (MFA bypass) | Block all access + isolate device + revoke sessions + SOC alert |
+| **20** | Infostealer malware credentials | Force password reset + revoke sessions + MFA re-registration |
+| **5** | Credentials in breach with PII | Reset password + monitor |
+| **2** | Credentials in breach (no PII) | Notify user |
 
-## Logic App Auth Flow
+## Post-Deployment Automation
 
-```
-Logic App (System Managed Identity)
-  │
-  ├─→ Key Vault: GET secret 'spycloud-api-key'
-  │     Auth: Managed Identity → vault access policy
-  │
-  ├─→ SpyCloud API: GET /enterprise-v2/breach/data/watchlist
-  │     Auth: Authorization: Bearer {api-key-from-vault}
-  │
-  ├─→ Microsoft Graph API: PATCH /users/{id}
-  │     Auth: Managed Identity → Graph API permissions
-  │
-  ├─→ Defender API: POST /machines/{id}/isolate
-  │     Auth: Managed Identity → MDE API permissions
-  │
-  ├─→ DCE Ingestion: POST /dataCollectionRules/{id}/streams/...
-  │     Auth: Managed Identity → Monitoring Metrics Publisher role
-  │
-  └─→ Sentinel API: POST /Incidents/Comment
-        Auth: Managed Identity → Sentinel Responder role
-```
+Run `scripts/post-deploy-auto.sh` to automatically:
 
----
+1. Resolve DCE/DCR identifiers
+2. Assign RBAC roles (Monitoring Metrics Publisher, Sentinel Responder)
+3. Grant Graph API permissions to all playbook managed identities
+4. Grant MDE API permissions (Machine.Isolate, Machine.ReadWrite.All)
+5. Grant admin consent for all permissions
+6. Enable all deployed analytics rules
+7. Verify deployment health (10-point check)
 
-## Post-Deployment Manual Steps
+## RBAC Requirements
 
-These CANNOT be automated via ARM and require PowerShell or Portal:
+| Role | Scope | Purpose |
+|------|-------|---------|
+| Microsoft Sentinel Contributor | Resource Group | Deploy connectors, rules, watchlists |
+| Log Analytics Contributor | Resource Group | Create tables, DCR, DCE |
+| Logic App Contributor | Resource Group | Deploy playbooks |
+| Managed Identity Operator | Resource Group | Assign playbook identities |
+| Security Administrator | Workspace | Configure UEBA |
 
-1. **MDE API Permissions** — Assign Machine.Isolate + Machine.ReadWrite.All
-   to MDE playbook managed identity
-2. **Graph API Permissions** — Assign User.ReadWrite.All + Directory.ReadWrite.All
-   to CA playbook managed identity
-3. **Sentinel Automation Contributor** — Assign to Microsoft Sentinel service
-   principal on the resource group
-4. **Defender XDR Connector** — Enable via Sentinel Content Hub (not ARM)
-5. **O365/Exchange Connector** — Enable via Sentinel Content Hub (not ARM)
-6. **Security Copilot Plugin** — Upload SpyCloud_Copilot_Plugin_Ultimate.yaml
-7. **Security Copilot Agent** — Upload SpyCloud_Agent_Manifest.yaml via Build
+## MITRE ATT&CK Coverage
 
----
-
-## Resource Count
-
-| Tier | Resources | Conditional |
-|------|-----------|-------------|
-| Foundation | 8 | Workspace + Sentinel optional |
-| Security | 2 | Key Vault + secret |
-| Automation | 7 | All conditional per toggle |
-| Notifications | 2 | Action group + health alert |
-| Entra Connectors | 3 | Diagnostic settings |
-| **Total** | **up to 22** | |
+| Tactic | Techniques | Rules |
+|--------|-----------|-------|
+| Initial Access | T1078, T1078.004, T1133 | sc-001, 020, 021, 036 |
+| Persistence | T1098, T1556.006 | sc-023, 025, 026 |
+| Credential Access | T1555, T1539, T1552, T1110.004 | sc-002, 003, 006, 008 |
+| Defense Evasion | T1550, T1550.004 | sc-003, 022, 041 |
+| Lateral Movement | T1021, T1534 | sc-039, 040 |
+| Collection | T1114, T1213, T1005 | sc-024, 028, 029 |
+| Exfiltration | T1048, T1530 | sc-028, 029 |
+| Execution | T1059, T1204 | sc-007, 009, 047 |

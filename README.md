@@ -1,438 +1,267 @@
 <div align="center">
 
-# SpyCloud Sentinel — Enterprise Threat Intelligence
+<img src="docs/images/SpyCloud-Logo-white.png" alt="SpyCloud Sentinel" width="420">
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json)
+<br><br>
 
-![Version](https://img.shields.io/badge/version-5.3-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Sentinel](https://img.shields.io/badge/Microsoft%20Sentinel-Ready-0078D4)
-![Analytics Rules](https://img.shields.io/badge/Analytics%20Rules-49-orange)
-![Playbooks](https://img.shields.io/badge/Playbooks-10-purple)
-![Hunting Queries](https://img.shields.io/badge/Hunting%20Queries-28-red)
+<img src="https://img.shields.io/badge/ENTERPRISE_THREAT_INTELLIGENCE-for_Microsoft_Sentinel-0078D4?style=for-the-badge&labelColor=1a1a2e" alt="Enterprise Threat Intelligence for Microsoft Sentinel">
 
-**Transform recaptured darknet data into automated identity threat protection.**
+<br><br>
 
-*The most comprehensive SpyCloud integration for Microsoft Sentinel — featuring automated detection, investigation, and response across identity, device, network, and cloud.*
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" height="44"></a>&nbsp;&nbsp;
+<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json"><img src="https://aka.ms/deploytoazuregovbutton" alt="Deploy to Azure Gov" height="44"></a>&nbsp;&nbsp;
+<a href="https://github.com/iammrherb/SPYCLOUD-SENTINEL"><img src="https://img.shields.io/badge/Visualize-Template-6B3FA0?style=for-the-badge&logo=microsoftazure&logoColor=white" alt="Visualize" height="44"></a>
+
+<br><br>
+
+<img src="https://img.shields.io/badge/version-6.0-00C7B7?style=flat-square&logo=semver&logoColor=white" alt="Version 5.3">
+<img src="https://img.shields.io/badge/Sentinel-Ready-0078D4?style=flat-square&logo=microsoftazure&logoColor=white" alt="Sentinel Ready">
+<img src="https://img.shields.io/badge/license-MIT-22C55E?style=flat-square" alt="MIT License">
+<img src="https://img.shields.io/badge/ARM-Validated-E34F26?style=flat-square&logo=json&logoColor=white" alt="ARM Validated">
+<img src="https://img.shields.io/badge/Terraform-Compatible-844FBA?style=flat-square&logo=terraform&logoColor=white" alt="Terraform Compatible">
+<img src="https://img.shields.io/badge/Copilot-Enabled-6366F1?style=flat-square&logo=githubcopilot&logoColor=white" alt="Copilot Enabled">
+
+<br><br>
+
+**Recaptured darknet intelligence. Automated identity threat protection.**<br>
+<sub>Detect compromised credentials hours after recapture -- not weeks after breach disclosure.</sub>
 
 </div>
 
----
+<br>
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Features](#features)
-  - [Data Connector](#data-connector)
-  - [Analytics Rules](#analytics-rules)
-  - [Playbooks](#playbooks)
-  - [Workbooks](#workbooks)
-  - [Hunting Queries](#hunting-queries)
-  - [Ticketing Integration](#ticketing-integration)
-  - [Notifications](#notifications)
-- [MITRE ATT&CK Coverage](#mitre-attck-coverage)
-- [Deployment](#deployment)
-  - [Prerequisites](#prerequisites)
-  - [Option 1: Azure Portal](#option-1-azure-portal-deploy-to-azure)
-  - [Option 2: Azure Cloud Shell](#option-2-azure-cloud-shell-one-click)
-  - [Option 3: Terraform](#option-3-terraform)
-  - [Option 4: GitHub Actions](#option-4-github-actions-cicd)
-  - [Option 5: Azure DevOps Pipeline](#option-5-azure-devops-pipeline)
-  - [Forking & Customization](#forking--customization)
-- [Post-Deployment Guide](#post-deployment-guide)
-- [Configuration](#configuration)
-- [Use Cases](#use-cases)
-- [Troubleshooting](#troubleshooting)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## Overview
-
-**SpyCloud Sentinel** brings the full power of SpyCloud's recaptured darknet intelligence into Microsoft Sentinel. SpyCloud monitors criminal underground markets, botnets, and infostealer malware ecosystems to recapture stolen credentials, session cookies, PII, and device fingerprints — often **months before** they appear in public breach databases.
-
-This solution automates the entire lifecycle:
-
-1. **Ingest** — 5 REST API pollers continuously pull SpyCloud data into 6 custom Sentinel tables
-2. **Detect** — 49 analytics rules correlate exposures with Entra ID, O365, firewalls, UEBA, MDE, and DNS
-3. **Respond** — 10 playbooks automate password reset, MFA enforcement, device isolation, and CA enforcement
-4. **Report** — Executive and SOC dashboards with real-time risk scoring and remediation tracking
-
-### Value Proposition
-
-| Without SpyCloud Sentinel | With SpyCloud Sentinel |
-|---|---|
-| Stolen credentials discovered weeks/months later | Real-time alerting within hours of credential recapture |
-| Manual investigation of each exposure | Automated enrichment and correlation across 12+ data sources |
-| Reactive password resets after breach notification | Proactive forced password reset + session revocation |
-| No visibility into infostealer infections | Full device forensics with malware family identification |
-| Siloed identity and endpoint response | Orchestrated remediation across identity, device, and network |
-
----
-
-## Architecture
-
-```mermaid
-graph TB
-    subgraph "SpyCloud Intelligence"
-        API[SpyCloud Enterprise API]
-    end
-
-    subgraph "Azure Data Pipeline"
-        CCF[CCF Connector<br/>5 REST API Pollers]
-        DCE[Data Collection Endpoint]
-        DCR[Data Collection Rule<br/>KQL Transforms]
-    end
-
-    subgraph "Custom Tables"
-        T1[SpyCloudBreachWatchlist_CL]
-        T2[SpyCloudBreachCatalog_CL]
-        T3[SpyCloudCompassData_CL]
-        T4[SpyCloudCompassDevices_CL]
-        T5[SpyCloud_ConditionalAccessLogs_CL]
-        T6[Spycloud_MDE_Logs_CL]
-    end
-
-    subgraph "Detection Engine"
-        AR[49 Analytics Rules]
-        HQ[28 Hunting Queries]
-        FUSION[Fusion ML Detection]
-        UEBA[UEBA Behavioral Analytics]
-    end
-
-    subgraph "Correlated Sources"
-        ENTRA[Entra ID / SigninLogs]
-        O365[Office 365 / OfficeActivity]
-        MDE[Defender for Endpoint]
-        FW[Firewalls / CommonSecurityLog]
-        DNS[DNS / DnsEvents]
-        TI[Threat Intelligence]
-    end
-
-    subgraph "Response"
-        PB[10 Remediation Playbooks]
-        AUTO[Automation Rules]
-    end
-
-    subgraph "Remediation Actions"
-        PWD[Password Reset]
-        MFA[MFA Enforcement]
-        ISO[Device Isolation]
-        CA[CA Group Assignment]
-        FWBLK[Firewall Block]
-        NOTIFY[SOC Notification]
-    end
-
-    subgraph "Reporting"
-        WB1[Executive Dashboard]
-        WB2[SOC Operations]
-        NB[Investigation Notebooks]
-        CP[Security Copilot]
-    end
-
-    subgraph "Ticketing & Notifications"
-        SNOW[ServiceNow]
-        JIRA[Jira]
-        ADO[Azure DevOps]
-        SLACK[Slack]
-        TEAMS[Microsoft Teams]
-        EMAIL[Email / O365]
-    end
-
-    API --> CCF --> DCE --> DCR
-    DCR --> T1 & T2 & T3 & T4
-    T1 & T2 --> AR & HQ
-    ENTRA & O365 & MDE & FW & DNS & TI --> AR
-    AR --> FUSION
-    UEBA --> AR
-    AR --> AUTO --> PB
-    PB --> PWD & MFA & ISO & CA & FWBLK & NOTIFY
-    PB --> T5 & T6
-    T1 & T2 & T5 & T6 --> WB1 & WB2 & NB & CP
-    PB --> SNOW & JIRA & ADO & SLACK & TEAMS & EMAIL
-```
-
----
-
-## Features
-
-### Data Connector
-
-The SpyCloud CCF (Codeless Connector Framework) connector deploys 5 REST API pollers:
-
-| Poller | Table | Description | API Tier |
-|--------|-------|-------------|----------|
-| Watchlist (New) | `SpyCloudBreachWatchlist_CL` | New employee exposures | Enterprise |
-| Watchlist (Modified) | `SpyCloudBreachWatchlist_CL` | Updated/re-sighted records | Enterprise |
-| Breach Catalog | `SpyCloudBreachCatalog_CL` | Breach metadata & malware families | Enterprise |
-| Compass Data | `SpyCloudCompassData_CL` | Consumer identity exposures | Enterprise+ |
-| Compass Devices | `SpyCloudCompassDevices_CL` | Infected device fingerprints | Enterprise+ |
-
-**6 Custom Tables** with **118+ columns** capturing the full breadth of SpyCloud intelligence.
-
-### Analytics Rules
-
-49 detection rules organized into 6 categories:
-
-| Category | Rules | Data Sources Required |
-|----------|-------|--------------------|
-| **Core SpyCloud Detection** (sc-001–012) | 12 | SpyCloud tables only |
-| **O365 & Entra ID Correlation** (sc-020–029) | 10 | SigninLogs, AuditLogs, OfficeActivity |
-| **UEBA & Firewall** (sc-030–039) | 10 | BehaviorAnalytics, CommonSecurityLog, DnsEvents |
-| **Advanced Threat Detection** (sc-040–049) | 10 | Multiple (varies per rule) |
-| **Microsoft Security (MSIC)** | 5 | Defender XDR, Entra Protection, etc. |
-| **Fusion Multistage ML** | 1 | All correlated sources |
-
-<details>
-<summary><strong>Click to see all 49 rules</strong></summary>
-
-#### Core SpyCloud Detection (sc-001 to sc-012)
-| ID | Name | Severity |
-|---|---|---|
-| sc-001 | Infostealer Credential Exposure (severity >= 20) | High |
-| sc-002 | Plaintext Password Exposure | High |
-| sc-003 | Session Cookie Theft / MFA Bypass (severity 25) | High |
-| sc-004 | PII / SSN / National ID Exposure | High |
-| sc-005 | Executive / VIP User Credential Exposure | High |
-| sc-006 | Multi-Domain Credential Reuse (3+ domains) | Medium |
-| sc-007 | Device Reinfection Pattern (2+ infections) | High |
-| sc-008 | High-Sighting Credential (>3 sources) | Medium |
-| sc-009 | New Malware Family Targeting Organization | Medium |
-| sc-010 | Stale Exposure Without Remediation (>48h) | Medium |
-| sc-011 | Corporate Email on Consumer Site Breach | Medium |
-| sc-012 | Credential Exposure Volume Spike (anomaly) | Medium |
-
-#### O365 & Entra ID Correlation (sc-020 to sc-029)
-| ID | Name | Severity |
-|---|---|---|
-| sc-020 | Exposed Credential + Successful Sign-in | High |
-| sc-021 | Exposed User + Risky Sign-in | High |
-| sc-022 | Exposed User + Impossible Travel | High |
-| sc-023 | Exposed User MFA Registration Change | High |
-| sc-024 | Exposed User Mailbox Rule Creation (BEC) | High |
-| sc-025 | Exposed User OAuth App Consent | High |
-| sc-026 | Exposed User Admin Role Assignment | High |
-| sc-027 | Exposed User Self-Service Password Change | Medium |
-| sc-028 | Exposed User eDiscovery Export | High |
-| sc-029 | Exposed User SharePoint Mass Download | High |
-
-#### UEBA & Firewall (sc-030 to sc-039)
-| ID | Name | Severity |
-|---|---|---|
-| sc-030 | UEBA Anomalous Behavior from Exposed User | High |
-| sc-031 | First-Time Access from Exposed User | Medium |
-| sc-032 | Firewall Deny from SpyCloud Infected IP | Medium |
-| sc-033 | Fortinet FSSO Session from Exposed User | High |
-| sc-034 | PaloAlto User-ID Traffic from Exposed User | High |
-| sc-035 | DNS C2 Communication from Infected Device | High |
-| sc-036 | VPN New Location from Exposed User | Medium |
-| sc-037 | Firewall Allow After Credential Exposure | High |
-| sc-038 | MDE Infected Machine Active on Network | High |
-| sc-039 | Lateral Movement from Compromised Account | High |
-
-#### Advanced Threat Detection (sc-040 to sc-049)
-| ID | Name | Severity |
-|---|---|---|
-| sc-040 | Multi-Stage Attack Chain | High |
-| sc-041 | Conditional Access Bypass from Exposed User | High |
-| sc-042 | User Re-Exposed After Password Reset | High |
-| sc-043 | TI Indicator Match on SpyCloud IP | High |
-| sc-044 | Azure Firewall + SpyCloud IP Correlation | Medium |
-| sc-045 | Sensitive Source Breach Detection | High |
-| sc-046 | First-Time Domain Access from Exposed User | Medium |
-| sc-047 | Credential Theft Tool Detection | High |
-| sc-048 | Geographic Mismatch (exposure vs sign-in) | High |
-| sc-049 | Check Point + SpyCloud IP Correlation | Medium |
-
-</details>
-
-### Playbooks
-
-10 remediation playbooks (Logic App ARM templates) with system-assigned managed identities:
-
-| Playbook | Category | Actions | Required Permissions |
-|----------|----------|---------|---------------------|
-| **ForcePasswordReset** | Identity | PATCH /users/{id} — force password change with MFA | User.ReadWrite.All |
-| **RevokeSessions** | Identity | POST /users/{id}/revokeSignInSessions | User.ReadWrite.All |
-| **EnforceMFA** | Identity | Delete MFA methods, force re-registration | UserAuthenticationMethod.ReadWrite.All |
-| **BlockConditionalAccess** | Access | Severity-tiered CA group assignment | GroupMember.ReadWrite.All |
-| **BlockFirewall** | Network | Push block rules to Fortinet/PaloAlto | Firewall API keys |
-| **IsolateDevice** | Device | MDE full/selective isolation by severity | Machine.Isolate (MDE) |
-| **NotifyUser** | Notification | Email user with breach details + required actions | Mail.Send |
-| **NotifySOC** | Notification | Teams Adaptive Card to SOC channel | Teams webhook |
-| **EnrichIncident** | Enrichment | Add SpyCloud context, tags, severity to incident | Sentinel Responder |
-| **FullRemediation** | Orchestration | Chains all above in 3 phases | All above |
-
-### Workbooks
-
-| Workbook | Tabs | Purpose |
-|----------|------|---------|
-| **Executive Dashboard** | 10 | Risk scores, exposure trends, breach intelligence, remediation metrics, compliance |
-| **SOC Operations** | 6 | Live threat feed, investigation hub, correlation matrix, hunting, automation metrics |
-
-### Hunting Queries
-
-28 hunting queries covering all MITRE ATT&CK tactics across SpyCloud + correlated data sources.
-
-### Ticketing Integration
-
-| System | Features |
-|--------|----------|
-| **ServiceNow** | Table selection (incident/security incident/change), assignment group, category, priority mapping, custom fields, description templates |
-| **Jira** | Project key, issue type, labels, priority mapping, custom fields, summary templates |
-| **Azure DevOps** | Org/project, work item type, area/iteration path, assigned to, tags, title templates |
-
-### Notifications
-
-| Channel | Features |
-|---------|----------|
-| **Slack** | Block Kit rich messages, severity filter, channel override, PII control, bot name |
-| **Microsoft Teams** | Adaptive Cards, remediation action buttons, severity filter |
-| **Email (O365)** | Custom templates, breach details, recommended actions, CC support |
-
----
-
-## MITRE ATT&CK Coverage
-
-| Tactic | Techniques | Rules |
-|--------|-----------|-------|
-| **Initial Access** | T1078 (Valid Accounts), T1078.004 (Cloud), T1133 (External Remote) | sc-001, 020, 021, 036 |
-| **Persistence** | T1098 (Account Manipulation), T1556.006 (MFA Modify) | sc-023, 025, 026 |
-| **Credential Access** | T1555, T1539, T1552, T1110.004, T1528 | sc-002, 003, 006, 008 |
-| **Defense Evasion** | T1550 (Alternate Auth Material), T1550.004 | sc-003, 022, 041 |
-| **Lateral Movement** | T1021 (Remote Services), T1534 | sc-039, 040 |
-| **Collection** | T1114 (Email), T1213 (Data Repositories), T1005 | sc-024, 028, 029 |
-| **Exfiltration** | T1048, T1530, T1020 | sc-028, 029 |
-| **Execution** | T1059, T1204 | sc-007, 009, 047 |
-
----
-
-## Deployment
-
-### Prerequisites
-
-<details>
-<summary><strong>Required Azure RBAC Roles</strong></summary>
-
-| Role | Scope | Required For |
-|------|-------|-------------|
-| Microsoft Sentinel Contributor | Resource Group | Connectors, rules, watchlists |
-| Log Analytics Contributor | Resource Group | Tables, DCR, DCE |
-| Logic App Contributor | Resource Group | Playbooks |
-| Managed Identity Operator | Resource Group | Playbook identities |
-| Security Administrator | Workspace | UEBA configuration |
-| Sentinel Automation Contributor | Resource Group | Automation rules |
-
-</details>
-
-<details>
-<summary><strong>Required Licenses by Feature</strong></summary>
-
-| Feature | License | Included In |
-|---------|---------|-------------|
-| Data Connector + Tables | Microsoft Sentinel | — |
-| All Analytics Rules | Microsoft Sentinel | — |
-| UEBA, Anomaly, Fusion | Microsoft Sentinel | — |
-| Password Reset Playbook | Entra ID P1+ | M365 E3/E5 |
-| MFA Enforcement Playbook | Entra ID P1+ | M365 E3/E5 |
-| Device Isolation Playbook | Defender for Endpoint P2 | M365 E5 |
-| TI Enrichment Playbook | None (free VT/AbuseIPDB) | — |
-| Security Copilot | Security Copilot license | Separate |
-
-</details>
-
-**Network Requirements:** Outbound HTTPS (443) to `api.spycloud.io` — no inbound rules needed.
-
-**SpyCloud API Key:** Obtain from [portal.spycloud.com](https://portal.spycloud.com) > Account Settings > API Keys
-
-### Option 1: Azure Portal (Deploy to Azure)
+<!-- ============================================================ -->
+<!-- WHY SPYCLOUD SENTINEL -->
+<!-- ============================================================ -->
 
 <div align="center">
-
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json)
-
-**Recommended for most users** — Launches the Azure Portal with a guided 8-step wizard.
-
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-WHY_SPYCLOUD_SENTINEL-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-0078D4?style=flat-square" alt="Section: Why SpyCloud Sentinel">
 </div>
 
-1. Click the **Deploy to Azure** button above
-2. Select your **Subscription** and **Resource Group**
-3. Walk through the 8-step wizard:
-   - **Step 1:** Choose deployment mode (Full/Upgrade/Selective) and workspace
-   - **Step 2:** Select analytics rule categories to deploy
-   - **Step 3:** Choose playbooks and configure CA groups
-   - **Step 4:** Configure ticketing (ServiceNow/Jira/Azure DevOps)
-   - **Step 5:** Set up notifications (Slack/Teams/Email)
-   - **Step 6:** Enable Sentinel features (UEBA/Anomaly/Fusion)
-   - **Step 7:** Set tags and review prerequisites
-   - **Step 8:** Review troubleshooting guide
-4. Click **Review + Create**, then **Create**
-5. Complete [post-deployment steps](#post-deployment-guide)
+<br>
 
-### Option 2: Azure Cloud Shell (One-Click)
+<table>
+<tr>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/HOURS-not_weeks-FF3E00?style=for-the-badge" alt="Hours not weeks"><br><br>
+<strong>Faster Than Breach Databases</strong><br>
+<sub>SpyCloud recaptures stolen data from botnets and underground markets months before public disclosure. You get alerts in hours.</sub>
+</td>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/12+-Data_Sources-6366F1?style=for-the-badge" alt="12+ Data Sources"><br><br>
+<strong>Deep Signal Correlation</strong><br>
+<sub>Every exposure is cross-referenced against Entra ID, O365, MDE, UEBA, firewalls, DNS, and threat intel -- automatically.</sub>
+</td>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/ZERO-Manual_Steps-22C55E?style=for-the-badge" alt="Zero Manual Steps"><br><br>
+<strong>Fully Orchestrated Response</strong><br>
+<sub>From detection to password reset, session revocation, device isolation, and SOC notification -- all hands-free.</sub>
+</td>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/ONE-Click_Deploy-F59E0B?style=for-the-badge" alt="One Click Deploy"><br><br>
+<strong>Production in Minutes</strong><br>
+<sub>ARM template with guided wizard. Deploy the full solution -- connector, rules, playbooks, workbooks -- in a single operation.</sub>
+</td>
+</tr>
+</table>
 
-**One-liner auto-launch** — Opens Cloud Shell and runs the interactive deployment wizard:
+<br>
 
-[![Launch Cloud Shell](https://img.shields.io/badge/Launch-Azure%20Cloud%20Shell-blue?logo=microsoft-azure)](https://shell.azure.com)
+<!-- ============================================================ -->
+<!-- WHAT'S INCLUDED -->
+<!-- ============================================================ -->
+
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-WHAT'S_INCLUDED-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-1a1a2e?style=flat-square" alt="Section: What's Included">
+</div>
+
+<br>
+
+<div align="center">
+<table>
+<tr>
+<td align="center" width="14%">
+<img src="https://img.shields.io/badge/49-FF3E00?style=for-the-badge&logoColor=white" alt="49"><br>
+<strong>Analytics<br>Rules</strong>
+</td>
+<td align="center" width="14%">
+<img src="https://img.shields.io/badge/10-6366F1?style=for-the-badge&logoColor=white" alt="10"><br>
+<strong>Remediation<br>Playbooks</strong>
+</td>
+<td align="center" width="14%">
+<img src="https://img.shields.io/badge/3-0078D4?style=for-the-badge&logoColor=white" alt="3"><br>
+<strong>Dashboard<br>Workbooks</strong>
+</td>
+<td align="center" width="14%">
+<img src="https://img.shields.io/badge/28-22C55E?style=for-the-badge&logoColor=white" alt="28"><br>
+<strong>Hunting<br>Queries</strong>
+</td>
+<td align="center" width="14%">
+<img src="https://img.shields.io/badge/85-F59E0B?style=for-the-badge&logoColor=white" alt="85"><br>
+<strong>Copilot<br>Skills</strong>
+</td>
+<td align="center" width="14%">
+<img src="https://img.shields.io/badge/6-844FBA?style=for-the-badge&logoColor=white" alt="6"><br>
+<strong>Custom<br>Tables</strong>
+</td>
+<td align="center" width="14%">
+<img src="https://img.shields.io/badge/5-E34F26?style=for-the-badge&logoColor=white" alt="5"><br>
+<strong>API<br>Pollers</strong>
+</td>
+</tr>
+</table>
+</div>
+
+<br>
+
+<!-- ============================================================ -->
+<!-- ARCHITECTURE -->
+<!-- ============================================================ -->
+
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-ARCHITECTURE-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-1a1a2e?style=flat-square" alt="Section: Architecture">
+</div>
+
+<br>
+
+```mermaid
+graph LR
+    subgraph SRC["SpyCloud Intelligence"]
+        API["Enterprise API<br/>5 REST Pollers"]
+    end
+
+    subgraph INGEST["Azure Ingestion"]
+        CCF["CCF Connector"]
+        DCR["DCE / DCR<br/>KQL Transforms"]
+    end
+
+    subgraph TABLES["6 Custom Tables"]
+        T1["BreachWatchlist_CL"]
+        T2["BreachCatalog_CL"]
+        T3["CompassData_CL"]
+        T4["CompassDevices_CL"]
+        T5["ConditionalAccessLogs_CL"]
+        T6["MDE_Logs_CL"]
+    end
+
+    subgraph DETECT["Detection Engine"]
+        AR["49 Analytics Rules"]
+        HQ["28 Hunting Queries"]
+        ML["Fusion ML + UEBA"]
+    end
+
+    subgraph CORRELATE["Correlated Sources"]
+        SIG["Entra ID + O365"]
+        SEC["MDE + Firewalls"]
+        NET["DNS + Threat Intel"]
+    end
+
+    subgraph RESPOND["Automated Response"]
+        PB["10 Playbooks"]
+        REM["Reset / Revoke / Isolate<br/>Block / Notify / Enrich"]
+    end
+
+    subgraph REPORT["Reporting"]
+        WB["3 Workbooks"]
+        CP["Security Copilot<br/>85 Skills"]
+        TK["ServiceNow / Jira<br/>Teams / Slack"]
+    end
+
+    API --> CCF --> DCR --> T1 & T2 & T3 & T4
+    T1 & T2 --> AR
+    CORRELATE --> AR
+    AR --> ML
+    AR --> PB --> REM
+    PB --> T5 & T6
+    T1 & T2 & T5 & T6 --> WB & CP
+    PB --> TK
+
+    style SRC fill:#FF3E00,stroke:#FF3E00,color:#fff
+    style INGEST fill:#0078D4,stroke:#0078D4,color:#fff
+    style TABLES fill:#844FBA,stroke:#844FBA,color:#fff
+    style DETECT fill:#F59E0B,stroke:#F59E0B,color:#000
+    style CORRELATE fill:#6366F1,stroke:#6366F1,color:#fff
+    style RESPOND fill:#22C55E,stroke:#22C55E,color:#fff
+    style REPORT fill:#1a1a2e,stroke:#1a1a2e,color:#fff
+```
+
+<br>
+
+<!-- ============================================================ -->
+<!-- QUICK START -->
+<!-- ============================================================ -->
+
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-QUICK_START-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-22C55E?style=flat-square" alt="Section: Quick Start">
+</div>
+
+<br>
+
+<table>
+<tr>
+<td width="33%" align="center">
+<img src="https://img.shields.io/badge/STEP_1-0078D4?style=for-the-badge" alt="Step 1"><br><br>
+<strong>Click Deploy to Azure</strong><br>
+<sub>Complete the 8-step guided wizard.<br>Select your workspace, rules, and playbooks.</sub><br><br>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure"></a>
+</td>
+<td width="33%" align="center">
+<img src="https://img.shields.io/badge/STEP_2-6366F1?style=for-the-badge" alt="Step 2"><br><br>
+<strong>Run Post-Deploy Script</strong><br>
+<sub>Grants managed identity permissions,<br>configures RBAC, and validates the deployment.</sub><br><br>
+<code>./scripts/post-deploy-auto.sh -g RG -w WS</code>
+</td>
+<td width="33%" align="center">
+<img src="https://img.shields.io/badge/STEP_3-22C55E?style=for-the-badge" alt="Step 3"><br><br>
+<strong>Verify & Monitor</strong><br>
+<sub>Run the verification script. Open the<br>Executive Dashboard workbook in Sentinel.</sub><br><br>
+<code>./scripts/verify-deployment.sh</code>
+</td>
+</tr>
+</table>
+
+<br>
+
+<!-- ============================================================ -->
+<!-- DEPLOYMENT OPTIONS -->
+<!-- ============================================================ -->
+
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-DEPLOYMENT_OPTIONS-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-1a1a2e?style=flat-square" alt="Section: Deployment Options">
+</div>
+
+<br>
+
+| | Method | Best For | Action |
+|:---:|--------|----------|--------|
+| <img src="https://img.shields.io/badge/-Azure_Portal-0078D4?style=flat-square&logo=microsoftazure&logoColor=white" alt="Azure Portal"> | **Azure Portal** | Most users -- guided 8-step wizard | [<img src="https://aka.ms/deploytoazurebutton" alt="Deploy" height="28">](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json) |
+| <img src="https://img.shields.io/badge/-Cloud_Shell-0078D4?style=flat-square&logo=windowsterminal&logoColor=white" alt="Cloud Shell"> | **Azure Cloud Shell** | CLI-native engineers, CI/CD pipelines | [![Launch](https://img.shields.io/badge/Launch-Cloud_Shell-0078D4?style=flat-square&logo=windowsterminal&logoColor=white)](https://shell.azure.com) |
+| <img src="https://img.shields.io/badge/-Terraform-844FBA?style=flat-square&logo=terraform&logoColor=white" alt="Terraform"> | **Terraform** | Infrastructure-as-code teams | `cd terraform && terraform apply` |
+| <img src="https://img.shields.io/badge/-GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white" alt="GitHub Actions"> | **GitHub Actions** | GitOps / automated CI/CD | `.github/workflows/deploy-sentinel.yml` |
+| <img src="https://img.shields.io/badge/-Azure_DevOps-0078D4?style=flat-square&logo=azuredevops&logoColor=white" alt="Azure DevOps"> | **Azure DevOps** | Enterprise pipeline teams | ADO Pipeline YAML |
+| <img src="https://img.shields.io/badge/-SpyCloud_Portal-FF3E00?style=flat-square" alt="SpyCloud Portal"> | **SpyCloud Integration Portal** | Existing SpyCloud customers | [portal.spycloud.com](https://portal.spycloud.com) |
+
+<details>
+<summary><img src="https://img.shields.io/badge/Cloud_Shell-One--liner_deployment-0078D4?style=flat-square" alt="Cloud Shell one-liner"></summary>
 
 ```bash
-# One-liner: clone + run interactive guided deployment
 curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/deploy-all.sh | bash
 ```
 
-Or clone and run manually:
+Or clone and run with parameters:
 
 ```bash
-git clone https://github.com/iammrherb/SPYCLOUD-SENTINEL.git
-cd SPYCLOUD-SENTINEL
-chmod +x scripts/deploy-all.sh
-./scripts/deploy-all.sh
+git clone https://github.com/iammrherb/SPYCLOUD-SENTINEL.git && cd SPYCLOUD-SENTINEL
+./scripts/deploy-all.sh -g rg-spycloud -w law-spycloud -k YOUR_API_KEY -l eastus --non-interactive
 ```
 
-The interactive wizard guides you through 9 phases:
-1. Azure authentication
-2. Configuration (resource group, workspace, region, API key)
-3. Resource group creation
-4. ARM template deployment
-5. Content template finalization
-6. DCE/DCR resolution
-7. RBAC assignments (Monitoring Metrics Publisher)
-8. API permissions (MDE + Graph)
-9. Deployment verification
-
-**Non-interactive mode** (CI/CD compatible):
-```bash
-./scripts/deploy-all.sh \
-  -g rg-spycloud-sentinel \
-  -w law-spycloud-prod \
-  -k YOUR_SPYCLOUD_API_KEY \
-  -l eastus \
-  --enable-rules \
-  --non-interactive
-```
-
-### Option 3: Terraform
-
-```bash
-cd terraform
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
-
-# Set API key via environment variable (recommended)
-export TF_VAR_spycloud_api_key="your-api-key"
-
-terraform init
-terraform plan
-terraform apply
-```
+</details>
 
 <details>
-<summary><strong>terraform.tfvars example</strong></summary>
+<summary><img src="https://img.shields.io/badge/Terraform-Configuration_example-844FBA?style=flat-square" alt="Terraform config"></summary>
 
 ```hcl
+# terraform.tfvars
 subscription_id       = "00000000-0000-0000-0000-000000000000"
 resource_group_name   = "rg-spycloud-sentinel"
 location              = "eastus"
@@ -442,40 +271,26 @@ enable_mde_playbook   = true
 enable_ca_playbook    = true
 enable_key_vault      = true
 enable_analytics_rules = true
+```
 
-tags = {
-  Solution    = "SpyCloud-Sentinel"
-  ManagedBy   = "Terraform"
-  Environment = "Production"
-}
+```bash
+export TF_VAR_spycloud_api_key="your-api-key"
+terraform init && terraform plan && terraform apply
 ```
 
 </details>
 
-### Option 4: GitHub Actions CI/CD
-
 <details>
-<summary><strong>Complete workflow YAML</strong></summary>
-
-Create `.github/workflows/deploy-sentinel.yml`:
+<summary><img src="https://img.shields.io/badge/GitHub_Actions-Workflow_YAML-2088FF?style=flat-square" alt="GitHub Actions workflow"></summary>
 
 ```yaml
 name: Deploy SpyCloud Sentinel
-
 on:
   push:
     branches: [main]
-    paths:
-      - 'azuredeploy.json'
-      - 'createUiDefinition.json'
-      - 'playbooks/**'
-      - 'analytics-rules/**'
   workflow_dispatch:
     inputs:
       deployment_mode:
-        description: 'Deployment mode'
-        required: true
-        default: 'Full'
         type: choice
         options: [Full, Upgrade, RulesOnly, PlaybooksOnly, ConnectorOnly]
 
@@ -484,20 +299,7 @@ permissions:
   contents: read
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Validate ARM template
-        run: |
-          python3 -c "import json; json.load(open('azuredeploy.json')); print('ARM: Valid')"
-          python3 -c "import json; json.load(open('createUiDefinition.json')); print('UI: Valid')"
-          for f in playbooks/*.json; do
-            python3 -c "import json; json.load(open('$f')); print('OK: $f')"
-          done
-
   deploy:
-    needs: validate
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -507,7 +309,6 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
       - uses: azure/arm-deploy@v2
         with:
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
@@ -517,300 +318,239 @@ jobs:
             deploymentMode=${{ github.event.inputs.deployment_mode || 'Full' }}
 ```
 
-**Required GitHub Secrets:**
-| Secret | Description |
-|--------|-------------|
-| `AZURE_CLIENT_ID` | Service principal client ID |
-| `AZURE_TENANT_ID` | Azure AD tenant ID |
-| `AZURE_SUBSCRIPTION_ID` | Target subscription |
-| `RESOURCE_GROUP` | Target resource group |
-| `WORKSPACE_NAME` | Sentinel workspace name |
-
 </details>
 
-### Option 5: Azure DevOps Pipeline
+<br>
+
+<!-- ============================================================ -->
+<!-- ANALYTICS RULES -->
+<!-- ============================================================ -->
+
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-49_ANALYTICS_RULES-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-FF3E00?style=flat-square" alt="Section: 49 Analytics Rules">
+</div>
+
+<br>
+
+<div align="center">
+<sub>All rules are <strong>enabled by default</strong> and deploy with a single click.</sub>
+</div>
+
+<br>
 
 <details>
-<summary><strong>Pipeline YAML</strong></summary>
+<summary><img src="https://img.shields.io/badge/Core_SpyCloud_Detection-12_Rules-FF3E00?style=flat-square" alt="Core: 12 Rules"> &nbsp; <sub>SpyCloud tables only -- no additional data sources required</sub></summary>
 
-```yaml
-trigger:
-  branches:
-    include: [main]
-  paths:
-    include:
-      - azuredeploy.json
-      - playbooks/*
-
-pool:
-  vmImage: ubuntu-latest
-
-variables:
-  - group: SpyCloud-Sentinel-Variables
-
-stages:
-  - stage: Validate
-    jobs:
-      - job: ValidateTemplate
-        steps:
-          - script: |
-              python3 -c "import json; json.load(open('azuredeploy.json'))"
-            displayName: Validate JSON
-
-  - stage: Deploy
-    dependsOn: Validate
-    jobs:
-      - deployment: DeployToSentinel
-        environment: production
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: AzureResourceManagerTemplateDeployment@3
-                  inputs:
-                    azureResourceManagerConnection: 'SpyCloud-Azure-Connection'
-                    resourceGroupName: $(ResourceGroup)
-                    location: $(Location)
-                    templateLocation: 'Linked artifact'
-                    csmFile: 'azuredeploy.json'
-                    overrideParameters: '-workspace $(WorkspaceName) -deploymentMode Full'
-```
+| ID | Rule Name | Severity |
+|:---:|-----------|:--------:|
+| sc-001 | Infostealer Credential Exposure (severity >= 20) | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-002 | Plaintext Password Exposure | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-003 | Session Cookie Theft / MFA Bypass (severity 25) | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-004 | PII / SSN / National ID Exposure | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-005 | Executive / VIP User Credential Exposure | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-006 | Multi-Domain Credential Reuse (3+ domains) | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-007 | Device Reinfection Pattern (2+ infections) | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-008 | High-Sighting Credential (>3 sources) | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-009 | New Malware Family Targeting Organization | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-010 | Stale Exposure Without Remediation (>48h) | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-011 | Corporate Email on Consumer Site Breach | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-012 | Credential Exposure Volume Spike (anomaly) | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
 
 </details>
 
-### Forking & Customization
+<details>
+<summary><img src="https://img.shields.io/badge/O365_&_Entra_ID_Correlation-10_Rules-6366F1?style=flat-square" alt="O365: 10 Rules"> &nbsp; <sub>Requires SigninLogs, AuditLogs, OfficeActivity</sub></summary>
 
-1. **Fork** this repository to your GitHub account
-2. **Update Deploy to Azure button** — Replace the URL in README.md:
-   ```
-   Change: iammrherb/SPYCLOUD-SENTINEL
-   To:     YOUR-USERNAME/YOUR-REPO-NAME
-   ```
-3. **Customize analytics rules** — Edit files in `analytics-rules/`
-4. **Add custom playbooks** — Add Logic App JSON files to `playbooks/`
-5. **Modify the wizard** — Edit `createUiDefinition.json` steps
+| ID | Rule Name | Severity |
+|:---:|-----------|:--------:|
+| sc-020 | Exposed Credential + Successful Sign-in | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-021 | Exposed User + Risky Sign-in | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-022 | Exposed User + Impossible Travel | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-023 | Exposed User MFA Registration Change | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-024 | Exposed User Mailbox Rule Creation (BEC) | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-025 | Exposed User OAuth App Consent | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-026 | Exposed User Admin Role Assignment | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-027 | Exposed User Self-Service Password Change | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-028 | Exposed User eDiscovery Export | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-029 | Exposed User SharePoint Mass Download | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
 
----
+</details>
 
-## Post-Deployment Guide
+<details>
+<summary><img src="https://img.shields.io/badge/UEBA_&_Firewall_Correlation-10_Rules-22C55E?style=flat-square" alt="UEBA: 10 Rules"> &nbsp; <sub>Requires BehaviorAnalytics, CommonSecurityLog, DnsEvents</sub></summary>
 
-### 1. Grant Managed Identity Permissions
+| ID | Rule Name | Severity |
+|:---:|-----------|:--------:|
+| sc-030 | UEBA Anomalous Behavior from Exposed User | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-031 | First-Time Access from Exposed User | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-032 | Firewall Deny from SpyCloud Infected IP | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-033 | Fortinet FSSO Session from Exposed User | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-034 | PaloAlto User-ID Traffic from Exposed User | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-035 | DNS C2 Communication from Infected Device | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-036 | VPN New Location from Exposed User | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-037 | Firewall Allow After Credential Exposure | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-038 | MDE Infected Machine Active on Network | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-039 | Lateral Movement from Compromised Account | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
 
-**Critical:** Each playbook's managed identity needs API permissions.
+</details>
 
-| Playbook | API | Permission | Command |
-|----------|-----|-----------|---------|
-| ForcePasswordReset | Microsoft Graph | User.ReadWrite.All | `az ad app permission grant --id <MI_ID> --api 00000003-0000-0000-c000-000000000000 --scope User.ReadWrite.All` |
-| RevokeSessions | Microsoft Graph | User.ReadWrite.All | Same as above |
-| EnforceMFA | Microsoft Graph | UserAuthenticationMethod.ReadWrite.All | `--scope UserAuthenticationMethod.ReadWrite.All` |
-| BlockConditionalAccess | Microsoft Graph | GroupMember.ReadWrite.All | `--scope GroupMember.ReadWrite.All` |
-| IsolateDevice | WindowsDefenderATP | Machine.Isolate | Assign via Enterprise Applications |
-| NotifyUser | Microsoft Graph | Mail.Send | `--scope Mail.Send` |
-| EnrichIncident | Sentinel | Sentinel Responder role | `az role assignment create` |
+<details>
+<summary><img src="https://img.shields.io/badge/Advanced_Threat_Detection-10_Rules-F59E0B?style=flat-square" alt="Advanced: 10 Rules"> &nbsp; <sub>Multi-stage, conditional access, geographic, tool detection</sub></summary>
 
-**Or run the automated scripts:**
+| ID | Rule Name | Severity |
+|:---:|-----------|:--------:|
+| sc-040 | Multi-Stage Attack Chain | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-041 | Conditional Access Bypass from Exposed User | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-042 | User Re-Exposed After Password Reset | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-043 | TI Indicator Match on SpyCloud IP | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-044 | Azure Firewall + SpyCloud IP Correlation | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-045 | Sensitive Source Breach Detection | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-046 | First-Time Domain Access from Exposed User | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| sc-047 | Credential Theft Tool Detection | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-048 | Geographic Mismatch (exposure vs sign-in) | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| sc-049 | Check Point + SpyCloud IP Correlation | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+
+</details>
+
+<details>
+<summary><img src="https://img.shields.io/badge/Microsoft_Security_(MSIC)_+_Fusion-6_Rules-0078D4?style=flat-square" alt="MSIC: 6 Rules"> &nbsp; <sub>Defender XDR, Entra Protection, Fusion ML</sub></summary>
+
+| ID | Rule Name | Severity |
+|:---:|-----------|:--------:|
+| MSIC-1 | Defender XDR Correlated Exposure | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| MSIC-2 | Entra ID Protection Risk Correlation | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| MSIC-3 | Defender for Cloud App Anomaly | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| MSIC-4 | Intune Non-Compliant Exposed Device | ![Medium](https://img.shields.io/badge/-Medium-DD6B20?style=flat-square) |
+| MSIC-5 | Purview DLP + Exposed User | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+| Fusion | Multi-Stage ML Attack Detection | ![High](https://img.shields.io/badge/-High-E53E3E?style=flat-square) |
+
+</details>
+
+<br>
+
+<!-- ============================================================ -->
+<!-- PLAYBOOKS -->
+<!-- ============================================================ -->
+
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-10_PLAYBOOKS-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-6366F1?style=flat-square" alt="Section: 10 Playbooks">
+</div>
+
+<br>
+
+<div align="center">
+<sub>All playbooks are <strong>enabled by default</strong> with system-assigned managed identities.</sub>
+</div>
+
+<br>
+
+| | Playbook | Category | What It Does |
+|:---:|----------|:--------:|--------------|
+| ![](https://img.shields.io/badge/-ID-E53E3E?style=flat-square) | **ForcePasswordReset** | Identity | Forces password change with next-login MFA prompt |
+| ![](https://img.shields.io/badge/-ID-E53E3E?style=flat-square) | **RevokeSessions** | Identity | Immediately invalidates all active sign-in sessions |
+| ![](https://img.shields.io/badge/-ID-E53E3E?style=flat-square) | **EnforceMFA** | Identity | Deletes existing MFA methods, forces re-registration |
+| ![](https://img.shields.io/badge/-AC-6366F1?style=flat-square) | **BlockConditionalAccess** | Access | Assigns user to severity-tiered Conditional Access group |
+| ![](https://img.shields.io/badge/-NW-22C55E?style=flat-square) | **BlockFirewall** | Network | Pushes block rules to Fortinet / Palo Alto |
+| ![](https://img.shields.io/badge/-DV-F59E0B?style=flat-square) | **IsolateDevice** | Device | MDE full or selective isolation based on severity |
+| ![](https://img.shields.io/badge/-NT-0078D4?style=flat-square) | **NotifyUser** | Notify | Emails user with breach details and required actions |
+| ![](https://img.shields.io/badge/-NT-0078D4?style=flat-square) | **NotifySOC** | Notify | Teams Adaptive Card to SOC channel with action buttons |
+| ![](https://img.shields.io/badge/-EN-844FBA?style=flat-square) | **EnrichIncident** | Enrich | Adds SpyCloud context, tags, and severity to incident |
+| ![](https://img.shields.io/badge/-ALL-1a1a2e?style=flat-square) | **FullRemediation** | Orchestration | Chains all playbooks in 3 phased stages |
+
+<br>
+
+<!-- ============================================================ -->
+<!-- POST-DEPLOYMENT -->
+<!-- ============================================================ -->
+
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-POST--DEPLOYMENT-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-1a1a2e?style=flat-square" alt="Section: Post-Deployment">
+</div>
+
+<br>
+
+> **All steps below are automated by the post-deploy script.** Run it once and verify.
+
 ```bash
-# Grant all required permissions (MDE, Graph, RBAC)
+# Automated: grants permissions, configures RBAC, validates everything
 ./scripts/post-deploy.sh -g YOUR_RG -w YOUR_WORKSPACE
 
-# Comprehensive deployment verification (10 checks)
+# Verify: checks all 10 components (tables, connector, rules, playbooks, data flow)
 ./scripts/verify-deployment.sh -g YOUR_RG -w YOUR_WORKSPACE
 ```
 
-The verification script checks all 10 components: workspace, Sentinel, DCE, DCR, custom tables (4), connector definition, connector pollers, Key Vault, playbooks (4), analytics rules, workbooks, and data flow status.
-
-### 2. Enable Analytics Rules (Phased Approach)
-
-| Week | Rules to Enable | Category |
-|------|----------------|----------|
-| 1 | sc-001, sc-002, sc-003 | Core (infostealer, plaintext, cookies) |
-| 2 | sc-005, sc-007, sc-010 | Core (VIP, reinfection, remediation gap) |
-| 3 | sc-020, sc-021, sc-022 | O365/Entra (sign-in, risky, impossible travel) |
-| 4 | sc-030, sc-035, sc-038 | UEBA/Firewall (anomaly, DNS C2, MDE) |
-
-### 3. Populate Watchlists
-
-After deployment, populate these watchlists in Sentinel > Watchlists:
-
-- **SpyCloud-VIP-Watchlist** — Add executive/admin emails for priority alerting
-- **SpyCloud-IOC-Blocklist** — Add known malicious IPs/domains
-- **SpyCloud-Approved-Domains** — Add all your corporate email domains
-- **SpyCloud-HighValue-Assets** — Add critical servers, DCs, VPN gateways
-
----
-
-## Configuration
-
 <details>
-<summary><strong>ServiceNow Integration</strong></summary>
+<summary><img src="https://img.shields.io/badge/Manual_checklist-if_needed-6B7280?style=flat-square" alt="Manual checklist"></summary>
 
-1. Create an integration user with `itil` role in ServiceNow
-2. Generate credentials (Basic Auth or OAuth)
-3. Configure in deployment wizard (Step 4: Ticketing & ITSM)
-
-**Priority Mapping:**
-| SpyCloud Severity | ServiceNow Priority |
-|---|---|
-| 25 (session cookies) | 1 - Critical |
-| 20 (infostealer) | 2 - High |
-| 5 (breach) | 3 - Moderate |
-| 2 (low) | 4 - Low |
+| | Task | Automated |
+|:---:|------|:---------:|
+| ![](https://img.shields.io/badge/-1-22C55E?style=flat-square) | Grant managed identity API permissions (Graph, MDE) | Yes |
+| ![](https://img.shields.io/badge/-2-22C55E?style=flat-square) | Assign RBAC roles (Sentinel Responder, Monitoring Metrics Publisher) | Yes |
+| ![](https://img.shields.io/badge/-3-22C55E?style=flat-square) | Verify data ingestion in custom tables (allow 15 min) | Yes |
+| ![](https://img.shields.io/badge/-4-22C55E?style=flat-square) | Confirm analytics rules are firing (check Incidents blade) | Yes |
+| ![](https://img.shields.io/badge/-5-0078D4?style=flat-square) | Populate VIP Watchlist with executive/admin emails | Manual |
+| ![](https://img.shields.io/badge/-6-0078D4?style=flat-square) | Configure ticketing integration (ServiceNow / Jira / ADO) | Optional |
+| ![](https://img.shields.io/badge/-7-0078D4?style=flat-square) | Set up notification channels (Teams / Slack / Email) | Optional |
 
 </details>
 
 <details>
-<summary><strong>Jira Integration</strong></summary>
+<summary><img src="https://img.shields.io/badge/Prerequisites_&_Permissions-details-6B7280?style=flat-square" alt="Prerequisites"></summary>
 
-1. Create API token at `id.atlassian.com` > Security > API tokens
-2. Note your project key (e.g., `SEC`)
-3. Configure in deployment wizard
+<br>
 
-**Custom Fields Example:**
-```json
-{
-  "customfield_10001": "SpyCloud",
-  "customfield_10002": "Credential Exposure"
-}
-```
+**Required Azure RBAC Roles:**
+Sentinel Contributor, Log Analytics Contributor, Logic App Contributor, Managed Identity Operator, Sentinel Automation Contributor
 
-</details>
+**Network:** Outbound HTTPS (443) to `api.spycloud.io` -- no inbound rules needed.
 
-<details>
-<summary><strong>Slack Notifications</strong></summary>
+**SpyCloud API Key:** Obtain from [portal.spycloud.com](https://portal.spycloud.com) > Account Settings > API Keys
 
-1. Go to `api.slack.com/apps` > Create New App
-2. Enable Incoming Webhooks > Add to channel
-3. Copy webhook URL into deployment wizard
+**Playbook Permissions (auto-granted by script):**
 
-Messages support Block Kit rich formatting with severity-based color coding.
+| Playbook | API Permission |
+|----------|---------------|
+| ForcePasswordReset / RevokeSessions | `User.ReadWrite.All` |
+| EnforceMFA | `UserAuthenticationMethod.ReadWrite.All` |
+| BlockConditionalAccess | `GroupMember.ReadWrite.All` |
+| IsolateDevice | `Machine.Isolate` (MDE) |
+| NotifyUser | `Mail.Send` |
+| EnrichIncident | Sentinel Responder role |
 
 </details>
 
-<details>
-<summary><strong>Microsoft Teams Notifications</strong></summary>
+<br>
 
-1. Teams > Channel > Manage channel > Connectors
-2. Add Incoming Webhook > Configure > Copy URL
-3. Enter in deployment wizard
+<!-- ============================================================ -->
+<!-- SUPPORT & LINKS -->
+<!-- ============================================================ -->
 
-Supports Adaptive Cards with action buttons for incident response.
+<div align="center">
+<img src="https://img.shields.io/badge/%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-SUPPORT-%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95%E2%80%95-1a1a2e?style=flat-square" alt="Section: Support">
+</div>
 
-</details>
-
----
-
-## Use Cases
-
-### BEC Prevention
-Detect compromised credentials before email takeover. SpyCloud exposure → Entra ID sign-in correlation → mailbox rule detection → automatic session revocation.
-
-### Infostealer Response
-Automated device isolation and credential reset when infostealer malware exfiltrates credentials. Full device forensics with malware family identification.
-
-### Executive Protection
-VIP monitoring with priority alerting. Executive exposures trigger immediate password reset + MFA re-registration + SOC notification.
-
-### Insider Threat Correlation
-UEBA behavioral baselines + SpyCloud exposure data reveal whether compromised credentials are actively being exploited with anomalous behavior.
-
-### Compliance Reporting
-Automated exposure metrics, remediation SLA tracking, and exportable reports for SOC2, PCI DSS, HIPAA, and cyber insurance auditors.
-
----
-
-## Troubleshooting
-
-<details>
-<summary><strong>Connector Issues</strong></summary>
-
-| Problem | Cause | Fix |
-|---------|-------|-----|
-| No data after 15 min | Invalid API key | Test: `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` |
-| 401 Unauthorized | Wrong API tier | Need Enterprise tier from portal.spycloud.com |
-| Compass tables empty | Missing license | Requires Enterprise+ tier |
-| Data stops | Rate limiting | Increase polling interval to 60min+ |
-| Duplicates | Overlapping lookback | Normal — deduplicate: `summarize arg_max(TimeGenerated, *) by document_id` |
-
-</details>
-
-<details>
-<summary><strong>Playbook Issues</strong></summary>
-
-| Problem | Cause | Fix |
-|---------|-------|-----|
-| Not triggering | Rule/automation disabled | Enable in Sentinel > Analytics and Automation |
-| 403 Forbidden | Missing permissions | Run `scripts/grant-permissions.sh` |
-| MDE isolation fails | No MDE P2 license | Verify license and device onboarding |
-| Password reset fails | No Entra P1+ | Verify license, grant User.ReadWrite.All |
-| Teams not sending | Expired webhook | Regenerate webhook in Teams channel |
-
-</details>
-
-<details>
-<summary><strong>Diagnostic Queries</strong></summary>
-
-```kusto
-// Health Check
-union
-  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),
-  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog')
-| project Table, Records, Latest
-
-// Remediation Gap (exposures > 48h without CA action)
-let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(48h) and severity >= 20 | distinct email;
-let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(48h) | distinct Email;
-exposed | where email !in (remediated)
-
-// Playbook Execution Status
-SpyCloud_ConditionalAccessLogs_CL | union Spycloud_MDE_Logs_CL
-| where TimeGenerated > ago(7d)
-| summarize Total=count(), Success=countif(ActionStatus=='Success') by Action
-```
-
-</details>
-
----
-
-## Roadmap
-
-- [ ] Additional firewall vendors (Cisco Meraki, SonicWall, WatchGuard)
-- [ ] Power BI embedded dashboards
-- [ ] Mobile push notifications (PagerDuty, Opsgenie)
-- [ ] Sentinel custom entity types for SpyCloud
-- [ ] Automated compliance reporting (SOC2, PCI DSS, HIPAA)
-- [ ] SOAR integration (Palo Alto XSOAR, Splunk SOAR)
-- [ ] Custom ML models for exposure risk scoring
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
-## Support
-
-- **GitHub Issues:** [github.com/iammrherb/SPYCLOUD-SENTINEL/issues](https://github.com/iammrherb/SPYCLOUD-SENTINEL/issues)
-- **SpyCloud Support:** support@spycloud.com
-- **Microsoft Sentinel Docs:** [learn.microsoft.com/azure/sentinel](https://learn.microsoft.com/azure/sentinel)
-
----
+<br>
 
 <div align="center">
 
-**Built with SpyCloud + Microsoft Sentinel**
+<a href="https://github.com/iammrherb/SPYCLOUD-SENTINEL/issues"><img src="https://img.shields.io/badge/GitHub-Issues-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Issues"></a>&nbsp;
+<a href="mailto:support@spycloud.com"><img src="https://img.shields.io/badge/SpyCloud-Support-FF3E00?style=for-the-badge" alt="SpyCloud Support"></a>&nbsp;
+<a href="https://learn.microsoft.com/azure/sentinel"><img src="https://img.shields.io/badge/Microsoft-Sentinel_Docs-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white" alt="Sentinel Docs"></a>
 
-*Protecting organizations from the consequences of stolen credentials, one exposure at a time.*
+<br><br>
+
+<img src="docs/images/SpyCloud-icon-SC_2.png" alt="SpyCloud" width="40">
+
+<br>
+
+<sub>
+<strong>SpyCloud Sentinel</strong> -- Built on SpyCloud intelligence and Microsoft Sentinel.<br>
+Protecting organizations from the consequences of stolen credentials.
+</sub>
+
+<br><br>
+
+<img src="https://img.shields.io/badge/license-MIT-22C55E?style=flat-square" alt="MIT License">&nbsp;
+<img src="https://img.shields.io/badge/version-6.0-00C7B7?style=flat-square" alt="Version 5.3">
 
 </div>

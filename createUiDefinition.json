@@ -6,7 +6,7 @@
         "config": {
             "isWizard": true,
             "basics": {
-                "description": "## SpyCloud Sentinel \u2014 Enterprise Threat Intelligence\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 5 REST API pollers\n- 49 analytics rules (grouped & selectable by category)\n- 10 remediation playbooks (identity, device, network, orchestration)\n- 2 workbooks (Executive Dashboard + SOC Operations)\n- 28 hunting queries across all MITRE ATT&CK tactics\n- Full ticketing integration (ServiceNow, Jira, Azure DevOps)\n- Customizable notifications (Slack, Teams, Email)\n- UEBA, Anomaly Detection, Fusion multistage detection\n- Graceful upgrade support for incremental deployments\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)",
+                "description": "## SpyCloud Sentinel v6.0 \u2014 Enterprise Threat Intelligence\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration with **all recommended features enabled by default**:\n- CCF Data Connector with 5 REST API pollers \u2192 6 custom tables\n- 49 analytics rules (all categories ON by default \u2014 uncheck to disable)\n- 10+ remediation playbooks (all ON by default \u2014 uncheck to disable)\n- 3 workbooks (Executive + SOC + Threat Intel dashboards)\n- 28 hunting queries across all MITRE ATT&CK tactics\n- 85 Security Copilot skills for AI-assisted investigation\n- Full ticketing integration (ServiceNow, Jira, Azure DevOps)\n- Notifications (Slack, Teams, Email)\n- UEBA, Anomaly Detection, Fusion multistage ML detection\n\n**After deployment:** Run `scripts/post-deploy-auto.sh` to automatically configure RBAC, managed identity permissions, admin consent, and enable rules.\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)",
                 "location": {
                     "label": "Deployment Region",
                     "allowedValues": [
@@ -207,7 +207,7 @@
                         "visible": true,
                         "options": {
                             "icon": "Info",
-                            "text": "Select which categories of analytics rules to deploy. **All rules deploy DISABLED by default** \u2014 you review and enable them individually in Sentinel > Analytics after deployment. Each category lists its rules and required data sources."
+                            "text": "All analytics rule categories are **ENABLED by default** with recommended settings. Rules that require data sources you haven't connected will auto-skip gracefully. You can disable individual rules post-deployment in Sentinel > Analytics. Uncheck categories below only if you explicitly don't want them."
                         }
                     },
                     {
@@ -242,8 +242,9 @@
                             {
                                 "name": "enableO365EntraRules",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Deploy O365 & Entra ID Correlation Rules (10 rules)",
-                                "toolTip": "Cross-correlates SpyCloud exposures with Entra ID sign-ins, Office 365 activity. Detects active exploitation of stolen credentials."
+                                "label": "Deploy O365 & Entra ID Correlation Rules (10 rules) — Recommended",
+                                "toolTip": "RECOMMENDED — Cross-correlates SpyCloud exposures with Entra ID sign-ins, Office 365 activity, impossible travel, mailbox rules, OAuth consent, and admin role changes. Rules auto-skip if data sources aren't connected.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox7",
@@ -265,8 +266,9 @@
                             {
                                 "name": "enableUebaFirewallRules",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Deploy UEBA & Firewall Correlation Rules (10 rules)",
-                                "toolTip": "Correlates SpyCloud with UEBA behavioral anomalies, firewall logs, DNS, and VPN. Detects lateral movement and C2 communication."
+                                "label": "Deploy UEBA & Firewall Correlation Rules (10 rules) — Recommended",
+                                "toolTip": "RECOMMENDED — Correlates SpyCloud with UEBA behavioral anomalies, firewall logs, DNS queries, and VPN sessions. Detects lateral movement, C2 communication, and anomalous access. Rules auto-skip if data sources aren't connected.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox8",
@@ -288,8 +290,9 @@
                             {
                                 "name": "enableAdvancedThreatRules",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Deploy Advanced Threat Detection Rules (10 rules)",
-                                "toolTip": "Advanced multi-stage, cross-source detection rules. Detects sophisticated attack patterns using SpyCloud + multiple data sources."
+                                "label": "Deploy Advanced Threat Detection Rules (10 rules) — Recommended",
+                                "toolTip": "RECOMMENDED — Detects multi-stage attacks, CA bypass, credential re-exposure after reset, TI indicator matches, and geographic mismatches. Uses multiple data sources with graceful fallback.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox9",
@@ -365,8 +368,9 @@
                             {
                                 "name": "enableForcePasswordResetPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-ForcePasswordReset",
-                                "toolTip": "Forces password change on next sign-in via Microsoft Graph API. User must change password WITH MFA."
+                                "label": "SpyCloud-ForcePasswordReset (Recommended)",
+                                "toolTip": "RECOMMENDED — Forces password change on next sign-in via Microsoft Graph API. User must re-authenticate with MFA. Critical for any infostealer credential exposure response.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox12",
@@ -380,8 +384,9 @@
                             {
                                 "name": "enableRevokeSessionsPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-RevokeSessions",
-                                "toolTip": "Revokes ALL active sessions (browser, app, token) for compromised users."
+                                "label": "SpyCloud-RevokeSessions (Recommended)",
+                                "toolTip": "RECOMMENDED — Instantly revokes ALL active sessions, refresh tokens, and browser cookies for compromised users. Essential when session cookies are stolen.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox13",
@@ -395,8 +400,9 @@
                             {
                                 "name": "enableEnforceMfaPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-EnforceMFA",
-                                "toolTip": "Deletes existing MFA methods (phone, authenticator) and forces re-registration. Prevents attackers from using compromised MFA tokens."
+                                "label": "SpyCloud-EnforceMFA (Recommended)",
+                                "toolTip": "RECOMMENDED — Deletes compromised MFA methods (phone, authenticator app) and forces secure re-registration. Prevents attackers from using stolen MFA tokens.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox14",
@@ -418,8 +424,9 @@
                             {
                                 "name": "enableBlockConditionalAccessPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-BlockConditionalAccess",
-                                "toolTip": "Adds users to tiered Conditional Access security groups based on exposure severity."
+                                "label": "SpyCloud-BlockConditionalAccess (Recommended)",
+                                "toolTip": "RECOMMENDED — Adds compromised users to severity-tiered CA security groups: Sev 25 → Block All, Sev 20 → Require Compliant Device, Sev 5+ → Require MFA.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox15",
@@ -433,8 +440,9 @@
                             {
                                 "name": "enableBlockFirewallPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-BlockFirewall",
-                                "toolTip": "Pushes malicious IPs from SpyCloud data to Fortinet FortiGate and/or Palo Alto Networks firewalls."
+                                "label": "SpyCloud-BlockFirewall (Recommended)",
+                                "toolTip": "RECOMMENDED — Auto-pushes malicious IP block rules to Fortinet/PaloAlto/Azure Firewall from SpyCloud C2 data. Configure firewall API keys post-deploy.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox16",
@@ -456,8 +464,9 @@
                             {
                                 "name": "enableIsolateDevicePlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-IsolateDevice",
-                                "toolTip": "Isolates infected devices via Microsoft Defender for Endpoint API. Severity-based isolation type."
+                                "label": "SpyCloud-IsolateDevice (Recommended)",
+                                "toolTip": "RECOMMENDED — Isolates infected devices via MDE API. Sev 25 = full isolation, Sev 20 = selective (allows Outlook/Teams). Tags device in MDE portal.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox17",
@@ -479,8 +488,9 @@
                             {
                                 "name": "enableNotifyUserPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-NotifyUser",
-                                "toolTip": "Sends email notification to the exposed user with breach details and required actions."
+                                "label": "SpyCloud-NotifyUser (Recommended)",
+                                "toolTip": "RECOMMENDED — Emails exposed users with breach details, required actions (change password, review sign-ins), and IT support contacts.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox18",
@@ -494,8 +504,9 @@
                             {
                                 "name": "enableNotifySOCPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-NotifySOC",
-                                "toolTip": "Posts alert to Microsoft Teams SOC channel with exposure summary and recommended actions."
+                                "label": "SpyCloud-NotifySOC (Recommended)",
+                                "toolTip": "RECOMMENDED — Posts Adaptive Cards to SOC Teams channel with severity, affected users, recommended response actions, and direct incident link.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox19",
@@ -509,8 +520,9 @@
                             {
                                 "name": "enableEnrichIncidentPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-EnrichIncident",
-                                "toolTip": "Enriches Sentinel incident with SpyCloud context: adds comments, tags, updates severity."
+                                "label": "SpyCloud-EnrichIncident (Recommended)",
+                                "toolTip": "RECOMMENDED — Auto-enriches every incident with SpyCloud context: breach source, exposure count, password reuse analysis, malware family, and device forensics.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox20",
@@ -532,8 +544,9 @@
                             {
                                 "name": "enableFullRemediationPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "SpyCloud-FullRemediation (chains all playbooks)",
-                                "toolTip": "Master orchestrator that runs: password reset \u2192 session revocation \u2192 MFA re-registration \u2192 CA group assignment \u2192 device isolation \u2192 SOC notification. Uses parallel branches where possible."
+                                "label": "SpyCloud-FullRemediation (Recommended - chains all playbooks)",
+                                "toolTip": "RECOMMENDED — Master orchestrator: Phase 1 (parallel): password reset + session revocation + device isolation \u2192 Phase 2: MFA enforcement + CA group \u2192 Phase 3: SOC notification. Best for severity 25 incidents.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox21",
@@ -564,32 +577,37 @@
                             {
                                 "name": "enableMdePlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Playbook: MDE Device Isolation (original)",
-                                "toolTip": "Original MDE isolation playbook."
+                                "label": "Playbook: MDE Device Isolation (Recommended)",
+                                "toolTip": "RECOMMENDED — Isolates compromised devices via MDE API based on SpyCloud severity. Requires: MDE P2.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "enableCaPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Playbook: Conditional Access Identity Protection (original)",
-                                "toolTip": "Original CA remediation playbook."
+                                "label": "Playbook: Conditional Access Identity Protection (Recommended)",
+                                "toolTip": "RECOMMENDED — Adds compromised users to CA security groups for identity protection. Requires: Entra ID P1/P2.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "enableCredResponsePlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Playbook: Credential Response + Teams Alert (original)",
-                                "toolTip": "Original credential response playbook."
+                                "label": "Playbook: Credential Response + Teams Alert (Recommended)",
+                                "toolTip": "RECOMMENDED — Password reset + Teams SOC alert in a single playbook. Combines identity remediation with SOC awareness.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "enableMdeBlocklistPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Playbook: MDE Blocklist Scheduled Scan (original)",
-                                "toolTip": "Original MDE blocklist playbook."
+                                "label": "Playbook: MDE Blocklist Scheduled Scan (Recommended)",
+                                "toolTip": "RECOMMENDED — Scheduled scan that auto-isolates devices matching severity 25 infostealer records. Runs every 4 hours by default.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "enableTiEnrichmentPlaybook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Playbook: TI Enrichment (VirusTotal + AbuseIPDB)",
-                                "toolTip": "Enriches incidents with VirusTotal and AbuseIPDB lookups."
+                                "label": "Playbook: TI Enrichment (VirusTotal + AbuseIPDB) — Recommended",
+                                "toolTip": "RECOMMENDED — Enriches incidents with VirusTotal, AbuseIPDB, and GreyNoise TI lookups. Free API keys supported. Deploys but skips lookups until API keys are configured.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "virusTotalApiKey",
@@ -1566,14 +1584,16 @@
                             {
                                 "name": "enableWorkbook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Deploy SpyCloud Executive Dashboard (8-tab workbook)",
-                                "toolTip": "Rich executive dashboard with risk scores, exposure trends, breach intelligence, remediation metrics."
+                                "label": "Deploy SpyCloud Executive Dashboard (8-tab workbook) — Recommended",
+                                "toolTip": "RECOMMENDED — Rich executive dashboard with risk scores, exposure trends, breach intelligence, remediation metrics, and compliance reporting.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "enableSocWorkbook",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Deploy SpyCloud SOC Operations Dashboard (4-tab workbook)",
-                                "toolTip": "Operational dashboard with live threat feed, investigation hub, correlation matrix, hunting dashboard."
+                                "label": "Deploy SpyCloud SOC Operations Dashboard (4-tab workbook) — Recommended",
+                                "toolTip": "RECOMMENDED — Operational dashboard for SOC analysts: live threat feed, investigation hub, correlation matrix, hunting queries, and automation metrics.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "infoBox33",
@@ -1595,8 +1615,9 @@
                             {
                                 "name": "enableSessionCookieDetection",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable session cookie / token theft detection",
-                                "toolTip": "Rules for severity 25 exposures \u2014 stolen cookies that bypass MFA."
+                                "label": "Enable session cookie / token theft detection — Recommended",
+                                "toolTip": "RECOMMENDED — Detects severity 25 exposures where stolen session cookies enable MFA bypass. Most critical detection category.",
+                                "defaultValue": true
                             },
                             {
                                 "name": "enableIdentityProviderAlerts",

@@ -33,10 +33,67 @@
             "value": true
         },
         "enableAnalyticsRulesLibrary": {
-            "value": false
+            "value": true
+        },
+        "enableCoreDetectionRules": {
+            "value": true
+        },
+        "enableO365EntraRules": {
+            "value": true
+        },
+        "enableUebaFirewallRules": {
+            "value": true
+        },
+        "enableAdvancedThreatRules": {
+            "value": true
+        },
+        "enableMsicRules": {
+            "value": true
+        },
+        "enableFusionDetection": {
+            "value": true
+        },
+        "enableForcePasswordResetPlaybook": {
+            "value": true
+        },
+        "enableRevokeSessionsPlaybook": {
+            "value": true
+        },
+        "enableEnforceMfaPlaybook": {
+            "value": true
+        },
+        "enableBlockConditionalAccessPlaybook": {
+            "value": true
+        },
+        "enableBlockFirewallPlaybook": {
+            "value": true
+        },
+        "enableIsolateDevicePlaybook": {
+            "value": true
+        },
+        "enableNotifyUserPlaybook": {
+            "value": true
+        },
+        "enableNotifySOCPlaybook": {
+            "value": true
+        },
+        "enableEnrichIncidentPlaybook": {
+            "value": true
+        },
+        "enableFullRemediationPlaybook": {
+            "value": true
         },
         "enableNotifications": {
-            "value": false
+            "value": true
+        },
+        "enableWorkbook": {
+            "value": true
+        },
+        "enableUEBA": {
+            "value": true
+        },
+        "enableAnomalies": {
+            "value": true
         },
         "retentionInDays": {
             "value": 90

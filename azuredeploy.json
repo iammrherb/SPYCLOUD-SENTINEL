@@ -4,7 +4,7 @@
   "metadata": {
     "title": "SpyCloud Sentinel \u2014 Unified Deployment",
     "description": "Single-template deployment for the complete SpyCloud Threat Intelligence integration with Microsoft Sentinel. Includes: CCF data connector (5 pollers), 6 custom tables, 5 playbooks, 43+ analytics rules, Fusion multistage detection, 5 MSIC rules, UEBA/Anomaly/EyesOn settings, 3 automation rules, 15 hunting queries, 4 watchlists, TI enrichment, and comprehensive connector recommendations.",
-    "version": "5.0.0",
+    "version": "6.0.0",
     "author": "SpyCloud"
   },
   "parameters": {
@@ -76,7 +76,7 @@
       "type": "object",
       "defaultValue": {
         "solution": "SpyCloud-ThreatIntel-Sentinel",
-        "version": "5.3",
+        "version": "6.0",
         "deployedBy": "SpyCloud-ARM-Template"
       },
       "metadata": {
@@ -235,23 +235,23 @@
     },
     "enableAnalyticsRulesLibrary": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the FULL library of SpyCloud analytics rules (all created DISABLED by default for review). Includes: infostealer detection, plaintext password alerts, PII/SSN exposure alerts, session cookie theft, device reinfection, multi-domain credential exposure, geographic anomaly, executive/VIP exposure, remediation gap detection, and high-sighting credential alerts. You must manually enable each rule after reviewing its logic."
+        "description": "RECOMMENDED: ON — Deploys the full library of 49 SpyCloud analytics rules covering infostealer detection, plaintext password alerts, PII/SSN exposure, session cookie theft, device reinfection, credential reuse, geographic anomalies, VIP exposure, and remediation gap detection. Rules deploy ENABLED by default with recommended settings. Disable individual rules post-deployment in Sentinel > Analytics if needed."
       }
     },
     "enableSessionCookieDetection": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy analytics rules specifically for detecting stolen session cookies and tokens (severity 25). These exposures enable MFA bypass via session hijacking and require immediate session revocation."
+        "description": "RECOMMENDED: ON — Deploys rules for detecting stolen session cookies and tokens (severity 25). These are the most critical exposures as they enable MFA bypass via session hijacking, requiring immediate session revocation and device isolation."
       }
     },
     "enableIdentityProviderAlerts": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy analytics rules that correlate SpyCloud exposure data with third-party identity provider logs (Okta, Duo, Ping Identity, CyberArk) if those logs are already ingested into Sentinel via their respective connectors. These rules detect compromised credentials being used across IdP sign-in events."
+        "description": "RECOMMENDED: ON — Deploys rules correlating SpyCloud exposures with third-party identity provider logs (Okta, Duo, Ping Identity, CyberArk). Detects compromised credentials being used across IdP sign-in events. Rules auto-skip gracefully if the required IdP connector is not installed."
       }
     },
     "createNewWorkspace": {
@@ -277,23 +277,23 @@
     },
     "enablePostDeployScript": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "No longer needed \u2014 deployment script and container instance removed. All RBAC and API permissions should be granted when you are ready to enable automated playbook response. See connector Step 6 or run scripts/grant-permissions.sh from Cloud Shell."
+        "description": "RECOMMENDED: ON \u2014 After ARM deployment, run scripts/post-deploy-auto.sh to automatically resolve DCE/DCR, assign RBAC roles, grant managed identity permissions, grant admin consent, enable rules, and verify deployment."
       }
     },
     "enableCredResponsePlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy Credential Response playbook. REQUIRES: Entra ID P1/P2 for reset. Notifications work without license."
+        "description": "RECOMMENDED: ON — Credential response playbook with password reset + Teams alert notification. Combines identity remediation with SOC awareness. Requires: Entra ID P1/P2 for password reset; Teams notifications work without additional license."
       }
     },
     "enableMdeBlocklistPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy MDE Blocklist playbook. REQUIRES: Defender for Endpoint P1/P2. Scheduled severity 25 auto-isolation."
+        "description": "RECOMMENDED: ON — Scheduled MDE blocklist scan that auto-isolates devices matching severity 25 infostealer records. Runs on configurable schedule (default: every 4 hours). Requires: MDE P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "teamsChannelWebhook": {
@@ -363,9 +363,9 @@
     },
     "enableTiEnrichmentPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the SpyCloud TI Enrichment playbook. Automatically enriches SpyCloud incidents with external threat intelligence lookups (VirusTotal, AbuseIPDB, GreyNoise) for IP addresses found in infostealer data. REQUIRES: VirusTotal API key (free tier supported)."
+        "description": "RECOMMENDED: ON — Enriches incidents with VirusTotal, AbuseIPDB, and GreyNoise threat intelligence lookups for IPs found in infostealer data. Free tier API keys supported. If no VirusTotal API key is provided, the playbook deploys but skips TI lookups until configured."
       }
     },
     "virusTotalApiKey": {
@@ -463,23 +463,23 @@
     },
     "enableO365EntraRules": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy Office 365 and Entra ID analytics rules sc-020 through sc-029. REQUIRES: SigninLogs and AuditLogs data connectors enabled in Sentinel. These rules correlate SpyCloud exposures with Entra sign-in and audit activity."
+        "description": "RECOMMENDED: ON — Deploys O365 & Entra ID correlation rules (sc-020 to sc-029). Correlates SpyCloud exposures with sign-in activity, impossible travel, mailbox rules, OAuth consent, and admin role changes. Requires: Entra ID and Office 365 connectors. Rules auto-skip if data sources are not connected."
       }
     },
     "enableUebaFirewallRules": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy UEBA and Firewall analytics rules sc-030 through sc-039. REQUIRES: BehaviorAnalytics and CommonSecurityLog tables populated via UEBA and a firewall/CEF connector. These rules correlate SpyCloud exposures with behavioral anomalies and network activity."
+        "description": "RECOMMENDED: ON — Deploys UEBA & firewall correlation rules (sc-030 to sc-039). Detects anomalous behavior, lateral movement, DNS C2 communication, and VPN anomalies from exposed users. Requires: UEBA enabled + firewall/CEF connector. Rules auto-skip if data sources are not connected."
       }
     },
     "enableAdvancedThreatRules": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy advanced threat hunting analytics rules sc-040 through sc-049. These rules detect sophisticated attack patterns such as credential stuffing campaigns, lateral movement using exposed credentials, and multi-stage attack chains."
+        "description": "RECOMMENDED: ON — Deploys advanced threat detection rules (sc-040 to sc-049). Detects multi-stage attack chains, CA bypass attempts, credential re-exposure after reset, TI indicator matches, and geographic mismatches. Uses multiple data sources with graceful fallback."
       }
     },
     "enableMsicRules": {
@@ -498,72 +498,72 @@
     },
     "enableForcePasswordResetPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Force Password Reset playbook. Automatically resets the compromised user's password in Entra ID upon incident creation. REQUIRES: Entra ID P1/P2 license and User Administrator or Password Administrator role assigned to the playbook's managed identity. Post-deployment: grant API permissions via scripts/grant-permissions.sh."
+        "description": "RECOMMENDED: ON — Forces password change on next sign-in via Microsoft Graph API when credentials are exposed. The user must re-authenticate with MFA. Requires: Entra ID P1/P2. Post-deploy: run scripts/post-deploy-auto.sh to auto-grant User.ReadWrite.All permission."
       }
     },
     "enableRevokeSessionsPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Revoke Sessions playbook. Revokes all active refresh tokens and sign-in sessions for the compromised user in Entra ID. REQUIRES: Entra ID P1/P2 license. Post-deployment: grant User.ReadWrite.All API permission to the playbook's managed identity."
+        "description": "RECOMMENDED: ON — Instantly revokes ALL active sessions (browser, app, refresh tokens) for compromised users. Critical for infostealer response where session cookies may be stolen. Requires: Entra ID P1/P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableEnforceMfaPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Enforce MFA playbook. Forces MFA re-registration for the compromised user by resetting their authentication methods. REQUIRES: Entra ID P1/P2 with Conditional Access. Post-deployment: grant UserAuthenticationMethod.ReadWrite.All API permission to the playbook's managed identity."
+        "description": "RECOMMENDED: ON — Deletes compromised MFA methods and forces re-registration. Prevents attackers from using stolen authenticator tokens or phone-based MFA. Requires: Entra ID P1/P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableBlockConditionalAccessPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Block via Conditional Access playbook. Adds compromised users to a designated Entra ID security group targeted by a blocking Conditional Access policy. REQUIRES: Entra ID P1/P2 with a pre-configured Conditional Access policy and security group. Post-deployment: configure the caSecurityGroupId parameter and grant Group.ReadWrite.All API permission."
+        "description": "RECOMMENDED: ON — Adds compromised users to severity-tiered Conditional Access security groups (Blocked/Restricted/Monitored). Sev 25 → block all access, Sev 20 → require compliant device, Sev 5+ → require MFA. Requires: Entra ID P1/P2 + pre-created security groups. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableBlockFirewallPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Block at Firewall playbook. Sends IP block requests to your firewall management API for source IPs found in SpyCloud infostealer data. REQUIRES: Firewall API integration (Palo Alto, Fortinet, or Azure Firewall). Post-deployment: configure the firewall API connection in the Logic App designer."
+        "description": "RECOMMENDED: ON — Automatically pushes malicious IP block rules to Fortinet FortiGate, Palo Alto PAN-OS, or Azure Firewall from SpyCloud infostealer C2 data. Post-deploy: configure firewall API URLs and keys in the Logic App designer. Deploys but remains inactive until firewall credentials are provided."
       }
     },
     "enableIsolateDevicePlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Isolate Device playbook. Isolates compromised devices via Microsoft Defender for Endpoint API. REQUIRES: Defender for Endpoint P1/P2 license. Post-deployment: grant Machine.Isolate API permission to the playbook's managed identity."
+        "description": "RECOMMENDED: ON — Isolates infected devices via MDE API. Sev 25 → full isolation (complete disconnect), Sev 20 → selective isolation (allows Outlook/Teams/Defender). Tags device as 'SpyCloud-Compromised' in MDE. Requires: MDE P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableNotifyUserPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Notify User playbook. Sends an email notification to the compromised user informing them of the credential exposure and required remediation steps. REQUIRES: Office 365 or Exchange Online connector configured in Logic Apps. Post-deployment: authorize the Office 365 API connection."
+        "description": "RECOMMENDED: ON — Emails the exposed user with breach details, required actions (change password, review sign-ins), and support contacts. Uses Office 365 Mail.Send via managed identity. Requires: Exchange Online. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableNotifySOCPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Notify SOC playbook. Sends detailed incident notifications to the SOC team via email, Teams, or Slack with full exposure context and recommended response actions. Post-deployment: configure at least one notification channel (email, Teams webhook, or Slack webhook)."
+        "description": "RECOMMENDED: ON — Posts real-time Adaptive Cards to your SOC Teams channel with severity, affected users, exposure type, recommended actions, and direct incident links. Uses webhook (no Graph permissions needed). Post-deploy: add Teams webhook URL in Logic App parameters."
       }
     },
     "enableEnrichIncidentPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Enrich Incident playbook. Automatically enriches Sentinel incidents with additional SpyCloud context including breach source details, historical exposure count, password reuse analysis, and infected device information. Post-deployment: grant Sentinel Responder role to the playbook's managed identity."
+        "description": "RECOMMENDED: ON — Auto-enriches every Sentinel incident with SpyCloud context: breach source, historical exposure count, password reuse analysis, malware family, and infected device info. Adds tags like 'malware-sourced', 'plaintext-password'. Requires: Sentinel Responder role. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableFullRemediationPlaybook": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Deploy the Full Remediation orchestrator playbook. Chains together password reset, session revocation, MFA enforcement, device isolation, and user notification into a single automated response workflow. REQUIRES: All prerequisite licenses for individual playbooks. Post-deployment: grant all required API permissions and enable the individual playbooks this orchestrator calls."
+        "description": "RECOMMENDED: ON — Master orchestrator that chains ALL playbooks in 3 phases: Phase 1 (parallel): password reset + session revocation + device isolation → Phase 2 (parallel): MFA enforcement + CA group assignment → Phase 3: SOC notification. Best used as the single automation rule target for severity 25 (session cookie) incidents. Requires: all individual playbook licenses. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableServiceNow": {
