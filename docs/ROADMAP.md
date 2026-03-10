@@ -1,47 +1,33 @@
-# SpyCloud Sentinel Supreme — Comprehensive Enhancement Roadmap
+# SpyCloud Sentinel — Roadmap
 
-## Phase 1: Core Pipeline & Cross-Connector (v8.0) ✅ THIS PR
+## v6.0 (Current Release)
 
-### New Data Sources
-- **Compass Data** poller + `SpyCloudCompassData_CL` table (29 cols)
-- **Compass Devices** poller + `SpyCloudCompassDevices_CL` table (8 cols)
+- All 49 analytics rules enabled by default
+- All 10+ playbooks enabled by default with recommended settings
+- Enhanced post-deployment automation script (auto-RBAC, admin consent, connector setup)
+- GitHub Pages deployment portal for one-click setup
+- Improved ARM template tooltips and descriptions
+- Marketing-quality README with visual design
+- 85 Security Copilot skills (Plugin + Agent)
+- 3 workbooks (Executive, SOC, Threat Intel)
+- 28 hunting queries + 2 Jupyter notebooks
+- Full ticketing integration (ServiceNow, Jira, Azure DevOps)
 
-### New Analytics Rules (10 additional → 38 total)
-- SpyCloud × Office 365: Compromised user email forwarding/delegation
-- SpyCloud × Email Events: Exposed credentials in email phishing chains
-- SpyCloud × Identity Logon: Compromised user lateral movement
-- SpyCloud × Threat Intelligence: SpyCloud IOCs matching external TI feeds
-- SpyCloud × Behavior Analytics: UEBA anomalies for exposed users
-- SpyCloud × Azure Activity: Compromised user cloud resource access
-- SpyCloud × Compass: Consumer identity cross-reference with corporate
-- SpyCloud × Firewall: Infected IP in CommonSecurityLog (CEF/Syslog)
-- SpyCloud × Impossible Travel: Exposed credential used from distant locations
-- SpyCloud × Compass Devices: Infected device reappearance in Compass
+## v6.5 (Planned)
 
-### Enhanced Connector UI
-- Full cross-connector integration guide
-- Recommended additional connectors table
-- Enhanced verification queries for all 6 tables
+- [ ] SOAR runbooks for guided incident response
+- [ ] PagerDuty and Opsgenie integration
+- [ ] Adaptive Card interactive response buttons in Teams
+- [ ] Custom ML credential risk scoring via Azure ML
+- [ ] EU API region support for SpyCloud data residency
+- [ ] Cross-tenant federation for MSSP deployments
 
-### Enhanced Copilot (Plugin + Agent)
-- Compass investigation skills
-- Cross-connector correlation skills
-- Proactive threat hunting prompts
-- Risk scoring and prioritization
+## v7.0 (Future)
 
-## Phase 2: Advanced Automation (v8.5) — PLANNED
-- Jupyter investigation notebooks
-- SOAR runbooks for guided response
-- Adaptive Card interactive notifications
-- PagerDuty/Opsgenie integration
-- Auto-enable high-confidence rules on deploy
-
-## Phase 3: Intelligence Platform (v9.0) — FUTURE
-- ML-based credential risk scoring (Azure ML / OpenAI)
-- Predictive breach impact analysis
-- Automated threat intelligence report generation
-- Cross-tenant federation for MSSPs
-- Azure DevOps pipeline for rule CI/CD testing
-- MCP integrations (Atlassian, Gmail, Slack direct)
-- EU API region support
-- Custom VIP/executive watchlist with elevated alerting
+- [ ] Additional firewall vendors (Cisco Meraki, SonicWall, WatchGuard)
+- [ ] Power BI embedded dashboards
+- [ ] Predictive breach impact analysis
+- [ ] Automated compliance reporting (SOC2, PCI DSS, HIPAA)
+- [ ] Rule CI/CD testing via Azure DevOps pipeline
+- [ ] MCP integrations (Atlassian, Gmail, Slack direct)
+- [ ] Custom VIP/executive watchlist with elevated alerting

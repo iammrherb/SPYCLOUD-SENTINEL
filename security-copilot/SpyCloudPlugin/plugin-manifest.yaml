@@ -1,0 +1,501 @@
+Descriptor:
+  Name: SpyCloudAPIPlugin
+  DisplayName: SpyCloud Dark Web Threat Intelligence
+  Description: >
+    Production-grade Microsoft Security Copilot plugin providing direct access
+    to the SpyCloud API for real-time dark web threat intelligence. Covers 12
+    skills across the Enterprise Breach, Compass Investigation, and Identity
+    Exposure APIs. Enables SOC analysts and incident responders to look up
+    compromised credentials by email, domain, IP, username, or password; perform
+    deep Compass investigations into infostealer infections with malware
+    attribution, stolen cookies, and device forensics; query identity exposure
+    posture; browse the breach catalog; and audit the monitored identity
+    watchlist -- all without leaving the Copilot experience.
+  DescriptionDisplay: default
+  Category: Threat Intelligence
+  SupportedAuthTypes:
+    - ApiKey
+  Authorization:
+    Type: APIKey
+    Key: X-API-Key
+    Location: Header
+    AuthScheme: ''
+  Settings:
+    - Name: ApiBaseUrl
+      Description: >
+        Base URL of the SpyCloud API. Override only if directed by SpyCloud
+        support for regional or on-premises deployments.
+      HintText: https://api.spycloud.io
+      SettingType: string
+      Required: false
+      DefaultValue: https://api.spycloud.io
+  Icon: https://spycloud.com/wp-content/uploads/spycloud-logo.svg
+
+SkillGroups:
+  - Format: API
+    Settings:
+      OpenApiSpecUrl: openapi.yaml
+    Skills:
+
+      # =====================================================================
+      # ENTERPRISE API - EMAIL LOOKUP
+      # =====================================================================
+
+      - Name: GetBreachDataByEmail
+        DisplayName: Look up breach records by email
+        Description: >
+          Queries the SpyCloud Enterprise API for all breach and infostealer
+          records associated with a specific email address. Returns exposed
+          credentials, target applications, password types, severity scores,
+          infection metadata, device context, and PII fields. This is the
+          primary skill for investigating a compromised user identity.
+        ExamplePrompts:
+          - Look up SpyCloud breach data for this email
+          - Has this email been compromised according to SpyCloud
+          - Search SpyCloud for stolen credentials for this email address
+          - Check dark web exposure for this user email
+          - What breaches include this email address
+          - Find infostealer records for this email in SpyCloud
+        Inputs:
+          - Name: email
+            Description: The email address to search for in breach records.
+            Required: true
+          - Name: since
+            Description: >
+              Return records published on or after this date (YYYY-MM-DD).
+              Defaults to all time if omitted.
+            Required: false
+          - Name: until
+            Description: >
+              Return records published on or before this date (YYYY-MM-DD).
+            Required: false
+          - Name: severity
+            Description: >
+              Minimum severity threshold (1-25). Only records at or above this
+              severity are returned.
+            Required: false
+          - Name: password_type
+            Description: >
+              Filter by password representation: plaintext, hashed, cracked,
+              or unknown.
+            Required: false
+          - Name: type
+            Description: >
+              Record category filter: corporate or infected.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page (1-10000, default 100).
+            Required: false
+        Settings:
+          OpenApiOperationId: getBreachDataByEmail
+
+      # =====================================================================
+      # ENTERPRISE API - DOMAIN LOOKUP
+      # =====================================================================
+
+      - Name: GetBreachDataByDomain
+        DisplayName: Look up breach records by domain
+        Description: >
+          Queries the SpyCloud Enterprise API for all breach and infostealer
+          records where the compromised email belongs to the specified corporate
+          domain. Returns aggregated exposure data across all employees and
+          service accounts under that domain. Use this for organization-wide
+          credential exposure assessments and to prioritize bulk password resets.
+        ExamplePrompts:
+          - Search SpyCloud for breaches affecting this domain
+          - How many credentials were stolen for this company domain
+          - Check dark web exposure for our corporate domain
+          - What SpyCloud data exists for employees at this domain
+          - Show all infostealer infections for this domain
+          - Get breach records for this organization from SpyCloud
+        Inputs:
+          - Name: domain
+            Description: The domain to search (e.g., example.com).
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: password_type
+            Description: Filter by password type.
+            Required: false
+          - Name: type
+            Description: Record category filter.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: getBreachDataByDomain
+
+      # =====================================================================
+      # ENTERPRISE API - IP LOOKUP
+      # =====================================================================
+
+      - Name: GetBreachDataByIp
+        DisplayName: Look up breach records by IP address
+        Description: >
+          Queries the SpyCloud Enterprise API for breach and infostealer
+          records associated with a specific IP address. The IP may represent
+          an infected device's external address or a login IP captured in
+          stolen credentials. Use this to correlate network-layer observables
+          with credential theft events during incident response.
+        ExamplePrompts:
+          - Search SpyCloud for breach data linked to this IP
+          - Is this IP associated with any infostealer infections
+          - Check this IP address against SpyCloud breach records
+          - What stolen credentials are associated with this IP
+          - Look up dark web data for this IP in SpyCloud
+        Inputs:
+          - Name: ip
+            Description: The IPv4 or IPv6 address to search.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: type
+            Description: Record category filter.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: getBreachDataByIp
+
+      # =====================================================================
+      # ENTERPRISE API - PASSWORD CHECK
+      # =====================================================================
+
+      - Name: CheckPasswordExposure
+        DisplayName: Check if a password is exposed in breaches
+        Description: >
+          Checks whether a specific password has appeared in any breach or
+          infostealer dataset tracked by SpyCloud. Returns matching records
+          with associated accounts, severity, and breach context. Use this
+          to validate that passwords in active use have not been previously
+          compromised, or to assess the risk of a password found during
+          forensic analysis.
+        ExamplePrompts:
+          - Has this password appeared in any SpyCloud breaches
+          - Check if this password was stolen or leaked
+          - Is this password compromised according to SpyCloud
+          - Search SpyCloud for this password
+          - Validate this password against dark web data
+        Inputs:
+          - Name: password
+            Description: The plaintext password to check for exposure.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: checkPasswordExposure
+
+      # =====================================================================
+      # ENTERPRISE API - USERNAME LOOKUP
+      # =====================================================================
+
+      - Name: GetBreachDataByUsername
+        DisplayName: Look up breach records by username
+        Description: >
+          Queries the SpyCloud Enterprise API for breach records where the
+          compromised identity used a non-email username. Useful for
+          investigating service accounts, legacy systems, gaming platforms,
+          and applications that use usernames rather than email addresses
+          for authentication.
+        ExamplePrompts:
+          - Search SpyCloud for breaches with this username
+          - Has this username been compromised in any breaches
+          - Look up dark web data for this username
+          - Check SpyCloud for stolen credentials for this username
+          - Find breach records for this service account username
+        Inputs:
+          - Name: username
+            Description: The username to search for in breach records.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: password_type
+            Description: Filter by password type.
+            Required: false
+          - Name: type
+            Description: Record category filter.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: getBreachDataByUsername
+
+      # =====================================================================
+      # ENTERPRISE API - BREACH CATALOG
+      # =====================================================================
+
+      - Name: ListBreachCatalog
+        DisplayName: Browse the SpyCloud breach catalog
+        Description: >
+          Returns the full SpyCloud breach catalog with metadata for every
+          tracked breach including title, description, affected site,
+          acquisition date, record count, data classes exposed, confidence
+          rating, and breach category. Use this for situational awareness,
+          trend analysis, identifying specific breaches by keyword, or
+          cross-referencing source IDs found in breach records.
+        ExamplePrompts:
+          - Show me the SpyCloud breach catalog
+          - List all breaches tracked by SpyCloud
+          - Search the SpyCloud breach catalog for this company
+          - What breaches has SpyCloud acquired recently
+          - How many records are in the SpyCloud breach database
+          - Find breaches related to this keyword in the catalog
+        Inputs:
+          - Name: query
+            Description: >
+              Free-text search term to filter breach catalog entries by
+              title or description.
+            Required: false
+          - Name: since
+            Description: >
+              Filter to breaches acquired on or after this date (YYYY-MM-DD).
+            Required: false
+          - Name: until
+            Description: >
+              Filter to breaches acquired on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum entries per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: listBreachCatalog
+
+      - Name: GetBreachCatalogEntry
+        DisplayName: Get details for a specific breach
+        Description: >
+          Returns complete metadata for a single breach catalog entry
+          identified by its numeric SpyCloud source ID. Includes the breach
+          title, description, affected site, acquisition and breach dates,
+          total record count, confidence rating, and the full list of data
+          classes exposed. Use this after finding a source_id in breach
+          records to understand the breach context.
+        ExamplePrompts:
+          - Show me details for this SpyCloud breach ID
+          - What breach does this source ID refer to
+          - Get information about SpyCloud breach number
+          - Describe this breach from the SpyCloud catalog
+          - What data was exposed in this specific breach
+        Inputs:
+          - Name: id
+            Description: The numeric SpyCloud source ID for the breach.
+            Required: true
+        Settings:
+          OpenApiOperationId: getBreachCatalogEntry
+
+      # =====================================================================
+      # COMPASS API - DEEP INVESTIGATION
+      # =====================================================================
+
+      - Name: CompassInvestigateEmail
+        DisplayName: Deep Compass investigation by email
+        Description: >
+          Performs a comprehensive SpyCloud Compass investigation of an email
+          address across underground marketplaces, paste sites, botnet logs,
+          and infostealer datasets. Returns enriched records with malware
+          family attribution, infection timelines, device fingerprints, stolen
+          session cookies, browser autofill data, cryptocurrency wallets,
+          installed software, and command-and-control infrastructure. Provides
+          significantly deeper context than the standard Enterprise endpoint
+          for incident response and advanced threat hunting.
+        ExamplePrompts:
+          - Run a deep SpyCloud Compass investigation on this email
+          - Investigate this email with SpyCloud Compass
+          - Get Compass infostealer data for this email
+          - Deep dive into dark web exposure for this email
+          - What stolen cookies and sessions exist for this email
+          - Check Compass for malware infections tied to this email
+        Inputs:
+          - Name: email
+            Description: The email address to investigate.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: compassInvestigateEmail
+
+      - Name: CompassInvestigateDomain
+        DisplayName: Deep Compass investigation by domain
+        Description: >
+          Performs a comprehensive SpyCloud Compass investigation of all
+          identities under a corporate domain across underground marketplaces,
+          paste sites, botnet logs, and infostealer datasets. Returns enriched
+          records with malware attribution, stolen cookies, device forensics,
+          and session hijack risk across the entire organization. Use this for
+          enterprise-wide threat exposure assessments and proactive hunting.
+        ExamplePrompts:
+          - Run a Compass investigation on this domain
+          - Deep investigate all users at this domain with SpyCloud Compass
+          - What Compass infostealer data exists for this organization
+          - Check Compass for stolen cookies across this domain
+          - Compass deep dive on corporate domain exposure
+        Inputs:
+          - Name: domain
+            Description: The domain to investigate.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: compassInvestigateDomain
+
+      - Name: CompassInvestigateIp
+        DisplayName: Deep Compass investigation by IP
+        Description: >
+          Performs a comprehensive SpyCloud Compass investigation of an IP
+          address across underground sources. Returns enriched records tying
+          the IP to infected machines, botnet membership, credential theft
+          events, malware command-and-control infrastructure, and associated
+          identities. Use this to determine whether a network observable is
+          linked to active infostealer operations and to identify all
+          compromised identities connected to the IP.
+        ExamplePrompts:
+          - Run a Compass investigation on this IP address
+          - Deep investigate this IP with SpyCloud Compass
+          - Is this IP part of a botnet according to Compass
+          - What infostealer infections are linked to this IP
+          - Compass deep dive on this network address
+        Inputs:
+          - Name: ip
+            Description: The IPv4 or IPv6 address to investigate.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: compassInvestigateIp
+
+      # =====================================================================
+      # IDENTITY API - EXPOSURE LOOKUP
+      # =====================================================================
+
+      - Name: GetIdentityExposure
+        DisplayName: Get identity exposure profile for an email
+        Description: >
+          Queries the SpyCloud Identity API for the aggregated exposure profile
+          of an email address. Unlike the Enterprise endpoint which returns
+          individual breach records, this endpoint deduplicates credentials
+          and provides a unified view of the identity's current risk posture
+          including total exposure count, distinct breach sources, highest
+          severity score, infected device count, exposed data classes, and
+          whether the current password is compromised. Use this for rapid
+          risk assessment and identity-centric triage.
+        ExamplePrompts:
+          - What is the identity exposure profile for this email
+          - Show the SpyCloud identity risk summary for this user
+          - How many times has this identity been exposed
+          - Get the identity exposure score from SpyCloud
+          - Is this identity's current password compromised
+          - Summarize identity risk for this email address
+        Inputs:
+          - Name: email
+            Description: The email address to retrieve identity exposure for.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: getIdentityExposure
+
+      # =====================================================================
+      # IDENTITY API - WATCHLIST
+      # =====================================================================
+
+      - Name: GetIdentityWatchlist
+        DisplayName: List monitored identities on the watchlist
+        Description: >
+          Returns all identities currently on the organization's SpyCloud
+          watchlist including monitored email addresses, domains, and IP
+          ranges with their monitoring state, alert history, and cumulative
+          exposure counts. The watchlist drives automated alerting when new
+          dark web exposures are detected. Use this to audit monitoring
+          coverage, verify critical identities are tracked, and review
+          recent alert activity.
+        ExamplePrompts:
+          - Show the SpyCloud identity watchlist
+          - What identities are we monitoring in SpyCloud
+          - List all emails on the SpyCloud watchlist
+          - Which domains are on the SpyCloud watchlist
+          - Are there any inactive watchlist entries
+          - Show recent watchlist alerts from SpyCloud
+        Inputs:
+          - Name: type
+            Description: >
+              Filter by asset type: email, domain, or ip.
+            Required: false
+          - Name: state
+            Description: >
+              Filter by monitoring state: active or inactive.
+            Required: false
+          - Name: limit
+            Description: Maximum entries per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: getIdentityWatchlist

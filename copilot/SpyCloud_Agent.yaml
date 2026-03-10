@@ -105,6 +105,125 @@ SkillGroups:
     - Prompt: How effective are our automated playbooks?
     - Prompt: Check the breach catalog for this malware
     - Prompt: Show social media and LinkedIn exposure for this user
+
+    # === Campaign & Threat Actor Analysis ===
+    - Prompt: What malware campaigns are currently targeting our organization?
+      Title: Active Campaigns
+      Personas:
+      - 1
+      - 2
+    - Prompt: Analyze the RedLine infostealer campaign affecting our users
+    - Prompt: Show me related breaches from the same threat actor group
+    - Prompt: What are the TTPs associated with the infostealers targeting us?
+    - Prompt: Compile a full threat brief on the latest campaign hitting our org
+    - Prompt: Track this malware family's activity over time — show me the timeline
+    - Prompt: What other organizations were affected in the same breach as ours?
+    - Prompt: Show me breach records grouped by campaign or threat actor
+    - Prompt: Which bad actor groups have targeted our domain the most?
+    - Prompt: Create a campaign intelligence report for the last 30 days
+
+    # === Deep Dive Investigations ===
+    - Prompt: Build a complete attack timeline for this compromised user
+      Title: Attack Timeline
+      Personas:
+      - 1
+      - 2
+    - Prompt: If you were an attacker with our exposed data, what would you do?
+    - Prompt: What's the worst-case scenario from our current exposures?
+    - Prompt: Design an incident response plan for our top exposure right now
+    - Prompt: Tell me the story of the most interesting breach affecting us
+    - Prompt: Create a threat model based on our SpyCloud intelligence
+    - Prompt: What security controls would you prioritize based on our data?
+    - Prompt: What questions should I be asking that I'm not thinking of?
+    - Prompt: Walk me through a full forensic analysis of this infected device
+    - Prompt: Show me the kill chain for this infostealer infection end to end
+
+    # === Incident & Ticket Creation ===
+    - Prompt: Help me create a detailed incident report for this exposure
+      Title: Incident Report
+      Personas:
+      - 1
+      - 3
+    - Prompt: Draft a ServiceNow incident ticket for this credential exposure
+    - Prompt: Create a Jira issue for the security team about this finding
+    - Prompt: Compile all evidence for an Azure DevOps work item on this
+    - Prompt: Generate a complete incident summary with all correlated evidence
+    - Prompt: What information should I include in the ticket for this breach?
+    - Prompt: Create a detailed exposure report suitable for our ticketing system
+    - Prompt: Help me document this incident for compliance and audit trail
+
+    # === Credential & Password Deep Dive ===
+    - Prompt: Show me all passwords that are reused across multiple sites
+      Title: Password Reuse Hunt
+      Personas:
+      - 1
+      - 4
+    - Prompt: Find users whose exposed password matches their current Active Directory password
+    - Prompt: Which credentials have the highest sighting counts on the dark web?
+    - Prompt: Show me the history of password exposure for this specific user
+    - Prompt: Find phishing-sourced credential exposures specifically
+    - Prompt: What combo lists contain our corporate email addresses?
+    - Prompt: Show me credentials exposed on both corporate AND consumer sites
+
+    # === Breach Record Deep Dive ===
+    - Prompt: Show me detailed breach records including all available fields
+      Title: Breach Deep Dive
+      Personas:
+      - 1
+      - 2
+    - Prompt: What sensitive source breaches affect our organization?
+    - Prompt: Show breach catalog metadata — confidence, record counts, dates
+    - Prompt: Which breaches have the most records affecting our users?
+    - Prompt: Give me a timeline of all breaches affecting our domain
+    - Prompt: Analyze breach categories — infostealers vs phishing vs combo lists
+
+    # === Remediation & Response ===
+    - Prompt: What's our mean time to remediate credential exposures?
+      Title: MTTR Analysis
+      Personas:
+      - 1
+      - 3
+    - Prompt: Show me the remediation gap — who still needs to be fixed?
+    - Prompt: Which users were re-exposed AFTER their password was reset?
+    - Prompt: Track CA group membership changes over the last 30 days
+    - Prompt: Show MDE device isolation and release history
+    - Prompt: How many playbook executions succeeded vs failed this week?
+    - Prompt: Generate a remediation SLA compliance report
+
+    # === Compliance & Executive ===
+    - Prompt: Generate a compliance report for cyber insurance renewal
+      Title: Compliance Report
+      Personas:
+      - 3
+      - 5
+    - Prompt: What PII exposures require GDPR/CCPA notification?
+    - Prompt: Show me exposure metrics formatted for SOC2 audit evidence
+    - Prompt: What would you present to the CISO right now?
+    - Prompt: Generate a board-level threat summary with recommendations
+    - Prompt: Compare our exposure this month vs last month
+
+    # === Network & Infrastructure ===
+    - Prompt: Show me all firewall events for SpyCloud-related IPs
+    - Prompt: Are any infected device IPs being allowed through our firewalls?
+    - Prompt: Hunt for DNS C2 beaconing from infected devices
+    - Prompt: Show VPN connections from users with active credential exposures
+    - Prompt: Find Fortinet FSSO sessions from compromised user accounts
+
+    # === Proactive & Creative ===
+    - Prompt: What's the single most dangerous finding in our SpyCloud data right now?
+      Title: Top Risk
+      Personas:
+      - 1
+      - 2
+      - 3
+      IsStarterAgent: true
+    - Prompt: If our CEO's credentials were exposed, walk me through the response
+    - Prompt: Predict our exposure trajectory — are things getting better or worse?
+    - Prompt: What Fusion multistage attacks involve SpyCloud alerts?
+    - Prompt: Show me UEBA anomalies for users with active credential exposures
+    - Prompt: What would a SOC maturity assessment say about our SpyCloud response?
+    - Prompt: Help me design an exposure response SOP for our team
+    - Prompt: What are all the things you can help me with? Give me the full menu
     Settings:
       OrchestratorSkill: DefaultAgentOrchestrator
       Instructions: '# Identity & Personality
