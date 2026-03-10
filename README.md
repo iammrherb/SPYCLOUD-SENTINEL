@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="docs/images/SpyCloud-Logo-white.png" alt="SpyCloud Sentinel" width="420">
+<img src="docs/images/spycloud-logo.svg" alt="SpyCloud Sentinel" width="420">
 
 <br><br>
 
-# Enterprise Threat Intelligence for Microsoft Sentinel
+# Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel
 
-**Recaptured darknet intelligence. Automated identity threat protection.**
+**Recaptured darknet data meets automated identity threat protection -- powered by SpyCloud.**
 
 [![Azure](https://img.shields.io/badge/Microsoft_Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com)
 [![Sentinel](https://img.shields.io/badge/Microsoft_Sentinel-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://learn.microsoft.com/azure/sentinel)
@@ -56,7 +56,7 @@
 ## Architecture
 
 ```
-                                  SpyCloud Sentinel -- End-to-End Architecture
+                                  SpyCloud Sentinel -- Darknet & Identity Threat Exposure Intelligence
  _______________________________________________________________________________
 
   +---------------------+       +------------------------+       +--------------------+
