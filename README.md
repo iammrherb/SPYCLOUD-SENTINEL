@@ -35,9 +35,10 @@
 - [Deployment](#deployment)
   - [Prerequisites](#prerequisites)
   - [Option 1: Azure Portal](#option-1-azure-portal-deploy-to-azure)
-  - [Option 2: Azure Cloud Shell](#option-2-azure-cloud-shell)
-  - [Option 3: GitHub Actions](#option-3-github-actions-cicd)
-  - [Option 4: Azure DevOps Pipeline](#option-4-azure-devops-pipeline)
+  - [Option 2: Azure Cloud Shell](#option-2-azure-cloud-shell-one-click)
+  - [Option 3: Terraform](#option-3-terraform)
+  - [Option 4: GitHub Actions](#option-4-github-actions-cicd)
+  - [Option 5: Azure DevOps Pipeline](#option-5-azure-devops-pipeline)
   - [Forking & Customization](#forking--customization)
 - [Post-Deployment Guide](#post-deployment-guide)
 - [Configuration](#configuration)
@@ -349,7 +350,13 @@ The SpyCloud CCF (Codeless Connector Framework) connector deploys 5 REST API pol
 
 ### Option 1: Azure Portal (Deploy to Azure)
 
+<div align="center">
+
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json)
+
+**Recommended for most users** — Launches the Azure Portal with a guided 8-step wizard.
+
+</div>
 
 1. Click the **Deploy to Azure** button above
 2. Select your **Subscription** and **Resource Group**
@@ -365,61 +372,87 @@ The SpyCloud CCF (Codeless Connector Framework) connector deploys 5 REST API pol
 4. Click **Review + Create**, then **Create**
 5. Complete [post-deployment steps](#post-deployment-guide)
 
-### Option 2: Azure Cloud Shell
+### Option 2: Azure Cloud Shell (One-Click)
+
+**One-liner auto-launch** — Opens Cloud Shell and runs the interactive deployment wizard:
+
+[![Launch Cloud Shell](https://img.shields.io/badge/Launch-Azure%20Cloud%20Shell-blue?logo=microsoft-azure)](https://shell.azure.com)
 
 ```bash
-# Clone the repository
+# One-liner: clone + run interactive guided deployment
+curl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/deploy-all.sh | bash
+```
+
+Or clone and run manually:
+
+```bash
 git clone https://github.com/iammrherb/SPYCLOUD-SENTINEL.git
 cd SPYCLOUD-SENTINEL
+chmod +x scripts/deploy-all.sh
+./scripts/deploy-all.sh
+```
 
-# Set variables
-RESOURCE_GROUP="rg-sentinel-spycloud"
-LOCATION="eastus"
-WORKSPACE="law-sentinel-prod"
+The interactive wizard guides you through 9 phases:
+1. Azure authentication
+2. Configuration (resource group, workspace, region, API key)
+3. Resource group creation
+4. ARM template deployment
+5. Content template finalization
+6. DCE/DCR resolution
+7. RBAC assignments (Monitoring Metrics Publisher)
+8. API permissions (MDE + Graph)
+9. Deployment verification
 
-# Deploy
-az deployment group create \
-  --resource-group $RESOURCE_GROUP \
-  --template-file azuredeploy.json \
-  --parameters workspace=$WORKSPACE \
-               deploymentRegion=$LOCATION \
-               deploymentMode=Full
+**Non-interactive mode** (CI/CD compatible):
+```bash
+./scripts/deploy-all.sh \
+  -g rg-spycloud-sentinel \
+  -w law-spycloud-prod \
+  -k YOUR_SPYCLOUD_API_KEY \
+  -l eastus \
+  --enable-rules \
+  --non-interactive
+```
 
-# Run post-deployment script
-chmod +x scripts/grant-permissions.sh
-./scripts/grant-permissions.sh
+### Option 3: Terraform
+
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+
+# Set API key via environment variable (recommended)
+export TF_VAR_spycloud_api_key="your-api-key"
+
+terraform init
+terraform plan
+terraform apply
 ```
 
 <details>
-<summary><strong>Full parameter file example</strong></summary>
+<summary><strong>terraform.tfvars example</strong></summary>
 
-```json
-{
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "workspace": { "value": "law-sentinel-prod" },
-    "deploymentMode": { "value": "Full" },
-    "enableCoreDetectionRules": { "value": true },
-    "enableO365EntraRules": { "value": true },
-    "enableForcePasswordResetPlaybook": { "value": true },
-    "enableRevokeSessionsPlaybook": { "value": true },
-    "enableIsolateDevicePlaybook": { "value": true },
-    "enableNotifySOCPlaybook": { "value": true },
-    "enableFullRemediationPlaybook": { "value": true },
-    "enableServiceNow": { "value": true },
-    "serviceNowInstanceUrl": { "value": "https://your-instance.service-now.com" },
-    "enableTeamsNotifications": { "value": true },
-    "teamsChannelWebhook": { "value": "https://outlook.office.com/webhook/..." },
-    "enableUEBA": { "value": true },
-    "enableFusionRule": { "value": true }
-  }
+```hcl
+subscription_id       = "00000000-0000-0000-0000-000000000000"
+resource_group_name   = "rg-spycloud-sentinel"
+location              = "eastus"
+workspace_name        = "law-spycloud-sentinel"
+create_new_workspace  = true
+enable_mde_playbook   = true
+enable_ca_playbook    = true
+enable_key_vault      = true
+enable_analytics_rules = true
+
+tags = {
+  Solution    = "SpyCloud-Sentinel"
+  ManagedBy   = "Terraform"
+  Environment = "Production"
 }
 ```
 
 </details>
 
-### Option 3: GitHub Actions CI/CD
+### Option 4: GitHub Actions CI/CD
 
 <details>
 <summary><strong>Complete workflow YAML</strong></summary>
@@ -495,7 +528,7 @@ jobs:
 
 </details>
 
-### Option 4: Azure DevOps Pipeline
+### Option 5: Azure DevOps Pipeline
 
 <details>
 <summary><strong>Pipeline YAML</strong></summary>
@@ -575,10 +608,16 @@ stages:
 | NotifyUser | Microsoft Graph | Mail.Send | `--scope Mail.Send` |
 | EnrichIncident | Sentinel | Sentinel Responder role | `az role assignment create` |
 
-**Or run the automated script:**
+**Or run the automated scripts:**
 ```bash
-./scripts/grant-permissions.sh
+# Grant all required permissions (MDE, Graph, RBAC)
+./scripts/post-deploy.sh -g YOUR_RG -w YOUR_WORKSPACE
+
+# Comprehensive deployment verification (10 checks)
+./scripts/verify-deployment.sh -g YOUR_RG -w YOUR_WORKSPACE
 ```
+
+The verification script checks all 10 components: workspace, Sentinel, DCE, DCR, custom tables (4), connector definition, connector pollers, Key Vault, playbooks (4), analytics rules, workbooks, and data flow status.
 
 ### 2. Enable Analytics Rules (Phased Approach)
 
