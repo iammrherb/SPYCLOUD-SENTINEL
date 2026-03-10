@@ -1260,6 +1260,93 @@
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
       "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudCompassApplications_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudCompassApplications_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "credential_count",
+              "type": "int"
+            },
+            {
+              "name": "cookie_count",
+              "type": "int"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
+              "name": "severity",
+              "type": "int"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "malware_family",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]",
+      "condition": "[parameters('enableCompass')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
       "name": "[concat(parameters('workspace'), '/SpyCloudCompassData_CL')]",
       "properties": {
         "schema": {
@@ -1387,6 +1474,110 @@
             },
             {
               "name": "spycloud_publish_date",
+              "type": "string"
+            },
+            {
+              "name": "malware_family",
+              "type": "string"
+            },
+            {
+              "name": "username",
+              "type": "string"
+            },
+            {
+              "name": "full_name",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "type": "string"
+            },
+            {
+              "name": "company_name",
+              "type": "string"
+            },
+            {
+              "name": "job_title",
+              "type": "string"
+            },
+            {
+              "name": "record_type",
+              "type": "string"
+            },
+            {
+              "name": "account_type",
+              "type": "string"
+            },
+            {
+              "name": "breach_date",
+              "type": "string"
+            },
+            {
+              "name": "breach_description",
+              "type": "string"
+            },
+            {
+              "name": "stolen_cookies",
+              "type": "dynamic"
+            },
+            {
+              "name": "autofill_fields",
+              "type": "dynamic"
+            },
+            {
+              "name": "crypto_wallets",
+              "type": "dynamic"
+            },
+            {
+              "name": "installed_software",
+              "type": "dynamic"
+            },
+            {
+              "name": "browser_history_domains",
+              "type": "dynamic"
+            },
+            {
+              "name": "bot_id",
+              "type": "string"
+            },
+            {
+              "name": "campaign_id",
+              "type": "string"
+            },
+            {
+              "name": "c2_url",
+              "type": "string"
+            },
+            {
+              "name": "infection_build_id",
+              "type": "string"
+            },
+            {
+              "name": "hardware_id",
+              "type": "string"
+            },
+            {
+              "name": "screenshot_available",
+              "type": "boolean"
+            },
+            {
+              "name": "keylog_available",
+              "type": "boolean"
+            },
+            {
+              "name": "file_exfiltration",
+              "type": "boolean"
+            },
+            {
+              "name": "salt",
+              "type": "string"
+            },
+            {
+              "name": "credit_card_number",
+              "type": "string"
+            },
+            {
+              "name": "credit_card_expiration",
               "type": "string"
             }
           ]
@@ -1961,6 +2152,110 @@
               {
                 "name": "spycloud_publish_date",
                 "type": "string"
+              },
+              {
+                "name": "malware_family",
+                "type": "string"
+              },
+              {
+                "name": "username",
+                "type": "string"
+              },
+              {
+                "name": "full_name",
+                "type": "string"
+              },
+              {
+                "name": "phone",
+                "type": "string"
+              },
+              {
+                "name": "company_name",
+                "type": "string"
+              },
+              {
+                "name": "job_title",
+                "type": "string"
+              },
+              {
+                "name": "record_type",
+                "type": "string"
+              },
+              {
+                "name": "account_type",
+                "type": "string"
+              },
+              {
+                "name": "breach_date",
+                "type": "string"
+              },
+              {
+                "name": "breach_description",
+                "type": "string"
+              },
+              {
+                "name": "stolen_cookies",
+                "type": "dynamic"
+              },
+              {
+                "name": "autofill_fields",
+                "type": "dynamic"
+              },
+              {
+                "name": "crypto_wallets",
+                "type": "dynamic"
+              },
+              {
+                "name": "installed_software",
+                "type": "dynamic"
+              },
+              {
+                "name": "browser_history_domains",
+                "type": "dynamic"
+              },
+              {
+                "name": "bot_id",
+                "type": "string"
+              },
+              {
+                "name": "campaign_id",
+                "type": "string"
+              },
+              {
+                "name": "c2_url",
+                "type": "string"
+              },
+              {
+                "name": "infection_build_id",
+                "type": "string"
+              },
+              {
+                "name": "hardware_id",
+                "type": "string"
+              },
+              {
+                "name": "screenshot_available",
+                "type": "boolean"
+              },
+              {
+                "name": "keylog_available",
+                "type": "boolean"
+              },
+              {
+                "name": "file_exfiltration",
+                "type": "boolean"
+              },
+              {
+                "name": "salt",
+                "type": "string"
+              },
+              {
+                "name": "credit_card_number",
+                "type": "string"
+              },
+              {
+                "name": "credit_card_expiration",
+                "type": "string"
               }
             ]
           },
@@ -1997,6 +2292,78 @@
               {
                 "name": "application_count",
                 "type": "int"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudCompassApplications_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
+              },
+              {
+                "name": "credential_count",
+                "type": "int"
+              },
+              {
+                "name": "cookie_count",
+                "type": "int"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "malware_family",
+                "type": "string"
               },
               {
                 "name": "spycloud_publish_date",
@@ -2149,7 +2516,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
+            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend stolen_cookies = iff(gettype(stolen_cookies) == 'string', parse_json(stolen_cookies), stolen_cookies) | extend autofill_fields = iff(gettype(autofill_fields) == 'string', parse_json(autofill_fields), autofill_fields) | extend crypto_wallets = iff(gettype(crypto_wallets) == 'string', parse_json(crypto_wallets), crypto_wallets) | extend installed_software = iff(gettype(installed_software) == 'string', parse_json(installed_software), installed_software) | extend browser_history_domains = iff(gettype(browser_history_domains) == 'string', parse_json(browser_history_domains), browser_history_domains) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain)) | extend screenshot_available = tobool(screenshot_available) | extend keylog_available = tobool(keylog_available) | extend file_exfiltration = tobool(file_exfiltration)",
             "outputStream": "Custom-SpyCloudCompassData_CL"
           },
           {
@@ -2161,6 +2528,16 @@
             ],
             "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend application_count = toint(application_count) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses)",
             "outputStream": "Custom-SpyCloudCompassDevices_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudCompassApplications_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend severity = toint(severity) | extend credential_count = toint(credential_count) | extend cookie_count = toint(cookie_count) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
+            "outputStream": "Custom-SpyCloudCompassApplications_CL"
           },
           {
             "streams": [
@@ -2190,6 +2567,7 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassDevices_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassApplications_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassData_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachCatalog_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachWatchlist_CL')]"
@@ -2304,6 +2682,11 @@
               "metricName": "Total Compass Devices",
               "legend": "SpyCloud Compass Devices",
               "baseQuery": "SpyCloudCompassDevices_CL"
+            },
+            {
+              "metricName": "Total Compass Applications",
+              "legend": "SpyCloud Compass Applications",
+              "baseQuery": "SpyCloudCompassApplications_CL"
             }
           ],
           "sampleQueries": [
@@ -2356,12 +2739,28 @@
               "query": "union\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Logs'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA Logs')\n| project Table, Records, Latest\n| order by Table asc"
             },
             {
-              "description": "Compass Exposures by Severity (Enterprise+ Only)",
-              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d)\n| summarize Count=count() by severity\n| order by severity asc"
+              "description": "Compass Exposures by Severity — with Malware Attribution (Enterprise+ Only)",
+              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d)\n| summarize Count=count(), MalwareFamilies=make_set(malware_family), HasCookies=countif(array_length(stolen_cookies) > 0), HasAutofill=countif(array_length(autofill_fields) > 0) by severity\n| order by severity asc"
+            },
+            {
+              "description": "Compass Stolen Cookies — Session Hijack Risk (Enterprise+ Only)",
+              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d) and array_length(stolen_cookies) > 0\n| mv-expand cookie = stolen_cookies\n| project TimeGenerated, email, target_domain, CookieDomain=tostring(cookie.domain), CookieName=tostring(cookie.name), malware_family, severity\n| take 100"
+            },
+            {
+              "description": "Compass C2 Infrastructure — Active Malware Callbacks",
+              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(30d) and isnotempty(c2_url)\n| summarize Victims=dcount(email), Devices=dcount(infected_machine_id) by c2_url, malware_family, campaign_id\n| order by Victims desc"
             },
             {
               "description": "Compass Infected Devices — Top 25 by Application Count",
               "query": "SpyCloudCompassDevices_CL\n| where TimeGenerated > ago(30d)\n| top 25 by application_count desc\n| project TimeGenerated, user_hostname, user_os, ip_addresses, application_count, infected_time"
+            },
+            {
+              "description": "Compass Applications — Most Targeted Applications per Device",
+              "query": "SpyCloudCompassApplications_CL\n| where TimeGenerated > ago(30d)\n| summarize TotalCredentials=sum(credential_count), TotalCookies=sum(cookie_count), DeviceCount=dcount(infected_machine_id) by target_domain\n| order by TotalCredentials desc\n| take 50"
+            },
+            {
+              "description": "Compass Applications — Devices with Stolen Corporate App Credentials",
+              "query": "SpyCloudCompassApplications_CL\n| where TimeGenerated > ago(30d) and credential_count > 0\n| project TimeGenerated, infected_machine_id, user_hostname, target_domain, target_url, credential_count, cookie_count, malware_family, severity\n| order by credential_count desc\n| take 100"
             },
             {
               "description": "Compass + Watchlist Cross-Reference — Shared Exposures",
@@ -2392,6 +2791,10 @@
             {
               "name": "SpyCloudCompassDevices_CL",
               "lastDataReceivedQuery": "SpyCloudCompassDevices_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCompassApplications_CL",
+              "lastDataReceivedQuery": "SpyCloudCompassApplications_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
             }
           ],
           "connectivityCriteria": [
@@ -2447,7 +2850,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "| Table | Description | Columns | API Source | License |\n|-------|-------------|---------|------------|--------|\n| `SpyCloudBreachWatchlist_CL` | Employee credential exposures — passwords, PII, device forensics, infostealer artifacts, financial data, social media profiles | 73 | Enterprise Watchlist API | Enterprise |\n| `SpyCloudBreachCatalog_CL` | Breach source metadata — title, description, category, record counts, confidence scores, acquisition dates | 13 | Enterprise Catalog API | Enterprise |\n| `SpyCloudCompassData_CL` | Consumer/partner identity exposures with enriched infostealer data, stolen cookies, and session tokens | 29 | Compass Data API | Enterprise+ |\n| `SpyCloudCompassDevices_CL` | Infected device fingerprints — malware artifacts, installed software, device hardware profiles | 8 | Compass Devices API | Enterprise+ |\n| `Spycloud_MDE_Logs_CL` | MDE device isolation, tagging, and IOC submission audit trail from automated playbooks | 19 | Playbook Output | Enterprise |\n| `SpyCloud_ConditionalAccessLogs_CL` | Password resets, session revocations, CA group assignments, and account disablements from playbooks | 14 | Playbook Output | Enterprise |\n\n**Total: 156 columns across 6 tables**"
+                    "text": "| Table | Description | Columns | API Source | License |\n|-------|-------------|---------|------------|--------|\n| `SpyCloudBreachWatchlist_CL` | Employee credential exposures — passwords, PII, device forensics, infostealer artifacts, financial data, social media profiles | 73 | Enterprise Watchlist API | Enterprise |\n| `SpyCloudBreachCatalog_CL` | Breach source metadata — title, description, category, record counts, confidence scores, acquisition dates | 13 | Enterprise Catalog API | Enterprise |\n| `SpyCloudCompassData_CL` | Full Compass infostealer data — stolen cookies, autofill, crypto wallets, C2 URLs, malware family, browser history, installed software, keylogger/screenshot indicators | 55 | Compass Data API | Enterprise+ |\n| `SpyCloudCompassDevices_CL` | Infected device fingerprints — hostname, OS, IP addresses, application counts, infection timeline | 8 | Compass Devices API | Enterprise+ |\n| `SpyCloudCompassApplications_CL` | Per-application stolen credential and cookie counts per infected device — target URLs, domains, credential/cookie tallies, malware attribution | 17 | Compass Applications API | Enterprise+ |\n| `Spycloud_MDE_Logs_CL` | MDE device isolation, tagging, and IOC submission audit trail from automated playbooks | 19 | Playbook Output | Enterprise |\n| `SpyCloud_ConditionalAccessLogs_CL` | Password resets, session revocations, CA group assignments, and account disablements from playbooks | 14 | Playbook Output | Enterprise |\n\n**Total: 199 columns across 7 tables**"
                   }
                 }
               ]
@@ -3231,7 +3634,10 @@
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
                   "httpMethod": "GET",
-                  "queryParameters": {},
+                  "queryParameters": {
+                    "severity": "[[join(parameters('severity'), ',')]",
+                    "type": "corporate,infected"
+                  },
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
@@ -3279,7 +3685,59 @@
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
                   "httpMethod": "GET",
-                  "queryParameters": {},
+                  "queryParameters": {
+                    "severity": "[[join(parameters('severity'), ',')]"
+                  },
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "startTimeAttributeName": "since",
+                  "rateLimitQPS": 2,
+                  "headers": {
+                    "Accept": "application/json"
+                  },
+                  "queryTimeFormat": "yyyy-MM-dd"
+                },
+                "response": {
+                  "eventsJsonPaths": [
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
+                }
+              },
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+              "apiVersion": "2023-12-01-preview",
+              "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassApplicationsConnector')]",
+              "kind": "RestApiPoller",
+              "properties": {
+                "connectorDefinitionName": "SpyCloudCCF",
+                "dcrConfig": {
+                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "streamName": "Custom-SpyCloudCompassApplications_CL"
+                },
+                "dataType": "SpyCloud CompassApplications",
+                "auth": {
+                  "type": "APIKey",
+                  "ApiKeyName": "X-Api-Key",
+                  "ApiKey": "[[parameters('apiKey')]"
+                },
+                "request": {
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications",
+                  "httpMethod": "GET",
+                  "queryParameters": {
+                    "severity": "[[join(parameters('severity'), ',')]"
+                  },
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
