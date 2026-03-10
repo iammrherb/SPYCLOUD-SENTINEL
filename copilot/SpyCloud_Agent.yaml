@@ -1,7 +1,7 @@
 Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
-  DisplayName: SpyCloud Threat Intelligence Agent
-  Description: Autonomous Security Copilot agent for SpyCloud dark web threat intelligence spanning 96 resources including 44 analytics rules (38 scheduled, 1 Fusion, 5 MSIC), 15 hunting queries,
+  DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
+  Description: Autonomous Security Copilot agent for SpyCloud darknet & identity threat exposure intelligence spanning 96 resources including 44 analytics rules (38 scheduled, 1 Fusion, 5 MSIC), 15 hunting queries,
     5 playbooks (MDE, Conditional Access, Credential Response, MDE Blocklist, TI Enrichment), 4 watchlists (VIP/Executive, IOC Blocklist, Approved Domains, High-Value Assets), 4 automation rules,
     4 Sentinel settings (UEBA, Anomalies, EyesOn, EntityAnalytics), and 6 notification channels (Slack, Teams, Email, ServiceNow, Jira, Azure DevOps). Investigates compromised credentials,
     infostealer infections, exposed PII, UEBA behavioral anomalies, Fusion multistage attacks, TI enrichment and IOC analysis, session cookie theft, lateral movement, data exfiltration,
@@ -35,7 +35,7 @@ SkillGroups:
   Skills:
   - Name: SpyCloudInvestigationAgent
     DisplayName: SpyCloud Investigation Agent
-    Description: Interactive investigation agent for SpyCloud dark web threat intelligence. Autonomously triages compromised credentials, infostealer infections, exposed PII, and remediation status across
+    Description: Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence. Autonomously triages compromised credentials, infostealer infections, exposed PII, and remediation status across
       Sentinel, Defender XDR, and Entra ID. Produces rich, detailed reports with data tables, severity indicators, timelines, and actionable pivot suggestions for continued investigation.
     Interfaces:
     - InteractiveAgent
@@ -1933,8 +1933,8 @@ SkillGroups:
         \ > ago(7d) and ForcedPasswordResetOnNextSignIn == false | summarize Failures=count() | extend Check=\"CA reset failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\"))\n| project Check, Status"
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
-  DisplayName: SpyCloud Threat Intelligence Agent
-  Description: Interactive investigation agent for SpyCloud dark web threat intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families
+  DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
+  Description: Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families
     for threat hunting, or request an organization-wide exposure overview. The agent orchestrates 28 KQL skills across 4 Sentinel tables (118 columns), GPT-4.1 analysis, and produces rich investigation
     reports with data tables, timelines, severity indicators, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Supports all breach categories including
     infostealers, combo lists, phishing, exfiltration, and scraping.

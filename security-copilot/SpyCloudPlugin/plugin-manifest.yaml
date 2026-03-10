@@ -1,9 +1,9 @@
 Descriptor:
   Name: SpyCloudAPIPlugin
-  DisplayName: SpyCloud Dark Web Threat Intelligence
+  DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence
   Description: >
     Production-grade Microsoft Security Copilot plugin providing direct access
-    to the SpyCloud API for real-time dark web threat intelligence. Covers 12
+    to the SpyCloud API for real-time darknet & identity threat exposure intelligence. Covers 12
     skills across the Enterprise Breach, Compass Investigation, and Identity
     Exposure APIs. Enables SOC analysts and incident responders to look up
     compromised credentials by email, domain, IP, username, or password; perform
