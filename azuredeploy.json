@@ -7347,7 +7347,7 @@
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
-      "apiVersion": "2023-02-01",
+      "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoResponse'))]",
       "location": "[parameters('deploymentRegion')]",
       "condition": "[and(parameters('enableAutomationRule'), parameters('enableCredResponsePlaybook'))]",
@@ -7403,7 +7403,8 @@
               ]
             }
           }
-        ]
+        ],
+        "isEnabled": true
       }
     },
     {
@@ -7759,7 +7760,8 @@
               "status": "Active"
             }
           }
-        ]
+        ],
+        "isEnabled": true
       }
     },
     {
@@ -7812,7 +7814,8 @@
               ]
             }
           }
-        ]
+        ],
+        "isEnabled": true
       }
     },
     {
@@ -7870,7 +7873,8 @@
               ]
             }
           }
-        ]
+        ],
+        "isEnabled": true
       }
     },
     {
