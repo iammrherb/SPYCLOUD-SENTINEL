@@ -2,8 +2,8 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
-    "title": "SpyCloud Sentinel \u2014 Unified Deployment",
-    "description": "Single-template deployment for the complete SpyCloud Threat Intelligence integration with Microsoft Sentinel. Includes: CCF data connector (5 pollers), 6 custom tables, 5 playbooks, 43+ analytics rules, Fusion multistage detection, 5 MSIC rules, UEBA/Anomaly/EyesOn settings, 3 automation rules, 15 hunting queries, 4 watchlists, TI enrichment, and comprehensive connector recommendations.",
+    "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel",
+    "description": "Complete deployment of SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel. Includes: CCF data connector (5 REST API pollers), 6 custom tables, 10 remediation playbooks, 49 analytics rules, Fusion multistage ML detection, MSIC rules, UEBA/Anomaly settings, 4 automation rules, 28 hunting queries, 4 watchlists, 3 workbooks, TI enrichment playbook, and Security Copilot integration (85 KQL skills + 12 API skills + interactive agent).",
     "version": "6.0.0",
     "author": "SpyCloud"
   },
@@ -952,8 +952,8 @@
   },
   "variables": {
     "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
-    "_solutionName": "SpyCloud Threat Intelligence Connector",
-    "_solutionVersion": "3.5.1",
+    "_solutionName": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
+    "_solutionVersion": "6.0.0",
     "_solutionAuthor": "SpyCloud",
     "_solutionId": "azuresentinel.azure-sentinel-solution-spycloud-threatintel",
     "dataConnectorVersionConnectorDefinition": "1.1.0",
@@ -2263,7 +2263,7 @@
           "id": "SpyCloudCCF",
           "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "## SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel\n\nThe **SpyCloud Connector** ingests recaptured darknet data into Microsoft Sentinel via the Codeless Connector Framework (CCF). SpyCloud monitors criminal underground markets, botnets, and infostealer malware to recapture stolen credentials, session cookies, PII, and device fingerprints \u2014 often months before they appear in public breach databases.\n\n---\n\n### Data Pollers\n\n| # | Poller | Target Table | Description | API Tier |\n|---|--------|-------------|-------------|----------|\n| 1 | Watchlist (New) | `SpyCloudBreachWatchlist_CL` | New employee credential exposures | Enterprise |\n| 2 | Watchlist (Modified) | `SpyCloudBreachWatchlist_CL` | Updated records with new sightings | Enterprise |\n| 3 | Breach Catalog | `SpyCloudBreachCatalog_CL` | Breach metadata, malware families, confidence scores | Enterprise |\n| 4 | Compass Data | `SpyCloudCompassData_CL` | Consumer/partner identity exposures | Enterprise+ |\n| 5 | Compass Devices | `SpyCloudCompassDevices_CL` | Infected device fingerprints and malware artifacts | Enterprise+ |\n\n### Severity Levels\n\n| Level | Category | Meaning | Recommended Action |\n|-------|----------|---------|-------------------|\n| **25** | Critical | Session cookies / MFA bypass tokens stolen by infostealer | Immediate: block access, revoke sessions, isolate device |\n| **20** | High | Credentials stolen by infostealer malware | Force password reset, revoke sessions, enforce MFA |\n| **5** | Medium | Credentials found in data breach with PII | Reset password, monitor sign-ins |\n| **2** | Low | Credentials found in data breach (no PII) | Notify user, recommend password change |\n\n### Validation & Health Check\n\nAfter deployment, verify data flow with these queries in Log Analytics:\n\n```\n// Check all tables for data\nunion isfuzzy=true\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest\n```\n\n```\n// Check connector health\nSentinelHealth\n| where TimeGenerated > ago(24h)\n| where SentinelResourceType == 'Data connector'\n| where SentinelResourceName contains 'SpyCloud'\n| project TimeGenerated, Status, Description\n```\n\n### Prerequisites\n\n| Requirement | Details |\n|-------------|---------|\n| **SpyCloud API Key** | Enterprise tier from [portal.spycloud.com](https://portal.spycloud.com) |\n| **Azure RBAC** | Microsoft Sentinel Contributor + Log Analytics Contributor |\n| **Network** | Outbound HTTPS (443) to `api.spycloud.io` |\n| **Workspace** | Log Analytics workspace with Microsoft Sentinel enabled |\n\n### Post-Deployment Steps\n\n1. **Verify data ingestion** \u2014 Run the health check queries above. Data should appear within 15 minutes.\n2. **Enable analytics rules** \u2014 Navigate to Sentinel > Analytics > filter by 'SpyCloud' > enable rules.\n3. **Grant playbook permissions** \u2014 Run `scripts/grant-permissions.sh` or manually grant API permissions via Enterprise Applications.\n4. **Populate watchlists** \u2014 Add VIP emails, approved domains, and IOC blocklists.\n\n### Troubleshooting\n\n| Issue | Cause | Fix |\n|-------|-------|-----|\n| No data after 15 min | Invalid API key | Test: `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` \u2014 expect HTTP 200 |\n| 401 Unauthorized | Wrong API tier | Need Enterprise tier key from portal.spycloud.com |\n| Compass tables empty | Missing license | Compass requires Enterprise+ subscription |\n| Data stops flowing | Rate limiting | Check DCR metrics in Azure Monitor, increase polling interval |\n| Duplicate records | Overlapping lookback | Normal \u2014 deduplicate: `summarize arg_max(TimeGenerated, *) by document_id` |\n\n### Resources Deployed\n\n- **6 Custom Tables** with 118+ columns\n- **Data Collection Endpoint (DCE)** for HTTPS ingestion\n- **Data Collection Rule (DCR)** with KQL transforms\n- **49 Analytics Rules** across 6 categories (all deploy disabled)\n- **10 Remediation Playbooks** (Logic Apps with managed identities)\n- **28 Hunting Queries** covering all MITRE ATT&CK tactics\n- **4 Watchlists** (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- **2 Workbooks** (Executive Dashboard, SOC Operations)\n\n**Requires:** SpyCloud Enterprise or Enterprise+ API key \u2014 [portal.spycloud.com](https://portal.spycloud.com)",
+          "descriptionMarkdown": "## SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel\n\nThe **SpyCloud Connector** ingests recaptured darknet data into Microsoft Sentinel via the Codeless Connector Framework (CCF). SpyCloud monitors criminal underground markets, botnets, and infostealer malware to recapture stolen credentials, session cookies, PII, and device fingerprints \u2014 often months before they appear in public breach databases.\n\n---\n\n### Data Pollers\n\n| # | Poller | Target Table | Description | API Tier |\n|---|--------|-------------|-------------|----------|\n| 1 | Watchlist (New) | `SpyCloudBreachWatchlist_CL` | New employee credential exposures | Enterprise |\n| 2 | Watchlist (Modified) | `SpyCloudBreachWatchlist_CL` | Updated records with new sightings | Enterprise |\n| 3 | Breach Catalog | `SpyCloudBreachCatalog_CL` | Breach metadata, malware families, confidence scores | Enterprise |\n| 4 | Compass Data | `SpyCloudCompassData_CL` | Consumer/partner identity exposures | Enterprise+ |\n| 5 | Compass Devices | `SpyCloudCompassDevices_CL` | Infected device fingerprints and malware artifacts | Enterprise+ |\n\n### Severity Levels\n\n| Level | Category | Meaning | Recommended Action |\n|-------|----------|---------|-------------------|\n| **25** | Critical | Session cookies / MFA bypass tokens stolen by infostealer | Immediate: block access, revoke sessions, isolate device |\n| **20** | High | Credentials stolen by infostealer malware | Force password reset, revoke sessions, enforce MFA |\n| **5** | Medium | Credentials found in data breach with PII | Reset password, monitor sign-ins |\n| **2** | Low | Credentials found in data breach (no PII) | Notify user, recommend password change |\n\n### Validation & Health Check\n\nAfter deployment, verify data flow with these queries in Log Analytics:\n\n```\n// Check all tables for data\nunion isfuzzy=true\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest\n```\n\n```\n// Check connector health\nSentinelHealth\n| where TimeGenerated > ago(24h)\n| where SentinelResourceType == 'Data connector'\n| where SentinelResourceName contains 'SpyCloud'\n| project TimeGenerated, Status, Description\n```\n\n### Prerequisites\n\n| Requirement | Details |\n|-------------|---------|\n| **SpyCloud API Key** | Enterprise tier from [portal.spycloud.com](https://portal.spycloud.com) |\n| **Azure RBAC** | Microsoft Sentinel Contributor + Log Analytics Contributor |\n| **Network** | Outbound HTTPS (443) to `api.spycloud.io` |\n| **Workspace** | Log Analytics workspace with Microsoft Sentinel enabled |\n\n### Post-Deployment Steps\n\n1. **Verify data ingestion** \u2014 Run the health check queries above. Data should appear within 15 minutes.\n2. **Enable analytics rules** \u2014 Navigate to Sentinel > Analytics > filter by 'SpyCloud' > enable rules.\n3. **Grant playbook permissions** \u2014 Run `scripts/grant-permissions.sh` or manually grant API permissions via Enterprise Applications.\n4. **Populate watchlists** \u2014 Add VIP emails, approved domains, and IOC blocklists.\n\n### Troubleshooting\n\n| Issue | Cause | Fix |\n|-------|-------|-----|\n| No data after 15 min | Invalid API key | Test: `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` \u2014 expect HTTP 200 |\n| 401 Unauthorized | Wrong API tier | Need Enterprise tier key from portal.spycloud.com |\n| Compass tables empty | Missing license | Compass requires Enterprise+ subscription |\n| Data stops flowing | Rate limiting | Check DCR metrics in Azure Monitor, increase polling interval |\n| Duplicate records | Overlapping lookback | Normal \u2014 deduplicate: `summarize arg_max(TimeGenerated, *) by document_id` |\n\n### Resources Deployed\n\n- **6 Custom Tables** with 118+ columns\n- **Data Collection Endpoint (DCE)** for HTTPS ingestion\n- **Data Collection Rule (DCR)** with KQL transforms\n- **49 Analytics Rules** across 6 categories (all deploy disabled)\n- **10 Remediation Playbooks** (Logic Apps with managed identities)\n- **28 Hunting Queries** covering all MITRE ATT&CK tactics\n- **4 Watchlists** (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- **3 Workbooks** (Executive Dashboard, SOC Operations, Threat Intelligence)\n\n**Requires:** SpyCloud Enterprise or Enterprise+ API key \u2014 [portal.spycloud.com](https://portal.spycloud.com)",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -7437,7 +7437,6 @@
         "description": "Automatically sets severity and adds investigation tasks for SpyCloud credential exposure incidents. To auto-trigger playbooks, configure the RunPlaybook action manually after granting Microsoft Sentinel Automation Contributor role to the playbook's managed identity.",
         "order": 1,
         "triggeringLogic": {
-          "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -7478,14 +7477,6 @@
                   "labelName": "CredentialTheft"
                 }
               ]
-            }
-          },
-          {
-            "order": 2,
-            "actionType": "AddIncidentTask",
-            "actionConfiguration": {
-              "title": "Investigate and remediate credential exposure",
-              "description": "1. Review SpyCloud breach data for exposed credentials\n2. Check if user has active sessions (SigninLogs)\n3. Run credential response playbook manually OR configure automation\n4. Force password reset + revoke sessions\n5. Check for lateral movement indicators\n\nTo auto-trigger playbooks: Sentinel > Automation > Edit this rule > Add RunPlaybook action\nPre-req: Grant 'Microsoft Sentinel Automation Contributor' role to the playbook managed identity"
             }
           }
         ]
@@ -7789,9 +7780,7 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
-      "properties": {
-        "isEnabled": true
-      }
+      "properties": {}
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/settings",
@@ -7803,9 +7792,7 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
-      "properties": {
-        "isEnabled": true
-      }
+      "properties": {}
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
@@ -7823,10 +7810,12 @@
         "sourceSettings": [
           {
             "sourceName": "Anomalies",
-            "sourceSubTypes": []
+            "sourceSubTypes": [],
+            "enabled": true
           },
           {
             "sourceName": "Alert providers",
+            "enabled": true,
             "sourceSubTypes": [
               {
                 "sourceSubTypeName": "Microsoft Cloud App Security",
@@ -8016,6 +8005,7 @@
           },
           {
             "sourceName": "Raw logs from other sources",
+            "enabled": true,
             "sourceSubTypes": [
               {
                 "sourceSubTypeName": "Palo Alto Networks",
@@ -8161,7 +8151,6 @@
         "description": "Automatically sets severity to High and assigns owner tag for SpyCloud incidents involving severity 25 (critical infostealer) or plaintext password exposure. Ensures immediate SOC attention.",
         "order": 2,
         "triggeringLogic": {
-          "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -8188,14 +8177,6 @@
               "severity": "High",
               "status": "Active"
             }
-          },
-          {
-            "order": 2,
-            "actionType": "AddIncidentTask",
-            "actionConfiguration": {
-              "title": "Verify credential exposure and initiate password reset",
-              "description": "1. Check SpyCloud breach data for plaintext credentials\n2. Verify if user has active sessions\n3. Force password reset via CA playbook\n4. Revoke all active sessions\n5. Check for lateral movement indicators"
-            }
           }
         ]
       }
@@ -8214,7 +8195,6 @@
         "description": "Automatically adds investigation tasks for incidents involving infected devices or device reinfection patterns detected by SpyCloud Compass.",
         "order": 3,
         "triggeringLogic": {
-          "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -8237,18 +8217,18 @@
         "actions": [
           {
             "order": 1,
-            "actionType": "AddIncidentTask",
+            "actionType": "ModifyProperties",
             "actionConfiguration": {
-              "title": "Investigate infected device and isolate if needed",
-              "description": "1. Look up infected_machine_id in SpyCloudBreachWatchlist_CL\n2. Cross-reference with MDE DeviceInfo table\n3. Check for active malware indicators in MDE\n4. Isolate device if infection is confirmed\n5. Scan device for persistence mechanisms\n6. Check if user credentials were exfiltrated"
-            }
-          },
-          {
-            "order": 2,
-            "actionType": "AddIncidentTask",
-            "actionConfiguration": {
-              "title": "Reset all credentials used on infected device",
-              "description": "1. Query SpyCloud for all credentials associated with the infected_machine_id\n2. Force password reset for each affected user\n3. Revoke all OAuth tokens and refresh tokens\n4. Check for cookie/session theft indicators\n5. Enable step-up authentication for affected accounts"
+              "severity": "High",
+              "status": "Active",
+              "labels": [
+                {
+                  "labelName": "SpyCloud-DeviceInfection"
+                },
+                {
+                  "labelName": "InvestigateDevice"
+                }
+              ]
             }
           }
         ]
@@ -8268,7 +8248,6 @@
         "description": "Automatically closes informational-severity incidents (e.g., new malware family in catalog, AV-present-but-failed) after tagging them for tracking. Reduces SOC noise while preserving audit trail.",
         "order": 10,
         "triggeringLogic": {
-          "isEnabled": false,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -8595,6 +8574,10 @@
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "contentVersion": "1.0.0.0",
           "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            },
             "VirusTotalApiKey": {
               "defaultValue": "",
               "type": "SecureString"

@@ -89,7 +89,7 @@
               |   Automated Response  +------>+   Reporting            |
               |                       |       |                        |
               |   10 Playbooks        |       |   3 Workbooks          |
-              |   - Reset / Revoke    |       |   85 Copilot Skills   |
+              |   - Reset / Revoke    |       |   97 Copilot Skills   |
               |   - Isolate / Block   |       |   ServiceNow / Jira   |
               |   - Notify / Enrich   |       |   Teams / Slack       |
               |                       |       |                        |
@@ -138,7 +138,7 @@ graph LR
 
     subgraph REPORT["Reporting"]
         WB["3 Workbooks"]
-        CP["Security Copilot<br/>85 Skills"]
+        CP["Security Copilot<br/>97 Skills + Agent"]
         TK["ServiceNow / Jira<br/>Teams / Slack"]
     end
 
@@ -270,10 +270,11 @@ gh workflow run deploy.yml \
 | **Playbooks** | 10 | Logic App workflows with managed identity for automated response |
 | **Workbooks** | 3 | Executive, Threat Intel, and SOC Operations dashboards |
 | **Hunting Queries** | 28 | KQL queries for proactive threat hunting |
-| **Copilot Skills** | 85 | Security Copilot promptbook skills |
+| **Copilot Skills** | 97 | 85 KQL promptbook skills + 12 direct API skills |
+| **Copilot Agent** | 1 | Interactive autonomous investigation agent |
 | **Custom Tables** | 6 | Dedicated Log Analytics tables for SpyCloud data |
 | **API Pollers** | 5 | CCF connector streams for each SpyCloud API endpoint |
-| **Notebooks** | 2 | Jupyter notebooks for incident triage and threat landscape analysis |
+| **Notebooks** | 3 | Incident triage, threat hunting, and threat landscape analysis |
 
 </div>
 
@@ -343,11 +344,12 @@ Deployed via the `hunting-queries.json` template.
 </details>
 
 <details>
-<summary><strong>2 Notebooks</strong></summary>
+<summary><strong>3 Notebooks</strong></summary>
 
 | Notebook | Purpose |
 |----------|---------|
 | `SpyCloud-Incident-Triage.ipynb` | Guided investigation for SpyCloud incidents with enrichment, timeline reconstruction, and remediation recommendations |
+| `SpyCloud-ThreatHunting.ipynb` | 8 proactive threat hunting scenarios covering credential reuse, device reinfection, lateral movement, and session hijacking |
 | `SpyCloud-Threat-Landscape.ipynb` | Organizational threat landscape analysis with exposure trends, malware family breakdowns, and risk scoring |
 
 </details>
@@ -367,7 +369,7 @@ Deployed via the `hunting-queries.json` template.
 | Firewall integration | **Yes** | Fortinet + Palo Alto block rules |
 | UEBA correlation | **Yes** | Cross-reference exposures with behavioral anomalies |
 | Fusion ML multi-stage detection | **Yes** | Patented ML correlates low-fidelity signals into high-confidence incidents |
-| Security Copilot skills | **Yes** | 85 promptbook skills for natural-language investigation |
+| Security Copilot integration | **Yes** | 97 skills (85 KQL + 12 API) + autonomous investigation agent |
 | Terraform module | **Yes** | Full IaC alternative in `terraform/` |
 | GitHub Actions CI/CD | **Yes** | Validate + Deploy + Configure pipeline |
 | Key Vault secret storage | **Yes** | Optional secure storage for API keys |
@@ -534,23 +536,53 @@ All workbooks are deployed via the ARM template when `enableWorkbook` is set to 
 
 ## Security Copilot Integration
 
-SpyCloud Sentinel includes **85 Security Copilot skills** that enable natural-language investigation of breach data directly from the Copilot interface.
+SpyCloud Sentinel includes **three Security Copilot integrations** in the unified `copilot/` directory, providing **97 skills + 1 autonomous investigation agent** for natural-language investigation of darknet threat exposure data.
 
-**Capabilities include:**
+<details>
+<summary><strong>All files in <code>copilot/</code></strong></summary>
+
+| File | Type | Skills | Description |
+|------|:----:|:------:|-------------|
+| `SpyCloud_Plugin.yaml` | KQL Plugin | 85 | Promptbook skills querying 6 Sentinel custom tables for user investigation, device forensics, breach catalog, UEBA correlation, remediation audit, executive reporting, and more |
+| `SpyCloud_API_Plugin.yaml` | API Plugin | 12 | Direct REST API skills calling SpyCloud Enterprise, Compass, and Identity APIs for real-time lookups by email, domain, IP, username, or password |
+| `SpyCloud_API_Plugin_OpenAPI.yaml` | OpenAPI Spec | -- | OpenAPI 3.0 specification backing the API Plugin |
+| `SpyCloud_Agent.yaml` | Agent | 1 | Autonomous interactive investigation agent that triages incidents, pivots across data sources, and produces rich investigation reports |
+
+</details>
+
+**Example prompts:**
 
 - "Show me all users exposed in the last 24 hours with severity 25"
 - "What malware families have targeted our organization this quarter?"
 - "Is this user's device still compromised? Show remediation status."
 - "Summarize the breach exposure for user@company.com"
 - "Which exposed credentials have not been remediated within SLA?"
+- "Look up SpyCloud breach data for this email" *(API Plugin)*
+- "Investigate this user's full dark web exposure" *(Agent)*
 
 <details>
 <summary><strong>Setup</strong></summary>
 
-1. Navigate to **Security Copilot > Settings > Plugins**
-2. Upload the SpyCloud plugin manifest from the `copilot/` directory
-3. Skills become available in Copilot promptbooks and standalone prompts
-4. No additional licensing beyond Security Copilot is required
+**KQL Plugin (queries Sentinel tables -- no API key needed):**
+
+1. Navigate to **Security Copilot > Settings > Plugins > Add Plugin**
+2. Upload `copilot/SpyCloud_Plugin.yaml`
+3. Enter your Tenant ID, Subscription ID, Resource Group, and Workspace Name
+4. 85 KQL skills become available in promptbooks and standalone prompts
+
+**API Plugin (direct SpyCloud API access):**
+
+1. Upload `copilot/SpyCloud_API_Plugin.yaml`
+2. Enter your SpyCloud Enterprise API key when prompted
+3. 12 REST API skills for real-time lookups are available immediately
+
+**Investigation Agent (autonomous interactive triage):**
+
+1. Upload `copilot/SpyCloud_Agent.yaml`
+2. Configure the same Sentinel workspace settings
+3. Use the agent for guided, multi-step investigations with automatic pivoting
+
+All three integrations work together -- the KQL plugin queries historical Sentinel data, the API plugin pulls real-time data from SpyCloud, and the agent orchestrates complex investigations across both.
 
 </details>
 

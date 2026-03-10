@@ -1,13 +1,17 @@
 openapi: 3.0.3
 info:
-  title: SpyCloud Threat Intelligence API
+  title: SpyCloud Darknet & Identity Threat Exposure Intelligence API
   version: 2.0.0
   description: >
-    SpyCloud provides actionable intelligence on compromised credentials, stolen
-    identities, and malware-infected devices sourced from the criminal underground.
-    This specification covers the Enterprise Breach, Compass Investigation, and
-    Identity Exposure APIs enabling Security Copilot to query breach records,
-    investigate identities, and monitor watchlists.
+    SpyCloud Darknet & Identity Threat Exposure Intelligence API for Microsoft
+    Security Copilot. Provides direct REST API access to recaptured darknet data
+    including compromised credentials, stolen identities, infostealer infections,
+    and malware-infected devices. Covers the Enterprise Breach, Compass Investigation,
+    and Identity Exposure APIs with 12 skills enabling SOC analysts to query breach
+    records by email, domain, IP, username, or password; perform deep Compass
+    investigations into infostealer infections with malware attribution, stolen
+    cookies, and device forensics; query identity exposure posture; browse the
+    breach catalog; and audit the monitored identity watchlist.
   contact:
     name: SpyCloud Support
     url: https://spycloud.com/support
