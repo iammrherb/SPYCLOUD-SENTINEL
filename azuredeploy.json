@@ -237,21 +237,21 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Deploys the full library of 49 SpyCloud analytics rules covering infostealer detection, plaintext password alerts, PII/SSN exposure, session cookie theft, device reinfection, credential reuse, geographic anomalies, VIP exposure, and remediation gap detection. Rules deploy ENABLED by default with recommended settings. Disable individual rules post-deployment in Sentinel > Analytics if needed."
+        "description": "RECOMMENDED: ON \u2014 Deploys the full library of 49 SpyCloud analytics rules covering infostealer detection, plaintext password alerts, PII/SSN exposure, session cookie theft, device reinfection, credential reuse, geographic anomalies, VIP exposure, and remediation gap detection. Rules deploy ENABLED by default with recommended settings. Disable individual rules post-deployment in Sentinel > Analytics if needed."
       }
     },
     "enableSessionCookieDetection": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Deploys rules for detecting stolen session cookies and tokens (severity 25). These are the most critical exposures as they enable MFA bypass via session hijacking, requiring immediate session revocation and device isolation."
+        "description": "RECOMMENDED: ON \u2014 Deploys rules for detecting stolen session cookies and tokens (severity 25). These are the most critical exposures as they enable MFA bypass via session hijacking, requiring immediate session revocation and device isolation."
       }
     },
     "enableIdentityProviderAlerts": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Deploys rules correlating SpyCloud exposures with third-party identity provider logs (Okta, Duo, Ping Identity, CyberArk). Detects compromised credentials being used across IdP sign-in events. Rules auto-skip gracefully if the required IdP connector is not installed."
+        "description": "RECOMMENDED: ON \u2014 Deploys rules correlating SpyCloud exposures with third-party identity provider logs (Okta, Duo, Ping Identity, CyberArk). Detects compromised credentials being used across IdP sign-in events. Rules auto-skip gracefully if the required IdP connector is not installed."
       }
     },
     "createNewWorkspace": {
@@ -286,14 +286,14 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Credential response playbook with password reset + Teams alert notification. Combines identity remediation with SOC awareness. Requires: Entra ID P1/P2 for password reset; Teams notifications work without additional license."
+        "description": "RECOMMENDED: ON \u2014 Credential response playbook with password reset + Teams alert notification. Combines identity remediation with SOC awareness. Requires: Entra ID P1/P2 for password reset; Teams notifications work without additional license."
       }
     },
     "enableMdeBlocklistPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Scheduled MDE blocklist scan that auto-isolates devices matching severity 25 infostealer records. Runs on configurable schedule (default: every 4 hours). Requires: MDE P2. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Scheduled MDE blocklist scan that auto-isolates devices matching severity 25 infostealer records. Runs on configurable schedule (default: every 4 hours). Requires: MDE P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "teamsChannelWebhook": {
@@ -365,7 +365,7 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Enriches incidents with VirusTotal, AbuseIPDB, and GreyNoise threat intelligence lookups for IPs found in infostealer data. Free tier API keys supported. If no VirusTotal API key is provided, the playbook deploys but skips TI lookups until configured."
+        "description": "RECOMMENDED: ON \u2014 Enriches incidents with VirusTotal, AbuseIPDB, and GreyNoise threat intelligence lookups for IPs found in infostealer data. Free tier API keys supported. If no VirusTotal API key is provided, the playbook deploys but skips TI lookups until configured."
       }
     },
     "virusTotalApiKey": {
@@ -465,21 +465,21 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Deploys O365 & Entra ID correlation rules (sc-020 to sc-029). Correlates SpyCloud exposures with sign-in activity, impossible travel, mailbox rules, OAuth consent, and admin role changes. Requires: Entra ID and Office 365 connectors. Rules auto-skip if data sources are not connected."
+        "description": "RECOMMENDED: ON \u2014 Deploys O365 & Entra ID correlation rules (sc-020 to sc-029). Correlates SpyCloud exposures with sign-in activity, impossible travel, mailbox rules, OAuth consent, and admin role changes. Requires: Entra ID and Office 365 connectors. Rules auto-skip if data sources are not connected."
       }
     },
     "enableUebaFirewallRules": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Deploys UEBA & firewall correlation rules (sc-030 to sc-039). Detects anomalous behavior, lateral movement, DNS C2 communication, and VPN anomalies from exposed users. Requires: UEBA enabled + firewall/CEF connector. Rules auto-skip if data sources are not connected."
+        "description": "RECOMMENDED: ON \u2014 Deploys UEBA & firewall correlation rules (sc-030 to sc-039). Detects anomalous behavior, lateral movement, DNS C2 communication, and VPN anomalies from exposed users. Requires: UEBA enabled + firewall/CEF connector. Rules auto-skip if data sources are not connected."
       }
     },
     "enableAdvancedThreatRules": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Deploys advanced threat detection rules (sc-040 to sc-049). Detects multi-stage attack chains, CA bypass attempts, credential re-exposure after reset, TI indicator matches, and geographic mismatches. Uses multiple data sources with graceful fallback."
+        "description": "RECOMMENDED: ON \u2014 Deploys advanced threat detection rules (sc-040 to sc-049). Detects multi-stage attack chains, CA bypass attempts, credential re-exposure after reset, TI indicator matches, and geographic mismatches. Uses multiple data sources with graceful fallback."
       }
     },
     "enableMsicRules": {
@@ -500,70 +500,70 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Forces password change on next sign-in via Microsoft Graph API when credentials are exposed. The user must re-authenticate with MFA. Requires: Entra ID P1/P2. Post-deploy: run scripts/post-deploy-auto.sh to auto-grant User.ReadWrite.All permission."
+        "description": "RECOMMENDED: ON \u2014 Forces password change on next sign-in via Microsoft Graph API when credentials are exposed. The user must re-authenticate with MFA. Requires: Entra ID P1/P2. Post-deploy: run scripts/post-deploy-auto.sh to auto-grant User.ReadWrite.All permission."
       }
     },
     "enableRevokeSessionsPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Instantly revokes ALL active sessions (browser, app, refresh tokens) for compromised users. Critical for infostealer response where session cookies may be stolen. Requires: Entra ID P1/P2. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Instantly revokes ALL active sessions (browser, app, refresh tokens) for compromised users. Critical for infostealer response where session cookies may be stolen. Requires: Entra ID P1/P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableEnforceMfaPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Deletes compromised MFA methods and forces re-registration. Prevents attackers from using stolen authenticator tokens or phone-based MFA. Requires: Entra ID P1/P2. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Deletes compromised MFA methods and forces re-registration. Prevents attackers from using stolen authenticator tokens or phone-based MFA. Requires: Entra ID P1/P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableBlockConditionalAccessPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Adds compromised users to severity-tiered Conditional Access security groups (Blocked/Restricted/Monitored). Sev 25 → block all access, Sev 20 → require compliant device, Sev 5+ → require MFA. Requires: Entra ID P1/P2 + pre-created security groups. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Adds compromised users to severity-tiered Conditional Access security groups (Blocked/Restricted/Monitored). Sev 25 \u2192 block all access, Sev 20 \u2192 require compliant device, Sev 5+ \u2192 require MFA. Requires: Entra ID P1/P2 + pre-created security groups. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableBlockFirewallPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Automatically pushes malicious IP block rules to Fortinet FortiGate, Palo Alto PAN-OS, or Azure Firewall from SpyCloud infostealer C2 data. Post-deploy: configure firewall API URLs and keys in the Logic App designer. Deploys but remains inactive until firewall credentials are provided."
+        "description": "RECOMMENDED: ON \u2014 Automatically pushes malicious IP block rules to Fortinet FortiGate, Palo Alto PAN-OS, or Azure Firewall from SpyCloud infostealer C2 data. Post-deploy: configure firewall API URLs and keys in the Logic App designer. Deploys but remains inactive until firewall credentials are provided."
       }
     },
     "enableIsolateDevicePlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Isolates infected devices via MDE API. Sev 25 → full isolation (complete disconnect), Sev 20 → selective isolation (allows Outlook/Teams/Defender). Tags device as 'SpyCloud-Compromised' in MDE. Requires: MDE P2. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Isolates infected devices via MDE API. Sev 25 \u2192 full isolation (complete disconnect), Sev 20 \u2192 selective isolation (allows Outlook/Teams/Defender). Tags device as 'SpyCloud-Compromised' in MDE. Requires: MDE P2. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableNotifyUserPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Emails the exposed user with breach details, required actions (change password, review sign-ins), and support contacts. Uses Office 365 Mail.Send via managed identity. Requires: Exchange Online. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Emails the exposed user with breach details, required actions (change password, review sign-ins), and support contacts. Uses Office 365 Mail.Send via managed identity. Requires: Exchange Online. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableNotifySOCPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Posts real-time Adaptive Cards to your SOC Teams channel with severity, affected users, exposure type, recommended actions, and direct incident links. Uses webhook (no Graph permissions needed). Post-deploy: add Teams webhook URL in Logic App parameters."
+        "description": "RECOMMENDED: ON \u2014 Posts real-time Adaptive Cards to your SOC Teams channel with severity, affected users, exposure type, recommended actions, and direct incident links. Uses webhook (no Graph permissions needed). Post-deploy: add Teams webhook URL in Logic App parameters."
       }
     },
     "enableEnrichIncidentPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Auto-enriches every Sentinel incident with SpyCloud context: breach source, historical exposure count, password reuse analysis, malware family, and infected device info. Adds tags like 'malware-sourced', 'plaintext-password'. Requires: Sentinel Responder role. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Auto-enriches every Sentinel incident with SpyCloud context: breach source, historical exposure count, password reuse analysis, malware family, and infected device info. Adds tags like 'malware-sourced', 'plaintext-password'. Requires: Sentinel Responder role. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableFullRemediationPlaybook": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "RECOMMENDED: ON — Master orchestrator that chains ALL playbooks in 3 phases: Phase 1 (parallel): password reset + session revocation + device isolation → Phase 2 (parallel): MFA enforcement + CA group assignment → Phase 3: SOC notification. Best used as the single automation rule target for severity 25 (session cookie) incidents. Requires: all individual playbook licenses. Post-deploy: auto-granted by post-deploy-auto.sh."
+        "description": "RECOMMENDED: ON \u2014 Master orchestrator that chains ALL playbooks in 3 phases: Phase 1 (parallel): password reset + session revocation + device isolation \u2192 Phase 2 (parallel): MFA enforcement + CA group assignment \u2192 Phase 3: SOC notification. Best used as the single automation rule target for severity 25 (session cookie) incidents. Requires: all individual playbook licenses. Post-deploy: auto-granted by post-deploy-auto.sh."
       }
     },
     "enableServiceNow": {
@@ -2263,7 +2263,7 @@
           "id": "SpyCloudCCF",
           "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "## SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel\n\nThe **SpyCloud Connector** ingests recaptured darknet data into Microsoft Sentinel via the Codeless Connector Framework (CCF). SpyCloud monitors criminal underground markets, botnets, and infostealer malware to recapture stolen credentials, session cookies, PII, and device fingerprints \u2014 often months before they appear in public breach databases.\n\n---\n\n### Data Pollers\n\n| # | Poller | Target Table | Description | API Tier |\n|---|--------|-------------|-------------|----------|\n| 1 | Watchlist (New) | `SpyCloudBreachWatchlist_CL` | New employee credential exposures | Enterprise |\n| 2 | Watchlist (Modified) | `SpyCloudBreachWatchlist_CL` | Updated records with new sightings | Enterprise |\n| 3 | Breach Catalog | `SpyCloudBreachCatalog_CL` | Breach metadata, malware families, confidence scores | Enterprise |\n| 4 | Compass Data | `SpyCloudCompassData_CL` | Consumer/partner identity exposures | Enterprise+ |\n| 5 | Compass Devices | `SpyCloudCompassDevices_CL` | Infected device fingerprints and malware artifacts | Enterprise+ |\n\n### Severity Levels\n\n| Level | Category | Meaning | Recommended Action |\n|-------|----------|---------|-------------------|\n| **25** | Critical | Session cookies / MFA bypass tokens stolen by infostealer | Immediate: block access, revoke sessions, isolate device |\n| **20** | High | Credentials stolen by infostealer malware | Force password reset, revoke sessions, enforce MFA |\n| **5** | Medium | Credentials found in data breach with PII | Reset password, monitor sign-ins |\n| **2** | Low | Credentials found in data breach (no PII) | Notify user, recommend password change |\n\n### Validation & Health Check\n\nAfter deployment, verify data flow with these queries in Log Analytics:\n\n```\n// Check all tables for data\nunion isfuzzy=true\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest\n```\n\n```\n// Check connector health\nSentinelHealth\n| where TimeGenerated > ago(24h)\n| where SentinelResourceType == 'Data connector'\n| where SentinelResourceName contains 'SpyCloud'\n| project TimeGenerated, Status, Description\n```\n\n### Prerequisites\n\n| Requirement | Details |\n|-------------|---------|\n| **SpyCloud API Key** | Enterprise tier from [portal.spycloud.com](https://portal.spycloud.com) |\n| **Azure RBAC** | Microsoft Sentinel Contributor + Log Analytics Contributor |\n| **Network** | Outbound HTTPS (443) to `api.spycloud.io` |\n| **Workspace** | Log Analytics workspace with Microsoft Sentinel enabled |\n\n### Post-Deployment Steps\n\n1. **Verify data ingestion** \u2014 Run the health check queries above. Data should appear within 15 minutes.\n2. **Enable analytics rules** \u2014 Navigate to Sentinel > Analytics > filter by 'SpyCloud' > enable rules.\n3. **Grant playbook permissions** \u2014 Run `scripts/grant-permissions.sh` or manually grant API permissions via Enterprise Applications.\n4. **Populate watchlists** \u2014 Add VIP emails, approved domains, and IOC blocklists.\n\n### Troubleshooting\n\n| Issue | Cause | Fix |\n|-------|-------|-----|\n| No data after 15 min | Invalid API key | Test: `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` \u2014 expect HTTP 200 |\n| 401 Unauthorized | Wrong API tier | Need Enterprise tier key from portal.spycloud.com |\n| Compass tables empty | Missing license | Compass requires Enterprise+ subscription |\n| Data stops flowing | Rate limiting | Check DCR metrics in Azure Monitor, increase polling interval |\n| Duplicate records | Overlapping lookback | Normal \u2014 deduplicate: `summarize arg_max(TimeGenerated, *) by document_id` |\n\n### Resources Deployed\n\n- **6 Custom Tables** with 118+ columns\n- **Data Collection Endpoint (DCE)** for HTTPS ingestion\n- **Data Collection Rule (DCR)** with KQL transforms\n- **49 Analytics Rules** across 6 categories (all deploy disabled)\n- **10 Remediation Playbooks** (Logic Apps with managed identities)\n- **28 Hunting Queries** covering all MITRE ATT&CK tactics\n- **4 Watchlists** (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- **3 Workbooks** (Executive Dashboard, SOC Operations, Threat Intelligence)\n\n**Requires:** SpyCloud Enterprise or Enterprise+ API key \u2014 [portal.spycloud.com](https://portal.spycloud.com)",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-logo.svg)\n\n---\n\n## SpyCloud Darknet & Identity Threat Exposure Intelligence\n\nSpyCloud recaptures stolen credentials, session cookies, and device fingerprints from criminal underground markets, botnets, and infostealer malware \u2014 often **months before public disclosure**.\n\nThis connector ingests SpyCloud data into Microsoft Sentinel via the **Codeless Connector Framework (CCF)** with 5 automated REST API pollers writing to 6 custom Log Analytics tables.\n\n---\n\n### What Gets Ingested\n\n| Poller | Table | Description |\n|--------|-------|-------------|\n| Watchlist (New) | `SpyCloudBreachWatchlist_CL` | New employee credential exposures |\n| Watchlist (Modified) | `SpyCloudBreachWatchlist_CL` | Updated records with new sightings |\n| Breach Catalog | `SpyCloudBreachCatalog_CL` | Breach metadata and confidence scores |\n| Compass Data | `SpyCloudCompassData_CL` | Consumer/partner identity exposures |\n| Compass Devices | `SpyCloudCompassDevices_CL` | Infected device fingerprints |\n\n### Severity Reference\n\n| Level | Category | Action |\n|-------|----------|--------|\n| **25** | Infostealer + App Credentials | Block access, revoke sessions, isolate device |\n| **20** | Infostealer Malware | Force password reset, enforce MFA |\n| **5** | Breach + PII | Reset password, monitor sign-ins |\n| **2** | Breach Credential | Notify user, recommend password change |\n\n### Prerequisites\n\n- **SpyCloud Enterprise API Key** from [portal.spycloud.com](https://portal.spycloud.com)\n- **Azure Roles:** Microsoft Sentinel Contributor, Log Analytics Contributor\n- **Network:** Outbound HTTPS to `api.spycloud.io`\n- Compass tables require **Enterprise+** subscription\n\n### Resources Deployed\n\n6 custom tables \u00b7 38 analytics rules \u00b7 10 remediation playbooks \u00b7 28 hunting queries \u00b7 3 workbooks \u00b7 4 watchlists\n\n---\n\n*For support, contact support@spycloud.com or visit [portal.spycloud.com](https://portal.spycloud.com)*",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -2432,27 +2432,21 @@
           },
           "instructionSteps": [
             {
-              "title": "Prerequisites & Requirements",
-              "description": "Review all requirements before connecting. Incomplete prerequisites will cause deployment failures or limited functionality.",
+              "title": "1. Prerequisites",
+              "description": "Ensure you have the following before connecting:",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Required for All Features:**\n\n1. **SpyCloud Enterprise API Key** \u2014 Obtain from [portal.spycloud.com](https://portal.spycloud.com). Contact support@spycloud.com if you need Enterprise+ for Compass data.\n\n2. **Azure Roles** (on the resource group):\n   - **Microsoft Sentinel Contributor** \u2014 Create/manage connectors, analytics rules, workbooks\n   - **Log Analytics Contributor** \u2014 Create tables, manage data collection rules\n   - **Monitoring Metrics Publisher** \u2014 Required on the DCR for data ingestion via DCE\n\n3. **Network Access** \u2014 Outbound HTTPS (443) to `api.spycloud.io` from Azure. No inbound rules required.\n\n4. **Log Analytics Workspace** \u2014 Existing workspace with Microsoft Sentinel enabled, or the template creates one.\n\n---\n\n**Optional License Requirements:**\n\n| Feature | License | What It Enables |\n|---------|---------|----------------|\n| MDE Isolation Playbook | Defender for Endpoint P2 | Automatic device isolation + security tagging |\n| MDE Blocklist Playbook | Defender for Endpoint P2 | Block malicious IPs/domains from infostealer data |\n| Conditional Access Playbook | Entra ID P1+ | Force password reset, revoke sessions, CA group assignment |\n| Credential Response Playbook | Entra ID P1+ | Targeted UPN-based password reset with notifications |\n| UEBA Anomaly Detection | Sentinel UEBA (free) | Behavioral anomaly detection for exposed user accounts |\n\n**What Works Without Extra Licenses:** All data ingestion (5 pollers, 6 tables), 38 analytics rules, workbook dashboards, hunting queries, all notification channels (Slack/Teams/Email/ServiceNow/Jira/Azure DevOps).\n\n---\n\n**Pre-Deployment Checklist:**\n\n- [ ] SpyCloud API key tested: `curl -H 'X-Api-Key: YOUR_KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1`\n- [ ] Required Azure roles assigned to the deploying user\n- [ ] Target resource group and Log Analytics workspace identified\n- [ ] Decided which playbooks to enable (based on available licenses)\n- [ ] Notification channel URLs ready (Teams webhook, Slack webhook, email addresses) if desired"
+                    "text": "**Required:**\n\n- SpyCloud Enterprise API key \u2014 get yours at [portal.spycloud.com](https://portal.spycloud.com)\n- Microsoft Sentinel Contributor + Log Analytics Contributor roles\n- Outbound HTTPS (443) to `api.spycloud.io`\n\n**Optional (for advanced playbooks):**\n\n- Defender for Endpoint P2 \u2014 enables device isolation playbook\n- Entra ID P1+ \u2014 enables password reset and Conditional Access playbooks"
                   }
                 }
               ]
             },
             {
-              "title": "Step 1 \u2014 SpyCloud API Key Configuration",
-              "description": "Enter your SpyCloud Enterprise Protection API key. This key authenticates all 5 pollers against the SpyCloud API.",
+              "title": "2. Configure API Key",
+              "description": "Enter your SpyCloud Enterprise Protection API key. This authenticates all 5 data pollers.",
               "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Where to Find Your API Key:**\n\n1. Log in to [portal.spycloud.com](https://portal.spycloud.com)\n2. Navigate to **Account Settings** \u2192 **API Keys**\n3. Copy your **Enterprise API Key** (starts with a long alphanumeric string)\n\n**Important Notes:**\n- The API key is stored securely as a `securestring` parameter and is never exposed in logs or outputs\n- Enterprise tier is required for Watchlist and Breach Catalog pollers\n- Enterprise+ tier is required for Compass Data and Compass Devices pollers\n- If you only have Enterprise (not Enterprise+), Compass pollers will return empty results but will not cause errors\n\n**Validation:** After deployment, you can verify API connectivity in the connector health panel or by checking the Data Collection Rule ingestion metrics in Azure Monitor."
-                  }
-                },
                 {
                   "type": "Textbox",
                   "parameters": {
@@ -2461,19 +2455,19 @@
                     "placeholder": "Enter your SpyCloud Enterprise API key",
                     "type": "password"
                   }
+                },
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "Find your key at **portal.spycloud.com** \u2192 Account Settings \u2192 API Keys. Enterprise+ is required for Compass pollers."
+                  }
                 }
               ]
             },
             {
-              "title": "Step 2 \u2014 Data Filters & Scope",
-              "description": "Configure which exposure data to ingest. These settings control the volume, sensitivity, and scope of data flowing into your Sentinel workspace.",
+              "title": "3. Data Filters",
+              "description": "Choose which exposure data to ingest. All severity levels and exposure types are selected by default.",
               "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Understanding SpyCloud Severity Levels:**\n\n| Severity | Category | Description | Typical Volume |\n|----------|----------|-------------|---------------|\n| **2** | Breach Credential | Username/password exposed in a data breach | High |\n| **5** | Breach + PII | Breach data enriched with personally identifiable information | Medium |\n| **20** | Infostealer | Credentials stolen by malware (high-risk, active threat) | Medium |\n| **25** | Infostealer + Application | Infostealer with specific application targets (highest risk) | Lower |\n\n**Recommendation:** Start with **all severity levels** selected. After initial ingestion, review volume in the workbook and narrow if needed. Severity 20+ (infostealer) records are the highest priority for SOC response.\n\n**Exposure Types:**\n- **Corporate** \u2014 Exposures matching your organization's email domains\n- **Infected** \u2014 Exposures from devices infected with infostealer malware (includes session cookies, application credentials)\n\n**Recommendation:** Select both for comprehensive coverage."
-                  }
-                },
                 {
                   "type": "Dropdown",
                   "parameters": {
@@ -2482,22 +2476,22 @@
                     "options": [
                       {
                         "key": "2",
-                        "text": "2 - Breach Credential"
+                        "text": "2 \u2014 Breach Credential"
                       },
                       {
                         "key": "5",
-                        "text": "5 - Breach + PII"
+                        "text": "5 \u2014 Breach + PII"
                       },
                       {
                         "key": "20",
-                        "text": "20 - Infostealer"
+                        "text": "20 \u2014 Infostealer"
                       },
                       {
                         "key": "25",
-                        "text": "25 - Infostealer + Application"
+                        "text": "25 \u2014 Infostealer + Application"
                       }
                     ],
-                    "placeholder": "Select severity levels to ingest",
+                    "placeholder": "Select severity levels",
                     "isMultiSelect": true,
                     "defaultValue": [
                       "2",
@@ -2522,7 +2516,7 @@
                         "text": "Infected Device Exposures (infostealer malware)"
                       }
                     ],
-                    "placeholder": "Select exposure types to ingest",
+                    "placeholder": "Select exposure types",
                     "isMultiSelect": true,
                     "defaultValue": [
                       "corporate",
@@ -2542,43 +2536,31 @@
                       },
                       {
                         "key": "True",
-                        "text": "Yes \u2014 Include plaintext passwords (requires data handling policy)"
+                        "text": "Yes \u2014 Include plaintext passwords"
                       }
                     ],
-                    "placeholder": "Include plaintext passwords in ingested data?",
+                    "placeholder": "Include plaintext passwords?",
                     "isMultiSelect": false,
                     "defaultValue": [
                       "False"
                     ]
                   }
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Plaintext Password Warning:** Enabling plaintext passwords stores cleartext credentials in your Log Analytics workspace. Before enabling:\n\n1. Ensure your organization has a **data handling policy** for exposed credentials\n2. Configure **table-level RBAC** on `SpyCloudBreachWatchlist_CL` to restrict access\n3. Consider your **data retention** policy (passwords should not be retained longer than needed for remediation)\n4. The `password_plaintext` column is empty when this setting is 'No'\n\n**Use Case:** Plaintext passwords enable password-reuse detection analytics rules and richer hunting queries."
-                  }
                 }
               ]
             },
             {
-              "title": "Step 3 \u2014 Polling & Performance Settings",
-              "description": "Configure how frequently the connector polls SpyCloud and how it handles retries. These settings affect data freshness, API usage, and resilience.",
+              "title": "4. Polling Settings",
+              "description": "Configure polling interval and lookback period. Defaults work well for most organizations.",
               "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Polling Interval Guidance:**\n\n| Interval | Best For | API Calls/Day | Notes |\n|----------|----------|---------------|-------|\n| **5 min** | Active incident response | ~1,440 | Highest freshness, highest API usage |\n| **15 min** | High-security environments | ~480 | Good balance of freshness and cost |\n| **30 min** | Most organizations (recommended) | ~240 | Standard recommendation |\n| **60 min** | Large environments, cost-sensitive | ~120 | Acceptable for most SOC workflows |\n| **120 min** | Low-priority monitoring | ~60 | May delay detection of active infostealers |\n| **360 min** | Minimal monitoring | ~20 | 6-hour gap between checks |\n\n**Lookback Days:** How far back to retrieve data on first connection. 365 days (recommended) ensures you capture the full year of historical exposures. Reduce to 30-90 days if you want faster initial sync.\n\n**Retry & Timeout:** Default values (5 retries, 120s timeout) work for most deployments. Increase timeout to 180-300s if you have very large watchlists (100K+ records)."
-                  }
-                },
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Polling Interval (minutes)",
+                    "label": "Polling Interval",
                     "name": "pollingIntervalMin",
                     "options": [
                       {
                         "key": "5",
-                        "text": "5 minutes (highest freshness)"
+                        "text": "5 minutes"
                       },
                       {
                         "key": "15",
@@ -2611,7 +2593,7 @@
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Initial Lookback Period (days)",
+                    "label": "Initial Lookback Period",
                     "name": "lookbackDays",
                     "options": [
                       {
@@ -2628,10 +2610,10 @@
                       },
                       {
                         "key": "365",
-                        "text": "365 days (recommended \u2014 full year of history)"
+                        "text": "365 days (recommended)"
                       }
                     ],
-                    "placeholder": "How far back to retrieve on first connection",
+                    "placeholder": "How far back on first connection",
                     "isMultiSelect": false,
                     "defaultValue": [
                       "365"
@@ -2641,7 +2623,7 @@
                 {
                   "type": "Dropdown",
                   "parameters": {
-                    "label": "Retry Count on API Failure",
+                    "label": "Retry Count",
                     "name": "retryCount",
                     "options": [
                       {
@@ -2654,10 +2636,10 @@
                       },
                       {
                         "key": "10",
-                        "text": "10 retries (high resilience)"
+                        "text": "10 retries"
                       }
                     ],
-                    "placeholder": "Number of retries on transient failures",
+                    "placeholder": "Retries on API failure",
                     "isMultiSelect": false,
                     "defaultValue": [
                       "5"
@@ -2684,7 +2666,7 @@
                       },
                       {
                         "key": "300",
-                        "text": "300 seconds (large watchlists)"
+                        "text": "300 seconds"
                       }
                     ],
                     "placeholder": "Timeout per API call",
@@ -2697,125 +2679,29 @@
               ]
             },
             {
-              "title": "Step 4 \u2014 Architecture & Data Flow",
-              "description": "Understand how SpyCloud data flows through your Sentinel environment.",
+              "title": "5. Connect",
+              "description": "Activate all 5 SpyCloud pollers to begin data ingestion.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Data Pipeline Architecture:**\n\n```\nSpyCloud API (api.spycloud.io)\n    \u2502\n    \u25bc\nCCF Pollers (5 pollers, Codeless Connector Framework)\n    \u2502\n    \u25bc\nData Collection Endpoint (DCE) \u2192 Data Collection Rule (DCR)\n    \u2502                                    \u2502\n    \u2502                            Transform & Normalize\n    \u2502                                    \u2502\n    \u25bc                                    \u25bc\nLog Analytics Workspace (6 Custom Tables)\n    \u2502\n    \u251c\u2500\u2500 Analytics Rules (38) \u2192 Incidents \u2192 Playbooks (4)\n    \u251c\u2500\u2500 Hunting Queries (8) \u2192 Bookmarks \u2192 Investigations\n    \u251c\u2500\u2500 Workbook (19 panels) \u2192 Dashboards\n    \u2514\u2500\u2500 Copilot Plugin \u2192 Natural Language Queries\n```\n\n**Table Schema Overview:**\n\n| Table | Key Columns | Records Per Poll |\n|-------|------------|------------------|\n| `SpyCloudBreachWatchlist_CL` | email, severity, source_id, password_type, infected_machine_id, target_domain | Varies by org size |\n| `SpyCloudBreachCatalog_CL` | uuid, short_title, breach_category, num_records, confidence | ~50-200 total |\n| `SpyCloudCompassData_CL` | email, severity, breach_title, infected_machine_id, target_url | Enterprise+ only |\n| `SpyCloudCompassDevices_CL` | user_hostname, user_os, ip_addresses, application_count | Enterprise+ only |\n| `Spycloud_MDE_Logs_CL` | DeviceName, DeviceId, Action, IsolationType, ActionStatus | Playbook output |\n| `SpyCloud_ConditionalAccessLogs_CL` | UserPrincipalName, Action, PasswordReset, SessionsRevoked | Playbook output |\n\n**Cost Estimation:** Data ingestion costs depend on your Log Analytics pricing tier and data volume. Most organizations ingest 50MB-500MB/day from SpyCloud. Use the workbook's ingestion volume panel to monitor costs after deployment."
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 5 \u2014 Sentinel Configuration Recommendations",
-              "description": "Enable these Microsoft Sentinel features to maximize the value of SpyCloud threat intelligence. Each recommendation includes step-by-step instructions.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Critical \u2014 Enable These First:**\n\n**1. User and Entity Behavior Analytics (UEBA)**\n   - Navigate to: **Sentinel** \u2192 **Settings** \u2192 **Settings tab** \u2192 **User and Entity Behavior Analytics**\n   - Toggle: **ON**\n   - Select data sources: **Azure Active Directory** (Sign-in Logs, Audit Logs)\n   - Why: UEBA creates behavioral baselines for users. When SpyCloud detects an exposed credential, analytics rules correlate with UEBA anomalies to detect active exploitation (e.g., impossible travel after credential exposure).\n\n**2. Fusion Detection**\n   - Navigate to: **Sentinel** \u2192 **Analytics** \u2192 filter by 'Fusion' \u2192 **Enable**\n   - Why: Fusion uses ML to detect multi-stage attacks. SpyCloud exposure + anomalous sign-in + data exfiltration = high-confidence attack chain.\n\n**3. Threat Intelligence Solution**\n   - Navigate to: **Content Hub** \u2192 search 'Threat Intelligence' \u2192 **Install**\n   - Why: Matches SpyCloud infostealer IP addresses against global TI feeds for additional context.\n\n---\n\n**Recommended Sentinel Data Connectors (install from Content Hub):**\n\n| Connector | Priority | Why It Matters |\n|-----------|----------|---------------|\n| **Entra ID (Azure AD)** | Critical | Sign-in log correlation \u2014 detect logins using exposed credentials |\n| **Microsoft Defender for Endpoint** | Critical | Device correlation \u2014 identify infected machines from SpyCloud data |\n| **Office 365** | High | Detect email compromise after credential exposure |\n| **Azure Activity** | High | Track admin actions from compromised accounts |\n| **DNS** | Medium | Detect C2 callbacks from infostealer-infected devices |\n| **Microsoft Cloud App Security** | Medium | Detect OAuth token abuse from stolen session cookies |\n| **Okta SSO / Duo / Ping Identity** | Medium | Correlate MFA bypass with exposed credentials |\n| **AWS CloudTrail / GCP** | Medium | Cross-cloud compromised account detection |\n| **Palo Alto / Fortinet / Zscaler** | Low | Firewall correlation with infostealer C2 traffic |\n\n**Enable Entra ID Connector:**\n1. Content Hub \u2192 search 'Microsoft Entra ID' \u2192 Install\n2. Data Connectors \u2192 Microsoft Entra ID \u2192 Open connector page\n3. Enable: Sign-in Logs, Audit Logs, Non-interactive Sign-in Logs, Managed Identity Sign-in Logs\n4. These feed 12+ SpyCloud analytics rules that detect sign-ins using exposed credentials."
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 6 \u2014 Connect & Activate",
-              "description": "Activate all 5 SpyCloud pollers to begin data ingestion into your Sentinel workspace.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Before Clicking Connect:**\n\n1. Verify your API key is entered correctly in Step 1\n2. Confirm your severity and exposure type selections in Step 2\n3. Review polling settings in Step 3\n\n**What Happens When You Connect:**\n\n1. All 5 pollers activate simultaneously\n2. Initial data pull begins using your lookback period (default: 365 days)\n3. The first poll may take 5-15 minutes depending on your watchlist size\n4. Subsequent polls run at your configured interval\n5. Data flows through the DCR transform pipeline and appears in your custom tables\n\n**Expected Initial Ingestion Timeline:**\n\n| Phase | Time | What Happens |\n|-------|------|--------------|\n| Connection | Immediate | Pollers registered, authentication verified |\n| First Data | 5-10 min | Watchlist and Catalog data begins appearing |\n| Backfill Complete | 15-60 min | Historical lookback period fully ingested |\n| Steady State | Ongoing | Incremental updates at polling interval |"
+                    "text": "Clicking **Connect** activates all pollers. Initial data pull begins immediately using your lookback period. Expect data within **5\u201315 minutes** depending on watchlist size."
                   }
                 },
                 {
                   "type": "ConnectionToggleButton",
                   "parameters": {}
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "After connecting, proceed to Step 7 for verification queries and troubleshooting guidance."
-                  }
                 }
               ]
             },
             {
-              "title": "Step 7 \u2014 Verification, Validation & Troubleshooting",
-              "description": "Verify data ingestion is working correctly and troubleshoot common issues. Run these queries in your Log Analytics workspace.",
+              "title": "6. Verify Data Flow",
+              "description": "After connecting, run this query in Log Analytics to confirm data is flowing:",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Verification Queries \u2014 Run in Log Analytics:**\n\n**1. Overall Health Check (run first):**\n```kql\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest\n| order by Table asc\n```\n\n**2. Hourly Ingestion Volume:**\n```kql\nSpyCloudBreachWatchlist_CL\n| summarize count() by bin(TimeGenerated, 1h)\n| render timechart\n```\n\n**3. Severity Distribution:**\n```kql\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(24h)\n| summarize Count=count() by severity\n| order by severity asc\n```\n\n**4. Infostealer-Infected Devices:**\n```kql\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where isnotempty(infected_machine_id)\n| summarize ExposureCount=count(), Domains=dcount(target_domain) by infected_machine_id, user_hostname\n| order by ExposureCount desc\n| take 25\n```\n\n**5. Top Exposed Email Domains:**\n```kql\nSpyCloudBreachWatchlist_CL\n| where isnotempty(email_domain)\n| summarize Exposures=count(), UniqueEmails=dcount(email) by email_domain\n| order by Exposures desc\n| take 10\n```\n\n**Expected Results:**\n- Watchlist table should have records within 10 minutes of connecting\n- Catalog table should have 50-200+ breach records\n- Compass tables require Enterprise+ (empty with standard Enterprise)\n- MDE and CA log tables populate only when playbooks execute"
-                  }
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Troubleshooting Guide:**\n\n| Symptom | Likely Cause | Resolution |\n|---------|-------------|------------|\n| No data after 15 minutes | API key invalid or wrong tier | Verify key: `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` |\n| 401 Unauthorized on connect | API key rejected | Ensure Enterprise (not SaaS) tier key from portal.spycloud.com |\n| Watchlist data but no Catalog | API permissions | Catalog requires separate endpoint access \u2014 contact SpyCloud support |\n| Compass tables empty | Enterprise+ required | Compass endpoints need Enterprise+ subscription |\n| Playbooks not triggering | Analytics rule disabled | Check Sentinel \u2192 Analytics \u2192 verify SpyCloud rules are Enabled |\n| Playbooks failing (403) | Missing permissions | Run `grant-permissions.sh` from Cloud Shell to assign managed identity roles |\n| MDE playbook fails | No MDE P2 license | Device isolation requires Defender for Endpoint Plan 2 |\n| CA playbook fails | No Entra P1+ license | Password reset/CA group requires Entra ID P1 or P2 |\n| High ingestion costs | Large watchlist | Reduce severity levels, increase polling interval, or reduce retention |\n| Duplicate records | Overlapping lookback | Normal during initial sync \u2014 deduplication occurs via document_id |\n\n**Advanced Diagnostics:**\n\n1. **Check DCR health:**\n   Azure Monitor \u2192 Data Collection Rules \u2192 `dcr-ccf-{workspace}` \u2192 Metrics \u2192 check ingestion success/failure rates\n\n2. **Check connector status:**\n   Sentinel \u2192 Data Connectors \u2192 SpyCloud \u2192 check 'Last log received' timestamps\n\n3. **Check poller logs:**\n   ```kql\n   SentinelHealth\n   | where OperationName contains 'SpyCloud' or OperationName contains 'DataConnector'\n   | where TimeGenerated > ago(1h)\n   | order by TimeGenerated desc\n   ```\n\n4. **Validate DCE endpoint:**\n   Azure Monitor \u2192 Data Collection Endpoints \u2192 `dce-spycloud-{workspace}` \u2192 Overview \u2192 verify status is 'Succeeded'\n\n**Support Contacts:**\n- SpyCloud API issues: support@spycloud.com\n- Sentinel connector issues: Open a GitHub issue or contact Microsoft support\n- Playbook permissions: Run `grant-permissions.sh` or manually assign roles in Azure AD \u2192 Enterprise Applications"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 8 \u2014 Post-Deployment Configuration & Best Practices",
-              "description": "Optimize your SpyCloud integration with these post-deployment recommendations for security operations.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Immediate Post-Deployment Tasks (Day 1):**\n\n1. **Verify all 6 tables receiving data** \u2014 Run the health check query from Step 7\n2. **Review analytics rules** \u2014 Sentinel \u2192 Analytics \u2192 filter by 'SpyCloud' \u2192 verify all rules are Enabled\n3. **Test a playbook manually** \u2014 Create a test incident and run the MDE or CA playbook to verify permissions\n4. **Configure notification channels** \u2014 Update playbook parameters with your Teams/Slack webhook URLs\n5. **Review the workbook** \u2014 Sentinel \u2192 Workbooks \u2192 'SpyCloud Threat Intelligence' \u2192 verify panels load\n\n---\n\n**Week 1 Tuning:**\n\n1. **Adjust analytics rule thresholds** \u2014 Some rules may generate too many or too few incidents based on your exposure volume\n2. **Configure VIP watchlist** \u2014 Add high-value accounts (executives, admins, service accounts) to the `SpyCloud-VIP-Watchlist` for priority alerting\n3. **Review incident volume** \u2014 If overwhelmed, increase `spycloudSeverityThreshold` to focus on infostealer (20+) exposures first\n4. **Enable automation rules** \u2014 Configure auto-assignment, auto-close, or auto-escalation for SpyCloud incidents\n\n---\n\n**Ongoing Operations:**\n\n- **Daily:** Review SpyCloud incidents in Sentinel, triage infostealer alerts (severity 20+) first\n- **Weekly:** Check the workbook for exposure trends, review top-exposed domains and users\n- **Monthly:** Review playbook execution logs, update VIP watchlist, assess credential remediation rates\n- **Quarterly:** Review data retention settings, assess API usage, evaluate Compass data value\n\n---\n\n**Security Hardening:**\n\n1. **Table-level RBAC** \u2014 Restrict `SpyCloudBreachWatchlist_CL` access if plaintext passwords are enabled:\n   ```kql\n   -- Grant read access only to SOC analysts\n   -- Azure Portal \u2192 Log Analytics \u2192 Tables \u2192 SpyCloudBreachWatchlist_CL \u2192 Access Control (IAM)\n   ```\n\n2. **Data retention** \u2014 Set appropriate retention (90 days recommended for active remediation, 365 for compliance):\n   - Configured via the `retentionInDays` ARM template parameter\n\n3. **API key rotation** \u2014 Rotate your SpyCloud API key periodically:\n   - Generate new key in portal.spycloud.com\n   - Update the connector configuration\n   - Verify data continues flowing\n\n4. **Managed Identity permissions** \u2014 Review and minimize permissions assigned to playbook managed identities\n\n---\n\n**Upgrade Path:**\n\n- **Enterprise \u2192 Enterprise+:** Enables Compass pollers for consumer/partner exposure data\n- **Add MDE P2:** Enables automatic device isolation for infostealer-infected machines\n- **Add Entra P1+:** Enables automatic password reset and Conditional Access enforcement\n- **Enable Copilot for Security:** Natural language queries across all SpyCloud data using the included plugin"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 9 \u2014 Firewall & Network Integration Guide",
-              "description": "Configure firewall vendor integrations to correlate SpyCloud exposure data with network traffic. This enables detection of compromised user sessions and infected device traffic across your perimeter.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Fortinet FortiGate Integration (FSSO User-ID)**\n\nSpyCloud analytics rules correlate exposed credentials with Fortinet FSSO (Fortinet Single Sign-On) sessions to detect compromised users authenticating through FortiGate firewalls.\n\n**Setup Requirements:**\n1. Install the **Fortinet FortiGate** connector from Sentinel Content Hub\n2. Configure CEF log forwarding from FortiGate to your Log Analytics workspace\n3. Ensure FSSO is enabled on FortiGate with Active Directory integration\n4. Verify logs appear in `CommonSecurityLog` with `DeviceVendor == 'Fortinet'`\n\n**Verification Query:**\n```kql\nCommonSecurityLog\n| where DeviceVendor == 'Fortinet'\n| where TimeGenerated > ago(1h)\n| summarize count() by DeviceProduct, Activity\n| order by count_ desc\n```\n\n**Correlation Query (SpyCloud + Fortinet):**\n```kql\nlet exposedIPs = SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| mv-expand ip = ip_addresses\n| project ExposedIP = tostring(ip), email, severity;\nCommonSecurityLog\n| where DeviceVendor == 'Fortinet'\n| where TimeGenerated > ago(24h)\n| join kind=inner exposedIPs on $left.SourceIP == $right.ExposedIP\n| project TimeGenerated, SourceIP, email, severity, Activity, DeviceProduct\n```\n\n---\n\n**Palo Alto Networks Integration (User-ID Agent)**\n\nSpyCloud correlates with PAN User-ID to detect exposed users whose traffic passes through Palo Alto Networks firewalls.\n\n**Setup Requirements:**\n1. Install the **Palo Alto Networks** connector from Sentinel Content Hub\n2. Configure syslog or CEF forwarding from PAN-OS to Log Analytics\n3. Ensure User-ID agent is configured with AD integration\n4. Verify logs appear in `CommonSecurityLog` with `DeviceVendor == 'Palo Alto Networks'`\n\n**Verification Query:**\n```kql\nCommonSecurityLog\n| where DeviceVendor == 'Palo Alto Networks'\n| where TimeGenerated > ago(1h)\n| summarize count() by DeviceProduct, Activity\n```\n\n**Correlation Query (SpyCloud + Palo Alto):**\n```kql\nlet exposedUsers = SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| distinct email;\nCommonSecurityLog\n| where DeviceVendor == 'Palo Alto Networks'\n| where TimeGenerated > ago(24h)\n| where isnotempty(SourceUserName)\n| join kind=inner exposedUsers on $left.SourceUserName == $right.email\n| project TimeGenerated, SourceUserName, SourceIP, DestinationIP, Activity\n```\n\n---\n\n**Other Supported Firewalls:**\n\n| Vendor | Content Hub Connector | CommonSecurityLog DeviceVendor |\n|--------|----------------------|-------------------------------|\n| Check Point | Check Point | Check Point |\n| Cisco ASA | Cisco ASA | Cisco |\n| Cisco Firepower | Cisco Firepower eStreamer | Cisco |\n| Sophos XG | Sophos XG Firewall | Sophos |\n| Juniper SRX | Juniper SRX | Juniper |\n| Barracuda | Barracuda CloudGen Firewall | Barracuda |\n| WatchGuard | WatchGuard Firebox | WatchGuard |\n| SonicWall | SonicWall | SonicWall |\n\n**Azure Firewall Integration:**\n```kql\nlet exposedIPs = SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| mv-expand ip = ip_addresses\n| project ExposedIP = tostring(ip);\nAzureDiagnostics\n| where Category == 'AzureFirewallNetworkRule' or Category == 'AzureFirewallApplicationRule'\n| where TimeGenerated > ago(24h)\n| extend SourceIP = extract('([0-9]+\\\\.[0-9]+\\\\.[0-9]+\\\\.[0-9]+)', 1, msg_s)\n| join kind=inner exposedIPs on $left.SourceIP == $right.ExposedIP\n```\n\n**DNS Correlation for C2 Detection:**\n```kql\nlet infectedHosts = SpyCloudCompassDevices_CL\n| where TimeGenerated > ago(30d)\n| distinct user_hostname;\nDnsEvents\n| where TimeGenerated > ago(24h)\n| where Name has_any ('duckdns.org', 'no-ip.com', 'ddns.net', 'hopto.org')\n| where Computer in (infectedHosts)\n| project TimeGenerated, Computer, Name, IPAddresses, QueryType\n```"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 10 \u2014 Conditional Access & Identity Protection Setup",
-              "description": "Configure Conditional Access policies, security groups, and authentication method enforcement to automatically respond to SpyCloud credential exposures.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Tiered Security Group Architecture**\n\nCreate these 4 Entra ID security groups before enabling CA playbooks. SpyCloud playbooks automatically move users between groups based on exposure severity.\n\n**Step 1: Create Security Groups**\n- Navigate to: **Entra ID** \u2192 **Groups** \u2192 **New Group**\n- Create these groups:\n\n| Group Name | Type | Purpose | CA Policy |\n|------------|------|---------|----------|\n| `SpyCloud-Blocked` | Security | Severity 25 \u2014 blocked from all access | Block access from all locations |\n| `SpyCloud-Restricted` | Security | Severity 20 \u2014 restricted access | Require compliant device + MFA |\n| `SpyCloud-Monitored` | Security | Severity 5 \u2014 enhanced monitoring | Require MFA from untrusted locations |\n| `SpyCloud-Remediated` | Security | Post-remediation tracking | Normal access (monitoring only) |\n\n**Step 2: Create Conditional Access Policies**\n- Navigate to: **Entra ID** \u2192 **Security** \u2192 **Conditional Access** \u2192 **New Policy**\n\n**Policy 1: SpyCloud Critical Block**\n- Users: Include `SpyCloud-Blocked` group\n- Cloud apps: All cloud apps\n- Grant: Block access\n- Session: Sign-in frequency = Every time\n\n**Policy 2: SpyCloud High Risk Restriction**\n- Users: Include `SpyCloud-Restricted` group\n- Cloud apps: All cloud apps\n- Grant: Require MFA + Require compliant device\n- Session: Sign-in frequency = 1 hour\n\n**Policy 3: SpyCloud Medium Monitoring**\n- Users: Include `SpyCloud-Monitored` group\n- Cloud apps: All cloud apps\n- Conditions: Locations = All locations except trusted\n- Grant: Require MFA\n\n---\n\n**Authentication Method Enforcement**\n\nSpyCloud playbooks can control which authentication methods are allowed for compromised users:\n\n| Scenario | Action | Methods Affected |\n|----------|--------|------------------|\n| **Critical (Severity 25)** | Disable all, force re-registration | FIDO2, Authenticator, Phone, Email, CBA |\n| **High (Severity 20)** | Disable weak methods | SMS, Phone Call, Email OTP (keep FIDO2/Authenticator) |\n| **Session Cookie Theft** | Revoke + re-register MFA | All current registrations revoked |\n| **Password Plaintext** | Force reset + require strong MFA | Block legacy auth, require Authenticator |\n\n**Graph API Permissions Required:**\n\n| Permission | Type | Used For |\n|-----------|------|----------|\n| `User.ReadWrite.All` | Application | Reset passwords, update user properties |\n| `Directory.ReadWrite.All` | Application | Add/remove users from security groups |\n| `UserAuthenticationMethod.ReadWrite.All` | Application | Read/delete/register auth methods |\n| `Policy.ReadWrite.ConditionalAccess` | Application | Read CA policy status |\n| `IdentityRiskyUser.ReadWrite.All` | Application | Confirm user compromise in ID Protection |\n| `AuditLog.Read.All` | Application | Read sign-in and audit logs |\n\n**Assigning Permissions (PowerShell):**\n```powershell\n# Get the managed identity Object ID from the Logic App\n$miObjectId = (Get-AzADServicePrincipal -DisplayName 'SpyCloud-CA-Remediation-{workspace}').Id\n\n# Assign Graph API permissions\n$graphApp = Get-AzADServicePrincipal -Filter \"appId eq '00000003-0000-0000-c000-000000000000'\"\n$permissions = @(\n    'User.ReadWrite.All',\n    'Directory.ReadWrite.All', \n    'UserAuthenticationMethod.ReadWrite.All',\n    'IdentityRiskyUser.ReadWrite.All'\n)\nforeach ($perm in $permissions) {\n    $role = $graphApp.AppRole | Where-Object { $_.Value -eq $perm }\n    New-AzADServicePrincipalAppRoleAssignment -ServicePrincipalId $miObjectId -ResourceId $graphApp.Id -AppRoleId $role.Id\n}\n```\n\n---\n\n**Risky Sign-In Correlation**\n\nSpyCloud automatically correlates with Entra ID Identity Protection risky sign-in events:\n\n```kql\n// Find exposed users with risky sign-ins in the last 7 days\nlet exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d) and severity >= 20\n| distinct email;\nAADUserRiskEvents\n| where TimeGenerated > ago(7d)\n| where UserPrincipalName in (exposedUsers)\n| project TimeGenerated, UserPrincipalName, RiskLevel, RiskDetail, RiskEventType, IPAddress\n| order by TimeGenerated desc\n```\n\n**Remediation Workflow:**\n1. SpyCloud detects credential exposure (severity 20+)\n2. Analytics rule creates Sentinel incident\n3. Automation rule triggers CA Enforcement playbook\n4. Playbook checks severity and assigns user to appropriate group\n5. CA policy enforces access restrictions immediately\n6. Password reset and MFA re-registration triggered\n7. User notified via email with security guidance\n8. After remediation confirmed, user moved to Remediated group\n9. Incident updated with remediation timeline and closed"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 11 \u2014 Remediation Playbook Configuration",
-              "description": "Detailed configuration guide for all 10 remediation playbooks. Each playbook can be customized for your organization's security policies.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Playbook 1: Password Reset & MFA Re-Registration**\n\nAutomates immediate credential response for exposed users.\n\n**Configuration:**\n- Navigate to: Resource Group \u2192 Logic Apps \u2192 `SpyCloud-PasswordReset-MFA-{workspace}`\n- Edit trigger: Sentinel incident trigger (auto-configured)\n\n**Customizable Parameters:**\n| Parameter | Default | Description |\n|-----------|---------|-------------|\n| `forceChangePasswordNextSignIn` | true | Require new password on next login |\n| `revokeAllSessions` | true | Invalidate all active sessions |\n| `deleteAllAuthMethods` | false | Delete all MFA methods (forces re-registration) |\n| `disableSmsAuth` | true (severity >= 20) | Disable SMS-based MFA |\n| `disablePhoneAuth` | true (severity >= 20) | Disable phone call MFA |\n| `requireAuthenticatorApp` | true | Require Microsoft Authenticator |\n| `requireFido2` | false | Require FIDO2 security key |\n| `sendUserNotification` | true | Email user with remediation instructions |\n\n**Actions Performed:**\n1. Query incident for account entities\n2. For each user: Reset password via Graph API\n3. Revoke all sign-in sessions\n4. If severity >= 20: Delete weak auth methods, keep FIDO2/Authenticator\n5. If severity >= 25: Delete ALL auth methods, force complete re-registration\n6. Send notification email with re-enrollment link\n7. Log all actions to `SpyCloud_ConditionalAccessLogs_CL`\n8. Update incident with remediation details\n\n---\n\n**Playbook 2: Device Isolation & Remediation**\n\nAutomates endpoint response for infected devices detected by SpyCloud.\n\n**Configuration:**\n- Navigate to: Resource Group \u2192 Logic Apps \u2192 `SpyCloud-MDE-Remediation-{workspace}`\n\n**Severity-Based Actions:**\n| Severity | Isolation | AV Scan | Intune Action | Wipe |\n|----------|-----------|---------|---------------|------|\n| **25** | Full | Yes | Mark non-compliant | Optional |\n| **20** | Selective | Yes | Mark non-compliant | No |\n| **5** | No | Yes | No change | No |\n| **2** | No | No | No change | No |\n\n**Customizable Parameters:**\n| Parameter | Default | Description |\n|-----------|---------|-------------|\n| `isolationType` | Full | Full or Selective isolation |\n| `autoReleaseHours` | 72 | Hours before auto-releasing isolation |\n| `triggerAvScan` | true | Run AV scan after isolation |\n| `tagDevice` | SpyCloud-Compromised | MDE tag applied |\n| `quarantineGroupId` | (configure) | Device quarantine security group |\n| `enableIntuneCompliance` | false | Mark device non-compliant in Intune |\n| `enableRemoteWipe` | false | Allow remote wipe for severity 25 |\n\n---\n\n**Playbook 3: Firewall Block Integration**\n\nAutomates network-level blocking by pushing SpyCloud IOCs to your firewalls.\n\n**Supported Vendors & Configuration:**\n\n| Vendor | API Used | Configuration Required |\n|--------|---------|----------------------|\n| Fortinet FortiGate | REST API v2 | FortiGate IP, API key, VDOM name |\n| Palo Alto Networks | PAN-OS XML API | Firewall IP, API key, device group |\n| Azure Firewall | ARM API | Resource group, firewall name, IP group name |\n| Azure NSG | ARM API | NSG resource ID |\n\n**Customizable Parameters:**\n| Parameter | Default | Description |\n|-----------|---------|-------------|\n| `fortinetEnabled` | false | Push IOCs to FortiGate |\n| `fortinetApiUrl` | (configure) | FortiGate management URL |\n| `fortinetApiKey` | (configure) | FortiGate REST API key |\n| `paloAltoEnabled` | false | Push IOCs to PAN-OS |\n| `paloAltoApiUrl` | (configure) | PAN management URL |\n| `paloAltoApiKey` | (configure) | PAN-OS API key |\n| `azureFirewallEnabled` | false | Update Azure Firewall IP groups |\n| `nsgEnabled` | false | Update NSG deny rules |\n| `addToTiIndicators` | true | Add IPs to Sentinel TI |\n\n---\n\n**Playbook 4: Security Group Manager**\n\nAutomates user lifecycle through tiered security groups.\n\n**Workflow:**\n```\nNew Exposure Detected\n    \u2502\n    \u251c\u2500\u2500 Severity 25 \u2192 Add to SpyCloud-Blocked\n    \u251c\u2500\u2500 Severity 20 \u2192 Add to SpyCloud-Restricted  \n    \u251c\u2500\u2500 Severity 5  \u2192 Add to SpyCloud-Monitored\n    \u2514\u2500\u2500 Severity 2  \u2192 Add to SpyCloud-Awareness\n    \u2502\nRemediation Confirmed\n    \u2502\n    \u2514\u2500\u2500 Move to SpyCloud-Remediated (remove from risk groups)\n    \u2502\n30 Days Post-Remediation\n    \u2502\n    \u2514\u2500\u2500 Remove from SpyCloud-Remediated (return to normal)\n```\n\n---\n\n**Playbook 5: SOC Notification Hub**\n\nCentralized multi-channel notification for all SpyCloud incidents.\n\n**Teams Adaptive Card includes:**\n- Incident severity, title, and description\n- Affected user(s) with exposure count\n- Affected device(s) with infection details\n- Breach source and malware family\n- Recommended actions checklist\n- Quick-action buttons (Isolate Device, Reset Password, View in Sentinel)\n\n**ServiceNow Ticket includes:**\n- Priority mapped from Sentinel severity\n- Assignment group based on incident type\n- Full exposure details in work notes\n- Related CI (Configuration Item) for affected devices\n- Auto-resolve when Sentinel incident closed\n\n---\n\n**Playbook 6: Auto-Remediation Orchestrator**\n\nMaster playbook that coordinates all other playbooks based on incident analysis.\n\n**Decision Matrix:**\n| Incident Type | Playbooks Called |\n|---------------|----------------|\n| User credential exposure (sev 25) | Password Reset + CA Enforcement + Group Manager + Notification |\n| User credential exposure (sev 20) | Password Reset + CA Enforcement + Group Manager + Notification |\n| Device infection | Device Isolation + Firewall Block + Notification |\n| Session cookie theft | Password Reset + CA Enforcement (block all) + Notification |\n| PII/SSN exposure | Notification (SOC review required, no auto-action) |\n| Multi-domain exposure | Password Reset + CA Enforcement + Enrichment + Notification |"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 12 \u2014 Comprehensive Troubleshooting Guide",
-              "description": "Complete troubleshooting reference for all SpyCloud Sentinel components \u2014 connector, playbooks, analytics rules, workbooks, and integrations.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**SECTION A: Data Connector Troubleshooting**\n\n| # | Symptom | Likely Cause | Resolution |\n|---|---------|-------------|------------|\n| 1 | No data after 15 minutes | API key invalid or wrong tier | Test: `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` |\n| 2 | 401 Unauthorized on connect | API key rejected | Verify Enterprise (not SaaS) key from portal.spycloud.com |\n| 3 | Watchlist data but no Catalog | API permissions | Catalog may need separate endpoint \u2014 contact SpyCloud support |\n| 4 | Compass tables empty | Enterprise+ required | Compass endpoints need Enterprise+ subscription tier |\n| 5 | Intermittent data gaps | API rate limiting | Increase polling interval or contact SpyCloud for rate limit increase |\n| 6 | DCR ingestion failures | Schema mismatch | Check DCR transform: Azure Monitor \u2192 DCR \u2192 JSON View \u2192 verify stream declarations match table schemas |\n| 7 | DCE endpoint unreachable | Network/Private Link issue | If using Private Link, verify PE is provisioned. Otherwise check NSG rules |\n| 8 | Duplicate records | Overlapping lookback | Normal during initial sync \u2014 deduplicate via `document_id` in KQL queries |\n| 9 | High ingestion costs | Large watchlist volume | Reduce severity levels, increase polling interval, or use summary rules |\n| 10 | Connector shows 'Disconnected' | API key expired/rotated | Re-enter API key in connector configuration page |\n\n**Diagnostic Query \u2014 Check Connector Health:**\n```kql\nSentinelHealth\n| where TimeGenerated > ago(24h)\n| where SentinelResourceType == 'Data connector'\n| where SentinelResourceName contains 'SpyCloud'\n| project TimeGenerated, Status, Description, ExtendedProperties\n| order by TimeGenerated desc\n```\n\n**Diagnostic Query \u2014 Check DCR Ingestion:**\n```kql\nAzureMetrics\n| where TimeGenerated > ago(24h)\n| where ResourceProvider == 'MICROSOFT.INSIGHTS'\n| where MetricName == 'LogsIngestionLatency' or MetricName == 'LogsIngestionSucceeded'\n| project TimeGenerated, MetricName, Total, Count\n| order by TimeGenerated desc\n```\n\n---\n\n**SECTION B: Playbook Troubleshooting**\n\n| # | Symptom | Likely Cause | Resolution |\n|---|---------|-------------|------------|\n| 1 | Playbook not triggering | Analytics rule disabled | Sentinel \u2192 Analytics \u2192 verify SpyCloud rules are Enabled |\n| 2 | Playbook not triggering | Automation rule disabled | Sentinel \u2192 Automation \u2192 verify rules are Enabled |\n| 3 | Playbook fails with 403 | Missing managed identity permissions | Run `scripts/grant-permissions.sh` or assign permissions manually |\n| 4 | MDE isolation fails | No MDE P2 license | Verify Defender for Endpoint Plan 2 is licensed |\n| 5 | Password reset fails | No Entra P1+ or missing permissions | Verify Entra ID P1+, assign `User.ReadWrite.All` to Logic App identity |\n| 6 | MFA method delete fails | Missing `UserAuthenticationMethod.ReadWrite.All` | Assign permission via PowerShell (see Step 10) |\n| 7 | Security group add fails | Missing `Directory.ReadWrite.All` | Assign permission to Logic App managed identity |\n| 8 | Teams notification fails | Invalid webhook URL | Verify Teams webhook: Channel \u2192 Connectors \u2192 Incoming Webhook \u2192 copy new URL |\n| 9 | ServiceNow ticket fails | Invalid instance URL or auth | Verify ServiceNow instance URL and API credentials |\n| 10 | Firewall update fails | API key/connectivity issue | Verify firewall management URL is accessible from Azure, API key is valid |\n\n**Check Playbook Run History:**\n1. Navigate to: Resource Group \u2192 Logic Apps \u2192 select playbook \u2192 Run History\n2. Click on failed run \u2192 expand each action to see error details\n3. Common fix: Re-authorize API connections (Logic App \u2192 API Connections \u2192 Edit \u2192 Authorize)\n\n**Check Managed Identity Permissions:**\n```powershell\n# List all permissions for a Logic App managed identity\n$logicAppName = 'SpyCloud-CA-Remediation-{workspace}'\n$sp = Get-AzADServicePrincipal -DisplayName $logicAppName\nGet-AzADServicePrincipalAppRoleAssignment -ServicePrincipalId $sp.Id | Format-Table ResourceDisplayName, AppRoleId\n```\n\n---\n\n**SECTION C: Analytics Rule Troubleshooting**\n\n| # | Symptom | Likely Cause | Resolution |\n|---|---------|-------------|------------|\n| 1 | Rule shows 'Error' status | KQL syntax issue | Open rule \u2192 Run query in Log Analytics \u2192 check for errors |\n| 2 | Rule creates no incidents | No matching data | Verify SpyCloud tables have data, check rule threshold |\n| 3 | Too many incidents | Threshold too low | Increase triggerThreshold or add additional WHERE filters |\n| 4 | Cross-source rule fails | Missing data source | Install required connector (e.g., Entra ID for SigninLogs) |\n| 5 | UEBA rule shows no results | UEBA not enabled | Enable UEBA: Sentinel \u2192 Settings \u2192 UEBA \u2192 toggle ON |\n| 6 | Firewall correlation empty | No CommonSecurityLog data | Install firewall connector from Content Hub |\n| 7 | Fusion rule not detecting | Fusion disabled or no correlated signals | Enable Fusion: Sentinel \u2192 Analytics \u2192 filter Fusion \u2192 Enable |\n\n**Validate Rule Query:**\n```kql\n// Replace with your rule query and test in Log Analytics\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(1h)\n| where severity >= 20\n| summarize ExposureCount = count() by email\n| where ExposureCount > 0\n```\n\n---\n\n**SECTION D: Workbook Troubleshooting**\n\n| # | Symptom | Likely Cause | Resolution |\n|---|---------|-------------|------------|\n| 1 | Workbook shows 'No data' | Tables empty or wrong workspace | Verify workspace selection in workbook parameters |\n| 2 | Panels show errors | Table schema changed | Re-deploy workbook from template |\n| 3 | Slow loading | Large data volume | Add time range filters, consider summary rules |\n| 4 | Missing tabs | Older version deployed | Re-deploy latest version from GitHub |\n\n---\n\n**SECTION E: Integration Troubleshooting**\n\n**Fortinet Integration Issues:**\n| Issue | Resolution |\n|-------|------------|\n| No Fortinet logs in Sentinel | Verify CEF forwarding config: `config log syslogd setting` \u2192 set `format cef` |\n| FSSO sessions not correlating | Ensure FSSO is configured with AD polling or TS Agent |\n| FortiGate API 403 | Verify API key has read-write access to firewall policy and address objects |\n\n**Palo Alto Integration Issues:**\n| Issue | Resolution |\n|-------|------------|\n| No PAN logs in Sentinel | Verify syslog forwarding: Device \u2192 Server Profiles \u2192 Syslog \u2192 configure CEF |\n| User-ID not populating | Verify User-ID agent is running and connected to AD |\n| PAN-OS API timeout | Check management interface accessibility from Azure Logic App |\n\n**Entra ID / Conditional Access Issues:**\n| Issue | Resolution |\n|-------|------------|\n| SigninLogs empty | Enable diagnostic settings: Entra ID \u2192 Diagnostic Settings \u2192 Send to Log Analytics |\n| CA policy not enforcing | Verify policy is in 'On' mode (not Report-only), check group membership |\n| Risk events not appearing | Verify Entra ID P2 license for Identity Protection |\n\n---\n\n**SECTION F: Performance Tips**\n\n1. **Reduce query costs** \u2014 Use `summarize` and `project` to minimize data scanned\n2. **Summary rules** \u2014 For 100K+ records/day, create summary rules to pre-aggregate data\n3. **Data retention** \u2014 Set per-table retention: Catalog = 730d (low volume), Watchlist = 90-365d, MDE/CA logs = 90d\n4. **Polling optimization** \u2014 Start with 30min polling, reduce to 5-15min for critical environments\n5. **Selective severity** \u2014 If volume is high, start with severity >= 20 (infostealer only)\n\n---\n\n**SECTION G: Quick Reference Commands**\n\n**Azure CLI \u2014 Check Resources:**\n```bash\n# List all SpyCloud resources\naz resource list --resource-group {rg-name} --query \"[?contains(name,'spycloud') || contains(name,'SpyCloud')]\" -o table\n\n# Check DCE status\naz monitor data-collection endpoint show --name dce-spycloud-{workspace} --resource-group {rg-name}\n\n# Check DCR status  \naz monitor data-collection rule show --name dcr-spycloud-{workspace} --resource-group {rg-name}\n\n# Check Logic App status\naz logic workflow list --resource-group {rg-name} --query \"[?contains(name,'SpyCloud')]\" -o table\n```\n\n**PowerShell \u2014 Grant Permissions:**\n```powershell\n# Run scripts/grant-permissions.sh from Cloud Shell, or manually:\nConnect-AzAccount\n$rg = '{resource-group-name}'\n$logicApps = Get-AzResource -ResourceGroupName $rg -ResourceType 'Microsoft.Logic/workflows' | Where-Object { $_.Name -like '*SpyCloud*' }\nforeach ($la in $logicApps) {\n    Write-Host \"Checking permissions for: $($la.Name)\"\n    $identity = (Get-AzLogicApp -ResourceGroupName $rg -Name $la.Name).Identity\n    Write-Host \"  Managed Identity Object ID: $($identity.PrincipalId)\"\n}\n```\n\n**Support Contacts:**\n- SpyCloud API issues: support@spycloud.com\n- Sentinel connector issues: GitHub \u2192 github.com/iammrherb/SPYCLOUD-SENTINEL/issues\n- Microsoft Sentinel support: Azure Portal \u2192 Support + Troubleshooting\n- Playbook permissions: Run `scripts/grant-permissions.sh` from Cloud Shell"
+                    "text": "**Health Check Query:**\n\n```kql\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Devices')\n| project Table, Records, Latest\n```\n\n**Troubleshooting:**\n\n| Issue | Fix |\n|-------|-----|\n| No data after 15 min | Verify API key with `curl -H 'X-Api-Key: KEY' https://api.spycloud.io/enterprise-v2/breach/catalog/1` |\n| Compass tables empty | Requires Enterprise+ subscription |\n| 401 errors | Ensure Enterprise tier key (not SaaS) |\n\n*For help, contact support@spycloud.com*"
                   }
                 }
               ]
@@ -4335,7 +4221,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "location": "[parameters('deploymentRegion')]"
     },
@@ -4455,7 +4342,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4509,7 +4397,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4563,7 +4452,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4628,7 +4518,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4694,7 +4585,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4749,7 +4641,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4804,7 +4697,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4858,7 +4752,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4913,7 +4808,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -4973,7 +4869,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -5013,7 +4910,8 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AnyAlert"
           }
-        }
+        },
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -5049,7 +4947,8 @@
             "lookbackDuration": "PT5H",
             "matchingMethod": "AnyAlert"
           }
-        }
+        },
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -5113,7 +5012,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -5177,7 +5077,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -5241,7 +5142,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -5296,7 +5198,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -6275,7 +6178,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
@@ -6329,7 +6233,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
@@ -6383,7 +6288,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
@@ -6438,7 +6344,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
@@ -6492,7 +6399,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       },
       "dependsOn": [
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
@@ -6579,7 +6487,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -6650,7 +6559,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -6712,7 +6622,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -6765,7 +6676,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -6818,7 +6730,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -6869,7 +6782,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -6922,7 +6836,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -6973,7 +6888,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7033,7 +6949,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7084,7 +7001,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7135,7 +7053,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7186,7 +7105,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7247,7 +7167,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7298,7 +7219,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7358,7 +7280,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7418,7 +7341,8 @@
               }
             ]
           }
-        ]
+        ],
+        "etag": "*"
       }
     },
     {
@@ -7793,349 +7717,6 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {}
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-12-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-Fusion-Multistage')]",
-      "kind": "Fusion",
-      "condition": "[parameters('enableFusionRule')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ],
-      "properties": {
-        "alertRuleTemplateName": "f71aba3d-28fb-450b-b192-4e76a83015c8",
-        "enabled": true,
-        "sourceSettings": [
-          {
-            "sourceName": "Anomalies",
-            "sourceSubTypes": [],
-            "enabled": true
-          },
-          {
-            "sourceName": "Alert providers",
-            "enabled": true,
-            "sourceSubTypes": [
-              {
-                "sourceSubTypeName": "Microsoft Cloud App Security",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              },
-              {
-                "sourceSubTypeName": "Azure Defender",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              },
-              {
-                "sourceSubTypeName": "Microsoft Defender for Endpoint",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Informational",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              },
-              {
-                "sourceSubTypeName": "Microsoft Defender for Identity",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Informational",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              },
-              {
-                "sourceSubTypeName": "Microsoft Defender for Office 365",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              },
-              {
-                "sourceSubTypeName": "Azure Sentinel scheduled analytics rules",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Informational",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              },
-              {
-                "sourceSubTypeName": "Azure Active Directory Identity Protection",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              },
-              {
-                "sourceSubTypeName": "Microsoft 365 Defender",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": [
-                    {
-                      "severity": "High",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Medium",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Low",
-                      "enabled": true
-                    },
-                    {
-                      "severity": "Informational",
-                      "enabled": true
-                    }
-                  ]
-                },
-                "enabled": true
-              }
-            ]
-          },
-          {
-            "sourceName": "Raw logs from other sources",
-            "enabled": true,
-            "sourceSubTypes": [
-              {
-                "sourceSubTypeName": "Palo Alto Networks",
-                "severityFilters": {
-                  "isDefaultFilteringDisabled": false,
-                  "filters": []
-                },
-                "enabled": true
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderXDR')]",
-      "kind": "MicrosoftSecurityIncidentCreation",
-      "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ],
-      "properties": {
-        "displayName": "Create incidents from Microsoft Defender for Endpoint alerts",
-        "description": "Auto-creates Sentinel incidents from Microsoft Defender for Endpoint (MDE) alerts. Ensures endpoint alerts are unified in Sentinel for cross-correlation with SpyCloud exposure data and device infection tracking.",
-        "enabled": true,
-        "productFilter": "Microsoft Defender Advanced Threat Protection",
-        "severitiesFilter": [
-          "High",
-          "Medium",
-          "Low",
-          "Informational"
-        ],
-        "displayNamesFilter": null
-      }
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-EntraProtection')]",
-      "kind": "MicrosoftSecurityIncidentCreation",
-      "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ],
-      "properties": {
-        "displayName": "Create incidents from Entra ID Protection alerts",
-        "description": "Auto-creates Sentinel incidents when Entra ID Protection detects risky users or risky sign-ins. Correlate with SpyCloud data to determine if the risky user was flagged due to darknet credential exposure.",
-        "enabled": true,
-        "productFilter": "Azure Active Directory Identity Protection",
-        "severitiesFilter": [
-          "High",
-          "Medium",
-          "Low"
-        ],
-        "displayNamesFilter": null
-      }
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderCloud')]",
-      "kind": "MicrosoftSecurityIncidentCreation",
-      "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ],
-      "properties": {
-        "displayName": "Create incidents from Defender for Cloud alerts",
-        "description": "Auto-creates Sentinel incidents from Microsoft Defender for Cloud (Azure Defender) alerts covering VMs, SQL, Storage, Key Vault, App Service, Kubernetes, and more. Cross-correlate with SpyCloud to detect compromised credentials accessing cloud resources.",
-        "enabled": true,
-        "productFilter": "Azure Security Center",
-        "severitiesFilter": [
-          "High",
-          "Medium",
-          "Low"
-        ],
-        "displayNamesFilter": null
-      }
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-MCAS')]",
-      "kind": "MicrosoftSecurityIncidentCreation",
-      "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ],
-      "properties": {
-        "displayName": "Create incidents from Microsoft Cloud App Security alerts",
-        "description": "Auto-creates Sentinel incidents from Microsoft Defender for Cloud Apps (MCAS) alerts. Detects impossible travel, suspicious inbox rules, OAuth app abuse, and mass file downloads \u2014 correlate with SpyCloud to verify if compromised credentials were used.",
-        "enabled": true,
-        "productFilter": "Microsoft Cloud App Security",
-        "severitiesFilter": [
-          "High",
-          "Medium",
-          "Low"
-        ],
-        "displayNamesFilter": null
-      }
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderIdentity')]",
-      "kind": "MicrosoftSecurityIncidentCreation",
-      "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
-      ],
-      "properties": {
-        "displayName": "Create incidents from Defender for Identity alerts",
-        "description": "Auto-creates Sentinel incidents from Microsoft Defender for Identity alerts (on-premises Active Directory). Detects pass-the-hash, golden ticket, DCSync, and reconnaissance activities \u2014 critical to correlate with SpyCloud credential exposures that may enable these attacks.",
-        "enabled": true,
-        "productFilter": "Azure Advanced Threat Protection",
-        "severitiesFilter": [
-          "High",
-          "Medium",
-          "Low",
-          "Informational"
-        ],
-        "displayNamesFilter": null
-      }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
