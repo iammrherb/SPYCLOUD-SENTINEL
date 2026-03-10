@@ -7427,10 +7427,12 @@
         "enabled": true,
         "sourceSettings": [
           {
+            "enabled": true,
             "sourceName": "Anomalies",
             "sourceSubTypes": []
           },
           {
+            "enabled": true,
             "sourceName": "Alert providers",
             "sourceSubTypes": [
               {
@@ -7620,6 +7622,7 @@
             ]
           },
           {
+            "enabled": true,
             "sourceName": "Raw logs from other sources",
             "sourceSubTypes": [
               {
@@ -7640,6 +7643,7 @@
       "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-EntraProtection')]",
       "kind": "MicrosoftSecurityIncidentCreation",
+      "etag": "*",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -7663,6 +7667,7 @@
       "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderCloud')]",
       "kind": "MicrosoftSecurityIncidentCreation",
+      "etag": "*",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -7686,6 +7691,7 @@
       "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-MCAS')]",
       "kind": "MicrosoftSecurityIncidentCreation",
+      "etag": "*",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -7709,6 +7715,7 @@
       "apiVersion": "2022-11-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-MSIC-DefenderIdentity')]",
       "kind": "MicrosoftSecurityIncidentCreation",
+      "etag": "*",
       "condition": "[parameters('enableMicrosoftSecurityIncidentRules')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -7732,6 +7739,7 @@
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoResponse'))]",
+      "etag": "*",
       "location": "[parameters('deploymentRegion')]",
       "condition": "[and(parameters('enableAutomationRule'), parameters('enableCredResponsePlaybook'))]",
       "dependsOn": [
@@ -7787,7 +7795,7 @@
             }
           }
         ],
-        "isEnabled": true
+        "IsEnabled": true
       }
     },
     {
@@ -8106,6 +8114,7 @@
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoEscalate'))]",
+      "etag": "*",
       "location": "[parameters('deploymentRegion')]",
       "condition": "[parameters('enableAutomationRule')]",
       "dependsOn": [
@@ -8145,13 +8154,14 @@
             }
           }
         ],
-        "isEnabled": true
+        "IsEnabled": true
       }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoTriageDevice'))]",
+      "etag": "*",
       "location": "[parameters('deploymentRegion')]",
       "condition": "[parameters('enableAutomationRule')]",
       "dependsOn": [
@@ -8200,13 +8210,14 @@
             }
           }
         ],
-        "isEnabled": true
+        "IsEnabled": true
       }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', guid('SpyCloud-AutoClose'))]",
+      "etag": "*",
       "location": "[parameters('deploymentRegion')]",
       "condition": "[parameters('enableAutomationRule')]",
       "dependsOn": [
@@ -8260,7 +8271,7 @@
             }
           }
         ],
-        "isEnabled": true
+        "IsEnabled": true
       }
     },
     {
