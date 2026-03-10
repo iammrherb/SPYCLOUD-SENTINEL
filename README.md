@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/spycloud-logo.svg" alt="SpyCloud Sentinel" width="420">
+<img src="docs/images/SpyCloud-Logo-white.png" alt="SpyCloud" width="340" style="background:#0D1B2A;padding:24px;border-radius:10px"/>
 
 <br><br>
 
