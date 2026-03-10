@@ -1,0 +1,1585 @@
+openapi: 3.0.3
+info:
+  title: SpyCloud Threat Intelligence API
+  version: 2.0.0
+  description: >
+    SpyCloud provides actionable intelligence on compromised credentials, stolen
+    identities, and malware-infected devices sourced from the criminal underground.
+    This specification covers the Enterprise Breach, Compass Investigation, and
+    Identity Exposure APIs enabling Security Copilot to query breach records,
+    investigate identities, and monitor watchlists.
+  contact:
+    name: SpyCloud Support
+    url: https://spycloud.com/support
+    email: support@spycloud.com
+  license:
+    name: Proprietary
+    url: https://spycloud.com/terms
+  x-logo:
+    url: https://spycloud.com/wp-content/uploads/spycloud-logo.svg
+
+servers:
+  - url: https://api.spycloud.io
+    description: SpyCloud Production API
+
+security:
+  - ApiKeyHeader: []
+
+tags:
+  - name: Enterprise - Email Lookup
+    description: Search breach records by email address.
+  - name: Enterprise - Domain Lookup
+    description: Search breach records by corporate domain.
+  - name: Enterprise - IP Lookup
+    description: Search breach records by IP address.
+  - name: Enterprise - Password Check
+    description: Check whether a password has appeared in known breaches.
+  - name: Enterprise - Username Lookup
+    description: Search breach records by username.
+  - name: Enterprise - Breach Catalog
+    description: Browse and inspect the SpyCloud breach catalog.
+  - name: Compass - Email Investigation
+    description: Deep investigation of an email across underground sources.
+  - name: Compass - Domain Investigation
+    description: Deep investigation of a domain across underground sources.
+  - name: Compass - IP Investigation
+    description: Deep investigation of an IP across underground sources.
+  - name: Identity - Exposure Lookup
+    description: Identity-centric exposure records by email.
+  - name: Identity - Watchlist
+    description: Manage and query the monitored identity watchlist.
+
+paths:
+  # ===========================================================================
+  # ENTERPRISE API
+  # ===========================================================================
+
+  /breach/data/emails/{email}:
+    get:
+      operationId: getBreachDataByEmail
+      summary: Get breach records for an email address
+      description: >
+        Returns all breach and infostealer records associated with the supplied
+        email address including exposed credentials, target applications,
+        infection metadata, password types, severity scores, and PII fields.
+        Use this as the primary lookup when investigating a user identity.
+      tags:
+        - Enterprise - Email Lookup
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/PasswordTypeFilter'
+        - $ref: '#/components/parameters/TypeFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Breach records matching the email address.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /breach/data/domains/{domain}:
+    get:
+      operationId: getBreachDataByDomain
+      summary: Get breach records for a domain
+      description: >
+        Returns all breach and infostealer records where the victim email
+        belongs to the specified corporate domain. Useful for assessing
+        organization-wide credential exposure and prioritizing remediation
+        across business units.
+      tags:
+        - Enterprise - Domain Lookup
+      parameters:
+        - $ref: '#/components/parameters/DomainPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/PasswordTypeFilter'
+        - $ref: '#/components/parameters/TypeFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Breach records matching the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /breach/data/ips/{ip}:
+    get:
+      operationId: getBreachDataByIp
+      summary: Get breach records for an IP address
+      description: >
+        Returns breach and infostealer records associated with the specified
+        IP address, which may represent an infected machine's external address
+        or a login IP captured in stolen credentials. Useful for correlating
+        network observables with credential theft events.
+      tags:
+        - Enterprise - IP Lookup
+      parameters:
+        - $ref: '#/components/parameters/IpPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/TypeFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Breach records matching the IP address.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /breach/data/passwords/{password}:
+    get:
+      operationId: checkPasswordExposure
+      summary: Check if a password appears in known breaches
+      description: >
+        Determines whether a given password has been observed in any breach or
+        infostealer dataset tracked by SpyCloud. Returns matching records with
+        associated accounts, severity, and breach context. Use this to validate
+        that credentials in use have not been previously compromised.
+      tags:
+        - Enterprise - Password Check
+      parameters:
+        - $ref: '#/components/parameters/PasswordPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Records where this password was observed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /breach/data/usernames/{username}:
+    get:
+      operationId: getBreachDataByUsername
+      summary: Get breach records for a username
+      description: >
+        Returns breach records where the compromised identity was identified
+        by a username rather than an email address. Useful for investigating
+        service accounts, legacy systems, or platforms that use non-email
+        usernames for authentication.
+      tags:
+        - Enterprise - Username Lookup
+      parameters:
+        - $ref: '#/components/parameters/UsernamePath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/PasswordTypeFilter'
+        - $ref: '#/components/parameters/TypeFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Breach records matching the username.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /breach/catalog:
+    get:
+      operationId: listBreachCatalog
+      summary: List all breaches in the SpyCloud catalog
+      description: >
+        Returns the full SpyCloud breach catalog including breach titles,
+        descriptions, acquisition dates, record counts, data types exposed,
+        confidence scores, and breach categories. Use this for situational
+        awareness, trend analysis, or to identify specific breaches affecting
+        your organization.
+      tags:
+        - Enterprise - Breach Catalog
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: >
+            Free-text search across breach titles and descriptions. Returns
+            only catalog entries matching the query string.
+          schema:
+            type: string
+            example: linkedin
+        - name: since
+          in: query
+          required: false
+          description: >
+            Filter to breaches acquired on or after this date (YYYY-MM-DD or
+            Unix epoch). Useful for reviewing newly added breaches.
+          schema:
+            type: string
+            example: '2024-01-01'
+        - name: until
+          in: query
+          required: false
+          description: Filter to breaches acquired on or before this date.
+          schema:
+            type: string
+            example: '2025-12-31'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: List of breach catalog entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachCatalogListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /breach/catalog/{id}:
+    get:
+      operationId: getBreachCatalogEntry
+      summary: Get details for a specific breach
+      description: >
+        Returns full metadata for a single breach catalog entry identified by
+        its numeric source ID. Includes breach title, description, site,
+        acquisition date, record count, data classes exposed, confidence level,
+        and category classification.
+      tags:
+        - Enterprise - Breach Catalog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The numeric SpyCloud source ID identifying the breach.
+          schema:
+            type: integer
+            format: int64
+            example: 41874
+      responses:
+        '200':
+          description: Breach catalog entry details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachCatalogEntryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ===========================================================================
+  # COMPASS API (INVESTIGATION)
+  # ===========================================================================
+
+  /compass/data/emails/{email}:
+    get:
+      operationId: compassInvestigateEmail
+      summary: Deep investigation of an email address
+      description: >
+        Performs a comprehensive Compass investigation of the given email
+        address across underground marketplaces, paste sites, botnet logs,
+        and infostealer datasets. Returns enriched records with malware family
+        attribution, infection timelines, device fingerprints, stolen cookies,
+        auto-fill data, and session tokens beyond what the standard Enterprise
+        endpoint provides. Use this for in-depth incident response and threat
+        hunting.
+      tags:
+        - Compass - Email Investigation
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Compass investigation records for the email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompassRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /compass/data/domains/{domain}:
+    get:
+      operationId: compassInvestigateDomain
+      summary: Deep investigation of a domain
+      description: >
+        Performs a comprehensive Compass investigation of all identities under
+        the specified domain across underground marketplaces, paste sites,
+        botnet logs, and infostealer datasets. Returns enriched records with
+        malware family attribution, device fingerprints, session tokens, and
+        cookie theft data. Use this for organization-wide threat exposure
+        assessments.
+      tags:
+        - Compass - Domain Investigation
+      parameters:
+        - $ref: '#/components/parameters/DomainPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Compass investigation records for the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompassRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /compass/data/ips/{ip}:
+    get:
+      operationId: compassInvestigateIp
+      summary: Deep investigation of an IP address
+      description: >
+        Performs a comprehensive Compass investigation of the specified IP
+        address across underground sources. Returns enriched records tying the
+        IP to infected machines, botnet membership, credential theft events,
+        and associated identities. Use this to determine whether a network
+        observable is linked to active infostealer infrastructure.
+      tags:
+        - Compass - IP Investigation
+      parameters:
+        - $ref: '#/components/parameters/IpPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Compass investigation records for the IP address.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompassRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ===========================================================================
+  # IDENTITY API
+  # ===========================================================================
+
+  /identity/data/emails/{email}:
+    get:
+      operationId: getIdentityExposure
+      summary: Get identity exposure records for an email
+      description: >
+        Returns identity-centric exposure records for the given email address
+        including credential pairs, identity attributes, exposure severity,
+        and timeline data. Unlike the Enterprise endpoint which is breach-record
+        oriented, this endpoint aggregates exposure across the full identity
+        lifecycle and deduplicates credentials to show current risk posture.
+      tags:
+        - Identity - Exposure Lookup
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Identity exposure records for the email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /identity/watchlist:
+    get:
+      operationId: getIdentityWatchlist
+      summary: List monitored identities on the watchlist
+      description: >
+        Returns all identities currently on the organization's SpyCloud
+        watchlist including monitored email addresses, domains, and IP ranges.
+        The watchlist drives automated alerting when new exposures are detected
+        for monitored assets. Use this to audit coverage and ensure critical
+        identities are being tracked.
+      tags:
+        - Identity - Watchlist
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: >
+            Filter watchlist entries by monitored asset type such as email,
+            domain, or ip.
+          schema:
+            type: string
+            enum:
+              - email
+              - domain
+              - ip
+        - name: state
+          in: query
+          required: false
+          description: >
+            Filter by watchlist entry state. Active entries are currently
+            monitored; inactive entries have been paused.
+          schema:
+            type: string
+            enum:
+              - active
+              - inactive
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Watchlist entries for the organization.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+# =============================================================================
+# COMPONENTS
+# =============================================================================
+
+components:
+
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: >
+        SpyCloud API key issued for your organization. Include this header in
+        every request. Keys can be generated and rotated from the SpyCloud
+        portal under Settings > API Keys.
+
+  # ---------------------------------------------------------------------------
+  # Reusable Parameters
+  # ---------------------------------------------------------------------------
+
+  parameters:
+    EmailPath:
+      name: email
+      in: path
+      required: true
+      description: The email address to search for in breach or investigation records.
+      schema:
+        type: string
+        format: email
+        example: john.doe@example.com
+
+    DomainPath:
+      name: domain
+      in: path
+      required: true
+      description: >
+        The domain name to search for. All email addresses under this domain
+        will be matched.
+      schema:
+        type: string
+        format: hostname
+        example: example.com
+
+    IpPath:
+      name: ip
+      in: path
+      required: true
+      description: >
+        The IPv4 or IPv6 address to search for in breach or investigation
+        records. Supports both bare addresses and CIDR notation for range
+        queries.
+      schema:
+        type: string
+        example: 198.51.100.42
+
+    PasswordPath:
+      name: password
+      in: path
+      required: true
+      description: >
+        The plaintext password to check for exposure. The value is transmitted
+        over TLS and is not stored by SpyCloud.
+      schema:
+        type: string
+        format: password
+
+    UsernamePath:
+      name: username
+      in: path
+      required: true
+      description: The username to search for in breach records.
+      schema:
+        type: string
+        example: jdoe_admin
+
+    Since:
+      name: since
+      in: query
+      required: false
+      description: >
+        Return records published on or after this date. Accepts ISO-8601 date
+        (YYYY-MM-DD) or Unix epoch seconds.
+      schema:
+        type: string
+        example: '2024-01-01'
+
+    Until:
+      name: until
+      in: query
+      required: false
+      description: >
+        Return records published on or before this date. Accepts ISO-8601 date
+        (YYYY-MM-DD) or Unix epoch seconds.
+      schema:
+        type: string
+        example: '2025-12-31'
+
+    SeverityFilter:
+      name: severity
+      in: query
+      required: false
+      description: >
+        Filter records by minimum severity score on a 1-25 scale where higher
+        values indicate greater risk. Records with severity below this
+        threshold are excluded.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 25
+        example: 20
+
+    SourceId:
+      name: source_id
+      in: query
+      required: false
+      description: >
+        Restrict results to a specific breach source by its numeric catalog ID.
+        Obtain IDs from the breach catalog endpoint.
+      schema:
+        type: integer
+        format: int64
+        example: 41874
+
+    PasswordTypeFilter:
+      name: password_type
+      in: query
+      required: false
+      description: >
+        Filter results by the type of password representation available in
+        the record. Useful for prioritizing remediation of plaintext
+        exposures.
+      schema:
+        type: string
+        enum:
+          - plaintext
+          - hashed
+          - cracked
+          - unknown
+
+    TypeFilter:
+      name: type
+      in: query
+      required: false
+      description: >
+        Filter by breach record category. corporate restricts to records
+        matching your monitored domains; infected restricts to records
+        originating from infostealer malware.
+      schema:
+        type: string
+        enum:
+          - corporate
+          - infected
+
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: >
+        Opaque pagination cursor returned in the previous response. Supply
+        this value to retrieve the next page of results.
+      schema:
+        type: string
+
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: >
+        Maximum number of records to return per page. Defaults to 100.
+        Maximum allowed value is 10000.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 10000
+        default: 100
+        example: 100
+
+  # ---------------------------------------------------------------------------
+  # Reusable Response Definitions
+  # ---------------------------------------------------------------------------
+
+  responses:
+    BadRequest:
+      description: >
+        The request was malformed. Check path parameters and query string
+        values.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: >
+        Authentication failed. The API key is missing, invalid, or expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: >
+        The API key does not have permission to access this endpoint or
+        resource. Contact SpyCloud to adjust your subscription tier.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: >
+        No records were found for the supplied search value.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    RateLimited:
+      description: >
+        Request rate limit exceeded. Retry after the interval indicated in
+        the Retry-After header.
+      headers:
+        Retry-After:
+          description: Seconds until the rate limit resets.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalError:
+      description: An unexpected server-side error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Schemas
+  # ---------------------------------------------------------------------------
+
+  schemas:
+
+    # -- Error ----------------------------------------------------------------
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 401
+        message:
+          type: string
+          description: Human-readable error description.
+          example: Invalid or missing API key.
+
+    # -- Pagination -----------------------------------------------------------
+
+    PaginationMeta:
+      type: object
+      properties:
+        cursor:
+          type: string
+          nullable: true
+          description: >
+            Opaque cursor for the next page. Null when there are no more
+            results.
+        total_records:
+          type: integer
+          format: int64
+          description: Total number of records matching the query.
+          example: 2437
+        limit:
+          type: integer
+          format: int32
+          description: Page size used for this response.
+          example: 100
+
+    # -- Enterprise Breach Record ---------------------------------------------
+
+    BreachRecord:
+      type: object
+      description: >
+        A single breach or infostealer exposure record from the SpyCloud
+        Enterprise dataset.
+      properties:
+        document_id:
+          type: string
+          description: Unique SpyCloud document identifier for this record.
+          example: d8f3a1b2-4c5e-6f7a-8b9c-0d1e2f3a4b5c
+        source_id:
+          type: integer
+          format: int64
+          description: Numeric breach source ID referencing the breach catalog.
+          example: 41874
+        spycloud_publish_date:
+          type: string
+          format: date-time
+          description: When SpyCloud first published this record.
+        breach_date:
+          type: string
+          format: date
+          nullable: true
+          description: Estimated date the breach occurred.
+        breach_title:
+          type: string
+          nullable: true
+          description: Human-readable name of the breach source.
+          example: ExampleCorp 2024 Data Breach
+        breach_description:
+          type: string
+          nullable: true
+          description: Extended description of the breach event.
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Compromised email address.
+        email_domain:
+          type: string
+          nullable: true
+          description: Domain portion of the compromised email.
+        email_username:
+          type: string
+          nullable: true
+          description: Local-part of the compromised email.
+        username:
+          type: string
+          nullable: true
+          description: Non-email username if available.
+        password:
+          type: string
+          nullable: true
+          description: >
+            Password value. May be plaintext, hashed, or cracked depending on
+            password_type.
+        password_plaintext:
+          type: string
+          nullable: true
+          description: Plaintext password if available.
+        password_type:
+          type: string
+          nullable: true
+          description: Classification of the password representation.
+          enum:
+            - plaintext
+            - hashed
+            - cracked
+            - unknown
+        salt:
+          type: string
+          nullable: true
+          description: Password salt if present in the breach data.
+        target_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Login URL or service targeted by the stolen credential.
+        target_domain:
+          type: string
+          nullable: true
+          description: Domain of the targeted service.
+        target_subdomain:
+          type: string
+          nullable: true
+          description: Subdomain of the targeted service.
+        severity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 25
+          description: >
+            SpyCloud severity score from 1 (low) to 25 (critical) reflecting
+            recency, data richness, and source reliability.
+          example: 22
+        sighting:
+          type: integer
+          format: int32
+          description: Number of times this credential pair has been observed.
+          example: 3
+        infected_machine_id:
+          type: string
+          nullable: true
+          description: SpyCloud identifier for the infected device.
+        infected_path:
+          type: string
+          nullable: true
+          description: File-system path where the infostealer was executed.
+        infected_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the device infection occurred.
+        malware_family:
+          type: string
+          nullable: true
+          description: Name of the malware family responsible for data theft.
+          example: RedLine
+        user_hostname:
+          type: string
+          nullable: true
+          description: Hostname of the infected machine.
+        user_os:
+          type: string
+          nullable: true
+          description: Operating system of the infected machine.
+        ip_addresses:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: IP addresses associated with the infected machine.
+        country_code:
+          type: string
+          nullable: true
+          description: ISO 3166-1 alpha-2 country code of the infected device.
+          example: US
+        keyboard_languages:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Keyboard languages configured on the infected device.
+        av_softwares:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Antivirus software detected on the infected machine.
+        full_name:
+          type: string
+          nullable: true
+          description: Full name of the compromised individual.
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          description: Phone number of the compromised individual.
+        dob:
+          type: string
+          format: date
+          nullable: true
+          description: Date of birth.
+        address_1:
+          type: string
+          nullable: true
+        address_2:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        job_title:
+          type: string
+          nullable: true
+        company_name:
+          type: string
+          nullable: true
+        industry:
+          type: string
+          nullable: true
+        social_linkedin:
+          type: string
+          format: uri
+          nullable: true
+        social_twitter:
+          type: string
+          nullable: true
+        ssn_last_four:
+          type: string
+          nullable: true
+          description: Last four digits of Social Security Number.
+        social_security_number:
+          type: string
+          nullable: true
+          description: Full SSN if present in breach data.
+        bank_number:
+          type: string
+          nullable: true
+          description: Bank account number if present.
+        credit_card_number:
+          type: string
+          nullable: true
+        credit_card_expiration:
+          type: string
+          nullable: true
+        log_id:
+          type: string
+          nullable: true
+          description: Infostealer log bundle identifier.
+        record_type:
+          type: string
+          nullable: true
+          description: Classification of the record source.
+          enum:
+            - breach
+            - infostealer
+            - phishing
+            - combolist
+            - paste
+        account_type:
+          type: string
+          nullable: true
+          description: Type of compromised account (e.g., personal, corporate).
+        account_signup_time:
+          type: string
+          format: date-time
+          nullable: true
+        account_last_login:
+          type: string
+          format: date-time
+          nullable: true
+
+    BreachRecordResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+          description: Total matching records.
+          example: 47
+        cursor:
+          type: string
+          nullable: true
+          description: Pagination cursor for the next page.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BreachRecord'
+
+    # -- Breach Catalog -------------------------------------------------------
+
+    BreachCatalogEntry:
+      type: object
+      description: Metadata about a single breach in the SpyCloud catalog.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique SpyCloud source identifier.
+          example: 41874
+        title:
+          type: string
+          description: Human-readable breach title.
+          example: ExampleCorp 2024 Breach
+        description:
+          type: string
+          nullable: true
+          description: Detailed description of the breach event.
+        type:
+          type: string
+          description: Breach category classification.
+          enum:
+            - breach
+            - infostealer
+            - phishing
+            - combolist
+            - paste
+            - scraping
+            - exfiltration
+        site:
+          type: string
+          nullable: true
+          description: Affected website or service.
+          example: example.com
+        site_description:
+          type: string
+          nullable: true
+        num_records:
+          type: integer
+          format: int64
+          description: Total number of records in this breach.
+          example: 1250000
+        acquisition_date:
+          type: string
+          format: date
+          description: Date SpyCloud acquired the breach data.
+        breach_date:
+          type: string
+          format: date
+          nullable: true
+          description: Estimated date the breach occurred.
+        confidence:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 5
+          description: >
+            SpyCloud confidence rating from 1 (low) to 5 (verified) indicating
+            authenticity of the dataset.
+          example: 4
+        data_classes:
+          type: array
+          items:
+            type: string
+          description: >
+            Types of data exposed in this breach such as email, password,
+            phone, ssn, credit_card, etc.
+          example:
+            - email
+            - password
+            - phone
+            - full_name
+
+    BreachCatalogListResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+          description: Total catalog entries matching the query.
+        cursor:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BreachCatalogEntry'
+
+    BreachCatalogEntryResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/BreachCatalogEntry'
+
+    # -- Compass Investigation Record -----------------------------------------
+
+    CompassRecord:
+      type: object
+      description: >
+        An enriched investigation record from the SpyCloud Compass dataset
+        providing deeper context than standard breach records.
+      allOf:
+        - $ref: '#/components/schemas/BreachRecord'
+        - type: object
+          properties:
+            stolen_cookies:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/StolenCookie'
+              description: >
+                Session cookies exfiltrated by infostealer malware. Can be
+                replayed to hijack authenticated sessions.
+            autofill_fields:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/AutofillField'
+              description: Browser autofill data captured by the infostealer.
+            crypto_wallets:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/CryptoWallet'
+              description: Cryptocurrency wallet addresses found on the device.
+            installed_software:
+              type: array
+              nullable: true
+              items:
+                type: string
+              description: Software inventory from the infected machine.
+            browser_history_domains:
+              type: array
+              nullable: true
+              items:
+                type: string
+              description: >
+                Domains found in the browser history of the infected device.
+            screenshot_available:
+              type: boolean
+              nullable: true
+              description: Whether a desktop screenshot was captured by the malware.
+            keylog_available:
+              type: boolean
+              nullable: true
+              description: Whether keylogger output was captured.
+            file_exfiltration:
+              type: boolean
+              nullable: true
+              description: Whether local files were exfiltrated by the malware.
+            bot_id:
+              type: string
+              nullable: true
+              description: Unique bot identifier assigned by the malware operator.
+            campaign_id:
+              type: string
+              nullable: true
+              description: Malware campaign identifier if attributable.
+            c2_url:
+              type: string
+              format: uri
+              nullable: true
+              description: Command-and-control URL used by the malware.
+            infection_build_id:
+              type: string
+              nullable: true
+              description: Malware build identifier.
+            hardware_id:
+              type: string
+              nullable: true
+              description: Hardware fingerprint of the infected device.
+            display_resolution:
+              type: string
+              nullable: true
+              description: Screen resolution of the infected device.
+              example: 1920x1080
+
+    StolenCookie:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: Cookie domain.
+          example: .google.com
+        name:
+          type: string
+          description: Cookie name.
+          example: SID
+        value:
+          type: string
+          description: Cookie value.
+        path:
+          type: string
+          example: /
+        expires:
+          type: string
+          format: date-time
+          nullable: true
+        http_only:
+          type: boolean
+        secure:
+          type: boolean
+
+    AutofillField:
+      type: object
+      properties:
+        field_name:
+          type: string
+          description: HTML form field name.
+          example: credit_card_number
+        field_value:
+          type: string
+          description: Value stored in browser autofill.
+        source_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL where the autofill was associated.
+
+    CryptoWallet:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Cryptocurrency type.
+          example: BTC
+        address:
+          type: string
+          description: Wallet address.
+        label:
+          type: string
+          nullable: true
+          description: User-assigned wallet label.
+
+    CompassRecordResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+        cursor:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompassRecord'
+
+    # -- Identity Exposure Record ---------------------------------------------
+
+    IdentityRecord:
+      type: object
+      description: >
+        An identity-centric exposure record that aggregates and deduplicates
+        credential exposure across multiple breach sources to represent the
+        current risk posture of a single identity.
+      properties:
+        identity_id:
+          type: string
+          description: SpyCloud unique identity identifier.
+        email:
+          type: string
+          format: email
+          nullable: true
+        email_domain:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        full_name:
+          type: string
+          nullable: true
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        dob:
+          type: string
+          format: date
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        current_password_exposed:
+          type: boolean
+          description: >
+            Whether the identity's current password (most recently observed)
+            is available in plaintext or cracked form.
+        password_last_seen:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the most recent password exposure was observed.
+        total_exposures:
+          type: integer
+          format: int32
+          description: Total number of breach records for this identity.
+          example: 14
+        total_sources:
+          type: integer
+          format: int32
+          description: Number of distinct breach sources contributing data.
+          example: 6
+        first_seen:
+          type: string
+          format: date-time
+          description: When this identity was first observed in breach data.
+        last_seen:
+          type: string
+          format: date-time
+          description: When this identity was most recently observed.
+        severity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 25
+          description: Highest severity score across all exposures.
+        infected_device_count:
+          type: integer
+          format: int32
+          description: Number of distinct infected devices associated.
+        exposed_credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExposedCredential'
+          description: Deduplicated list of exposed credential pairs.
+        exposed_data_classes:
+          type: array
+          items:
+            type: string
+          description: >
+            All PII and data classes exposed for this identity across all
+            sources.
+          example:
+            - email
+            - password
+            - phone
+            - ssn
+            - credit_card
+
+    ExposedCredential:
+      type: object
+      properties:
+        target_domain:
+          type: string
+          nullable: true
+          description: Service the credential was used for.
+        target_url:
+          type: string
+          format: uri
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        password_type:
+          type: string
+          nullable: true
+          enum:
+            - plaintext
+            - hashed
+            - cracked
+            - unknown
+        severity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 25
+        source_id:
+          type: integer
+          format: int64
+        first_seen:
+          type: string
+          format: date-time
+        last_seen:
+          type: string
+          format: date-time
+
+    IdentityRecordResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+        cursor:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityRecord'
+
+    # -- Watchlist ------------------------------------------------------------
+
+    WatchlistEntry:
+      type: object
+      description: A monitored asset on the organization's SpyCloud watchlist.
+      properties:
+        id:
+          type: string
+          description: Unique watchlist entry identifier.
+        type:
+          type: string
+          description: Asset type being monitored.
+          enum:
+            - email
+            - domain
+            - ip
+        value:
+          type: string
+          description: The monitored value (email address, domain, or IP).
+          example: ciso@example.com
+        state:
+          type: string
+          description: Current monitoring state.
+          enum:
+            - active
+            - inactive
+        added_at:
+          type: string
+          format: date-time
+          description: When the entry was added to the watchlist.
+        last_alert_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the last exposure alert was generated.
+        total_exposures:
+          type: integer
+          format: int32
+          description: Cumulative exposure count for this watchlist entry.
+          example: 23
+
+    WatchlistResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+        cursor:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchlistEntry'
