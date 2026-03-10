@@ -234,6 +234,7 @@
       "SpyCloudBreachCatalog_CL",
       "SpyCloudCompassData_CL",
       "SpyCloudCompassDevices_CL",
+      "SpyCloudCompassApplications_CL",
       "Spycloud_MDE_Logs_CL",
       "SpyCloud_ConditionalAccessLogs_CL"
     ],
@@ -282,10 +283,10 @@
       "Identity Exposure API"
     ],
     "sentinelTables": {
-      "spyCloud": 6,
+      "spyCloud": 7,
       "microsoft": 12,
       "watchlists": 4,
-      "totalColumns": 156
+      "totalColumns": 199
     }
   }
 }
