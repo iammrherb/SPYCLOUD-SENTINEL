@@ -1,3 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80" width="420" height="80">
-  <text x="0" y="65" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="72" font-weight="bold" fill="#000000" letter-spacing="-2">SpyCloud</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100" width="480" height="100">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a73e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d47a1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="eyeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#42a5f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1565c0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Shield icon -->
+  <path d="M45 8 L80 22 L80 48 C80 68 65 82 45 92 C25 82 10 68 10 48 L10 22 Z" fill="url(#shieldGrad)" />
+  <!-- Eye icon inside shield -->
+  <ellipse cx="45" cy="44" rx="22" ry="14" fill="none" stroke="#ffffff" stroke-width="2.5" />
+  <circle cx="45" cy="44" r="8" fill="url(#eyeGrad)" />
+  <circle cx="45" cy="44" r="3.5" fill="#ffffff" />
+  <!-- Scan lines -->
+  <line x1="20" y1="44" x2="28" y2="44" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+  <line x1="62" y1="44" x2="70" y2="44" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+  <!-- SpyCloud wordmark -->
+  <text x="98" y="42" font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="42" font-weight="700" fill="#0d47a1" letter-spacing="-1">Spy</text>
+  <text x="191" y="42" font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="42" font-weight="700" fill="#1a1a2e" letter-spacing="-1">Cloud</text>
+  <!-- Tagline -->
+  <text x="98" y="68" font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#5f6368" letter-spacing="0.5">Darknet &amp; Identity Threat Exposure Intelligence</text>
+  <!-- Accent line -->
+  <rect x="98" y="74" width="60" height="2.5" rx="1.25" fill="#1a73e8" />
 </svg>
