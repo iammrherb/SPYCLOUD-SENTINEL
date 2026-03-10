@@ -1563,15 +1563,22 @@
                 "name": "enableFusionRule",
                 "type": "Microsoft.Common.CheckBox",
                 "label": "Enable Fusion Multistage Attack Detection",
-                "toolTip": "Deploys the Fusion analytics rule.",
-                "defaultValue": true
+                "toolTip": "WARNING: Set to false if Fusion is already enabled in your workspace. Can only install once per workspace.",
+                "defaultValue": false
               },
               {
                 "name": "enableMicrosoftSecurityIncidentRules",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Create MSIC Rules (5 rules)",
-                "toolTip": "Auto-create incidents from Microsoft security product alerts.",
+                "label": "Create MSIC Rules (4 rules)",
+                "toolTip": "Auto-create incidents from Entra ID Protection, Defender for Cloud, MCAS, and Defender for Identity alerts.",
                 "defaultValue": true
+              },
+              {
+                "name": "enableCompass",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Compass Connectors (Enterprise+ only)",
+                "toolTip": "Enable SpyCloud Compass consumer/partner identity exposure connectors. Requires Enterprise+ API subscription. Leave unchecked if you only have Enterprise tier.",
+                "defaultValue": false
               }
             ],
             "visible": true
@@ -1904,6 +1911,7 @@
       "enableAnomalies": "[steps('sentinelFeatures').sectionSentinelSettings.enableAnomalies]",
       "enableFusionRule": "[steps('sentinelFeatures').sectionSentinelSettings.enableFusionRule]",
       "enableMicrosoftSecurityIncidentRules": "[steps('sentinelFeatures').sectionSentinelSettings.enableMicrosoftSecurityIncidentRules]",
+      "enableCompass": "[steps('sentinelFeatures').sectionSentinelSettings.enableCompass]",
       "enableWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableWorkbook]",
       "enableSessionCookieDetection": "[steps('sentinelFeatures').sectionIdp.enableSessionCookieDetection]",
       "enableIdentityProviderAlerts": "[steps('sentinelFeatures').sectionIdp.enableIdentityProviderAlerts]",
