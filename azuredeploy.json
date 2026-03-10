@@ -351,7 +351,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Deploy the Fusion Advanced Multistage Attack Detection analytics rule. Set to true only on first deployment - this built-in template can only be installed once per workspace. Uses patented ML algorithms to correlate low-fidelity anomalous activities into high-fidelity incidents across kill chain stages."
+        "description": "WARNING: Set to FALSE if Fusion is already enabled in your workspace (default). The Fusion template can only be installed ONCE per workspace. Only set to true on a brand-new Sentinel workspace where Fusion has never been enabled."
       }
     },
     "enableMicrosoftSecurityIncidentRules": {
@@ -3144,9 +3144,7 @@
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
                   "httpMethod": "GET",
-                  "queryParameters": {
-                    "severity": "[[join(parameters('severity'), ',')]"
-                  },
+                  "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
@@ -3155,7 +3153,7 @@
                   "headers": {
                     "Accept": "application/json"
                   },
-                  "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ"
+                  "queryTimeFormat": "yyyy-MM-dd"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -3203,7 +3201,7 @@
                   "headers": {
                     "Accept": "application/json"
                   },
-                  "queryTimeFormat": "yyyy-MM-ddTHH:mm:ssZ"
+                  "queryTimeFormat": "yyyy-MM-dd"
                 },
                 "response": {
                   "eventsJsonPaths": [
@@ -8055,12 +8053,14 @@
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/EntityAnalytics')]",
       "kind": "EntityAnalytics",
+      "etag": "*",
       "condition": "[parameters('enableUEBA')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
+        "isEnabled": true,
         "entityProviders": [
           "AzureActiveDirectory"
         ]
@@ -8071,6 +8071,7 @@
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/Ueba')]",
       "kind": "Ueba",
+      "etag": "*",
       "condition": "[parameters('enableUEBA')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -8078,6 +8079,7 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/settings', 'EntityAnalytics')]"
       ],
       "properties": {
+        "isEnabled": true,
         "dataSources": [
           "AuditLogs",
           "AzureActivity",
@@ -8091,24 +8093,30 @@
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/Anomalies')]",
       "kind": "Anomalies",
+      "etag": "*",
       "condition": "[parameters('enableAnomalies')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
-      "properties": {}
+      "properties": {
+        "isEnabled": true
+      }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/settings",
       "apiVersion": "2023-02-01-preview",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/EyesOn')]",
       "kind": "EyesOn",
+      "etag": "*",
       "condition": "[parameters('enableUEBA')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
-      "properties": {}
+      "properties": {
+        "isEnabled": true
+      }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
