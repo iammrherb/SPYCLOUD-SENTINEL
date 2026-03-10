@@ -1,17 +1,20 @@
 openapi: 3.0.3
 info:
   title: SpyCloud Darknet & Identity Threat Exposure Intelligence API
-  version: 2.0.0
+  version: 6.1.0
   description: >
     SpyCloud Darknet & Identity Threat Exposure Intelligence API for Microsoft
-    Security Copilot. Provides direct REST API access to recaptured darknet data
+    Security Copilot. Part of the SpyCloud Sentinel v6.1 solution spanning 145+
+    deployed resources. Provides direct REST API access to recaptured darknet data
     including compromised credentials, stolen identities, infostealer infections,
     and malware-infected devices. Covers the Enterprise Breach, Compass Investigation,
     and Identity Exposure APIs with 12 skills enabling SOC analysts to query breach
     records by email, domain, IP, username, or password; perform deep Compass
     investigations into infostealer infections with malware attribution, stolen
     cookies, and device forensics; query identity exposure posture; browse the
-    breach catalog; and audit the monitored identity watchlist.
+    breach catalog; and audit the monitored identity watchlist. Compatible with
+    the SpyCloud KQL Plugin (85 promptbook skills) and SpyCloud Investigation Agent
+    (autonomous interactive investigation with 12 sub-agents).
   contact:
     name: SpyCloud Support
     url: https://spycloud.com/support
@@ -20,7 +23,9 @@ info:
     name: Proprietary
     url: https://spycloud.com/terms
   x-logo:
-    url: https://spycloud.com/wp-content/uploads/spycloud-logo.svg
+    url: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
+    altText: SpyCloud Logo
+    backgroundColor: '#1a1a2e'
 
 servers:
   - url: https://api.spycloud.io

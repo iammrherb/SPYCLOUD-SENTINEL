@@ -1,8 +1,8 @@
 Descriptor:
   Name: SpyCloudAPIPlugin
-  DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence
+  DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence - API Plugin
   Description: >
-    Production-grade Microsoft Security Copilot plugin providing direct access
+    Production-grade Microsoft Security Copilot plugin providing direct REST API access
     to the SpyCloud API for real-time darknet & identity threat exposure intelligence. Covers 12
     skills across the Enterprise Breach, Compass Investigation, and Identity
     Exposure APIs. Enables SOC analysts and incident responders to look up
@@ -10,9 +10,15 @@ Descriptor:
     deep Compass investigations into infostealer infections with malware
     attribution, stolen cookies, and device forensics; query identity exposure
     posture; browse the breach catalog; and audit the monitored identity
-    watchlist -- all without leaving the Copilot experience.
+    watchlist -- all without leaving the Copilot experience. Works alongside
+    the SpyCloud KQL Plugin (85 promptbook skills for Sentinel data) and
+    SpyCloud Investigation Agent (autonomous interactive investigation with
+    12 sub-agents) for complete Security Copilot coverage. Part of the SpyCloud
+    Sentinel v6.1 solution spanning 145+ deployed resources.
   DescriptionDisplay: default
   Category: Threat Intelligence
+  Publisher: SpyCloud
+  Version: 6.1.0
   SupportedAuthTypes:
     - ApiKey
   Authorization:
@@ -29,7 +35,7 @@ Descriptor:
       SettingType: string
       Required: false
       DefaultValue: https://api.spycloud.io
-  Icon: https://spycloud.com/wp-content/uploads/spycloud-logo.svg
+  Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
 
 SkillGroups:
   - Format: API
