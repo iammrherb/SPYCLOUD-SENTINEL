@@ -601,6 +601,7 @@
     },
     "serviceNowPassword": {
       "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "ServiceNow password for Basic authentication. Stored securely and never exposed in deployment outputs or logs. Required when serviceNowAuthType is 'Basic'."
       }
@@ -687,6 +688,7 @@
     },
     "jiraApiToken": {
       "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "Jira API token for authentication. Generate at: https://id.atlassian.net/manage-profile/security/api-tokens. Stored securely and never exposed in deployment outputs or logs."
       }
