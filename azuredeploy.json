@@ -7750,6 +7750,7 @@
         "description": "Automatically sets severity and adds investigation tasks for SpyCloud credential exposure incidents. To auto-trigger playbooks, configure the RunPlaybook action manually after granting Microsoft Sentinel Automation Contributor role to the playbook's managed identity.",
         "order": 1,
         "triggeringLogic": {
+          "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -7792,8 +7793,7 @@
               ]
             }
           }
-        ],
-        "IsEnabled": true
+        ]
       }
     },
     {
@@ -8060,7 +8060,6 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
-        "isEnabled": true,
         "entityProviders": [
           "AzureActiveDirectory"
         ]
@@ -8079,7 +8078,6 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/settings', 'EntityAnalytics')]"
       ],
       "properties": {
-        "isEnabled": true,
         "dataSources": [
           "AuditLogs",
           "AzureActivity",
@@ -8099,9 +8097,7 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
-      "properties": {
-        "isEnabled": true
-      }
+      "properties": {}
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/settings",
@@ -8114,9 +8110,7 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
-      "properties": {
-        "isEnabled": true
-      }
+      "properties": {}
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
@@ -8134,6 +8128,7 @@
         "description": "Automatically sets severity to High and assigns owner tag for SpyCloud incidents involving severity 25 (critical infostealer) or plaintext password exposure. Ensures immediate SOC attention.",
         "order": 2,
         "triggeringLogic": {
+          "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -8161,8 +8156,7 @@
               "status": "Active"
             }
           }
-        ],
-        "IsEnabled": true
+        ]
       }
     },
     {
@@ -8181,6 +8175,7 @@
         "description": "Automatically adds investigation tasks for incidents involving infected devices or device reinfection patterns detected by SpyCloud Compass.",
         "order": 3,
         "triggeringLogic": {
+          "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -8217,8 +8212,7 @@
               ]
             }
           }
-        ],
-        "IsEnabled": true
+        ]
       }
     },
     {
@@ -8237,6 +8231,7 @@
         "description": "Automatically closes informational-severity incidents (e.g., new malware family in catalog, AV-present-but-failed) after tagging them for tracking. Reduces SOC noise while preserving audit trail.",
         "order": 10,
         "triggeringLogic": {
+          "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
           "conditions": [
@@ -8278,8 +8273,7 @@
               ]
             }
           }
-        ],
-        "IsEnabled": true
+        ]
       }
     },
     {
