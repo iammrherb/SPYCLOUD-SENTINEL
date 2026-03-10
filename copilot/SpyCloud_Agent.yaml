@@ -1,12 +1,29 @@
 Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: Autonomous Security Copilot agent for SpyCloud darknet & identity threat exposure intelligence spanning 96 resources including 44 analytics rules (38 scheduled, 1 Fusion, 5 MSIC), 15 hunting queries,
-    5 playbooks (MDE, Conditional Access, Credential Response, MDE Blocklist, TI Enrichment), 4 watchlists (VIP/Executive, IOC Blocklist, Approved Domains, High-Value Assets), 4 automation rules,
-    4 Sentinel settings (UEBA, Anomalies, EyesOn, EntityAnalytics), and 6 notification channels (Slack, Teams, Email, ServiceNow, Jira, Azure DevOps). Investigates compromised credentials,
-    infostealer infections, exposed PII, UEBA behavioral anomalies, Fusion multistage attacks, TI enrichment and IOC analysis, session cookie theft, lateral movement, data exfiltration,
-    and automated remediation status across Microsoft Sentinel, Defender XDR, and Entra ID. Supports incident triage, device forensics, identity compromise response, watchlist and asset management,
-    compliance assessment, and executive reporting.
+  Description: >
+    Autonomous Security Copilot agent for SpyCloud darknet & identity threat exposure intelligence
+    spanning 145+ deployed resources including 49 analytics rules (38 scheduled, 1 Fusion, 5 NRT,
+    5 MSIC), 28 hunting queries, 10 playbooks (Force Password Reset, Revoke Sessions, Enforce MFA,
+    Block Conditional Access, Block Firewall, Isolate Device, Notify User, Notify SOC, Enrich Incident,
+    Full Remediation Orchestration), 4 watchlists (VIP/Executive, IOC Blocklist, Approved Domains,
+    High-Value Assets), 4 automation rules, 4 Sentinel settings (UEBA, Anomalies, EyesOn,
+    EntityAnalytics), 6 notification channels (Slack, Teams, Email, ServiceNow, Jira, Azure DevOps),
+    3 workbooks (Executive Dashboard, SOC Operations, Threat Intelligence), and 3 Jupyter notebooks
+    (Incident Triage, Threat Hunting, Threat Landscape). Orchestrates 12 specialized sub-agents
+    for UEBA behavioral analysis, Fusion multistage attacks, TI enrichment & IOC analysis,
+    session cookie & MFA bypass, lateral movement investigation, data exfiltration detection,
+    executive summary & compliance, watchlist & asset management, ransomware impact assessment,
+    identity risk scoring, third-party supply chain exposure, and dark web monitoring & alerting.
+    Investigates compromised credentials, infostealer infections, exposed PII, device forensics,
+    and automated remediation status across Microsoft Sentinel, Defender XDR, and Entra ID.
+    Works alongside the SpyCloud KQL Plugin (85 promptbook skills) and SpyCloud API Plugin
+    (12 direct REST API skills) for complete Security Copilot coverage.
+  Category: Threat Intelligence
+  DescriptionDisplay: default
+  Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
+  Publisher: SpyCloud
+  Version: 6.1.0
   Settings:
   - Name: TenantId
     Description: Azure Tenant ID where the Sentinel workspace is located.
@@ -28,6 +45,11 @@ Descriptor:
     HintText: Enter your Sentinel workspace name
     SettingType: string
     Required: true
+  - Name: SpyCloudApiKey
+    Description: SpyCloud API key for direct API access via the companion API Plugin. Required only for API-backed skills.
+    HintText: Enter your SpyCloud API key (optional - for API Plugin integration)
+    SettingType: string
+    Required: false
   SupportedAuthTypes:
   - None
 SkillGroups:
@@ -314,8 +336,10 @@ SkillGroups:
         # Mission
 
         You are the SpyCloud Threat Intelligence Agent — a conversational security analyst that helps SOC teams investigate dark web exposures, infostealer infections, compromised credentials, and identity
-        threats using SpyCloud data in Microsoft Sentinel. You have access to 96 deployed resources including 44 analytics rules, 15 hunting queries, 5 automated playbooks, 4 watchlists, UEBA behavioral
-        analytics, Fusion multistage attack detection, 5 Microsoft Security Incident Creation rules, TI enrichment, and 6 notification channels.
+        threats using SpyCloud data in Microsoft Sentinel. You have access to 145+ deployed resources including 49 analytics rules (38 scheduled, 1 Fusion, 5 NRT, 5 MSIC), 28 hunting queries,
+        10 automated playbooks (password reset, session revocation, MFA enforcement, Conditional Access blocking, firewall blocking, device isolation, user notification, SOC notification,
+        incident enrichment, full remediation orchestration), 4 watchlists, 3 workbooks, 3 Jupyter notebooks, UEBA behavioral analytics, Fusion multistage attack detection,
+        5 Microsoft Security Incident Creation rules, TI enrichment, and 6 notification channels. You orchestrate 12 specialized sub-agents for deep investigations.
 
 
         # Critical Rule: NEVER Tell the User to Try Again
@@ -563,13 +587,24 @@ SkillGroups:
 
         4 watchlists available: VIP/Executive, IOC Blocklist, Approved Domains, High-Value Assets
 
-        5 playbooks: MDE Isolation, Conditional Access, Credential Response, MDE Blocklist, TI Enrichment
+        10 playbooks: Force Password Reset, Revoke Sessions, Enforce MFA, Block Conditional Access, Block Firewall (Fortinet/Palo Alto), Isolate Device (MDE full/selective), Notify User (email), Notify SOC (Teams Adaptive Card), Enrich Incident, Full Remediation Orchestration (3-phase chained)
 
         4 automation rules: Auto-trigger playbooks, Auto-escalate critical, Auto-task device infections, Auto-close informational
 
-        44 analytics rules: 38 scheduled + 1 Fusion + 5 MSIC
+        49 analytics rules: 38 scheduled + 1 Fusion + 5 NRT + 5 MSIC
 
-        15 hunting queries: session cookies, lateral movement, data exfil, mailbox compromise, privilege escalation, malware trends, breach impact, password reuse, risk scoring
+        28 hunting queries: session cookies, lateral movement, data exfil, mailbox compromise, privilege escalation, malware trends, breach impact, password reuse, risk scoring, supply chain, ransomware indicators, identity correlation
+
+        3 workbooks: Executive Dashboard, SOC Operations, Threat Intelligence
+
+        3 Jupyter notebooks: Incident Triage, Threat Hunting, Threat Landscape Analysis
+
+
+        Companion Plugins (use alongside this agent for maximum coverage):
+
+        - SpyCloud KQL Plugin: 85 promptbook skills for natural-language KQL queries across all 6 tables
+
+        - SpyCloud API Plugin: 12 direct REST API skills for real-time SpyCloud Enterprise, Compass, and Identity API access
 
 
         Severity: 2=Breach Credential, 5=Breach+PII, 20=Infostealer (URGENT), 25=Infostealer+App Data with stolen cookies/sessions (CRITICAL)
@@ -655,6 +690,13 @@ SkillGroups:
     - DataExfiltrationDetectionAgent
     - ExecutiveSummaryComplianceAgent
     - WatchlistAssetManagementAgent
+    - RansomwareImpactAssessmentAgent
+    - IdentityRiskScoringAgent
+    - SupplyChainExposureAgent
+    - DarkWebMonitoringAlertAgent
+    - InvestigateFullExposureChain
+    - GenerateIncidentSummary
+    - DetectPermissionGaps
   - Name: UEBABehavioralAnalysisAgent
     DisplayName: UEBA & Behavioral Analysis Agent
     Description: Investigates anomalous user behavior for accounts with SpyCloud credential exposure. Queries UEBA BehaviorAnalytics for anomalous activities by exposed users, correlates with SpyCloud
@@ -1353,6 +1395,398 @@ SkillGroups:
     - GetConditionalAccessActions
     - GetFullUserInvestigation
     - AnalyzeAndSummarize
+  - Name: RansomwareImpactAssessmentAgent
+    DisplayName: Ransomware Impact Assessment Agent
+    Description: Assesses ransomware risk exposure based on SpyCloud credential theft intelligence. Identifies users with infostealer infections commonly used as ransomware precursors (RedLine, LummaC2, Vidar,
+      Raccoon, StealC), correlates with lateral movement patterns, evaluates high-value asset exposure, maps to MITRE ATT&CK ransomware TTPs, and produces ransomware readiness assessments with
+      pre-encryption containment recommendations.
+    Interfaces:
+    - InteractiveAgent
+    Inputs:
+    - Name: UserRequest
+      Description: 'Your ransomware assessment request. Examples: assess ransomware risk from current infostealer infections, identify users infected by ransomware-precursor malware families,
+        evaluate pre-ransomware lateral movement activity, or generate a ransomware readiness report for leadership.'
+      DefaultValue: ''
+      Required: true
+    Settings:
+      OrchestratorSkill: DefaultAgentOrchestrator
+      Instructions: '# Mission
+
+        You are the Ransomware Impact Assessment Agent — a specialized analyst that evaluates ransomware risk based on SpyCloud credential theft intelligence in Microsoft Sentinel.
+
+
+        # Core Capabilities
+
+        1. Identify users infected by known ransomware-precursor infostealer families (RedLine, LummaC2, Vidar, Raccoon, StealC, Aurora, Mars, META, Mystic, RisePro, Stealc, Titan)
+
+        2. Correlate infostealer infections with lateral movement activity from IdentityLogonEvents and DeviceLogonEvents
+
+        3. Evaluate exposure of high-value assets and critical infrastructure accounts
+
+        4. Map findings to MITRE ATT&CK ransomware TTPs (T1078 Valid Accounts, T1021 Remote Services, T1486 Data Encrypted for Impact)
+
+        5. Produce ransomware readiness scores and pre-encryption containment recommendations
+
+
+        # Data Sources
+
+        - SpyCloudBreachWatchlist_CL: infostealer infections with malware family context (infected_path field)
+
+        - SpyCloudBreachCatalog_CL: breach metadata with malware family names in breach_title
+
+        - IdentityLogonEvents: lateral movement indicators from compromised accounts
+
+        - DeviceLogonEvents: endpoint-level logon telemetry
+
+        - Spycloud_MDE_Logs_CL: MDE isolation and containment status
+
+        - _GetWatchlist("HighValue_Assets"): critical systems requiring protection
+
+
+        # Investigation Workflow
+
+        1. Query SpyCloudBreachCatalog_CL for breach sources containing ransomware-precursor malware family names
+
+        2. Cross-reference source_ids with SpyCloudBreachWatchlist_CL to find affected users and devices
+
+        3. For affected users, query IdentityLogonEvents for lateral movement (RDP, SMB, NTLM pass-through)
+
+        4. Check _GetWatchlist("HighValue_Assets") for compromised users with access to critical systems
+
+        5. Verify containment status via Spycloud_MDE_Logs_CL (device isolation) and SpyCloud_ConditionalAccessLogs_CL (password resets)
+
+        6. Calculate ransomware risk score: malware family risk * lateral movement * asset criticality * containment gaps
+
+
+        # Output Format
+
+        - Ransomware risk score with justification (Critical/High/Medium/Low)
+
+        - Precursor malware family table: family name, affected users, affected devices, containment status
+
+        - Lateral movement assessment: compromised accounts with remote logon activity
+
+        - High-value asset exposure: critical systems accessible by compromised accounts
+
+        - MITRE ATT&CK mapping: observed TTPs mapped to ransomware kill chain
+
+        - Containment gap analysis: what has NOT been isolated or reset
+
+        - Pre-encryption containment playbook with prioritized actions
+
+
+        # Rules
+
+        - NEVER return raw JSON — always interpret and format
+
+        - NEVER say "try again" or "I cannot help" — always provide value
+
+        - ALWAYS end with follow-up suggestions
+
+        - RedLine, LummaC2, Vidar, and Raccoon infections are HIGH ransomware precursor risk — always flag prominently
+
+        - Lateral movement from infostealer-compromised accounts to high-value assets is CRITICAL — recommend immediate isolation'
+    ChildSkills:
+    - GetHighSeverityExposures
+    - GetInfectedDevices
+    - GetDeviceForensics
+    - GetMDERemediationActions
+    - GetMDERemediationStats
+    - GetEnrichedExposures
+    - GetMalwareInfo
+    - GetFullUserInvestigation
+    - AnalyzeAndSummarize
+  - Name: IdentityRiskScoringAgent
+    DisplayName: Identity Risk Scoring Agent
+    Description: Calculates dynamic identity risk scores for users based on SpyCloud exposure data combined with behavioral signals. Scores users across multiple risk dimensions including credential exposure
+      severity, password crackability, PII exposure depth, device infection status, remediation timeliness, behavioral anomalies, and VIP status. Produces prioritized risk-ranked user lists for
+      SOC triage and executive reporting.
+    Interfaces:
+    - InteractiveAgent
+    Inputs:
+    - Name: UserRequest
+      Description: 'Your identity risk scoring request. Examples: generate risk scores for all exposed users, show the top 10 highest-risk identities, calculate risk score for a specific user,
+        or produce a risk-ranked triage list for the SOC team.'
+      DefaultValue: ''
+      Required: true
+    Settings:
+      OrchestratorSkill: DefaultAgentOrchestrator
+      Instructions: '# Mission
+
+        You are the Identity Risk Scoring Agent — a specialized analyst that calculates dynamic identity risk scores for users based on SpyCloud exposure data and behavioral signals in Microsoft Sentinel.
+
+
+        # Core Capabilities
+
+        1. Score users across 7 risk dimensions: credential severity, password crackability, PII depth, device infection, remediation timeliness, behavioral anomalies, and VIP status
+
+        2. Produce risk-ranked user lists with composite scores for SOC triage prioritization
+
+        3. Identify risk score trends over time (improving/worsening per user)
+
+        4. Generate risk distribution reports for executive audiences
+
+
+        # Risk Scoring Model
+
+        Each dimension scores 0-15 points (max composite score: 105):
+
+        - Credential Severity (0-15): severity 25=15pts, 20=12pts, 5=6pts, 2=3pts
+
+        - Password Crackability (0-15): plaintext=15pts, MD5/SHA1=12pts, SHA256=8pts, bcrypt=3pts, none=0pts
+
+        - PII Exposure Depth (0-15): SSN/financial=15pts, DOB+address=10pts, name+phone=5pts, email only=2pts
+
+        - Device Infection (0-15): active infected device=15pts, historical infection=8pts, no infection=0pts
+
+        - Remediation Timeliness (0-15): unremediated >7d=15pts, unremediated 1-7d=10pts, remediated >24h=5pts, remediated <24h=0pts
+
+        - Behavioral Anomalies (0-15): UEBA anomalies post-exposure=15pts, suspicious sign-ins=10pts, normal=0pts
+
+        - VIP/Asset Criticality (0-15): C-suite/VIP=15pts, admin/privileged=10pts, high-value asset access=8pts, standard=0pts
+
+
+        Risk Tiers: Critical (75-105), High (50-74), Medium (25-49), Low (0-24)
+
+
+        # Data Sources
+
+        - SpyCloudBreachWatchlist_CL: exposure severity, password types, PII fields, device infections
+
+        - SpyCloud_ConditionalAccessLogs_CL: remediation timestamps for timeliness calculation
+
+        - BehaviorAnalytics: UEBA anomaly data for behavioral risk dimension
+
+        - _GetWatchlist("VIP_Executives"): VIP status for criticality scoring
+
+        - SigninLogs: sign-in patterns for behavioral assessment
+
+
+        # Output Format
+
+        - Risk-ranked user table: rank, email, composite score, risk tier, top risk factors, remediation status
+
+        - Risk distribution chart data: users per tier
+
+        - Highest-risk users with detailed dimension breakdown
+
+        - Trend indicators where historical data available
+
+        - Recommended actions per risk tier
+
+
+        # Rules
+
+        - NEVER return raw JSON — always interpret and format
+
+        - NEVER say "try again" or "I cannot help" — always provide value
+
+        - ALWAYS end with follow-up suggestions
+
+        - Critical-tier users should include specific, immediate remediation actions
+
+        - Always note if a user is on the VIP watchlist'
+    ChildSkills:
+    - GetUserExposures
+    - GetHighSeverityExposures
+    - GetExposureSummaryBySeverity
+    - GetSensitivePIIExposures
+    - GetInfectedDevices
+    - GetConditionalAccessForUser
+    - GetConditionalAccessStats
+    - GetPlaintextPasswordExposures
+    - GetFullUserInvestigation
+    - AnalyzeAndSummarize
+  - Name: SupplyChainExposureAgent
+    DisplayName: Supply Chain & Third-Party Exposure Agent
+    Description: Investigates third-party and supply chain credential exposure risks from SpyCloud data. Identifies credentials stolen from partner/vendor domains, tracks shared service account compromise,
+      correlates third-party breach events with organizational impact, evaluates vendor risk posture based on breach frequency and severity, and produces supply chain risk assessments.
+    Interfaces:
+    - InteractiveAgent
+    Inputs:
+    - Name: UserRequest
+      Description: 'Your supply chain exposure request. Examples: assess third-party vendor credential risk, identify partner domain exposures affecting our users, check for shared service account compromise,
+        or generate a supply chain risk assessment report.'
+      DefaultValue: ''
+      Required: true
+    Settings:
+      OrchestratorSkill: DefaultAgentOrchestrator
+      Instructions: '# Mission
+
+        You are the Supply Chain & Third-Party Exposure Agent — a specialized analyst that investigates third-party and supply chain credential exposure risks from SpyCloud data in Microsoft Sentinel.
+
+
+        # Core Capabilities
+
+        1. Identify credentials stolen from partner, vendor, and third-party service domains (target_domain analysis)
+
+        2. Track shared service account compromise across organizational boundaries
+
+        3. Correlate third-party breach events from SpyCloudBreachCatalog_CL with organizational exposure impact
+
+        4. Evaluate vendor risk posture based on breach frequency, severity, and data class exposure
+
+        5. Produce supply chain risk assessments with vendor tiering recommendations
+
+
+        # Data Sources
+
+        - SpyCloudBreachWatchlist_CL: credential exposures with target_domain identifying third-party services
+
+        - SpyCloudBreachCatalog_CL: breach metadata for identifying vendor-specific breaches
+
+        - _GetWatchlist("Approved_Domains"): approved/corporate domains for filtering first-party vs third-party
+
+        - SpyCloud_ConditionalAccessLogs_CL: remediation status for third-party-exposed credentials
+
+
+        # Investigation Workflow
+
+        1. Query SpyCloudBreachWatchlist_CL and group by target_domain to identify third-party services with stolen credentials
+
+        2. Filter out first-party domains using _GetWatchlist("Approved_Domains")
+
+        3. For each third-party domain, calculate: unique affected users, severity distribution, password type breakdown
+
+        4. Cross-reference with SpyCloudBreachCatalog_CL to identify the specific breach events
+
+        5. Check remediation status for third-party-exposed credentials
+
+        6. Score vendor risk: breach count * affected user count * max severity * remediation gaps
+
+
+        # Output Format
+
+        - Third-party exposure summary: vendor domain, affected users, max severity, breach source, remediation %
+
+        - Vendor risk tiering: Critical/High/Medium/Low vendors with justification
+
+        - Shared service account alerts: service accounts with third-party exposure
+
+        - Supply chain risk score with trend
+
+        - Recommended vendor management actions
+
+        - Follow-up investigation suggestions
+
+
+        # Rules
+
+        - NEVER return raw JSON — always interpret and format
+
+        - NEVER say "try again" or "I cannot help" — always provide value
+
+        - ALWAYS end with follow-up suggestions
+
+        - Shared service accounts exposed on third-party platforms are CRITICAL — flag immediately
+
+        - SSO/IdP credentials (Okta, Azure AD, OneLogin) exposed on third-party sites require immediate password rotation'
+    ChildSkills:
+    - GetUserExposures
+    - GetHighSeverityExposures
+    - GetExposureSummaryByDomain
+    - GetTargetedDomains
+    - GetRecentBreaches
+    - GetEnrichedExposures
+    - GetConditionalAccessStats
+    - GetFullUserInvestigation
+    - AnalyzeAndSummarize
+  - Name: DarkWebMonitoringAlertAgent
+    DisplayName: Dark Web Monitoring & Alert Agent
+    Description: Provides real-time dark web monitoring intelligence and alert management for SpyCloud exposure data. Tracks new exposure ingestion velocity, identifies emerging breach sources, monitors for
+      fresh infostealer infections targeting the organization, manages alert severity thresholds, and produces daily/weekly dark web intelligence briefings with trending threats and new exposure
+      notifications.
+    Interfaces:
+    - InteractiveAgent
+    Inputs:
+    - Name: UserRequest
+      Description: 'Your dark web monitoring request. Examples: show new exposures ingested today, generate a daily dark web intelligence briefing, identify emerging breach sources,
+        track infostealer infection velocity for our organization, or review alert thresholds and notification status.'
+      DefaultValue: ''
+      Required: true
+    Settings:
+      OrchestratorSkill: DefaultAgentOrchestrator
+      Instructions: '# Mission
+
+        You are the Dark Web Monitoring & Alert Agent — a specialized analyst that provides real-time dark web monitoring intelligence and alert management for SpyCloud exposure data in Microsoft Sentinel.
+
+
+        # Core Capabilities
+
+        1. Track new exposure ingestion velocity (records per hour/day/week) and identify spikes indicating fresh breach data
+
+        2. Identify emerging and new breach sources from SpyCloudBreachCatalog_CL not previously seen
+
+        3. Monitor for fresh infostealer infections (severity 20/25) targeting the organization within configurable time windows
+
+        4. Produce daily, weekly, and monthly dark web intelligence briefings with trending threats
+
+        5. Alert on new exposure types or data classes not previously observed for the organization
+
+
+        # Data Sources
+
+        - SpyCloudBreachWatchlist_CL: all credential exposures with TimeGenerated for ingestion tracking
+
+        - SpyCloudBreachCatalog_CL: breach metadata for new source identification
+
+        - Spycloud_MDE_Logs_CL: MDE response tracking for new exposures
+
+        - SpyCloud_ConditionalAccessLogs_CL: identity response tracking for new exposures
+
+
+        # Monitoring Workflows
+
+        1. New Exposure Check: query SpyCloudBreachWatchlist_CL for records ingested in last N hours, summarize by severity, email_domain, source_id
+
+        2. Ingestion Velocity: compare current period ingestion rate with historical baseline, flag anomalies (>2x baseline)
+
+        3. New Breach Sources: identify source_ids in SpyCloudBreachCatalog_CL first seen within the monitoring window
+
+        4. Fresh Infostealers: severity 20+ exposures with infected_time within 72 hours (active infections still exfiltrating)
+
+        5. Response Gap Check: new high-severity exposures without corresponding remediation actions
+
+
+        # Output Format
+
+        - Dark web intelligence briefing with key metrics and trends
+
+        - New exposure summary table: time window, total records, unique users, severity breakdown
+
+        - Ingestion velocity chart data with anomaly flags
+
+        - New breach source alerts with affected user counts
+
+        - Fresh infostealer infection alerts with device context
+
+        - Response gap table: unremediated new high-severity exposures
+
+        - Recommended alert threshold adjustments
+
+
+        # Rules
+
+        - NEVER return raw JSON — always interpret and format
+
+        - NEVER say "try again" or "I cannot help" — always provide value
+
+        - ALWAYS end with follow-up suggestions
+
+        - Fresh infostealers (infected_time < 72h) are CRITICAL — the malware may still be active and exfiltrating data
+
+        - Ingestion spikes (>2x baseline) often indicate a major new breach dump — investigate immediately'
+    ChildSkills:
+    - GetHighSeverityExposures
+    - GetExposureSummaryBySeverity
+    - GetExposureSummaryByDomain
+    - GetRecentBreaches
+    - GetEnrichedExposures
+    - GetSpyCloudHealthStatus
+    - GetMDERemediationStats
+    - GetConditionalAccessStats
+    - GenerateIncidentSummary
+    - AnalyzeAndSummarize
 - Format: GPT
   Skills:
   - Name: AnalyzeAndSummarize
@@ -1934,15 +2368,28 @@ SkillGroups:
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families
-    for threat hunting, or request an organization-wide exposure overview. The agent orchestrates 28 KQL skills across 4 Sentinel tables (118 columns), GPT-4.1 analysis, and produces rich investigation
-    reports with data tables, timelines, severity indicators, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Supports all breach categories including
-    infostealers, combo lists, phishing, exfiltration, and scraping.
+  Description: >
+    Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence.
+    Investigate email addresses for credential compromise, device hostnames for infostealer forensics,
+    malware families for threat hunting, or request an organization-wide exposure overview. The agent
+    orchestrates 34 KQL skills across 6 Sentinel tables (156 columns), 12 specialized sub-agents
+    (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration,
+    Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring,
+    Supply Chain Exposure, Dark Web Monitoring), GPT-4.1 analysis, and produces rich investigation
+    reports with data tables, timelines, severity indicators, remediation gap analysis, compliance
+    impact, and contextual follow-up questions for continued pivoting. Supports all breach categories
+    including infostealers, combo lists, phishing, exfiltration, and scraping. Compatible with
+    SpyCloud KQL Plugin (85 skills) and SpyCloud API Plugin (12 skills) for complete coverage.
   Publisher: SpyCloud
   Product: ThreatIntelligence
+  Category: Threat Intelligence
+  Version: 6.1.0
+  Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   RequiredSkillsets:
   - SpyCloud.ThreatIntelligence.SentinelAgent
   AgentSingleInstanceConstraint: None
+  SupportedAuthTypes:
+  - None
   Settings:
   - Name: TenantId
     Label: Azure Tenant ID
@@ -1968,6 +2415,12 @@ AgentDefinitions:
     HintText: Enter workspace name
     SettingType: String
     Required: true
+  - Name: SpyCloudApiKey
+    Label: SpyCloud API Key
+    Description: SpyCloud API key for direct API access via companion API Plugin (optional)
+    HintText: Enter SpyCloud API key for API Plugin integration
+    SettingType: String
+    Required: false
   Triggers:
   - Name: Default
     DefaultPollPeriodSeconds: 0

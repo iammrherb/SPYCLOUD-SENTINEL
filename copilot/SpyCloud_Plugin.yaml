@@ -5,23 +5,29 @@ Descriptor:
     Comprehensive Security Copilot KQL plugin for SpyCloud Darknet & Identity Threat
     Exposure Intelligence in Microsoft Sentinel. Provides 85 promptbook skills querying
     6 custom Sentinel tables (BreachWatchlist, BreachCatalog, CompassData, CompassDevices,
-    ConditionalAccessLogs, MDE_Logs) with 118 total columns. Enables natural-language
-    investigation of compromised credentials, infostealer infections, exposed PII, device
-    forensics, and automated remediation status. Skills span user credential investigation,
-    password analysis, severity and breach category analysis, sensitive PII and financial
-    data exposure, device and malware forensics, breach catalog intelligence, MDE device
-    remediation audit, Conditional Access identity remediation, cross-table investigation,
-    operational health monitoring, Compass consumer identity, cross-connector threat hunting,
-    risk scoring and prioritization, UEBA correlation, Fusion multistage analysis, TI
-    enrichment, automation rule metrics, session cookie theft detection, lateral movement
-    hunting, data exfiltration detection, malware family tracking, watchlist management,
-    MSIC incident correlation, executive reporting, campaign and threat actor intelligence,
-    advanced user analysis, network and infrastructure hunting, compliance and reporting,
-    incident and alert correlation, proactive threat intelligence, device deep dive forensics,
-    and executive dashboarding. Supports all breach categories including infostealers,
-    combo lists, phishing, exfiltration, and scraping. Works alongside the SpyCloud API
-    Plugin (direct REST API access) and SpyCloud Investigation Agent (autonomous interactive
-    investigation) for complete Security Copilot coverage.
+    ConditionalAccessLogs, MDE_Logs) with 156 total columns across 118 base fields.
+    Enables natural-language investigation of compromised credentials, infostealer infections,
+    exposed PII, device forensics, and automated remediation status. Skills span 17 categories:
+    user credential investigation, password analysis, severity and breach category analysis,
+    sensitive PII and financial data exposure, device and malware forensics, breach catalog
+    intelligence, MDE device remediation audit, Conditional Access identity remediation,
+    cross-table investigation, operational health monitoring, Compass consumer identity,
+    cross-connector threat hunting, risk scoring and prioritization, UEBA correlation,
+    Fusion multistage analysis, TI enrichment, automation rule metrics, session cookie theft
+    detection, lateral movement hunting, data exfiltration detection, malware family tracking,
+    watchlist management, MSIC incident correlation, executive reporting, campaign and threat
+    actor intelligence, advanced user analysis, network and infrastructure hunting, compliance
+    and reporting, incident and alert correlation, proactive threat intelligence, device deep
+    dive forensics, and executive dashboarding. Supports all breach categories including
+    infostealers, combo lists, phishing, exfiltration, and scraping. Works alongside the
+    SpyCloud API Plugin (12 direct REST API skills) and SpyCloud Investigation Agent
+    (autonomous interactive investigation with 12 sub-agents) for complete Security Copilot
+    coverage across 145+ deployed Sentinel resources.
+  Category: Threat Intelligence
+  DescriptionDisplay: default
+  Publisher: SpyCloud
+  Version: 6.1.0
+  Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId
       Description: Your Azure Tenant ID where the Sentinel workspace is located.
