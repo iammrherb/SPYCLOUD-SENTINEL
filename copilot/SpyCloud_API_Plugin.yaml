@@ -34,7 +34,7 @@ Descriptor:
 SkillGroups:
   - Format: API
     Settings:
-      OpenApiSpecUrl: openapi.yaml
+      OpenApiSpecUrl: SpyCloud_API_Plugin_OpenAPI.yaml
     Skills:
 
       # =====================================================================
