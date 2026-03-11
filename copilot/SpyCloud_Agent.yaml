@@ -1,7 +1,7 @@
 Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
-  DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: "Autonomous Security Copilot agent for SpyCloud darknet intelligence. Orchestrates 17 specialized sub-agents to investigate compromised credentials, infostealer infections, exposed PII, and device forensics across Microsoft Sentinel, Defender XDR, Intune, Entra ID, and CASB. Proactively detects missing data connectors, identifies playbook permission gaps, recommends additional tools and integrations, and generates admin-ready reports for enablement. Correlates dark web intelligence with endpoint threats, identity attacks, and cloud app risks. Works alongside the SpyCloud KQL Plugin and API Plugin for complete Security Copilot coverage."
+  DisplayName: SpyCloud Investigation Agent
+  Description: "Autonomous agent orchestrating 17 sub-agents to investigate credential exposure, infostealers, and identity threats across Sentinel, Defender XDR, Intune, and Entra ID."
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
