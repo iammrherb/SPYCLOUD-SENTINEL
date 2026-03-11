@@ -1,0 +1,246 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "templateMetadata": {
+    "templateVersion": "1.0.0",
+    "templateId": "spycloud-auto-triage",
+    "category": "Automation",
+    "requiredPermissions": [
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.SecurityInsights/automationRules/write"
+    ],
+    "requiredLicenses": [
+      "Microsoft Sentinel"
+    ],
+    "connectorAssociation": [
+      "azuresentinel"
+    ],
+    "deployAsTemplate": true
+  },
+  "metadata": {
+    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "title": "SpyCloud - Auto-Triage by Severity",
+    "description": "Automatically triages SpyCloud-related incidents based on severity. Assigns owners, sets status, and adds initial tags. High severity incidents are escalated, medium severity are queued for review, and low severity are auto-assigned to junior analysts.",
+    "prerequisites": [
+      "Microsoft Sentinel workspace",
+      "SpyCloud analytic rules deployed"
+    ],
+    "lastUpdateTime": "2026-03-11T00:00:00.000Z",
+    "support": { "tier": "community" },
+    "author": { "name": "SpyCloud" }
+  },
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "highSeverityOwnerObjectId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Azure AD Object ID of the owner for high-severity incidents (leave empty for unassigned)" }
+    },
+    "mediumSeverityOwnerObjectId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Azure AD Object ID of the owner for medium-severity incidents" }
+    },
+    "lowSeverityOwnerObjectId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Azure AD Object ID of the owner for low-severity incidents" }
+    }
+  },
+  "variables": {
+    "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-triage-high",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Triage: High Severity",
+        "order": 1,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["High"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "ModifyProperties",
+            "order": 1,
+            "actionConfiguration": {
+              "status": "Active",
+              "severity": "High",
+              "owner": {
+                "objectId": "[if(not(empty(parameters('highSeverityOwnerObjectId'))), parameters('highSeverityOwnerObjectId'), json('null'))]"
+              },
+              "labels": [
+                { "labelName": "SpyCloud-High-Priority" },
+                { "labelName": "Auto-Triaged" },
+                { "labelName": "Immediate-Response" }
+              ]
+            }
+          },
+          {
+            "actionType": "AddIncidentTask",
+            "order": 2,
+            "actionConfiguration": {
+              "title": "Investigate SpyCloud high-severity credential exposure",
+              "description": "1. Review SpyCloud enrichment data\n2. Verify affected accounts\n3. Check for signs of active compromise\n4. Initiate full remediation if confirmed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-triage-medium",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Triage: Medium Severity",
+        "order": 2,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["Medium"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "ModifyProperties",
+            "order": 1,
+            "actionConfiguration": {
+              "status": "New",
+              "owner": {
+                "objectId": "[if(not(empty(parameters('mediumSeverityOwnerObjectId'))), parameters('mediumSeverityOwnerObjectId'), json('null'))]"
+              },
+              "labels": [
+                { "labelName": "SpyCloud-Medium-Priority" },
+                { "labelName": "Auto-Triaged" },
+                { "labelName": "Review-Queue" }
+              ]
+            }
+          },
+          {
+            "actionType": "AddIncidentTask",
+            "order": 2,
+            "actionConfiguration": {
+              "title": "Review SpyCloud medium-severity credential exposure",
+              "description": "1. Review SpyCloud enrichment data\n2. Determine if password reset is needed\n3. Check breach recency and severity"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-triage-low",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Triage: Low Severity",
+        "order": 3,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["Low", "Informational"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "ModifyProperties",
+            "order": 1,
+            "actionConfiguration": {
+              "status": "New",
+              "owner": {
+                "objectId": "[if(not(empty(parameters('lowSeverityOwnerObjectId'))), parameters('lowSeverityOwnerObjectId'), json('null'))]"
+              },
+              "labels": [
+                { "labelName": "SpyCloud-Low-Priority" },
+                { "labelName": "Auto-Triaged" }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "highSeverityRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.SecurityInsights/automationRules', 'spycloud-auto-triage-high')]"
+    },
+    "mediumSeverityRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.SecurityInsights/automationRules', 'spycloud-auto-triage-medium')]"
+    },
+    "lowSeverityRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.SecurityInsights/automationRules', 'spycloud-auto-triage-low')]"
+    }
+  }
+}

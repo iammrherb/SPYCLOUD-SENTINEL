@@ -1,0 +1,246 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "templateMetadata": {
+    "templateVersion": "1.0.0",
+    "templateId": "spycloud-auto-investigate",
+    "category": "Automation",
+    "requiredPermissions": [
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.SecurityInsights/automationRules/write",
+      "Microsoft.Logic/workflows/read"
+    ],
+    "requiredLicenses": [
+      "Microsoft Sentinel",
+      "SpyCloud Investigations API"
+    ],
+    "connectorAssociation": [
+      "azuresentinel"
+    ],
+    "deployAsTemplate": true
+  },
+  "metadata": {
+    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "title": "SpyCloud - Auto-Trigger Investigations API Lookup",
+    "description": "Automatically triggers the SpyCloud Investigations API lookup for high-severity incidents and optionally runs IDLINK identity correlation. Provides deep forensic investigation data including plaintext credentials, target URLs, and infected machine details.",
+    "prerequisites": [
+      "Microsoft Sentinel workspace",
+      "SpyCloud-InvestigationsLookup playbook deployed",
+      "SpyCloud-IdLinkCorrelation playbook deployed (optional)"
+    ],
+    "lastUpdateTime": "2026-03-11T00:00:00.000Z",
+    "support": { "tier": "community" },
+    "author": { "name": "SpyCloud" }
+  },
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "investigationsLookupPlaybookId": {
+      "type": "string",
+      "metadata": { "description": "Resource ID of the SpyCloud-InvestigationsLookup Logic App" }
+    },
+    "idLinkCorrelationPlaybookId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Resource ID of the SpyCloud-IdLinkCorrelation Logic App (optional)" }
+    },
+    "capResponsePlaybookId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Resource ID of the SpyCloud-CAPResponse Logic App (optional)" }
+    },
+    "triggerOnSeverity": {
+      "type": "array",
+      "defaultValue": ["High"],
+      "metadata": { "description": "Severity levels that trigger the investigation (e.g., High, Medium)" }
+    }
+  },
+  "variables": {
+    "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-investigate-deep",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Investigate: Deep Investigation Lookup",
+        "order": 20,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": "[parameters('triggerOnSeverity')]"
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "RunPlaybook",
+            "order": 1,
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('investigationsLookupPlaybookId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "actionType": "ModifyProperties",
+            "order": 2,
+            "actionConfiguration": {
+              "labels": [
+                { "labelName": "Auto-Investigation-Triggered" },
+                { "labelName": "SpyCloud-Deep-Lookup" }
+              ]
+            }
+          },
+          {
+            "actionType": "AddIncidentTask",
+            "order": 3,
+            "actionConfiguration": {
+              "title": "Review SpyCloud Investigations API results",
+              "description": "1. Review the deep investigation data added to incident comments\n2. Check for plaintext credential exposure\n3. Identify target URLs and infected machines\n4. Determine scope of compromise and initiate remediation"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('idLinkCorrelationPlaybookId')))]",
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-investigate-idlink",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Investigate: IDLINK Identity Correlation",
+        "order": 21,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["High"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "RunPlaybook",
+            "order": 1,
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('idLinkCorrelationPlaybookId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "actionType": "ModifyProperties",
+            "order": 2,
+            "actionConfiguration": {
+              "labels": [
+                { "labelName": "IDLINK-Correlation-Triggered" }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('capResponsePlaybookId')))]",
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-investigate-cap",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Investigate: CAP Credential Abuse Check",
+        "order": 22,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["High", "Medium"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "RunPlaybook",
+            "order": 1,
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('capResponsePlaybookId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "actionType": "ModifyProperties",
+            "order": 2,
+            "actionConfiguration": {
+              "labels": [
+                { "labelName": "CAP-Check-Triggered" }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "investigationRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.SecurityInsights/automationRules', 'spycloud-auto-investigate-deep')]"
+    }
+  }
+}

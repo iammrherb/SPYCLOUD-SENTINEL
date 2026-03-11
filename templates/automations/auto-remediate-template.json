@@ -1,0 +1,249 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "templateMetadata": {
+    "templateVersion": "1.0.0",
+    "templateId": "spycloud-auto-remediate",
+    "category": "Automation",
+    "requiredPermissions": [
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.SecurityInsights/automationRules/write",
+      "Microsoft.Logic/workflows/read"
+    ],
+    "requiredLicenses": [
+      "Microsoft Sentinel"
+    ],
+    "connectorAssociation": [
+      "azuresentinel"
+    ],
+    "deployAsTemplate": true
+  },
+  "metadata": {
+    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "title": "SpyCloud - Auto-Trigger Remediation Playbooks",
+    "description": "Automatically triggers remediation playbooks based on incident severity and type. High severity triggers full remediation (password reset + session revoke + MFA + device isolation). Medium severity triggers password reset and session revoke. Low severity triggers notification only.",
+    "prerequisites": [
+      "Microsoft Sentinel workspace",
+      "SpyCloud remediation playbooks deployed (ForcePasswordReset, RevokeSessions, FullRemediation, NotifyUser)"
+    ],
+    "lastUpdateTime": "2026-03-11T00:00:00.000Z",
+    "support": { "tier": "community" },
+    "author": { "name": "SpyCloud" }
+  },
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "fullRemediationPlaybookId": {
+      "type": "string",
+      "metadata": { "description": "Resource ID of the SpyCloud-FullRemediation Logic App" }
+    },
+    "forcePasswordResetPlaybookId": {
+      "type": "string",
+      "metadata": { "description": "Resource ID of the SpyCloud-ForcePasswordReset Logic App" }
+    },
+    "revokeSessionsPlaybookId": {
+      "type": "string",
+      "metadata": { "description": "Resource ID of the SpyCloud-RevokeSessions Logic App" }
+    },
+    "notifyUserPlaybookId": {
+      "type": "string",
+      "metadata": { "description": "Resource ID of the SpyCloud-NotifyUser Logic App" }
+    }
+  },
+  "variables": {
+    "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-remediate-high",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Remediate: High Severity - Full Remediation",
+        "order": 10,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["High"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "RunPlaybook",
+            "order": 1,
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('fullRemediationPlaybookId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "actionType": "ModifyProperties",
+            "order": 2,
+            "actionConfiguration": {
+              "labels": [
+                { "labelName": "Auto-Remediation-Triggered" },
+                { "labelName": "Full-Remediation" }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-remediate-medium",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Remediate: Medium Severity - Password Reset & Session Revoke",
+        "order": 11,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["Medium"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "RunPlaybook",
+            "order": 1,
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('forcePasswordResetPlaybookId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "actionType": "RunPlaybook",
+            "order": 2,
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('revokeSessionsPlaybookId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "actionType": "ModifyProperties",
+            "order": 3,
+            "actionConfiguration": {
+              "labels": [
+                { "labelName": "Auto-Remediation-Triggered" },
+                { "labelName": "Partial-Remediation" }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/automationRules",
+      "apiVersion": "2023-02-01",
+      "name": "spycloud-auto-remediate-low",
+      "scope": "[variables('workspaceResourceId')]",
+      "properties": {
+        "displayName": "SpyCloud Auto-Remediate: Low Severity - Notify User",
+        "order": 12,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": ["Low"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentProviderName",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionType": "RunPlaybook",
+            "order": 1,
+            "actionConfiguration": {
+              "logicAppResourceId": "[parameters('notifyUserPlaybookId')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "actionType": "ModifyProperties",
+            "order": 2,
+            "actionConfiguration": {
+              "labels": [
+                { "labelName": "Auto-Remediation-Triggered" },
+                { "labelName": "Notification-Only" }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "highRemediationRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.SecurityInsights/automationRules', 'spycloud-auto-remediate-high')]"
+    },
+    "mediumRemediationRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.SecurityInsights/automationRules', 'spycloud-auto-remediate-medium')]"
+    },
+    "lowRemediationRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.SecurityInsights/automationRules', 'spycloud-auto-remediate-low')]"
+    }
+  }
+}
