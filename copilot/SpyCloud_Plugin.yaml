@@ -2663,3 +2663,742 @@ SkillGroups:
             (SecurityIncident | where Title has "SpyCloud" | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="SpyCloud Incidents", Type="Detection", Status=iff(Records>0,"Active","No Incidents")),
             (SentinelHealth | where SentinelResourceName has "SpyCloud" | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="Automation Health", Type="Health", Status=iff(Records>0,"Active","Not Monitored"))
             | project Component, Type, Status, Records, Latest
+
+      # =====================================================================
+      # 34. IDENTITY LINK GRAPH INVESTIGATION (SpyCloudIdLink_CL)
+      # =====================================================================
+
+      - Name: GetIdLinkByEmail
+        DisplayName: Find all identity links for an email
+        Description: |
+          Searches the SpyCloud Identity Link table for all identity graph connections associated with a specific email address. Returns linked emails, usernames, IPs, devices, link strength, breach sources, and risk scoring. Use this to understand the full identity footprint of a compromised user.
+        ExamplePrompts:
+          - Show identity links for this email
+          - What identities are linked to this email in SpyCloud
+          - Find identity graph connections for this user
+          - Look up SpyCloud identity links for this email
+          - What accounts are linked to this email address
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to search for identity link connections.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | where email =~ "{{targetEmail}}"
+            | project TimeGenerated, identity_id, email, email_domain, linked_emails, linked_usernames, linked_ips, linked_devices, link_strength, link_type, breach_sources, first_seen, last_seen, risk_score, total_exposures, graph_depth, correlation_id
+            | top 25 by TimeGenerated desc
+
+      - Name: GetIdLinkGraph
+        DisplayName: Show the full identity graph for an email
+        Description: |
+          Displays the complete identity graph for a given email showing all linked emails, usernames, IP addresses, and devices expanded from dynamic arrays. Provides a comprehensive view of how an identity connects across different accounts, networks, and devices in the SpyCloud identity intelligence graph.
+        ExamplePrompts:
+          - Show the full identity graph for this user
+          - Map all linked accounts and devices for this email
+          - Expand the identity graph for this email address
+          - What is the full identity network for this user
+          - Show all connected identities for this email
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to expand the full identity graph for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | where email =~ "{{targetEmail}}"
+            | mv-expand LinkedEmail = linked_emails
+            | mv-expand LinkedUsername = linked_usernames
+            | mv-expand LinkedIP = linked_ips
+            | mv-expand LinkedDevice = linked_devices
+            | project TimeGenerated, identity_id, email, LinkedEmail = tostring(LinkedEmail), LinkedUsername = tostring(LinkedUsername), LinkedIP = tostring(LinkedIP), LinkedDevice = tostring(LinkedDevice), link_strength, link_type, risk_score, graph_depth, correlation_id
+            | top 50 by link_strength desc
+
+      - Name: GetIdLinkHighRisk
+        DisplayName: Find high-risk identity links
+        Description: |
+          Returns all identity links with a risk score greater than 70, indicating strong connections between compromised identities that represent elevated threat. High-risk links often indicate credential reuse across accounts, shared infected devices, or coordinated compromise patterns.
+        ExamplePrompts:
+          - Show high risk identity links from SpyCloud
+          - Find identity links with high risk scores
+          - Which identity connections are most dangerous
+          - List critical risk identity graph connections
+          - Show SpyCloud identity links above risk threshold
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | where risk_score > 70
+            | project TimeGenerated, identity_id, email, email_domain, linked_emails, linked_usernames, linked_ips, linked_devices, link_strength, link_type, risk_score, total_exposures, graph_depth, breach_sources
+            | sort by risk_score desc, link_strength desc
+            | take 25
+
+      - Name: GetIdLinkCrossOrgCorrelation
+        DisplayName: Find identities linked across different email domains
+        Description: |
+          Identifies identity links that span across different email domains, revealing users who have accounts at multiple organizations that are connected through shared credentials, devices, or IP addresses. Critical for detecting credential reuse across corporate boundaries and shadow IT exposure.
+        ExamplePrompts:
+          - Find identities linked across different organizations
+          - Show cross-domain identity connections in SpyCloud
+          - Which users have linked accounts across different companies
+          - Detect credential reuse across email domains
+          - Show cross-organization identity graph connections
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | mv-expand LinkedEmail = linked_emails
+            | extend LinkedEmailStr = tostring(LinkedEmail)
+            | extend linked_domain = tostring(split(LinkedEmailStr, "@")[1])
+            | where isnotempty(linked_domain) and linked_domain != email_domain
+            | summarize CrossDomainLinks = dcount(linked_domain), LinkedDomains = make_set(linked_domain, 10), LinkedEmails = make_set(LinkedEmailStr, 10), AvgRiskScore = round(avg(risk_score), 1), MaxRiskScore = max(risk_score), TotalExposures = sum(total_exposures) by email, email_domain
+            | sort by CrossDomainLinks desc
+            | take 25
+
+      - Name: GetIdLinkSharedDevices
+        DisplayName: Find devices shared across multiple identities
+        Description: |
+          Identifies devices that appear in identity links for multiple different users, indicating shared infected machines or compromised corporate endpoints used by multiple employees. Shared devices often represent infostealer infections that captured credentials for multiple accounts.
+        ExamplePrompts:
+          - Find shared devices across identities in SpyCloud
+          - Which devices are linked to multiple users
+          - Show infected devices used by more than one identity
+          - Detect shared compromised devices from SpyCloud
+          - List devices appearing in multiple identity graphs
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | mv-expand Device = linked_devices
+            | extend DeviceStr = tostring(Device)
+            | where isnotempty(DeviceStr)
+            | summarize IdentityCount = dcount(email), Identities = make_set(email, 10), AvgRiskScore = round(avg(risk_score), 1), MaxLinkStrength = max(link_strength), FirstSeen = min(first_seen), LastSeen = max(last_seen) by DeviceStr
+            | where IdentityCount > 1
+            | sort by IdentityCount desc
+            | take 25
+
+      - Name: GetIdLinkBreachOverlap
+        DisplayName: Find identities appearing in the same breach sources
+        Description: |
+          Analyzes breach source overlap across identity links to find groups of users who were compromised in the same breaches. This reveals coordinated exposure patterns and helps prioritize remediation for breaches that affected multiple linked identities in your organization.
+        ExamplePrompts:
+          - Find identities compromised in the same breaches
+          - Show breach overlap across identity links
+          - Which breaches affected multiple linked identities
+          - Detect shared breach sources across SpyCloud identity graph
+          - Find common breach exposure patterns
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | mv-expand BreachSource = breach_sources
+            | extend BreachSourceStr = tostring(BreachSource)
+            | where isnotempty(BreachSourceStr)
+            | summarize AffectedIdentities = dcount(email), Emails = make_set(email, 15), AvgRiskScore = round(avg(risk_score), 1), TotalExposures = sum(total_exposures) by BreachSourceStr
+            | where AffectedIdentities > 1
+            | sort by AffectedIdentities desc
+            | take 25
+
+      - Name: GetIdLinkTimeline
+        DisplayName: Show timeline of identity link discoveries
+        Description: |
+          Displays a chronological timeline of identity link discoveries showing when new connections between identities were first observed and last updated. Useful for tracking the evolution of identity compromise and understanding the velocity of new identity connections appearing.
+        ExamplePrompts:
+          - Show identity link discovery timeline
+          - When were identity connections first seen
+          - Timeline of SpyCloud identity graph growth
+          - Show the chronological history of identity links
+          - Track identity link discovery over time
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | summarize NewLinks = dcount(identity_id), UniqueEmails = dcount(email), AvgRiskScore = round(avg(risk_score), 1), MaxRiskScore = max(risk_score), AvgLinkStrength = round(avg(link_strength), 2), TotalExposures = sum(total_exposures) by bin(TimeGenerated, 1d)
+            | sort by TimeGenerated desc
+            | take 30
+
+      - Name: GetIdLinkSummary
+        DisplayName: Summary statistics for identity links
+        Description: |
+          Provides executive summary statistics for all SpyCloud identity links including total link count, unique identities, average risk score, link type distribution, average link strength, and graph depth metrics. Use this for a quick overview of the identity graph intelligence available.
+        ExamplePrompts:
+          - Summarize SpyCloud identity link data
+          - Show identity graph summary statistics
+          - Give me an overview of identity links
+          - How many identity connections exist in SpyCloud
+          - Show identity link metrics and stats
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudIdLink_CL
+            | summarize TotalLinks = count(), UniqueIdentities = dcount(identity_id), UniqueEmails = dcount(email), UniqueDomains = dcount(email_domain), AvgRiskScore = round(avg(risk_score), 1), MaxRiskScore = max(risk_score), AvgLinkStrength = round(avg(link_strength), 2), AvgGraphDepth = round(avg(graph_depth), 1), MaxGraphDepth = max(graph_depth), TotalExposures = sum(total_exposures), EarliestSeen = min(first_seen), LatestSeen = max(last_seen)
+            | extend HighRiskLinks = toscalar(SpyCloudIdLink_CL | where risk_score > 70 | count)
+            | extend LinkTypes = toscalar(SpyCloudIdLink_CL | summarize Count = count() by link_type | summarize make_bag(pack(link_type, Count)))
+
+      # =====================================================================
+      # 35. DATA PARTNERSHIP INTELLIGENCE (SpyCloudDataPartnership_CL)
+      # =====================================================================
+
+      - Name: GetDataPartnershipByEmail
+        DisplayName: Get partner-sourced records for an email
+        Description: |
+          Retrieves all data partnership records associated with a specific email address. Shows partner source details, exposed credentials, severity levels, data classes, and breach context from SpyCloud data partnership feeds. Use this to see what partner intelligence is available for a compromised user.
+        ExamplePrompts:
+          - Show partner data for this email from SpyCloud
+          - What data partnership records exist for this user
+          - Look up partner-sourced intelligence for this email
+          - Check SpyCloud data partnerships for this email
+          - Find partner breach data for this user
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to search in data partnership records.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudDataPartnership_CL
+            | where email =~ "{{targetEmail}}"
+            | project TimeGenerated, partner_id, partner_name, email, email_domain, username, password, password_type, severity, source_type, data_classes, breach_date, ip_addresses, country_code, target_domain, target_url, document_id, source_id
+            | top 25 by TimeGenerated desc
+
+      - Name: GetDataPartnershipByDomain
+        DisplayName: Get all partner data for a domain
+        Description: |
+          Returns all data partnership records for a specific email domain, providing a comprehensive view of partner-sourced intelligence across the organization. Aggregates exposure data from all contributing partners for the given domain.
+        ExamplePrompts:
+          - Show all partner data for this domain
+          - What data partnership records exist for this domain
+          - Get partner-sourced intelligence for my organization
+          - Look up SpyCloud partner data by domain
+          - Find all partner breach records for this domain
+        Inputs:
+          - Name: targetDomain
+            Description: The email domain to search in data partnership records.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudDataPartnership_CL
+            | where email_domain =~ "{{targetDomain}}"
+            | project TimeGenerated, partner_id, partner_name, email, username, password_type, severity, source_type, data_classes, breach_date, ip_addresses, country_code, target_domain, target_url, document_id, source_id
+            | top 25 by TimeGenerated desc
+
+      - Name: GetDataPartnershipSources
+        DisplayName: Summary of data partnership sources
+        Description: |
+          Provides a summary breakdown of all data partnership contributions grouped by partner name and source type. Shows record volume, unique affected users, severity distribution, and data freshness for each contributing partner. Use this to understand which partners are providing the most valuable intelligence.
+        ExamplePrompts:
+          - Summarize data partnership sources
+          - Which partners are contributing data to SpyCloud
+          - Show partner source breakdown
+          - List all data partnership contributors
+          - What are the data partnership feed statistics
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudDataPartnership_CL
+            | summarize Records = count(), UniqueEmails = dcount(email), UniqueDomains = dcount(email_domain), AvgSeverity = round(avg(severity), 1), MaxSeverity = max(severity), LatestRecord = max(TimeGenerated), EarliestBreach = min(breach_date), LatestBreach = max(breach_date) by partner_name, source_type
+            | sort by Records desc
+
+      - Name: GetDataPartnershipHighSeverity
+        DisplayName: High-severity partner data records
+        Description: |
+          Returns all data partnership records with severity 20 or higher, representing the most critical partner-sourced intelligence including infostealer-grade credential exposure and high-risk data classes. These records require immediate attention and remediation.
+        ExamplePrompts:
+          - Show high severity partner data from SpyCloud
+          - Find critical partner-sourced exposures
+          - List high risk data partnership records
+          - What are the most severe partner intelligence findings
+          - Show partner data with severity 20 or above
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudDataPartnership_CL
+            | where severity >= 20
+            | project TimeGenerated, partner_name, email, email_domain, username, password_type, severity, source_type, data_classes, breach_date, ip_addresses, country_code, target_domain, target_url, document_id, source_id
+            | sort by severity desc, TimeGenerated desc
+            | take 25
+
+      - Name: GetDataPartnershipDataClasses
+        DisplayName: Breakdown of exposed data classes from partners
+        Description: |
+          Analyzes the data classes exposed across all data partnership records by expanding the dynamic data_classes array. Shows which types of data such as credentials, PII, financial information, and session tokens are most commonly found in partner intelligence feeds.
+        ExamplePrompts:
+          - What data classes are exposed in partner data
+          - Break down partner data by data class type
+          - Show most common data types from partner feeds
+          - Analyze data class distribution in partnership records
+          - Which data categories do partners report most
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudDataPartnership_CL
+            | mv-expand DataClass = data_classes
+            | extend DataClassStr = tostring(DataClass)
+            | where isnotempty(DataClassStr)
+            | summarize Records = count(), UniqueEmails = dcount(email), UniquePartners = dcount(partner_name), AvgSeverity = round(avg(severity), 1) by DataClassStr
+            | sort by Records desc
+            | take 25
+
+      - Name: GetDataPartnershipTrend
+        DisplayName: Weekly trend of partner data ingestion
+        Description: |
+          Shows the weekly trend of data partnership record ingestion over time, broken down by partner name. Useful for monitoring data feed health, detecting drops in partner data delivery, and understanding the velocity of new partner intelligence arriving in Sentinel.
+        ExamplePrompts:
+          - Show weekly trend of partner data ingestion
+          - How is partner data volume trending over time
+          - Track data partnership feed delivery by week
+          - Show partner data ingestion timeline
+          - Monitor data partnership feed health over time
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudDataPartnership_CL
+            | summarize Records = count(), UniqueEmails = dcount(email), UniquePartners = dcount(partner_name), AvgSeverity = round(avg(severity), 1) by Week = bin(TimeGenerated, 7d), partner_name
+            | sort by Week desc, Records desc
+
+      # =====================================================================
+      # 36. EXPOSURE RISK PROFILING (SpyCloudExposure_CL)
+      # =====================================================================
+
+      - Name: GetExposureProfileByEmail
+        DisplayName: Full risk exposure profile for an email
+        Description: |
+          Returns the complete SpyCloud exposure risk profile for a specific email including risk score, risk level, total breaches, infostealer infections, credential counts, plaintext and hashed password exposure, stolen cookies, infected devices, remediation status, exposed data classes, and breach source timeline. This is the comprehensive exposure assessment for a single identity.
+        ExamplePrompts:
+          - Show the full exposure profile for this email
+          - What is the SpyCloud risk profile for this user
+          - Get complete exposure assessment for this email
+          - Show risk score and exposure details for this user
+          - What is the exposure risk level for this email
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to retrieve the full exposure risk profile for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | where email =~ "{{targetEmail}}"
+            | project TimeGenerated, email, email_domain, risk_score, risk_level, total_breaches, total_infostealers, total_credentials, plaintext_passwords, hashed_passwords, stolen_cookies, infected_devices, first_exposure, last_exposure, remediation_status, remediation_date, remediation_actions, data_classes_exposed, breach_sources, timeline, assessment_date
+            | top 10 by TimeGenerated desc
+
+      - Name: GetExposureProfileByDomain
+        DisplayName: Domain-level exposure aggregation
+        Description: |
+          Aggregates exposure risk profiles across an entire email domain, providing organization-level metrics including total at-risk users, average risk score, risk level distribution, total credential exposure, infostealer infection count, plaintext password exposure, and remediation coverage. Essential for executive reporting and organizational risk assessment.
+        ExamplePrompts:
+          - Show domain-level exposure summary
+          - What is the overall exposure risk for this domain
+          - Aggregate exposure profiles for my organization
+          - Show organizational exposure metrics from SpyCloud
+          - Get domain-wide risk assessment
+        Inputs:
+          - Name: targetDomain
+            Description: The email domain to aggregate exposure profiles for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | where email_domain =~ "{{targetDomain}}"
+            | summarize TotalUsers = dcount(email), AvgRiskScore = round(avg(risk_score), 1), MaxRiskScore = max(risk_score), TotalBreaches = sum(total_breaches), TotalInfostealers = sum(total_infostealers), TotalCredentials = sum(total_credentials), PlaintextPasswords = sum(plaintext_passwords), HashedPasswords = sum(hashed_passwords), StolenCookies = sum(stolen_cookies), InfectedDevices = sum(infected_devices), Remediated = countif(remediation_status == "completed"), Pending = countif(remediation_status != "completed"), EarliestExposure = min(first_exposure), LatestExposure = max(last_exposure)
+            | extend RemediationCoverage = iff(TotalUsers > 0, round(toreal(Remediated) / toreal(TotalUsers) * 100, 1), 0.0)
+
+      - Name: GetExposureCriticalRisk
+        DisplayName: Find critical risk exposure profiles
+        Description: |
+          Returns all exposure profiles where the risk level is Critical or the risk score exceeds 80, representing identities with the most severe and comprehensive exposure across multiple breach types. These users are at highest risk for account takeover and identity theft and require immediate remediation.
+        ExamplePrompts:
+          - Show critical risk exposures from SpyCloud
+          - Find users with critical exposure risk level
+          - Which identities have the highest risk scores
+          - List critical risk profiles from SpyCloud exposure data
+          - Show the most at-risk users based on exposure score
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | where risk_level == "Critical" or risk_score > 80
+            | project TimeGenerated, email, email_domain, risk_score, risk_level, total_breaches, total_infostealers, total_credentials, plaintext_passwords, stolen_cookies, infected_devices, first_exposure, last_exposure, remediation_status, data_classes_exposed, breach_sources
+            | sort by risk_score desc
+            | take 25
+
+      - Name: GetExposureRemediationStatus
+        DisplayName: Exposure remediation status breakdown
+        Description: |
+          Provides a breakdown of remediation status across all exposure profiles showing how many identities have been fully remediated, are pending remediation, or are in progress. Includes average risk scores per status category and the remediation actions taken. Use this to track remediation progress and identify gaps.
+        ExamplePrompts:
+          - Show exposure remediation status breakdown
+          - How many exposures have been remediated
+          - What is the remediation progress for SpyCloud exposures
+          - Track remediation status across exposure profiles
+          - Show remediation completion rates
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | summarize Count = count(), UniqueUsers = dcount(email), AvgRiskScore = round(avg(risk_score), 1), TotalBreaches = sum(total_breaches), TotalCredentials = sum(total_credentials), PlaintextPasswords = sum(plaintext_passwords), LatestAssessment = max(assessment_date) by remediation_status
+            | sort by Count desc
+
+      - Name: GetExposureRemediationGaps
+        DisplayName: Find exposed identities without remediation
+        Description: |
+          Identifies exposure profiles where remediation has not been completed despite having active exposure, focusing on identities with high risk scores, plaintext passwords, or infostealer infections that remain unremediated. These represent the most urgent gaps in your security posture.
+        ExamplePrompts:
+          - Find exposures without remediation
+          - Show unremediated high-risk exposures
+          - Which exposed users have not been remediated
+          - Identify remediation gaps in SpyCloud data
+          - Show exposed identities still at risk
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | where remediation_status != "completed" or isempty(remediation_status)
+            | where risk_score > 50 or plaintext_passwords > 0 or total_infostealers > 0
+            | project TimeGenerated, email, email_domain, risk_score, risk_level, total_breaches, total_infostealers, plaintext_passwords, stolen_cookies, infected_devices, first_exposure, last_exposure, remediation_status, data_classes_exposed
+            | sort by risk_score desc
+            | take 25
+
+      - Name: GetExposureTimeline
+        DisplayName: Exposure timeline with breach source context
+        Description: |
+          Displays a chronological timeline of exposure assessments showing how risk scores, breach counts, and credential exposure have evolved over time. Includes breach source context to correlate risk changes with specific breach events. Use this for trend analysis and incident response timelines.
+        ExamplePrompts:
+          - Show exposure timeline from SpyCloud
+          - How has exposure risk changed over time
+          - Track exposure assessment history
+          - Show chronological exposure trend
+          - Display exposure risk evolution timeline
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | summarize Assessments = count(), UniqueUsers = dcount(email), AvgRiskScore = round(avg(risk_score), 1), MaxRiskScore = max(risk_score), TotalBreaches = sum(total_breaches), TotalInfostealers = sum(total_infostealers), PlaintextPasswords = sum(plaintext_passwords), StolenCookies = sum(stolen_cookies), Remediated = countif(remediation_status == "completed") by bin(TimeGenerated, 1d)
+            | sort by TimeGenerated desc
+            | take 30
+
+      - Name: GetExposureDataClasses
+        DisplayName: Most commonly exposed data class types
+        Description: |
+          Analyzes the data_classes_exposed field across all exposure profiles to identify which types of data are most frequently compromised. Shows the prevalence of credential exposure, PII leakage, financial data, session tokens, and other data categories across your monitored identities.
+        ExamplePrompts:
+          - What data classes are most commonly exposed
+          - Show exposed data type breakdown from SpyCloud
+          - Which data categories are most at risk
+          - Analyze data class exposure frequency
+          - What types of data are being compromised most
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | mv-expand DataClass = data_classes_exposed
+            | extend DataClassStr = tostring(DataClass)
+            | where isnotempty(DataClassStr)
+            | summarize Occurrences = count(), UniqueUsers = dcount(email), AvgRiskScore = round(avg(risk_score), 1), WithPlaintext = countif(plaintext_passwords > 0), WithInfostealer = countif(total_infostealers > 0) by DataClassStr
+            | sort by Occurrences desc
+            | take 25
+
+      - Name: GetExposureSummaryDashboard
+        DisplayName: Executive summary dashboard for all exposures
+        Description: |
+          Provides an executive-level summary dashboard across all SpyCloud exposure profiles including total monitored identities, risk distribution, total credential and breach counts, infostealer infection metrics, plaintext password exposure, remediation coverage percentage, and overall risk posture assessment. Designed for CISO and security leadership reporting.
+        ExamplePrompts:
+          - Show executive exposure summary dashboard
+          - Give me the exposure overview for leadership
+          - Show SpyCloud exposure metrics summary
+          - What is our overall exposure risk posture
+          - Generate executive exposure report
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudExposure_CL
+            | summarize TotalIdentities = dcount(email), UniqueDomains = dcount(email_domain), AvgRiskScore = round(avg(risk_score), 1), MaxRiskScore = max(risk_score), CriticalRisk = countif(risk_level == "Critical"), HighRisk = countif(risk_level == "High"), MediumRisk = countif(risk_level == "Medium"), LowRisk = countif(risk_level == "Low"), TotalBreaches = sum(total_breaches), TotalInfostealers = sum(total_infostealers), TotalCredentials = sum(total_credentials), PlaintextPasswords = sum(plaintext_passwords), HashedPasswords = sum(hashed_passwords), StolenCookies = sum(stolen_cookies), InfectedDevices = sum(infected_devices), Remediated = countif(remediation_status == "completed"), Unremediated = countif(remediation_status != "completed"), EarliestExposure = min(first_exposure), LatestExposure = max(last_exposure), LatestAssessment = max(assessment_date)
+            | extend RemediationRate = iff((Remediated + Unremediated) > 0, round(toreal(Remediated) / toreal(Remediated + Unremediated) * 100, 1), 0.0)
+            | extend RiskPosture = case(AvgRiskScore > 70, "CRITICAL - Immediate action required", AvgRiskScore > 50, "HIGH - Prioritize remediation", AvgRiskScore > 30, "MEDIUM - Monitor and remediate", "LOW - Maintain current posture")
+
+      # =====================================================================
+      # 37. COMPLIANCE AUTOMATION POLICY (SpyCloudCAP_CL)
+      # =====================================================================
+
+      - Name: GetCAPActionsByEmail
+        DisplayName: Get all CAP actions for a specific email
+        Description: |
+          Retrieves all Compliance Automation Policy actions taken for a specific email address including policy details, action type, completion status, trigger severity, credential type, notification status, affected applications, and compliance tags. Use this to review the full compliance action history for a user.
+        ExamplePrompts:
+          - Show CAP actions for this email
+          - What compliance actions were taken for this user
+          - Look up automated policy actions for this email
+          - Check SpyCloud CAP history for this user
+          - Show compliance automation actions for this email
+        Inputs:
+          - Name: targetEmail
+            Description: The email address to look up CAP actions for.
+            Required: true
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | where email =~ "{{targetEmail}}"
+            | project TimeGenerated, cap_id, policy_id, policy_name, email, email_domain, action_type, action_status, trigger_severity, credential_type, notification_sent, affected_applications, compliance_tags, created_date, completed_date, last_updated
+            | sort by TimeGenerated desc
+            | take 25
+
+      - Name: GetCAPActionsByPolicy
+        DisplayName: CAP actions grouped by policy
+        Description: |
+          Groups and summarizes all Compliance Automation Policy actions by policy name, showing the total actions, completion rate, average trigger severity, affected user count, and action type distribution for each policy. Use this to evaluate policy effectiveness and coverage.
+        ExamplePrompts:
+          - Show CAP actions grouped by policy
+          - Which compliance policies are most active
+          - Summarize CAP activity by policy name
+          - Break down automated actions by policy
+          - Show policy-level CAP statistics
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | summarize TotalActions = count(), UniqueUsers = dcount(email), Completed = countif(action_status == "completed"), Pending = countif(action_status != "completed"), AvgTriggerSeverity = round(avg(trigger_severity), 1), NotificationsSent = countif(notification_sent == true), ActionTypes = make_set(action_type, 10), LatestAction = max(TimeGenerated) by policy_id, policy_name
+            | extend CompletionRate = iff(TotalActions > 0, round(toreal(Completed) / toreal(TotalActions) * 100, 1), 0.0)
+            | sort by TotalActions desc
+
+      - Name: GetCAPPendingActions
+        DisplayName: Pending CAP actions awaiting completion
+        Description: |
+          Returns all Compliance Automation Policy actions that have not been completed, including those in pending, in-progress, or other non-completed states. These represent compliance gaps that need attention and may indicate automation failures or manual intervention requirements.
+        ExamplePrompts:
+          - Show pending CAP actions
+          - What compliance actions are still outstanding
+          - List incomplete automated policy actions
+          - Find CAP actions that need attention
+          - Show unfinished compliance automation tasks
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | where action_status != "completed"
+            | project TimeGenerated, cap_id, policy_name, email, email_domain, action_type, action_status, trigger_severity, credential_type, notification_sent, affected_applications, compliance_tags, created_date, last_updated
+            | sort by trigger_severity desc, TimeGenerated desc
+            | take 25
+
+      - Name: GetCAPCompletedActions
+        DisplayName: Successfully completed CAP actions
+        Description: |
+          Returns all Compliance Automation Policy actions that have been successfully completed, showing the full lifecycle from creation to completion including time to resolution. Use this to verify compliance enforcement and audit completed remediation actions.
+        ExamplePrompts:
+          - Show completed CAP actions
+          - List successfully completed compliance actions
+          - What CAP actions have been resolved
+          - Show finished automated policy actions
+          - Audit completed compliance automation tasks
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | where action_status == "completed"
+            | extend CompletionTime = datetime_diff('hour', todatetime(completed_date), todatetime(created_date))
+            | project TimeGenerated, cap_id, policy_name, email, email_domain, action_type, action_status, trigger_severity, credential_type, notification_sent, affected_applications, compliance_tags, created_date, completed_date, CompletionTime
+            | sort by TimeGenerated desc
+            | take 25
+
+      - Name: GetCAPFailedActions
+        DisplayName: Failed or timed-out CAP actions
+        Description: |
+          Identifies Compliance Automation Policy actions that have failed, timed out, or are stuck in an error state. These represent compliance enforcement failures that require manual investigation and intervention. Includes the policy context, trigger severity, and last update timestamp for troubleshooting.
+        ExamplePrompts:
+          - Show failed CAP actions
+          - Find timed out compliance automation actions
+          - List CAP actions that errored or failed
+          - Show broken compliance policy enforcement
+          - Identify failed automated remediation actions
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | where action_status in ("failed", "error", "timed_out", "timeout")
+            | project TimeGenerated, cap_id, policy_name, email, email_domain, action_type, action_status, trigger_severity, credential_type, notification_sent, affected_applications, compliance_tags, created_date, last_updated
+            | sort by trigger_severity desc, TimeGenerated desc
+            | take 25
+
+      - Name: GetCAPComplianceStatus
+        DisplayName: Compliance tag breakdown for CAP actions
+        Description: |
+          Analyzes compliance tags across all CAP actions to provide a breakdown of compliance framework coverage. Shows which compliance requirements such as SOC2, NIST, PCI-DSS, GDPR, and HIPAA are being addressed by automated policy actions, along with completion rates per compliance category.
+        ExamplePrompts:
+          - Show compliance tag breakdown from CAP
+          - Which compliance frameworks are covered by CAP actions
+          - Break down CAP actions by compliance requirement
+          - Show compliance coverage from automated policies
+          - Analyze compliance framework enforcement status
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | mv-expand ComplianceTag = compliance_tags
+            | extend ComplianceTagStr = tostring(ComplianceTag)
+            | where isnotempty(ComplianceTagStr)
+            | summarize TotalActions = count(), UniqueUsers = dcount(email), Completed = countif(action_status == "completed"), Failed = countif(action_status in ("failed", "error")), Pending = countif(action_status !in ("completed", "failed", "error")), AvgTriggerSeverity = round(avg(trigger_severity), 1) by ComplianceTagStr
+            | extend CompletionRate = iff(TotalActions > 0, round(toreal(Completed) / toreal(TotalActions) * 100, 1), 0.0)
+            | sort by TotalActions desc
+
+      - Name: GetCAPActionTimeline
+        DisplayName: Timeline of CAP actions over time
+        Description: |
+          Displays a daily timeline of Compliance Automation Policy actions showing the volume, completion rate, and average trigger severity over time. Useful for monitoring compliance automation health, detecting spikes in policy triggers, and tracking remediation velocity trends.
+        ExamplePrompts:
+          - Show CAP action timeline
+          - How are compliance actions trending over time
+          - Track CAP activity timeline
+          - Show daily compliance automation volume
+          - Monitor CAP action trends over time
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | summarize TotalActions = count(), UniqueUsers = dcount(email), Completed = countif(action_status == "completed"), Failed = countif(action_status in ("failed", "error")), Pending = countif(action_status !in ("completed", "failed", "error")), AvgTriggerSeverity = round(avg(trigger_severity), 1), UniquePolicies = dcount(policy_name) by bin(TimeGenerated, 1d)
+            | extend CompletionRate = iff(TotalActions > 0, round(toreal(Completed) / toreal(TotalActions) * 100, 1), 0.0)
+            | sort by TimeGenerated desc
+            | take 30
+
+      - Name: GetCAPSummaryDashboard
+        DisplayName: CAP summary dashboard with key metrics
+        Description: |
+          Provides an executive summary dashboard for all Compliance Automation Policy activity including total actions, unique policies, success rate, failure rate, average completion time in hours, average trigger severity, notification coverage, unique affected users, and compliance tag coverage. Designed for compliance officers and security leadership.
+        ExamplePrompts:
+          - Show CAP summary dashboard
+          - Give me compliance automation metrics
+          - Show CAP executive summary
+          - What is the overall CAP performance
+          - Generate compliance automation report
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudCAP_CL
+            | summarize TotalActions = count(), UniquePolicies = dcount(policy_name), UniqueUsers = dcount(email), UniqueDomains = dcount(email_domain), Completed = countif(action_status == "completed"), Failed = countif(action_status in ("failed", "error")), Pending = countif(action_status !in ("completed", "failed", "error")), AvgTriggerSeverity = round(avg(trigger_severity), 1), MaxTriggerSeverity = max(trigger_severity), NotificationsSent = countif(notification_sent == true), UniqueActionTypes = dcount(action_type), UniqueCredentialTypes = dcount(credential_type), EarliestAction = min(created_date), LatestAction = max(created_date)
+            | extend SuccessRate = iff(TotalActions > 0, round(toreal(Completed) / toreal(TotalActions) * 100, 1), 0.0)
+            | extend FailureRate = iff(TotalActions > 0, round(toreal(Failed) / toreal(TotalActions) * 100, 1), 0.0)
+            | extend AvgCompletionHours = toscalar(SpyCloudCAP_CL | where action_status == "completed" and isnotempty(completed_date) and isnotempty(created_date) | extend hours = datetime_diff('hour', todatetime(completed_date), todatetime(created_date)) | summarize round(avg(hours), 1))
+            | extend OverallStatus = case(SuccessRate > 90, "HEALTHY - High completion rate", SuccessRate > 70, "MODERATE - Some actions need attention", "AT RISK - Low completion rate, investigate failures")
