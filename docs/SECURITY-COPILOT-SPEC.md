@@ -1,4 +1,4 @@
-# SpyCloud Security Copilot Integration — Complete Specification
+# SpyCloud Security Copilot Integration -- Complete Guide
 
 <p align="center">
   <img src="images/SpyCloud-Logo-white.png" alt="SpyCloud Logo" width="300"/>
@@ -13,510 +13,486 @@
 
 ## Table of Contents
 
-1. [Executive Overview](#executive-overview)
-2. [Architecture](#architecture)
-3. [Plugin Inventory](#plugin-inventory)
-4. [Agent — Autonomous Investigation](#agent--autonomous-investigation)
-5. [KQL Plugin — 90 Promptbook Skills](#kql-plugin--90-promptbook-skills)
-6. [API Plugin — 20 REST API Skills](#api-plugin--20-rest-api-skills)
-7. [Sub-Agent Specifications](#sub-agent-specifications)
-8. [Data Sources & Schema](#data-sources--schema)
-9. [Sentinel Resources](#sentinel-resources)
-10. [Branding & Customization](#branding--customization)
-11. [Deployment Guide](#deployment-guide)
-12. [Compatibility Matrix](#compatibility-matrix)
-13. [Security & Compliance](#security--compliance)
-14. [Appendix: Complete Skill Reference](#appendix-complete-skill-reference)
+1. [Overview](#1-overview)
+2. [Installation Guide](#2-installation-guide)
+3. [API Plugin Configuration](#3-api-plugin-configuration)
+4. [KQL Plugin Skills Catalog](#4-kql-plugin-skills-catalog)
+5. [API Plugin Skills Catalog](#5-api-plugin-skills-catalog)
+6. [Investigation Agent](#6-investigation-agent)
+7. [GPT-4o AI Analysis Skills](#7-gpt-4o-ai-analysis-skills)
+8. [Agent Persona -- SENTINEL](#8-agent-persona--sentinel)
+9. [Suggested Prompts](#9-suggested-prompts)
+10. [Settings Reference](#10-settings-reference)
+11. [Troubleshooting](#11-troubleshooting)
+12. [Integration with Other Tools](#12-integration-with-other-tools)
+13. [What to Expect](#13-what-to-expect)
 
 ---
 
-## Executive Overview
+## 1. Overview
 
-The SpyCloud Security Copilot Integration is the most comprehensive dark web threat intelligence solution available for Microsoft Security Copilot. It provides three complementary plugins that together deliver **168 skills**, **17 specialized sub-agents**, and seamless access to **155+ deployed Sentinel resources** — enabling SOC teams to investigate compromised credentials, infostealer infections, exposed PII, device forensics, session cookie theft, identity exposure, and automated remediation status through natural-language conversation.
+The SpyCloud Security Copilot Integration delivers three complementary plugins that together provide **168 skills**, **17 specialized sub-agents**, and seamless access to **145+ deployed Sentinel resources** -- enabling SOC teams to investigate compromised credentials, infostealer infections, exposed PII, device forensics, and automated remediation status through natural-language conversation.
+
+### Three Integrated Plugins
+
+| Plugin | File | Skills | Purpose |
+|--------|------|--------|---------|
+| **KQL Plugin** | `SpyCloud_Plugin.yaml` | 90 | Query SpyCloud tables in Sentinel via natural-language KQL across 29 categories |
+| **API Plugin** | `SpyCloud_API_Plugin.yaml` | 20 | Direct REST API access to SpyCloud for real-time darknet lookups across 6 APIs |
+| **Investigation Agent** | `SpyCloud_Agent.yaml` | 58 total | Autonomous investigation: 17 sub-agents + 6 GPT-4o skills + 35 internal KQL skills |
 
 ### Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| **Total Skills** | 168 (90 KQL + 20 API + 58 Agent-internal) |
+| **Total Skills** | 168 (90 KQL + 20 API + 58 Agent) |
 | **Sub-Agents** | 17 specialized investigation agents |
-| **Sentinel Tables** | 10 custom SpyCloud tables |
-| **Total Columns** | 233+ across all SpyCloud tables |
-| **SpyCloud APIs** | 6 (Enterprise, Catalog, Compass, SIP, Identity Exposure, Investigations) |
-| **REST API Pollers** | 9 independent CCF pollers |
+| **GPT-4o Analysis Skills** | 6 AI-powered analysis and reporting skills |
+| **Agent Internal KQL Skills** | 35 data retrieval skills for agent orchestration |
+| **SpyCloud APIs Covered** | 6 (Enterprise, Catalog, Compass, SIP, Identity Exposure, Investigations) |
+| **Sentinel Custom Tables** | 10 SpyCloud tables |
 | **Analytics Rules** | 49 (38 scheduled, 1 Fusion, 5 NRT, 5 MSIC) |
 | **Hunting Queries** | 28 proactive threat hunting queries |
 | **Playbooks** | 10 Logic App automated response workflows |
 | **Watchlists** | 4 (VIP, IOC Blocklist, Approved Domains, High-Value Assets) |
-| **Workbooks** | 3 (Executive Dashboard, SOC Operations, Threat Intel) |
+| **Workbooks** | 3 (Executive Dashboard, SOC Operations, Threat Intelligence) |
 | **Notebooks** | 3 (Incident Triage, Threat Hunting, Threat Landscape) |
-| **Notification Channels** | 6 (Slack, Teams, Email, ServiceNow, Jira, Azure DevOps) |
-| **Deployment Methods** | 3 (ARM Template, Terraform, Azure Cloud Shell) |
+| **Deployment Methods** | 5 (ARM Template, Terraform, GitHub Actions, Cloud Shell, Azure Portal) |
 
-### Solution Components
+### Plugin Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                   Microsoft Security Copilot                      │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                    │
-│  ┌─────────────────┐  ┌──────────────────┐  ┌─────────────────┐  │
-│  │  Investigation   │  │   KQL Plugin     │  │   API Plugin    │  │
-│  │     Agent        │  │  (90 Skills)     │  │  (20 Skills)    │  │
-│  │  (17 Sub-Agents) │  │                  │  │                 │  │
-│  │  (58 Int Skills) │  │  Sentinel KQL    │  │  SpyCloud REST  │  │
-│  └────────┬────────┘  └────────┬─────────┘  └────────┬────────┘  │
-│           │                     │                      │           │
-├───────────┴─────────────────────┴──────────────────────┴──────────┤
-│                     Microsoft Sentinel                             │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            │
-│  │ 49 Rules │ │28 Hunting│ │10 Play-  │ │4 Watch-  │            │
-│  │          │ │ Queries  │ │  books   │ │  lists   │            │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            │
-│  │3 Work-   │ │3 Note-   │ │10 Custom │ │UEBA/     │            │
-│  │  books   │ │  books   │ │ Tables   │ │Fusion/TI │            │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │
-├──────────────────────────────────────────────────────────────────┤
-│                     SpyCloud APIs                                  │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐              │
-│  │  Enterprise   │ │   Compass    │ │   SIP        │              │
-│  │  Breach API   │ │Investigation │ │Session Cookie│              │
-│  │  + Catalog    │ │     API      │ │    API       │              │
-│  └──────────────┘ └──────────────┘ └──────────────┘              │
-│  ┌──────────────┐ ┌──────────────┐                                │
-│  │  Identity     │ │Investigations│                                │
-│  │  Exposure API │ │     API      │                                │
-│  └──────────────┘ └──────────────┘                                │
-└──────────────────────────────────────────────────────────────────┘
++----------------------------------------------------------------------+
+|                    Microsoft Security Copilot                         |
++----------------------------------------------------------------------+
+|                                                                      |
+|  +-------------------+  +------------------+  +-------------------+  |
+|  |  Investigation    |  |   KQL Plugin     |  |   API Plugin      |  |
+|  |     Agent         |  |  (90 Skills)     |  |  (20 Skills)      |  |
+|  |  (17 Sub-Agents)  |  |                  |  |                   |  |
+|  |  (6 GPT-4o)       |  |  Sentinel KQL    |  |  SpyCloud REST    |  |
+|  |  (35 KQL)         |  |  queries across  |  |  across 6 APIs   |  |
+|  |                   |  |  29 categories   |  |                   |  |
+|  +--------+----------+  +--------+---------+  +--------+----------+  |
+|           |                      |                      |            |
++-----------+----------------------+----------------------+------------+
+|                      Microsoft Sentinel                              |
+|  +----------+ +----------+ +----------+ +----------+ +----------+   |
+|  | 49 Rules | |28 Hunting| |10 Play-  | |4 Watch-  | |3 Work-   |   |
+|  |          | | Queries  | |  books   | |  lists   | |  books   |   |
+|  +----------+ +----------+ +----------+ +----------+ +----------+   |
+|  +----------+ +----------+ +----------+                              |
+|  |3 Note-   | |10 Custom | |UEBA/     |                             |
+|  |  books   | | Tables   | |Fusion/TI |                              |
+|  +----------+ +----------+ +----------+                              |
++---------+--------+--------+--------+--------+-----------------------+
+|                      SpyCloud APIs                                   |
+|  +------------+ +----------+ +--------+ +-----+ +--------+ +------+ |
+|  | Enterprise | | Catalog  | |Compass | | SIP | |Identity| |Invest| |
+|  | Breach API | | API      | |  API   | | API | |Exposure| |  API | |
+|  +------------+ +----------+ +--------+ +-----+ +--------+ +------+ |
++----------------------------------------------------------------------+
 ```
 
 ---
 
-## Architecture
+## 2. Installation Guide
 
-### Data Flow
+### Prerequisites
 
-1. **Ingestion**: SpyCloud 6 APIs → 9 CCF REST pollers → Data Collection Rules (DCR) with KQL transforms → 10 custom Sentinel tables
-2. **Detection**: 49 analytics rules continuously evaluate ingested data → Sentinel incidents
-3. **Response**: 10 Logic App playbooks auto-remediate (password reset, session revoke, MFA enforce, device isolate, firewall block, user/SOC notify, incident enrich, full orchestration)
-4. **Investigation**: Security Copilot agent + plugins provide natural-language access to all data and actions
-5. **Reporting**: 3 workbooks + 3 notebooks + executive summary agent for dashboarding and compliance
+1. Microsoft Sentinel workspace (Log Analytics) with SpyCloud data connector configured
+2. Security Copilot license
+3. SpyCloud API key (required for API Plugin and data ingestion)
+4. Azure permissions: Contributor on resource group, Microsoft Sentinel Contributor
 
-### Plugin Interaction Model
+### Step 1: Deploy Sentinel Resources
 
-| Scenario | Best Plugin | Why |
-|----------|-------------|-----|
-| Interactive investigation | **Agent** | Autonomous multi-step orchestration with personality |
-| Quick KQL query | **KQL Plugin** | Direct promptbook skill invocation |
-| Real-time API lookup | **API Plugin** | Live SpyCloud API for freshest data |
-| Deep Compass analysis | **API Plugin** | Compass API endpoints not available via KQL |
-| Executive reporting | **Agent** | Executive Summary sub-agent with GPT analysis |
-| Automated triage | **Agent** | Identity Risk Scoring sub-agent |
+Deploy the SpyCloud Sentinel solution first (ARM, Terraform, or Cloud Shell). This creates the 10 custom tables, 49 analytics rules, 10 playbooks, and all other Sentinel resources.
 
-All three plugins are **fully compatible** and can be used simultaneously. The Agent references skills from both the KQL and API plugins for comprehensive investigations.
+### Step 2: Install the KQL Plugin
+
+1. Open Microsoft Security Copilot
+2. Navigate to **Settings** > **Plugins** > **Custom plugins**
+3. Click **Add plugin** > **Upload file**
+4. Upload `copilot/SpyCloud_Plugin.yaml`
+5. Configure the required settings:
+   - **TenantId**: Your Azure Tenant ID
+   - **SubscriptionId**: Your Azure Subscription ID
+   - **ResourceGroupName**: Resource Group containing the Sentinel workspace
+   - **WorkspaceName**: Sentinel Log Analytics workspace name
+6. Click **Save**
+
+### Step 3: Install the API Plugin
+
+1. In **Settings** > **Plugins** > **Custom plugins**, click **Add plugin**
+2. Upload `copilot/SpyCloud_API_Plugin.yaml`
+3. For authentication, enter your SpyCloud API key
+4. The API key is sent as the `X-API-Key` header on all requests
+5. Configure optional settings:
+   - **ApiBaseUrl**: Defaults to `https://api.spycloud.io` (override only for regional/on-prem)
+6. Click **Save**
+
+### Step 4: Install the Investigation Agent
+
+1. In **Settings** > **Plugins** > **Custom plugins**, click **Add plugin**
+2. Upload `copilot/SpyCloud_Agent.yaml`
+3. Configure the required settings:
+   - **TenantId**: Your Azure Tenant ID
+   - **SubscriptionId**: Your Azure Subscription ID
+   - **ResourceGroupName**: Resource Group containing the Sentinel workspace
+   - **WorkspaceName**: Sentinel Log Analytics workspace name
+4. Optionally configure:
+   - **SpyCloudApiKey**: SpyCloud API key for API Plugin integration (not required if API Plugin is installed separately)
+5. Click **Save**
+
+### Step 5: Verify Installation
+
+Test each plugin with these prompts:
+
+| Plugin | Test Prompt |
+|--------|------------|
+| **Agent** | "What can you help me investigate?" |
+| **KQL Plugin** | "Check SpyCloud for exposures on user@company.com" |
+| **API Plugin** | "Look up SpyCloud breach data for user@company.com" |
 
 ---
 
-## Plugin Inventory
+## 3. API Plugin Configuration
 
-### File Structure
+### Authentication Details
 
+The API Plugin authenticates to SpyCloud using an API key sent in the HTTP header.
+
+| Setting | Value |
+|---------|-------|
+| **Auth Type** | APIKey |
+| **Key Header Name** | `X-API-Key` |
+| **AuthScheme** | *(empty string)* |
+| **Location** | Header |
+| **AuthorizationHeader** | `X-API-Key` |
+
+### Security Copilot Settings Fields
+
+When configuring the API Plugin in Security Copilot, enter the following in the authentication dialog:
+
+| Field | What to Enter |
+|-------|---------------|
+| **API Key** | Your SpyCloud API key (e.g., `abc123def456...`) |
+| **Key name** | `X-API-Key` |
+| **Auth scheme** | Leave empty |
+| **Location** | Select **Header** |
+
+### Base URL
+
+The default API base URL is `https://api.spycloud.io`. This is configured in the optional `ApiBaseUrl` setting and should only be changed if directed by SpyCloud support for regional or on-premises deployments.
+
+### OpenAPI Specification
+
+The API Plugin references the OpenAPI 3.0.3 specification at:
 ```
-copilot/
-├── manifest.json                      # Unified manifest for all plugins
-├── SpyCloud_Agent.yaml                # Autonomous investigation agent (17 sub-agents)
-├── SpyCloud_Plugin.yaml               # KQL plugin (90 promptbook skills)
-├── SpyCloud_API_Plugin.yaml           # API plugin (20 REST API skills)
-└── SpyCloud_API_Plugin_OpenAPI.yaml   # OpenAPI 3.0.3 specification for API Plugin
+https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml
 ```
 
-### Authentication Requirements
+---
 
-| Plugin | Auth Type | Credentials Required |
-|--------|-----------|---------------------|
-| Agent | None | Azure Sentinel workspace access (TenantId, SubscriptionId, ResourceGroupName, WorkspaceName) |
-| KQL Plugin | None | Same Sentinel workspace access |
-| API Plugin | API Key | SpyCloud API key (X-API-Key header) |
+## 4. KQL Plugin Skills Catalog
+
+The KQL Plugin provides **90 promptbook skills** organized into **29 categories**. All skills query SpyCloud custom tables in Microsoft Sentinel.
+
+### Category 1: User Credential and Exposure Investigation (3 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetUserExposures** | All compromised credentials and infostealer infections for a specific email | `targetEmail` |
+| **GetUserFullPIIProfile** | Complete identity profile including SSN, financial, employment, social media | `targetEmail` |
+| **GetUserAccountActivity** | Account activity timeline -- signup, login, modification timestamps | `targetEmail` |
+
+### Category 2: Password and Credential Analysis (3 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetExposedPasswords** | All password data including hashes, plaintext, types, salts, sightings | `targetEmail` |
+| **GetPlaintextPasswordExposures** | Organization-wide plaintext password exposures (highest risk) | -- |
+| **GetPasswordTypeBreakdown** | Breakdown by password type with crackability assessment | -- |
+
+### Category 3: Severity, Exposure Type, and Breach Category (4 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetHighSeverityExposures** | Recent severity 20+ infostealer exposures with device context | -- |
+| **GetExposureSummaryBySeverity** | Exposure breakdown by severity level (2, 5, 20, 25) | -- |
+| **GetExposureSummaryByDomain** | Exposures aggregated by corporate email domain | -- |
+| **GetTargetedDomains** | Most frequently targeted websites and applications | -- |
+
+### Category 4: Sensitive PII and Financial Data (2 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetSensitivePIIExposures** | Records with SSN, bank accounts, tax IDs, health data | -- |
+| **GetSocialMediaExposures** | LinkedIn, Twitter, social profiles for a user | `targetEmail` |
+
+### Category 5: Device and Malware Forensics (5 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetInfectedDevices** | All infected devices grouped by machine ID and hostname | -- |
+| **GetDeviceForensics** | Full forensic details for a specific infected device | `machineId` |
+| **GetDeviceToUserCorrelation** | All users affected by a single infected device | `machineId` |
+| **GetAVCoverageGaps** | AV products present on infected devices that failed to prevent infection | -- |
+| **GetMalwareInfo** | Breach catalog lookup for a malware family or breach source | `threatName` |
+
+### Category 6: Breach Catalog Intelligence (2 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetRecentBreaches** | Recently ingested breach and malware sources | -- |
+| **GetEnrichedExposures** | Exposures joined with catalog for malware family names | -- |
+
+### Category 7: MDE Device Remediation Audit (3 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetMDERemediationActions** | All MDE remediation actions triggered by SpyCloud | -- |
+| **GetMDERemediationForDevice** | MDE actions for a specific hostname | `hostName` |
+| **GetMDERemediationStats** | Aggregate MDE remediation effectiveness metrics | -- |
+
+### Category 8: Conditional Access Remediation (3 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetConditionalAccessActions** | All Entra ID identity protection actions | -- |
+| **GetConditionalAccessForUser** | Identity actions for a specific user | `userEmail` |
+| **GetConditionalAccessStats** | Aggregate identity remediation effectiveness | -- |
+
+### Category 9: Cross-Table Investigation (3 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetFullUserInvestigation** | Comprehensive cross-table investigation for a user | `investigateEmail` |
+| **GetGeographicAnalysis** | Geographic distribution of infostealer infections | -- |
+| **GetSpyCloudHealthStatus** | Data ingestion health check across all tables | -- |
+
+### Category 10: Compass Consumer Identity (4 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetCompassExposures** | Consumer identity exposures from Compass | `SearchTerm` |
+| **GetCompassDevices** | Compass infected devices with OS and infection timeline | -- |
+| **GetCompassCorporateOverlap** | Users with both consumer and corporate credential exposure | -- |
+| **GetDeviceReinfections** | Devices infected multiple times indicating failed remediation | -- |
+
+### Category 11: Cross-Connector Threat Hunting (4 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **HuntExposedUserSignIns** | Correlate exposed users with Entra ID sign-in logs | `DaysBack` (optional) |
+| **HuntExposedUserEmailActivity** | Office 365 email activity by exposed users | -- |
+| **HuntExposedUserAzureActivity** | Azure resource changes by exposed users | -- |
+| **HuntInfectedIPsInNetwork** | Search infected IPs across MDE, DNS, firewall, TI | -- |
+
+### Category 12: Risk Scoring and Prioritization (3 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetUserRiskScore** | Composite risk score for a user based on multiple factors | `UserEmail` |
+| **GetOrgRiskDashboard** | Organization-wide risk summary | -- |
+| **GetTopPriorityActions** | Highest-priority remediation actions needed now | -- |
+
+### Category 13: UEBA Correlation (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetUEBAAnomaliesForExposedUsers** | Cross-reference exposed users with UEBA anomalies | `Lookback`, `MinSeverity` (optional) |
+
+### Category 14: Fusion Multistage (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetFusionMultistageIncidents** | Fusion-detected multistage attack incidents | `Lookback` (optional) |
+
+### Category 15: TI Enrichment (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetTIEnrichmentResults** | TI enrichment results (VirusTotal, AbuseIPDB) for SpyCloud incidents | `Lookback` (optional) |
+
+### Category 16: Automation Rule Effectiveness (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetAutomationRuleMetrics** | Automation rule execution statistics and success rates | `Lookback` (optional) |
+
+### Category 17: Session Cookie Theft and Token Replay (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **HuntStolenSessionCookies** | Hunt stolen session cookies bypassing MFA via token replay | -- |
+
+### Category 18: Lateral Movement Detection (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **HuntLateralMovementFromExposedAccounts** | Detect RDP/SMB/NTLM lateral movement from exposed accounts | -- |
+
+### Category 19: Data Exfiltration Detection (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **HuntDataExfiltrationFromExposedUsers** | Detect mass file downloads from exposed users in cloud apps | -- |
+
+### Category 20: Malware Family Tracking (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **TrackMalwareFamilyTrends** | Track infostealer malware family trends across the org | `Lookback` (optional) |
+
+### Category 21: Watchlist Management (3 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetIOCBlocklistEntries** | Current IOC Blocklist watchlist entries | -- |
+| **GetHighValueAssets** | High-value assets requiring elevated monitoring | -- |
+| **GetApprovedDomains** | Corporate email domains configured for monitoring | -- |
+
+### Category 22: MSIC Incident Correlation (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetMSICIncidentCorrelation** | Microsoft Security Incident Creation rule incidents correlated with SpyCloud | `Lookback` (optional) |
+
+### Category 23: Executive Reporting (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GenerateExecutiveSummary** | Executive summary report with exposure metrics, incidents, and remediation | -- |
+
+### Category 24: Campaign and Threat Actor Intelligence (4 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetMalwareCampaignSummary** | Full impact summary for a malware campaign or family | `malwareFamily` |
+| **GetBreachCampaignTimeline** | Chronological timeline of breach catalog entries for a campaign | `campaignName` |
+| **GetRelatedBreaches** | Find breaches sharing victims, IPs, or time windows | `sourceId` |
+| **GetThreatActorProfile** | Comprehensive threat actor profile from SpyCloud data | `actorName` |
+
+### Category 25: Campaign TTPs (1 skill)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetCampaignTTPs** | Enumerate MITRE ATT&CK TTPs for a malware campaign | `campaignName` |
+
+### Category 26: Advanced User Analysis (5 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetUserAttackTimeline** | Complete attack timeline from exposure through data access | `targetEmail` |
+| **GetUserPasswordHistory** | Password exposure patterns over time | `targetEmail` |
+| **GetUserDeviceAssociations** | All devices a user signed in from with infection status | `targetEmail` |
+| **GetUserRemediationHistory** | Full remediation trail across CA, MDE, and Entra audit | `targetEmail` |
+| **GetUserRiskScoreBreakdown** | Composite risk score with detailed factor breakdown | `targetEmail` |
+
+### Category 27: Network and Infrastructure (4 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetInfectedIPFirewallActivity** | Firewall events (allow/deny) for SpyCloud infection IPs | -- |
+| **GetDNSQueriesFromInfectedHosts** | DNS queries from infected IPs for C2 detection | -- |
+| **GetVPNConnectionsFromExposedUsers** | VPN/remote access from users with active exposures | -- |
+| **GetNetworkLateralMovement** | Track lateral movement from compromised accounts | -- |
+
+### Category 28: Compliance and Reporting (4 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetExposureComplianceReport** | Compliance audit metrics (SOC2, PCI DSS, HIPAA) | -- |
+| **GetRemediationSLAReport** | Remediation SLA compliance (24h, 48h, 72h targets) | -- |
+| **GetPIIExposureInventory** | Count exposed PII elements for regulatory notification | -- |
+| **GetDataRetentionReport** | Table sizes, record counts, and retention spans | -- |
+
+### Category 29: Incident, Alert Correlation, and Proactive Intelligence (10 skills)
+
+| Skill | Description | Input |
+|-------|-------------|-------|
+| **GetIncidentCorrelation** | All correlated SpyCloud data for a Sentinel incident | `incidentId` |
+| **GetFusionIncidentContext** | Fusion multistage incident details with SpyCloud alerts | `Lookback` (optional) |
+| **GetAlertsByAnalyticsRule** | Rank SpyCloud analytics rules by alert volume | `Lookback` (optional) |
+| **GetIncidentRemediationStatus** | Remediation action status for each SpyCloud incident | `Lookback` (optional) |
+| **GetExposureForecast** | Trend analysis predicting exposure growth | -- |
+| **GetHighRiskUserCohort** | Users with exposures, active sign-ins, and no remediation | -- |
+| **GetStaleCredentialRisk** | Credentials exposed 30+ days with no password change | -- |
+| **GetPasswordReuseRisk** | Password reuse risk detection | -- |
+| **GetNewExposuresLastNHours** | New exposures ingested in recent hours | -- |
+| **GetDeviceForensicProfile** | Complete device forensic profile | -- |
+
+### Additional Operational Skills (10 skills)
+
+| Skill | Description |
+|-------|-------------|
+| **GetDeviceReinfectionHistory** | Device reinfection tracking over time |
+| **GetCompassDeviceInventory** | Compass device inventory summary |
+| **GetMDEIsolationAudit** | MDE isolation audit trail |
+| **GetExecutiveRiskGauge** | Executive-level risk gauge metric |
+| **GetExposureTrendComparison** | Exposure trend comparison (month-over-month) |
+| **GetTopRecommendations** | Top security recommendations based on data |
+| **GetConnectorHealthAssessment** | Assessment of all data connectors and ingestion health |
+| **GetMissingConnectorRecommendations** | Recommendations for missing connectors to enable |
+| **GetPlaybookPermissionGaps** | Detect permission issues with playbooks |
+| **GetCapabilityMatrix** | Full capability matrix of deployed resources |
 
 ---
 
-## Agent — Autonomous Investigation
-
-### Overview
-
-The SpyCloud Investigation Agent (`SpyCloud.ThreatIntelligence.SentinelAgent`) is an autonomous, conversational security analyst that provides interactive dark web threat investigation through Microsoft Security Copilot.
-
-### Identity: SENTINEL
-
-The agent operates as **SENTINEL** — a battle-hardened security analyst with:
-- Confident, direct communication backed by 600B+ recaptured darknet records
-- Strategic use of humor and engaging personality
-- Persistent, thorough investigation with automatic pivoting
-- Empathetic support for SOC analysts
-- Brutal honesty about risk exposure
-
-### Capabilities
-
-| Capability | Description |
-|------------|-------------|
-| **User Investigation** | Full credential, PII, password, and account activity investigation for any email |
-| **Device Forensics** | Infostealer infection analysis, malware path, AV coverage, OS, IPs, keyboard |
-| **Malware Hunting** | Track malware families (RedLine, LummaC2, Vidar, Raccoon, StealC, etc.) |
-| **Org-Wide Assessment** | Bird's-eye view of total exposure, top risks, remediation gaps |
-| **UEBA Correlation** | Cross-reference exposed credentials with behavioral anomalies |
-| **Fusion Analysis** | ML-detected multistage attack chain investigation |
-| **Password Audit** | Plaintext, hash type breakdown, crackability assessment, reuse detection |
-| **Compliance Reporting** | GDPR, HIPAA, PCI-DSS, SOX compliance mapping and notification requirements |
-| **Playbook Status** | MDE isolations, password resets, TI enrichment, automation effectiveness |
-| **Watchlist Management** | VIP accounts, IOC blocklists, approved domains, high-value assets |
-| **Ransomware Assessment** | Precursor malware detection, pre-encryption containment recommendations |
-| **Identity Risk Scoring** | Multi-dimensional risk scoring across 7 factors (0-105 scale) |
-| **Supply Chain Analysis** | Third-party vendor credential exposure and shared account risk |
-| **Dark Web Monitoring** | Ingestion velocity tracking, fresh infection alerts, intelligence briefings |
-
-### Suggested Prompts (Starter)
-
-| Prompt | Category |
-|--------|----------|
-| "What can you help me investigate?" | Getting Started |
-| "Show me an overview of our dark web exposure" | Exposure Overview |
-| "Which users have the most critical credential exposures?" | Critical Exposures |
-| "Are any devices infected with infostealer malware?" | Infected Devices |
-| "Show me users with plaintext passwords exposed" | Password Audit |
-| "Do we have sensitive PII exposed requiring breach notification?" | Compliance Check |
-| "What's the single most dangerous finding right now?" | Top Risk |
-
-### Internal Skills (58 Total)
-
-The Agent orchestrates 58 internal skills (35 KQL + 6 GPT-4o analysis + 17 sub-agents):
-
-| # | Skill Name | Type | Description |
-|---|-----------|------|-------------|
-| 1 | GetUserExposures | KQL | All exposures for a specific email |
-| 2 | GetUserFullPIIProfile | KQL | Complete PII/identity profile |
-| 3 | GetUserAccountActivity | KQL | Account activity timeline |
-| 4 | GetExposedPasswords | KQL | Password data for a user |
-| 5 | GetPlaintextPasswordExposures | KQL | All plaintext password exposures |
-| 6 | GetPasswordTypeBreakdown | KQL | Password type distribution |
-| 7 | GetHighSeverityExposures | KQL | Severity 20+ infostealer exposures |
-| 8 | GetExposureSummaryBySeverity | KQL | Exposure breakdown by severity |
-| 9 | GetExposureSummaryByDomain | KQL | Exposure breakdown by domain |
-| 10 | GetTargetedDomains | KQL | Most targeted websites |
-| 11 | GetSensitivePIIExposures | KQL | SSN, financial, health data |
-| 12 | GetSocialMediaExposures | KQL | LinkedIn, Twitter, social profiles |
-| 13 | GetInfectedDevices | KQL | Infected device summary |
-| 14 | GetDeviceForensics | KQL | Full device forensics |
-| 15 | GetDeviceToUserCorrelation | KQL | Users affected by a device |
-| 16 | GetAVCoverageGaps | KQL | AV products that failed |
-| 17 | GetMalwareInfo | KQL | Breach catalog malware lookup |
-| 18 | GetRecentBreaches | KQL | Recently added breaches |
-| 19 | GetEnrichedExposures | KQL | Exposures joined with catalog |
-| 20 | GetMDERemediationActions | KQL | MDE isolation/tagging actions |
-| 21 | GetMDERemediationForDevice | KQL | MDE actions for a device |
-| 22 | GetMDERemediationStats | KQL | MDE effectiveness summary |
-| 23 | GetConditionalAccessActions | KQL | CA remediation actions |
-| 24 | GetConditionalAccessForUser | KQL | CA actions for a user |
-| 25 | GetConditionalAccessStats | KQL | CA effectiveness summary |
-| 26 | GetFullUserInvestigation | KQL | Cross-table user investigation |
-| 27 | GetGeographicAnalysis | KQL | Geographic infection distribution |
-| 28 | GetSpyCloudHealthStatus | KQL | Data ingestion health check |
-| 29 | InvestigateFullExposureChain | KQL | Multi-table exposure chain |
-| 30 | GenerateIncidentSummary | KQL | Structured incident summary |
-| 31 | DetectPermissionGaps | KQL | Playbook permission gap detection |
-| 32 | AnalyzeAndSummarize | GPT | GPT-4.1 analysis and reporting |
-
----
-
-## Sub-Agent Specifications
-
-### 1. UEBA & Behavioral Analysis Agent
-
-**Purpose**: Correlates credential exposure with UEBA behavioral anomalies
-
-**Data Sources**: SpyCloudBreachWatchlist_CL, BehaviorAnalytics, IdentityInfo, SigninLogs
-
-**Investigation Flow**:
-1. Identify exposed users with severity >= 20
-2. Cross-reference with BehaviorAnalytics for anomalous activity
-3. Check SigninLogs for unusual sign-in patterns post-exposure
-4. Score risk: exposure severity + anomaly count + investigation priority
-
-**Key Output**: Correlation table of users with BOTH credential exposure AND behavioral anomalies
-
----
-
-### 2. Fusion & Multistage Attack Agent
-
-**Purpose**: Investigates Fusion-detected multistage attacks for credential theft correlation
-
-**Data Sources**: SpyCloudBreachWatchlist_CL, SecurityAlert, SecurityIncident, SpyCloudBreachCatalog_CL
-
-**Investigation Flow**:
-1. Query Fusion alerts from SecurityAlert
-2. Extract entities (accounts, IPs, hosts)
-3. Cross-reference with SpyCloud exposures
-4. Map kill chain timeline: SpyCloud exposure date vs. Fusion detection
-5. Assess whether stolen credentials enabled the attack chain
-
-**Key Output**: Attack chain visualization with MITRE ATT&CK mapping
-
----
-
-### 3. TI Enrichment & IOC Analysis Agent
-
-**Purpose**: Threat intelligence enrichment and IOC blocklist management
-
-**Data Sources**: SpyCloudBreachWatchlist_CL, ThreatIntelligenceIndicator, IOC Blocklist watchlist, Spycloud_MDE_Logs_CL
-
-**Investigation Flow**:
-1. Extract IOCs from SpyCloud exposures (IPs, domains, URLs)
-2. Query ThreatIntelligenceIndicator for matches
-3. Check IOC Blocklist for coverage
-4. Identify gaps and score IOC confidence
-5. Recommend blocking actions
-
-**Key Output**: IOC coverage gap analysis with prioritized blocking recommendations
-
----
-
-### 4. Session Cookie & MFA Bypass Agent
-
-**Purpose**: Detects stolen session tokens and MFA bypass attempts
-
-**Data Sources**: SpyCloudBreachWatchlist_CL (severity 25), SigninLogs, AADNonInteractiveUserSignInLogs, CloudAppEvents
-
-**Investigation Flow**:
-1. Find severity 25 exposures (stolen session cookies)
-2. Check SigninLogs for single-factor authentication events
-3. Detect impossible travel (different countries within hours)
-4. Detect token replay (multiple IPs for same session)
-5. Check CloudAppEvents for OAuth consent abuse
-
-**Key Output**: Session theft risk assessment with MFA gap analysis
-
----
-
-### 5. Lateral Movement Investigation Agent
-
-**Purpose**: Tracks device-to-device movement from compromised accounts
-
-**Data Sources**: SpyCloudBreachWatchlist_CL, IdentityLogonEvents, DeviceLogonEvents, Spycloud_MDE_Logs_CL
-
-**Investigation Flow**:
-1. Identify compromised users with severity >= 20
-2. Query IdentityLogonEvents for RDP/SMB/NTLM logons
-3. Map source-to-target device pairs
-4. Flag outliers (>3 unique targets in 24h)
-5. Verify containment status
-
-**Key Output**: Movement map with device isolation status
-
----
-
-### 6. Data Exfiltration Detection Agent
-
-**Purpose**: Detects data theft patterns from compromised accounts
-
-**Data Sources**: SpyCloudBreachWatchlist_CL, CloudAppEvents, OfficeActivity, SpyCloud_ConditionalAccessLogs_CL
-
-**Investigation Flow**:
-1. Determine exposure window (publish date to remediation)
-2. Query CloudAppEvents for mass file operations
-3. Check OfficeActivity for mailbox forwarding rules
-4. Flag suspicious patterns (>50 files/day, external forwarding)
-5. Estimate data volume at risk
-
-**Key Output**: Exfiltration risk assessment with containment recommendations
-
----
-
-### 7. Executive Summary & Compliance Agent
-
-**Purpose**: Executive reporting and compliance framework mapping
-
-**Data Sources**: All SpyCloud tables, MDE logs, CA logs
-
-**Report Types**:
-- Executive Dashboard: high-level metrics, trends, risk posture
-- Compliance Assessment: GDPR, HIPAA, PCI-DSS, SOX mapping
-- Malware Trend Report: top families, infection rates, AV evasion
-- Third-Party Impact: external breach sources
-- Automation Effectiveness: playbook metrics and ROI
-
-**Key Output**: Business-impact-focused executive reports with strategic recommendations
-
----
-
-### 8. Watchlist & Asset Management Agent
-
-**Purpose**: VIP monitoring, IOC blocklist, and asset risk correlation
-
-**Data Sources**: SpyCloudBreachWatchlist_CL, 4 Sentinel watchlists
-
-**Capabilities**:
-- VIP/Executive exposure monitoring (always HIGH priority)
-- IOC Blocklist coverage gap analysis
-- Approved Domains validation
-- High-Value Asset risk correlation
-
-**Key Output**: VIP exposure alerts and IOC coverage reports
-
----
-
-### 9. Ransomware Impact Assessment Agent (NEW)
-
-**Purpose**: Ransomware precursor detection and pre-encryption containment
-
-**Data Sources**: SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, IdentityLogonEvents, DeviceLogonEvents, High-Value Assets watchlist
-
-**Risk Model**: Malware family risk × lateral movement × asset criticality × containment gaps
-
-**Tracked Malware Families**: RedLine, LummaC2, Vidar, Raccoon, StealC, Aurora, Mars, META, Mystic, RisePro, Titan
-
-**Key Output**: Ransomware risk score with MITRE ATT&CK mapping and containment playbook
-
----
-
-### 10. Identity Risk Scoring Agent (NEW)
-
-**Purpose**: Dynamic multi-dimensional identity risk scoring
-
-**Risk Dimensions** (0-15 points each, max 105):
-
-| Dimension | Scoring |
-|-----------|---------|
-| Credential Severity | sev25=15, sev20=12, sev5=6, sev2=3 |
-| Password Crackability | plaintext=15, MD5/SHA1=12, SHA256=8, bcrypt=3 |
-| PII Exposure Depth | SSN/financial=15, DOB+addr=10, name+phone=5 |
-| Device Infection | active=15, historical=8, none=0 |
-| Remediation Timeliness | unremediated>7d=15, 1-7d=10, <24h=0 |
-| Behavioral Anomalies | UEBA anomalies=15, suspicious sign-ins=10 |
-| VIP/Asset Criticality | C-suite=15, admin=10, high-value access=8 |
-
-**Risk Tiers**: Critical (75-105), High (50-74), Medium (25-49), Low (0-24)
-
-**Key Output**: Risk-ranked user lists with composite scores for SOC triage
-
----
-
-### 11. Supply Chain & Third-Party Exposure Agent (NEW)
-
-**Purpose**: Third-party vendor and supply chain credential risk assessment
-
-**Data Sources**: SpyCloudBreachWatchlist_CL (target_domain analysis), SpyCloudBreachCatalog_CL, Approved Domains watchlist
-
-**Capabilities**:
-- Partner/vendor domain credential exposure tracking
-- Shared service account compromise detection
-- Vendor risk scoring: breach count × affected users × max severity
-- SSO/IdP credential monitoring (Okta, Azure AD, OneLogin)
-
-**Key Output**: Vendor risk tiering with supply chain risk score
-
----
-
-### 12. Dark Web Monitoring & Alert Agent (NEW)
-
-**Purpose**: Real-time dark web monitoring and intelligence briefings
-
-**Monitoring Workflows**:
-- New exposure ingestion tracking (records per hour/day/week)
-- Ingestion velocity anomaly detection (>2x baseline = alert)
-- New breach source identification
-- Fresh infostealer detection (infected_time < 72h = CRITICAL)
-- Response gap monitoring
-
-**Key Output**: Daily/weekly dark web intelligence briefings with trending threats
-
----
-
-## KQL Plugin — 90 Promptbook Skills
-
-### Skill Categories (29 Categories)
-
-| # | Category | Skills | Description |
-|---|----------|--------|-------------|
-| 1 | User Credential Investigation | 3 | Email-based exposure, PII profile, account activity |
-| 2 | Password & Credential Analysis | 5 | Passwords, plaintext, types, reuse, crackability |
-| 3 | Severity & Breach Category | 4 | High severity, by severity, by domain, by category |
-| 4 | Sensitive PII & Financial | 3 | SSN, financial, health data, social media |
-| 5 | Device & Malware Forensics | 5 | Infected devices, forensics, user correlation, AV gaps, malware |
-| 6 | Breach Catalog Intelligence | 3 | Recent breaches, catalog search, enriched exposures |
-| 7 | MDE Remediation Audit | 3 | MDE actions, per-device, stats |
-| 8 | Conditional Access Remediation | 3 | CA actions, per-user, stats |
-| 9 | Cross-Table Investigation | 3 | Full user investigation, exposure chain, health status |
-| 10 | UEBA Correlation | 4 | Behavioral anomalies, sign-in patterns, risk intersection |
-| 11 | Fusion Multistage | 3 | Fusion alerts, entity correlation, kill chain mapping |
-| 12 | TI Enrichment | 3 | IOC analysis, blocklist coverage, TI matches |
-| 13 | Session Cookie & Lateral Movement | 4 | Cookie theft, MFA bypass, lateral movement, token replay |
-| 14 | Data Exfiltration | 3 | File operations, mailbox rules, volume estimation |
-| 15 | Campaign Intelligence | 4 | Malware campaigns, threat actors, campaign timeline |
-| 16 | Executive Reporting | 5 | Trends, metrics comparison, recommendations, compliance |
-| 17 | Network & Infrastructure | 4 | Firewall events, DNS C2, VPN, geographic distribution |
-| 18 | Compass Consumer Identity | 4 | Consumer exposures, device fingerprints |
-| 19 | Watchlist & Asset Management | 4 | VIP check, IOC blocklist, approved domains, asset risk |
-| 20 | Operational Health | 3 | Ingestion health, automation metrics, incident summary |
-| 21 | Risk Scoring | 4 | User risk score, org risk posture, trend analysis |
-| 22 | SIP Session Cookie Analysis | 3 | Cookie domain exposure, session hijack risk, SIP summary |
-| 23 | Identity Exposure Profiling | 3 | Identity risk profiles, exposure timeline, corporate impact |
-| 24 | Investigations Deep Dive | 3 | Full database search results, investigation timeline, evidence chain |
-| 25 | Compass Applications | 2 | Application credential exposure, SaaS risk mapping |
-| 26 | Cross-API Correlation | 2 | Multi-table join investigations, API-to-table mapping |
-| 27 | Infostealer Malware Families | 2 | Family-specific detection, infection pattern analysis |
-| 28 | Remediation Gap Analysis | 2 | Unremediated exposure tracking, SLA compliance |
-| 29 | Supply Chain & Third-Party | 2 | Vendor credential exposure, shared account risk |
-
----
-
-## API Plugin — 20 REST API Skills
-
-### Enterprise Breach API (7 Skills)
-
-| Skill | Endpoint | Description |
-|-------|----------|-------------|
-| GetBreachDataByEmail | `GET /breach/data/emails/{email}` | Breach records by email address |
-| GetBreachDataByDomain | `GET /breach/data/domains/{domain}` | Breach records by corporate domain |
-| GetBreachDataByIp | `GET /breach/data/ips/{ip}` | Breach records by IP address |
-| CheckPasswordExposure | `GET /breach/data/passwords/{password}` | Password exposure check |
-| GetBreachDataByUsername | `GET /breach/data/usernames/{username}` | Breach records by username |
-| ListBreachCatalog | `GET /breach/catalog` | Browse breach catalog |
-| GetBreachCatalogEntry | `GET /breach/catalog/{id}` | Specific breach details |
-
-### Compass Investigation API (5 Skills)
-
-| Skill | Endpoint | Description |
-|-------|----------|-------------|
-| CompassInvestigateEmail | `GET /compass/data/emails/{email}` | Deep Compass investigation by email |
-| CompassInvestigateDomain | `GET /compass/data/domains/{domain}` | Deep Compass investigation by domain |
-| CompassInvestigateIp | `GET /compass/data/ips/{ip}` | Deep Compass investigation by IP |
-| CompassGetDevices | `GET /compass/devices` | Infected device fingerprints and malware artifacts |
-| CompassGetApplications | `GET /compass/applications` | Application credential exposure data |
-
-### SIP Session Identity Protection API (3 Skills)
-
-| Skill | Endpoint | Description |
-|-------|----------|-------------|
-| GetSipCookiesByDomain | `GET /sip/cookies/{domain}` | Stolen session cookies by domain |
-| GetSipCookiesByEmail | `GET /sip/cookies/emails/{email}` | Stolen session cookies by email |
-| GetSipSessionSummary | `GET /sip/summary` | SIP session exposure summary |
-
-### Identity Exposure API (3 Skills)
-
-| Skill | Endpoint | Description |
-|-------|----------|-------------|
-| GetIdentityExposure | `GET /identity/exposure/{email}` | Identity exposure risk profile |
-| GetIdentityExposureByDomain | `GET /identity/exposure/domains/{domain}` | Corporate identity exposure |
-| GetIdentityWatchlist | `GET /identity/watchlist` | Monitored identity watchlist |
-
-### Investigations API (2 Skills)
-
-| Skill | Endpoint | Description |
-|-------|----------|-------------|
-| InvestigationsSearch | `GET /investigations/search` | Full database search across all SpyCloud data |
-| InvestigationsGetDetails | `GET /investigations/{id}` | Detailed investigation record |
+## 5. API Plugin Skills Catalog
+
+The API Plugin provides **20 direct REST API skills** for real-time SpyCloud lookups. All skills use API key authentication via the `X-API-Key` header.
+
+### Enterprise API Skills (7 skills)
+
+| Skill | Endpoint | Description | Required Input | Example Prompt |
+|-------|----------|-------------|----------------|---------------|
+| **GetBreachDataByEmail** | `GET /breach/data/emails/{email}` | Breach records by email address | `email` | "Look up SpyCloud breach data for user@company.com" |
+| **GetBreachDataByDomain** | `GET /breach/data/domains/{domain}` | Breach records by corporate domain | `domain` | "Search SpyCloud for breaches affecting example.com" |
+| **GetBreachDataByIp** | `GET /breach/data/ips/{ip}` | Breach records by IP address | `ip` | "Search SpyCloud for breach data linked to 10.0.0.1" |
+| **CheckPasswordExposure** | `GET /breach/data/passwords/{password}` | Check if a password is exposed | `password` | "Has this password appeared in any SpyCloud breaches" |
+| **GetBreachDataByUsername** | `GET /breach/data/usernames/{username}` | Breach records by username | `username` | "Search SpyCloud for breaches with this username" |
+| **ListBreachCatalog** | `GET /breach/catalog` | Browse the full breach catalog | `query` (optional) | "Show me the SpyCloud breach catalog" |
+| **GetBreachCatalogEntry** | `GET /breach/catalog/{id}` | Specific breach details by source ID | `id` | "Show me details for SpyCloud breach ID 12345" |
+
+### Compass Investigation API Skills (3 skills)
+
+| Skill | Endpoint | Description | Required Input | Example Prompt |
+|-------|----------|-------------|----------------|---------------|
+| **CompassInvestigateEmail** | `GET /compass/data/emails/{email}` | Deep Compass investigation by email | `email` | "Run a deep Compass investigation on user@company.com" |
+| **CompassInvestigateDomain** | `GET /compass/data/domains/{domain}` | Deep Compass investigation by domain | `domain` | "Run a Compass investigation on example.com" |
+| **CompassInvestigateIp** | `GET /compass/data/ips/{ip}` | Deep Compass investigation by IP | `ip` | "Run a Compass investigation on this IP address" |
+
+### SIP API Skills (3 skills)
+
+| Skill | Endpoint | Description | Required Input | Example Prompt |
+|-------|----------|-------------|----------------|---------------|
+| **SipGetCookiesByDomain** | `GET /sip/breach/data/cookies` | Stolen session cookies for a domain | `cookie_domain` | "Get stolen cookies for example.com from SpyCloud SIP" |
+| **SipListBreachCatalog** | `GET /sip/breach/catalog` | SIP breach catalog entries | -- | "Show the SpyCloud SIP breach catalog" |
+| **SipGetBreachCatalogEntry** | `GET /sip/breach/catalog/{id}` | Specific SIP breach details | `id` | "Show details for this SIP breach ID" |
+
+### Investigations API Skills (5 skills)
+
+| Skill | Endpoint | Description | Required Input | Example Prompt |
+|-------|----------|-------------|----------------|---------------|
+| **InvestigateByEmail** | `GET /investigations/data/emails/{email}` | Full database investigation by email | `email` | "Investigate this email across all SpyCloud data" |
+| **InvestigateByDomain** | `GET /investigations/data/domains/{domain}` | Full database investigation by domain | `domain` | "Run a full investigation on this domain" |
+| **InvestigateByIp** | `GET /investigations/data/ips/{ip}` | Full database investigation by IP | `ip` | "Investigate this IP across all SpyCloud data" |
+| **InvestigateByUsername** | `GET /investigations/data/usernames/{username}` | Full database investigation by username | `username` | "Investigate this username across all SpyCloud data" |
+| **InvestigateByPassword** | `GET /investigations/data/passwords/{password}` | Full database investigation by password | `password` | "Search SpyCloud Investigations for this password" |
+
+### Identity API Skills (2 skills)
+
+| Skill | Endpoint | Description | Required Input | Example Prompt |
+|-------|----------|-------------|----------------|---------------|
+| **GetIdentityExposure** | `GET /identity/exposure/{email}` | Aggregated identity exposure profile | `email` | "What is the identity exposure profile for user@company.com" |
+| **GetIdentityWatchlist** | `GET /identity/watchlist` | Monitored identities on the watchlist | `type` (optional) | "Show the SpyCloud identity watchlist" |
 
 ### Common API Parameters
+
+All API skills support these optional filter parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
@@ -530,364 +506,511 @@ The Agent orchestrates 58 internal skills (35 KQL + 6 GPT-4o analysis + 17 sub-a
 
 ---
 
-## Data Sources & Schema
+## 6. Investigation Agent
 
-### SpyCloud Custom Tables
+### Overview
 
-#### SpyCloudBreachWatchlist_CL (73 columns)
+The SpyCloud Investigation Agent (`SpyCloud.ThreatIntelligence.SentinelAgent`) is an autonomous, conversational security analyst that orchestrates **17 specialized sub-agents** plus **6 GPT-4o analysis skills** and **35 internal KQL data retrieval skills** for a total of **58 capabilities**.
 
-Primary table for credential exposures and infostealer data.
+### 17 Sub-Agents
 
-| Column Group | Key Fields |
-|-------------|------------|
-| **Identity** | email, username, full_name, first_name, last_name, email_domain |
-| **Credentials** | password, password_plaintext, password_type, salt, sighting |
-| **Target** | target_domain, target_url, target_subdomain |
-| **PII** | phone, dob, birth_year, age, gender, address_1, city, state, country |
-| **Financial** | ssn_last_four, social_security_number, bank_number, taxid, health_insurance_id |
-| **Social** | social_linkedin, social_twitter, social_crunchbase, homepage |
-| **Employment** | job_title, company_name, company_website, industry |
-| **Device** | infected_machine_id, user_hostname, user_os, infected_path, device_name |
-| **Infection** | infected_time, ip_addresses, country_code, keyboard_languages, av_softwares |
-| **Metadata** | severity, source_id, document_id, spycloud_publish_date, log_id |
+#### 1. UEBABehavioralAnalysisAgent
+- **Display Name**: UEBA & Behavioral Analysis Agent
+- **What it investigates**: Anomalous user behavior for accounts with credential exposure
+- **Data sources**: SpyCloudBreachWatchlist_CL, BehaviorAnalytics, IdentityInfo, SigninLogs
+- **Example prompts**: "Show UEBA anomalies for SpyCloud exposed users", "Which exposed users have anomalous behavior"
+- **Expected output**: Correlation table of users with both credential exposure AND behavioral anomalies, risk intersection scoring, and prioritized action items
 
-#### SpyCloudBreachCatalog_CL (13 columns)
+#### 2. FusionMultistageAttackAgent
+- **Display Name**: Fusion & Multistage Attack Agent
+- **What it investigates**: Fusion-detected multistage attacks for credential theft correlation
+- **Data sources**: SpyCloudBreachWatchlist_CL, SecurityAlert, SecurityIncident, SpyCloudBreachCatalog_CL
+- **Example prompts**: "What Fusion multistage attacks involve SpyCloud alerts", "Correlate Fusion incident with SpyCloud data"
+- **Expected output**: Attack chain visualization with MITRE ATT&CK mapping, timeline of SpyCloud exposure vs Fusion detection
 
-Breach source metadata and malware family context.
+#### 3. TIEnrichmentIOCAnalysisAgent
+- **Display Name**: TI Enrichment & IOC Analysis Agent
+- **What it investigates**: Threat intelligence enrichment and IOC blocklist management
+- **Data sources**: SpyCloudBreachWatchlist_CL, ThreatIntelligenceIndicator, IOC Blocklist watchlist, Spycloud_MDE_Logs_CL
+- **Example prompts**: "Check SpyCloud IOCs against blocklists", "Show TI enrichment for SpyCloud incidents"
+- **Expected output**: IOC coverage gap analysis with prioritized blocking recommendations
 
-| Field | Description |
-|-------|-------------|
-| source_id | Unique breach identifier |
-| breach_title | Breach/malware family name |
-| description | Breach description |
-| status | Breach processing status |
+#### 4. SessionCookieMFABypassAgent
+- **Display Name**: Session Cookie & MFA Bypass Agent
+- **What it investigates**: Stolen session tokens and MFA bypass attempts
+- **Data sources**: SpyCloudBreachWatchlist_CL (severity 25), SigninLogs, AADNonInteractiveUserSignInLogs, CloudAppEvents
+- **Example prompts**: "Hunt for stolen session cookie abuse", "Find users bypassing MFA with stolen tokens"
+- **Expected output**: Session theft risk assessment, token replay indicators, MFA gap analysis
 
-#### SpyCloudCompassData_CL (29 columns)
+#### 5. LateralMovementInvestigationAgent
+- **Display Name**: Lateral Movement Investigation Agent
+- **What it investigates**: Device-to-device movement from compromised accounts
+- **Data sources**: SpyCloudBreachWatchlist_CL, IdentityLogonEvents, DeviceLogonEvents, Spycloud_MDE_Logs_CL
+- **Example prompts**: "Detect lateral movement from SpyCloud exposed accounts", "Map device-to-device movement"
+- **Expected output**: Movement map with source-to-target device chains, anomaly flags, containment status
 
-Consumer/partner identity exposures (Enterprise+ only).
+#### 6. DataExfiltrationDetectionAgent
+- **Display Name**: Data Exfiltration Detection Agent
+- **What it investigates**: Data theft patterns from compromised accounts
+- **Data sources**: SpyCloudBreachWatchlist_CL, CloudAppEvents, OfficeActivity, SpyCloud_ConditionalAccessLogs_CL
+- **Example prompts**: "Hunt for data exfiltration from exposed users", "Check for suspicious mailbox forwarding"
+- **Expected output**: Exfiltration risk assessment with data volume estimates and containment recommendations
 
-#### SpyCloudCompassDevices_CL (8 columns)
+#### 7. ExecutiveSummaryComplianceAgent
+- **Display Name**: Executive Summary & Compliance Agent
+- **What it investigates**: Executive reporting and compliance framework mapping
+- **Data sources**: All SpyCloud tables, MDE logs, CA logs
+- **Example prompts**: "Generate an executive summary", "Create a compliance assessment for GDPR"
+- **Expected output**: Business-impact-focused reports with risk posture, trends, compliance mapping, and strategic recommendations
 
-Infected device fingerprints and malware artifacts (Enterprise+ only).
+#### 8. WatchlistAssetManagementAgent
+- **Display Name**: Watchlist & Asset Management Agent
+- **What it investigates**: VIP monitoring, IOC blocklist coverage, and asset risk correlation
+- **Data sources**: SpyCloudBreachWatchlist_CL, 4 Sentinel watchlists
+- **Example prompts**: "Check VIP users for credential exposure", "Review IOC Blocklist coverage gaps"
+- **Expected output**: VIP exposure alerts, IOC coverage reports, high-value asset risk matrix
 
-#### Spycloud_MDE_Logs_CL (19 columns)
+#### 9. RansomwareImpactAssessmentAgent
+- **Display Name**: Ransomware Impact Assessment Agent
+- **What it investigates**: Ransomware precursor detection and pre-encryption containment
+- **Data sources**: SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, IdentityLogonEvents, DeviceLogonEvents, High-Value Assets watchlist
+- **Example prompts**: "Assess ransomware risk from current infections", "Identify ransomware-precursor malware"
+- **Expected output**: Ransomware risk score with MITRE ATT&CK mapping and containment playbook
+- **Tracked families**: RedLine, LummaC2, Vidar, Raccoon, StealC, Aurora, Mars, META, Mystic, RisePro, Titan
 
-MDE device isolation, tagging, and IOC submission audit trail.
+#### 10. IdentityRiskScoringAgent
+- **Display Name**: Identity Risk Scoring Agent
+- **What it investigates**: Dynamic multi-dimensional identity risk scoring
+- **Data sources**: SpyCloudBreachWatchlist_CL, SpyCloud_ConditionalAccessLogs_CL, BehaviorAnalytics, VIP watchlist, SigninLogs
+- **Example prompts**: "Generate risk scores for all exposed users", "Show top 10 highest-risk identities"
+- **Expected output**: Risk-ranked user lists with composite scores (0-105 scale) across 7 dimensions
+- **Risk tiers**: Critical (75-105), High (50-74), Medium (25-49), Low (0-24)
 
-| Field | Description |
-|-------|-------------|
-| IncidentId | Sentinel incident ID |
-| HostName / NormalizedHostName | Device hostname |
-| DeviceId | MDE device identifier |
-| IsolationRequested / IsolationStatus | Isolation request and result |
-| MachineTagAdded / MachineTagName | Device tagging |
-| AddedIOCsToDefender | IOC submission status |
-| PlaybookName | Triggering playbook |
+#### 11. SupplyChainExposureAgent
+- **Display Name**: Supply Chain & Third-Party Exposure Agent
+- **What it investigates**: Third-party vendor and supply chain credential risk
+- **Data sources**: SpyCloudBreachWatchlist_CL (target_domain analysis), SpyCloudBreachCatalog_CL, Approved Domains watchlist
+- **Example prompts**: "Assess third-party vendor credential risk", "Find partner domain exposures"
+- **Expected output**: Vendor risk tiering with supply chain risk score
 
-#### SpyCloudCompassApplications_CL (15 columns)
+#### 12. DarkWebMonitoringAlertAgent
+- **Display Name**: Dark Web Monitoring & Alert Agent
+- **What it investigates**: Real-time dark web monitoring and intelligence briefings
+- **Data sources**: SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, Spycloud_MDE_Logs_CL, SpyCloud_ConditionalAccessLogs_CL
+- **Example prompts**: "Show new exposures ingested today", "Generate a dark web intelligence briefing"
+- **Expected output**: Daily/weekly intelligence briefings with ingestion velocity, new breach sources, fresh infections
 
-Application credential exposure from Compass deep investigation (Enterprise+ only).
+#### 13. DefenderXDREndpointAgent
+- **Display Name**: Defender XDR & Endpoint Investigation Agent
+- **What it investigates**: Deep endpoint investigation across the full Defender XDR suite
+- **Data sources**: DeviceAlertEvents, DeviceInfo, DeviceNetworkEvents, DeviceFileEvents, DeviceProcessEvents, DeviceLogonEvents, IdentityLogonEvents, IdentityQueryEvents, EmailEvents, CloudAppEvents, SecurityAlert, SecurityIncident
+- **Example prompts**: "Check Defender alerts for this exposed user", "Show device timeline for this infected host"
+- **Expected output**: Unified XDR threat summary with endpoint forensics, identity attacks, email threats, cloud app risk
 
-| Column Group | Key Fields |
-|-------------|------------|
-| **Application** | app_name, app_domain, app_url, app_category |
-| **Credential** | email, username, password_type |
-| **Metadata** | source_id, severity, spycloud_publish_date |
+#### 14. IntuneDeviceComplianceAgent
+- **Display Name**: Intune Device Compliance & Posture Agent
+- **What it investigates**: Device compliance posture for SpyCloud-infected endpoints
+- **Data sources**: IntuneDevices, IntuneDeviceComplianceOrg, DeviceInfo, SpyCloudBreachWatchlist_CL, Spycloud_MDE_Logs_CL
+- **Example prompts**: "Are infected devices Intune-managed", "Find unmanaged devices with infections"
+- **Expected output**: Device compliance matrix, unmanaged device alerts, compliance gap analysis
 
-#### SpyCloudSIPCookies_CL (18 columns)
+#### 15. CASBCloudAppSecurityAgent
+- **Display Name**: CASB & Cloud Application Security Agent
+- **What it investigates**: Cloud app security risks from compromised credentials
+- **Data sources**: CloudAppEvents, OfficeActivity, SigninLogs, AuditLogs, SpyCloudBreachWatchlist_CL
+- **Example prompts**: "What shadow IT apps are accessed by compromised users", "Check OAuth consent grants"
+- **Expected output**: Cloud app risk summary, OAuth consent table, SSO blast radius, shadow IT inventory
 
-Stolen session cookies and tokens from infostealer infections (SIP license required).
+#### 16. CompassDeepInvestigationAgent
+- **Display Name**: Compass Deep Infostealer Investigation Agent
+- **What it investigates**: Deepest level infostealer forensics via SpyCloud Compass
+- **Data sources**: SpyCloudCompassData_CL, SpyCloudCompassDevices_CL, SpyCloudCompassApplications_CL, SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL
+- **Example prompts**: "Run a deep Compass investigation on this email", "What stolen cookies exist for this user"
+- **Expected output**: Complete infection profile with stolen artifact inventory, malware family attribution, C2 infrastructure, application credential map
+- **Note**: Requires SpyCloud Enterprise+ subscription for Compass data
 
-| Column Group | Key Fields |
-|-------------|------------|
-| **Session** | cookie_domain, cookie_name, cookie_value, session_token |
-| **Identity** | email, target_domain, target_url |
-| **Device** | infected_machine_id, user_hostname, infected_path |
-| **Metadata** | severity, infected_time, spycloud_publish_date |
-
-#### SpyCloudIdentityExposure_CL (23 columns)
-
-Identity risk profiles and exposure scoring across corporate identities.
-
-| Column Group | Key Fields |
-|-------------|------------|
-| **Identity** | email, full_name, username, email_domain |
-| **Exposure** | exposure_count, severity_max, exposure_types |
-| **Risk** | identity_risk_score, risk_tier, first_seen, last_seen |
-| **Corporate** | company_name, job_title, department |
-| **Metadata** | spycloud_publish_date, document_id |
-
-#### SpyCloudInvestigations_CL (28 columns)
-
-Full database search results from Investigations API (Enterprise+ with Investigations add-on).
-
-| Column Group | Key Fields |
-|-------------|------------|
-| **Identity** | email, username, full_name, phone, dob |
-| **Credential** | password, password_type, password_plaintext |
-| **Target** | target_domain, target_url, target_subdomain |
-| **Device** | infected_machine_id, user_hostname, user_os, infected_path |
-| **Source** | source_id, breach_title, severity |
-| **Metadata** | spycloud_publish_date, document_id, investigation_id |
-
-#### SpyCloud_ConditionalAccessLogs_CL (14 columns)
-
-Identity remediation audit trail.
-
-| Field | Description |
-|-------|-------------|
-| Username / UserEmail | User identifier |
-| ForcedPasswordResetOnNextSignIn | Password reset status |
-| UserSessionsRevoked | Session revocation status |
-| CAgroup | Conditional Access group assignment |
-| UserDisabled | Account disable status |
-| PlaybookName | Triggering playbook |
-
-### Severity Model
-
-| Score | Label | Risk Level | Description |
-|-------|-------|------------|-------------|
-| 2 | Breach Credential | Medium | Basic credential from a breach |
-| 5 | Breach + PII | High | Credential with personal information |
-| 20 | Infostealer | Urgent | Credential stolen by infostealer malware |
-| 25 | Infostealer + App Data | Critical | Stolen cookies, sessions, autofill (MFA bypass risk) |
-
-### Password Crackability
-
-| Type | Time to Crack | Risk |
-|------|--------------|------|
-| Plaintext | Immediate | Critical |
-| MD5 / SHA1 / NTLM | Minutes | Critical |
-| SHA256 | Hours | High |
-| bcrypt / scrypt / argon2 | Secure | Low |
-
----
-
-## Sentinel Resources
-
-### Analytics Rules (49 Total)
-
-| Type | Count | Description |
-|------|-------|-------------|
-| Scheduled | 38 | Time-based detection rules across 8 categories |
-| Fusion | 1 | ML-powered multistage attack detection |
-| NRT (Near-Real-Time) | 5 | Low-latency detection for critical events |
-| MSIC | 5 | Microsoft Security Incident Creation rules |
-
-**Rule Categories**: Core detection, O365/Entra ID correlation, UEBA/firewall/network correlation, infostealer-specific, credential compromise, device infection, remediation monitoring, compliance alerts.
-
-### Playbooks (10 Total)
-
-| Playbook | Category | Action |
-|----------|----------|--------|
-| SpyCloud-ForcePasswordReset | Identity | Force password change + require MFA |
-| SpyCloud-RevokeSessions | Identity | Revoke all active sign-in sessions |
-| SpyCloud-EnforceMFA | Identity | Delete MFA methods, force re-registration |
-| SpyCloud-BlockConditionalAccess | Access | Assign user to CA policy blocking group |
-| SpyCloud-BlockFirewall | Network | Push block rules to Fortinet/Palo Alto |
-| SpyCloud-IsolateDevice | Device | MDE isolation (full or selective) |
-| SpyCloud-NotifyUser | Notify | Email user with breach details and guidance |
-| SpyCloud-NotifySOC | Notify | Teams Adaptive Card alert to SOC channel |
-| SpyCloud-EnrichIncident | Enrich | Add SpyCloud context to Sentinel incident |
-| SpyCloud-FullRemediation | Orchestration | Chain all playbooks in 3 phases |
-
-### Workbooks (3 Total)
-
-| Workbook | Audience | Key Metrics |
-|----------|----------|-------------|
-| Executive Dashboard | Leadership/CISO | Risk posture, trends, ROI, compliance |
-| SOC Operations | SOC Analysts | Active incidents, triage queues, remediation |
-| Threat Intelligence | Threat Intel Team | Malware families, campaigns, IOCs, geography |
-
-### Hunting Queries (28 Total)
-
-Categories: session cookies, lateral movement, data exfiltration, mailbox compromise, privilege escalation, malware trends, breach impact, password reuse, risk scoring, supply chain, ransomware indicators, identity correlation.
+#### 17. SpyCloudInvestigationAgent (Primary Orchestrator)
+- **Display Name**: SpyCloud Investigation Agent
+- **What it investigates**: The primary entry point -- autonomously orchestrates all 16 other sub-agents plus internal skills based on the user's request
+- **Data sources**: All available sources via child skills and sub-agents
+- **Example prompts**: "What can you help me investigate?", "Show me an overview of our dark web exposure"
+- **Expected output**: Rich, detailed reports with data tables, severity indicators, timelines, and actionable pivot suggestions
 
 ---
 
-## Branding & Customization
+## 7. GPT-4o AI Analysis Skills
 
-### Logo Assets
+The Investigation Agent includes **6 GPT-4o analysis skills** that transform raw data into structured intelligence reports.
 
-| Asset | Path | Usage |
-|-------|------|-------|
-| Icon (Color) | `docs/images/SpyCloud-icon-SC_2.png` | Plugin/agent icon in Copilot |
-| Logo (White) | `docs/images/SpyCloud-Logo-white.png` | Dark backgrounds |
-| Wordmark (Black) | `docs/images/SpyCloud_wordmark-black.png` | Light backgrounds |
-
-### Brand Colors
-
-| Color | Hex | Usage |
-|-------|-----|-------|
-| Primary (Teal) | `#00D4AA` | Accent, highlights, positive indicators |
-| Secondary (Dark) | `#1a1a2e` | Backgrounds, headers |
-| Accent (Orange) | `#FF6B35` | Alerts, warnings, CTAs |
-
-### Agent Branding
-
-The Investigation Agent uses consistent branding in its responses:
-- **Name**: SENTINEL
-- **Severity Indicators**: 🔴 Critical, 🟠 High, 🟡 Medium, 🟢 Low
-- **Status Indicators**: ✅ Remediated, ⚠️ Partial, ❌ Unremediated
-- **Analyst's Take**: Expert interpretation callouts after data presentations
-
-### Plugin Icon URLs
-
-All plugins reference the same SpyCloud icon for consistent brand presence in the Security Copilot interface:
-```
-https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
-```
+| # | Skill | Description |
+|---|-------|-------------|
+| 1 | **AnalyzeAndSummarize** | Takes raw SpyCloud data from KQL queries and produces structured investigation reports with threat assessment, risk scoring, remediation recommendations, and compliance impact analysis. |
+| 2 | **BuildThreatNarrative** | Constructs chronological attack narratives from multi-source data (SpyCloud, Defender XDR, Intune, Entra ID, CASB). Maps findings to MITRE ATT&CK and generates complete incident timelines. |
+| 3 | **GenerateComplianceAssessment** | Analyzes exposure data against GDPR, CCPA, HIPAA, PCI-DSS, SOX, and NIST frameworks. Determines breach notification obligations, regulatory exposure, and remediation timelines. Produces audit-ready documentation. |
+| 4 | **GenerateExecutiveBriefing** | Transforms technical findings into board-level executive briefings with business impact analysis, risk quantification, trend assessment, strategic recommendations, and automation ROI metrics. |
+| 5 | **CorrelateExternalThreatIntel** | Enriches SpyCloud indicators (IPs, domains, malware families, hashes) with threat intelligence context including VirusTotal reputation, AbuseIPDB confidence, MITRE ATT&CK mapping, and threat actor attribution. |
+| 6 | **DesignResponsePlaybook** | Analyzes specific threat scenarios and designs custom incident response playbooks with step-by-step procedures, automation opportunities, decision trees, escalation criteria, and Logic App design guidance. |
 
 ---
 
-## Deployment Guide
+## 8. Agent Persona -- SENTINEL
 
-### Prerequisites
+The Investigation Agent operates as **SENTINEL** -- a battle-hardened security analyst personality designed for engaging, productive conversations.
 
-1. Microsoft Sentinel workspace (Log Analytics)
-2. Security Copilot license
-3. SpyCloud API key (for API Plugin and data ingestion)
-4. Azure permissions: Contributor on resource group, Microsoft Sentinel Contributor
+### Personality Traits
 
-### Step 1: Deploy Sentinel Resources
+- **Confident and Direct**: Speaks with authority backed by 600B+ recaptured darknet records. Does not hedge -- tells it like it is.
+- **Witty and Engaging**: Uses humor strategically. A well-placed observation about password reuse habits, a wry comment about "password123" showing up again.
+- **Persistent and Thorough**: Never gives up on an investigation. If one angle does not work, pivots to another. Always has a "but let me also check..." follow-up.
+- **Empathetic and Supportive**: Understands SOC analysts are overwhelmed. Makes their lives easier, celebrates wins, and prioritizes actionable findings.
+- **Brutally Honest**: When the situation is bad, says so directly. "Look, 47 users have plaintext passwords on the dark web and 12 of them logged in yesterday. We need to act NOW."
 
-Choose one deployment method:
+### Communication Style
 
-**ARM Template (Recommended)**:
-```bash
-az deployment group create \
-  --resource-group <rg-name> \
-  --template-file azuredeploy.json \
-  --parameters azuredeploy.parameters.json
-```
+- Leads with the most important finding first
+- Always ends with actionable next steps or pivot suggestions
+- Uses severity indicators for quick scanning: Critical, High, Medium, Low
+- Matches the user's energy -- brief question gets a brief answer, deep dive gets the full treatment
+- Uses tables for data clarity but adds an "Analyst's Take" with expert interpretation
+- Handles misspellings and typos gracefully without calling them out
+- Interprets single-word inputs intelligently (e.g., "passwords" shows password exposure summary, an email address triggers full user investigation)
 
-**Terraform**:
-```bash
-cd terraform/
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
-terraform init && terraform plan && terraform apply
-```
+### When SENTINEL Uses Humor
 
-**Interactive Wizard**:
-```bash
-chmod +x scripts/deploy-wizard.sh
-./scripts/deploy-wizard.sh
-```
+- After delivering good news: "Nice -- this user was already remediated 2 hours after exposure. The automation is doing its job."
+- When providing capabilities: "I've got 100+ skills, 17 sub-agents, and 600 billion darknet records. I'm basically the Avengers of threat intelligence, except I actually show up on time."
+- When password hygiene is poor: Wry observations about password reuse habits (tastefully)
+- Never uses humor when delivering critical threat findings or when the user is clearly stressed
 
-### Step 2: Install Copilot Plugins
+### Status Indicators
 
-1. Open Microsoft Security Copilot
-2. Navigate to **Settings** → **Plugins** → **Custom plugins**
-3. Upload each plugin file:
-   - `SpyCloud_Agent.yaml` — Investigation Agent
-   - `SpyCloud_Plugin.yaml` — KQL Plugin
-   - `SpyCloud_API_Plugin.yaml` — API Plugin (requires API key)
-4. Configure required settings (TenantId, SubscriptionId, etc.)
-
-### Step 3: Verify
-
-Run the post-deployment verification:
-```bash
-./scripts/verify-deployment.sh
-```
-
-In Security Copilot, test with:
-- "What can you help me investigate?" (Agent)
-- "Check SpyCloud for exposures on user@company.com" (KQL Plugin)
-- "Look up SpyCloud breach data for user@company.com" (API Plugin)
+- Severity: Critical, High, Medium, Low
+- Remediation: Remediated, Partial, Unremediated
+- "Analyst's Take": Expert interpretation callouts after data presentations
 
 ---
 
-## Compatibility Matrix
+## 9. Suggested Prompts
 
-| Platform | Version | Status |
-|----------|---------|--------|
-| Microsoft Sentinel | 2024.x+ | ✅ Full Support |
-| Security Copilot | 2024.x+ | ✅ Full Support |
-| Defender XDR | 2024.x+ | ✅ Full Support |
-| Entra ID | 2024.x+ | ✅ Full Support |
-| Azure Commercial | All regions | ✅ Full Support |
-| Azure Government | USGov, USGovDoD | ✅ Full Support |
-| Defender for Endpoint | P2 | ✅ Required for MDE playbooks |
-| Defender for Identity | Latest | ✅ Required for lateral movement |
-| Fortinet FortiGate | 6.x+ | ✅ Required for firewall playbook |
-| Palo Alto NGFW | PAN-OS 10+ | ✅ Required for firewall playbook |
+### Getting Started (6 prompts)
+
+| Prompt | What it does |
+|--------|-------------|
+| "What can you help me investigate?" | Shows full capability menu with categories |
+| "Show me an overview of our dark web exposure" | Runs organization-wide assessment with severity breakdown |
+| "Which users have the most critical credential exposures?" | Shows highest-severity exposed users |
+| "Are any devices infected with infostealer malware?" | Lists infected devices with forensic context |
+| "Show me users with plaintext passwords exposed" | Lists most dangerous credential exposures |
+| "Do we have sensitive PII exposed requiring breach notification?" | Compliance-focused PII assessment |
+
+### User Investigation (10 prompts)
+
+| Prompt |
+|--------|
+| "Investigate user@company.com" |
+| "Tell me more about this user's exposure" |
+| "What passwords were stolen and are any plaintext?" |
+| "Show the full PII profile including SSN and financial data" |
+| "Show account activity and login history" |
+| "Show social media and LinkedIn exposure for this user" |
+| "Build a complete attack timeline for this compromised user" |
+| "Calculate the risk score for this user" |
+| "Show full remediation history for this user" |
+| "Find users whose exposed password matches their current Active Directory password" |
+
+### Device Forensics (7 prompts)
+
+| Prompt |
+|--------|
+| "Show device forensics -- malware path, AV installed, IPs" |
+| "What other users were compromised from this device?" |
+| "Was this device isolated in Defender?" |
+| "What antivirus products failed to prevent infections?" |
+| "Walk me through a full forensic analysis of this infected device" |
+| "Show the kill chain for this infostealer infection end to end" |
+| "Are our SpyCloud-infected devices managed in Intune?" |
+
+### Malware and Threat Hunting (8 prompts)
+
+| Prompt |
+|--------|
+| "What malware campaigns are currently targeting our organization?" |
+| "Analyze the RedLine infostealer campaign affecting our users" |
+| "Show me related breaches from the same threat actor group" |
+| "What are the TTPs associated with the infostealers targeting us?" |
+| "Track this malware family's activity over time" |
+| "Create a campaign intelligence report for the last 30 days" |
+| "Which bad actor groups have targeted our domain the most?" |
+| "What malware family was responsible?" |
+
+### Remediation and Response (7 prompts)
+
+| Prompt |
+|--------|
+| "What's our mean time to remediate credential exposures?" |
+| "Show me the remediation gap -- who still needs to be fixed?" |
+| "Which users were re-exposed AFTER their password was reset?" |
+| "How many playbook executions succeeded vs failed this week?" |
+| "Is there anything NOT automatically remediated?" |
+| "How effective are our automated playbooks?" |
+| "What are the top 5 things to act on right now?" |
+
+### Defender XDR and Endpoint (6 prompts)
+
+| Prompt |
+|--------|
+| "Show me Defender XDR alerts for users with SpyCloud credential exposure" |
+| "Check the device timeline for this infected host in Defender for Endpoint" |
+| "Are there any identity attacks (pass-the-hash, golden ticket) from compromised accounts?" |
+| "Correlate Defender alerts with SpyCloud exposure data for a full XDR picture" |
+| "Are there any active MDE alerts on devices with infostealer infections?" |
+| "Build a complete Defender XDR incident summary with SpyCloud correlation" |
+
+### Intune Compliance (4 prompts)
+
+| Prompt |
+|--------|
+| "Show device compliance status for all infected endpoints" |
+| "Find unmanaged devices with active infostealer infections -- shadow IT risk" |
+| "What are the OS patch levels on our compromised devices?" |
+| "Which compliance policies are most frequently violated on infected devices?" |
+
+### CASB and Cloud App Security (4 prompts)
+
+| Prompt |
+|--------|
+| "What shadow IT apps are being accessed by compromised users?" |
+| "Check for OAuth consent grants from SpyCloud-exposed accounts" |
+| "If this user's SSO credentials were stolen, which connected apps are at risk?" |
+| "What's the blast radius if our Okta/Azure AD credentials are on the dark web?" |
+
+### Compass Deep Investigation (5 prompts)
+
+| Prompt |
+|--------|
+| "Run a deep Compass investigation on this email" |
+| "What stolen cookies and session tokens exist in Compass for this user?" |
+| "Map all application credentials stolen by the infostealer from Compass data" |
+| "Were any cryptocurrency wallets stolen in this infostealer infection?" |
+| "Build a complete Compass infostealer forensic timeline" |
+
+### Compliance and Executive (5 prompts)
+
+| Prompt |
+|--------|
+| "Generate a compliance report for cyber insurance renewal" |
+| "What PII exposures require GDPR/CCPA notification?" |
+| "What would you present to the CISO right now?" |
+| "Generate a board-level threat summary with recommendations" |
+| "Compare our exposure this month vs last month" |
+
+### Connector Health and Onboarding (5 prompts)
+
+| Prompt |
+|--------|
+| "What data sources am I missing and what should I enable?" |
+| "Check all my connector health and tell me what's broken" |
+| "Are my playbooks actually running or do they have permission issues?" |
+| "What blind spots do we have in our detection coverage?" |
+| "Walk me through onboarding -- what should I set up first?" |
+
+---
+
+## 10. Settings Reference
+
+### KQL Plugin Settings
+
+| Setting | Required | Type | Description |
+|---------|----------|------|-------------|
+| **TenantId** | Yes | string | Azure Tenant ID where the Sentinel workspace is located |
+| **SubscriptionId** | Yes | string | Azure Subscription ID where the Sentinel workspace is provisioned |
+| **ResourceGroupName** | Yes | string | Resource Group containing the Sentinel workspace |
+| **WorkspaceName** | Yes | string | Name of the Sentinel Log Analytics workspace with SpyCloud tables |
+
+### API Plugin Settings
+
+| Setting | Required | Type | Default | Description |
+|---------|----------|------|---------|-------------|
+| **API Key** | Yes | API Key | -- | SpyCloud API key sent as `X-API-Key` header |
+| **ApiBaseUrl** | No | string | `https://api.spycloud.io` | Override for regional or on-premises deployments |
+
+### Investigation Agent Settings
+
+| Setting | Required | Type | Description |
+|---------|----------|------|-------------|
+| **TenantId** | Yes | string | Azure Tenant ID |
+| **SubscriptionId** | Yes | string | Azure Subscription ID |
+| **ResourceGroupName** | Yes | string | Resource Group name |
+| **WorkspaceName** | Yes | string | Sentinel workspace name |
+| **SpyCloudApiKey** | No | string | SpyCloud API key for API Plugin integration (optional if API Plugin installed separately) |
+
+### Authentication Summary
+
+| Plugin | Auth Type | Credentials Required |
+|--------|-----------|---------------------|
+| Agent | None | Azure Sentinel workspace access (TenantId, SubscriptionId, ResourceGroupName, WorkspaceName) |
+| KQL Plugin | None | Same Sentinel workspace access |
+| API Plugin | APIKey | SpyCloud API key (`X-API-Key` header) |
+
+---
+
+## 11. Troubleshooting
+
+### Common Issues and Solutions
+
+#### "No data returned" from KQL skills
+
+| Table | Cause | Solution |
+|-------|-------|----------|
+| SpyCloudBreachWatchlist_CL | Connector not configured or API key invalid | Verify the SpyCloud data connector is running and the API key is valid |
+| Spycloud_MDE_Logs_CL | Playbook has not triggered yet | This table populates when the SpyCloud-IsolateDevice playbook executes. Check that automation rules are enabled and the playbook has MDE permissions (Machine.Isolate, Machine.ReadWrite.All) |
+| SpyCloud_ConditionalAccessLogs_CL | Playbook has not triggered yet | This table populates when password reset/session revocation playbooks execute. Verify the managed identity has User.ReadWrite.All and UserAuthenticationMethod.ReadWrite.All Graph API permissions |
+| SpyCloudCompassData_CL | Enterprise+ subscription required | Compass endpoints require an Enterprise+ SpyCloud subscription. Contact SpyCloud sales to upgrade |
+
+#### KQL query fails with "Failed to resolve column"
+
+The table exists but the column has not been populated yet. This is expected if the relevant playbook or connector has not processed any events. The agent will automatically explain this and suggest alternatives.
+
+#### API Plugin returns 401 Unauthorized
+
+1. Verify the API key is correct and active
+2. Confirm the key is entered in the `X-API-Key` header field (not Bearer token)
+3. Confirm `AuthScheme` is empty (not "Bearer" or any other value)
+4. Check that the key has the appropriate SpyCloud API tier for the endpoint being called
+
+#### API Plugin returns 403 Forbidden
+
+The API key does not have access to the requested endpoint. Common causes:
+- Compass endpoints require Enterprise+ subscription
+- SIP endpoints require SIP API entitlement
+- Investigations endpoints require Investigations API entitlement
+
+#### Agent does not respond or gives generic answers
+
+1. Verify all four required settings are configured (TenantId, SubscriptionId, ResourceGroupName, WorkspaceName)
+2. Ensure the plugin is enabled in Security Copilot settings
+3. Try "What can you help me investigate?" as a basic test
+4. Check that the workspace has SpyCloud tables with data
+
+#### Plugin not appearing in Security Copilot
+
+1. Re-upload the YAML file
+2. Check for YAML syntax errors (common with copy-paste)
+3. Verify your Security Copilot license includes custom plugins
+4. Try clearing browser cache and refreshing
+
+#### Playbook permission errors
+
+Run the post-deployment script to automatically grant all required permissions:
+```bash
+./scripts/post-deploy-auto.sh
+```
+
+Or manually verify:
+- Graph API: User.ReadWrite.All, UserAuthenticationMethod.ReadWrite.All, Directory.ReadWrite.All
+- MDE API: Machine.Isolate, Machine.ReadWrite.All, Ti.ReadWrite.All
+
+---
+
+## 12. Integration with Other Tools
+
+The SpyCloud Copilot integration correlates with the entire Microsoft security ecosystem:
+
+### Microsoft Sentinel
+
+- Queries all 10 SpyCloud custom tables and 20+ native Microsoft tables
+- Cross-references 49 analytics rules, 28 hunting queries, 10 playbooks
+- Accesses 4 watchlists for VIP monitoring, IOC management, and asset risk
+- Monitors automation rule health and playbook effectiveness
+
+### Microsoft Defender XDR
+
+- **Defender for Endpoint (MDE)**: Correlates SpyCloud infections with device alerts, process execution, network connections, file activity. Triggers device isolation via playbook.
+- **Defender for Identity**: Detects pass-the-hash, golden ticket, and LDAP reconnaissance from compromised credentials via IdentityLogonEvents and IdentityQueryEvents.
+- **Defender for Office 365**: Identifies phishing campaigns and credential harvesting targeting SpyCloud-exposed users via EmailEvents and EmailUrlInfo.
+- **Defender for Cloud Apps (CASB)**: Discovers shadow IT, assesses OAuth app risk, monitors DLP violations from compromised identities via CloudAppEvents.
+
+### Microsoft Intune
+
+- Checks device enrollment, compliance state, OS version, encryption status for infected endpoints
+- Identifies unmanaged devices with active infections (shadow IT risk)
+- Reviews Intune device actions (wipe, retire, sync) taken post-infection
+- Correlates compliance policy violations with infection severity
+
+### Microsoft Entra ID
+
+- Cross-references credential exposure with sign-in logs for active compromise detection
+- Monitors Conditional Access policy effectiveness for exposed users
+- Tracks risky user and risky sign-in assessments from Identity Protection
+- Audits password resets, session revocations, and MFA re-registrations
+
+### CASB / Cloud App Security
+
+- Maps SSO/IdP credential exposure to connected SaaS application blast radius
+- Detects OAuth consent phishing from compromised accounts
+- Identifies shadow IT access using stolen credentials
+- Monitors DLP policy violations by exposed users across cloud apps
+
+---
+
+## 13. What to Expect
+
+### Typical Response Times
+
+| Query Type | Expected Time | Notes |
+|-----------|--------------|-------|
+| Single user KQL lookup | 3-8 seconds | Depends on table size |
+| Organization-wide summary | 5-15 seconds | Multiple aggregate queries |
+| API Plugin real-time lookup | 2-5 seconds | Direct SpyCloud API call |
+| Full investigation (Agent) | 10-30 seconds | Multiple skills orchestrated sequentially |
+| Executive summary generation | 15-45 seconds | Multiple queries + GPT-4o analysis |
+| Cross-platform correlation | 15-60 seconds | Multiple sub-agents + multi-source queries |
+
+### Data Freshness
+
+| Source | Update Frequency | Notes |
+|--------|-----------------|-------|
+| SpyCloud CCF Connector | Configurable polling interval (default: hourly) | New breach data and watchlist updates |
+| MDE Remediation Logs | Real-time (playbook-triggered) | Populated when isolation playbook executes |
+| Conditional Access Logs | Real-time (playbook-triggered) | Populated when identity playbooks execute |
+| API Plugin (real-time) | Live | Queries SpyCloud API directly for freshest data |
+| Breach Catalog | Updated as SpyCloud acquires new breaches | New sources appear in catalog within hours of acquisition |
+
+### Limitations
+
+- **Password values**: The agent never displays actual password values in responses for security. It reports password types, crackability, and sighting counts.
+- **Compass data**: Requires SpyCloud Enterprise+ subscription. With standard Enterprise, Compass deep investigation tables will be empty. The agent gracefully falls back to Enterprise data.
+- **SIP data**: Requires SIP API entitlement. Stolen cookie lookups require a separate SIP subscription.
+- **Investigations API**: Requires Investigations API entitlement for full-database searches.
+- **KQL result limits**: Most KQL skills return top 20-25 results by default to keep responses manageable. Use the API Plugin for bulk data needs.
+- **Native Microsoft tables**: Some cross-correlation features (Defender XDR, Intune, CASB) require the corresponding Microsoft data connectors to be enabled in Sentinel.
+- **Historical data**: KQL queries are subject to Log Analytics data retention settings (default 90 days). Older data may not be available.
 
 ### Plugin Cross-Compatibility
 
-All three plugins are designed to work together seamlessly:
+All three plugins are fully compatible and can be used simultaneously:
 
 | Combination | Use Case |
 |-------------|----------|
-| Agent + KQL | Agent uses KQL skills for Sentinel data queries |
+| Agent + KQL | Agent uses KQL skills for Sentinel data queries (primary mode) |
 | Agent + API | Agent references API skills for real-time lookups |
 | KQL + API | Analyst uses KQL for historical data, API for live data |
 | All Three | Maximum coverage: autonomous investigation + KQL + live API |
 
----
+### When to Use Which Plugin
 
-## Security & Compliance
-
-### Data Handling
-
-- **No password display**: Agent never displays actual password values in responses
-- **PII masking**: Sensitive PII (SSN, financial) is handled per compliance requirements
-- **Audit trail**: All remediation actions logged to Spycloud_MDE_Logs_CL and SpyCloud_ConditionalAccessLogs_CL
-- **RBAC**: Sentinel RBAC controls access to data and playbook execution
-
-### Compliance Frameworks Supported
-
-| Framework | Coverage |
-|-----------|----------|
-| GDPR | Breach notification assessment, PII exposure mapping |
-| HIPAA | Health data exposure detection (health_insurance_id) |
-| PCI-DSS | Financial credential monitoring (bank_number, card data) |
-| SOX | Access control monitoring, remediation audit trail |
-| SOC 2 | Security monitoring effectiveness metrics |
-| CCPA | California consumer data exposure assessment |
-| NIST CSF | Identify, Protect, Detect, Respond, Recover mapping |
-
-### MITRE ATT&CK Coverage
-
-| Tactic | Techniques Covered |
-|--------|--------------------|
-| Initial Access | T1078 Valid Accounts, T1566 Phishing |
-| Credential Access | T1555 Credentials from Password Stores, T1539 Steal Web Session Cookie |
-| Lateral Movement | T1021 Remote Services, T1550 Use Alternate Authentication |
-| Collection | T1114 Email Collection, T1213 Data from Information Repositories |
-| Exfiltration | T1567 Exfiltration Over Web Service |
-| Impact | T1486 Data Encrypted for Impact (Ransomware) |
+| Scenario | Best Plugin | Why |
+|----------|-------------|-----|
+| Interactive investigation | **Agent** | Autonomous multi-step orchestration with SENTINEL personality |
+| Quick KQL query | **KQL Plugin** | Direct promptbook skill invocation, fastest for single queries |
+| Real-time API lookup | **API Plugin** | Live SpyCloud API for freshest data |
+| Deep Compass analysis | **API Plugin** | Compass API endpoints for deep infostealer forensics |
+| Executive reporting | **Agent** | Executive Summary sub-agent with GPT-4o analysis |
+| Automated triage | **Agent** | Identity Risk Scoring sub-agent |
+| Cross-platform correlation | **Agent** | Orchestrates multiple sub-agents across Sentinel, Defender, Intune, Entra, CASB |
+| Compliance assessment | **Agent** | GenerateComplianceAssessment GPT-4o skill with regulatory framework mapping |
 
 ---
 
-## Appendix: Complete Skill Reference
-
-### Quick Reference — All 168 Skills
-
-**Agent Internal Skills (58)**: 35 KQL investigation skills + 6 GPT-4o analysis skills + 17 specialized sub-agents. See SpyCloud_Agent.yaml for complete definitions.
-
-**KQL Plugin Skills (90)**: 90 promptbook skills across 29 categories querying 10 custom SpyCloud tables. See SpyCloud_Plugin.yaml for full skill definitions.
-
-**API Plugin Skills (20)**: GetBreachDataByEmail, GetBreachDataByDomain, GetBreachDataByIp, CheckPasswordExposure, GetBreachDataByUsername, ListBreachCatalog, GetBreachCatalogEntry, CompassInvestigateEmail, CompassInvestigateDomain, CompassInvestigateIp, CompassGetDevices, CompassGetApplications, GetSipCookiesByDomain, GetSipCookiesByEmail, GetSipSessionSummary, GetIdentityExposure, GetIdentityExposureByDomain, GetIdentityWatchlist, InvestigationsSearch, InvestigationsGetDetails
-
-### Custom Table Summary
-
-| Table | Columns | API Source | Tier |
-|-------|---------|------------|------|
-| SpyCloudBreachWatchlist_CL | 73 | Enterprise Breach | Enterprise |
-| SpyCloudBreachCatalog_CL | 13 | Breach Catalog | Enterprise |
-| SpyCloudCompassData_CL | 29 | Compass Data | Enterprise+ |
-| SpyCloudCompassDevices_CL | 8 | Compass Devices | Enterprise+ |
-| SpyCloudCompassApplications_CL | 15 | Compass Applications | Enterprise+ |
-| SpyCloudSIPCookies_CL | 18 | SIP Cookies | SIP License |
-| SpyCloudIdentityExposure_CL | 23 | Identity Exposure | Enterprise |
-| SpyCloudInvestigations_CL | 28 | Investigations | Enterprise+ |
-| SpyCloud_ConditionalAccessLogs_CL | 14 | Playbook Output | All |
-| Spycloud_MDE_Logs_CL | 19 | Playbook Output | All |
-| **Total** | **233+** | **6 APIs + 2 playbook logs** | |
-
----
-
-*SpyCloud Sentinel v8.0.0 — Darknet & Identity Threat Exposure Intelligence*
+*SpyCloud Sentinel v8.0.0 -- Darknet & Identity Threat Exposure Intelligence*
 *Copyright (c) 2024-2026 SpyCloud, Inc. All rights reserved.*

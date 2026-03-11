@@ -51,10 +51,65 @@
             },
             "defaultValue": "value::all",
             "label": "Severity"
+          },
+          {
+            "id": "selected_tab",
+            "version": "KqlParameterItem/1.0",
+            "name": "selectedTab",
+            "type": 1,
+            "isRequired": false,
+            "isHiddenWhenLocked": true,
+            "value": "livefeed"
           }
         ]
       },
       "name": "globalParams"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "tab-link-livefeed",
+            "cellValue": "livefeed",
+            "linkTarget": "parameter",
+            "linkLabel": "Live Threat Feed",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "tab-link-investigation",
+            "cellValue": "investigation",
+            "linkTarget": "parameter",
+            "linkLabel": "Investigation Hub",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "tab-link-correlation",
+            "cellValue": "correlation",
+            "linkTarget": "parameter",
+            "linkLabel": "Correlation Matrix",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "tab-link-hunting",
+            "cellValue": "hunting",
+            "linkTarget": "parameter",
+            "linkLabel": "Hunting Dashboard",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          }
+        ]
+      },
+      "name": "tabControl"
     },
     {
       "type": 12,
@@ -152,7 +207,12 @@
           }
         ]
       },
-      "name": "tabLiveThreatFeed"
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "livefeed"
+      },
+      "name": "group-livefeed"
     },
     {
       "type": 12,
@@ -293,7 +353,12 @@
           }
         ]
       },
-      "name": "tabInvestigationHub"
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "investigation"
+      },
+      "name": "group-investigation"
     },
     {
       "type": 12,
@@ -394,7 +459,12 @@
           }
         ]
       },
-      "name": "tabCorrelationMatrix"
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "correlation"
+      },
+      "name": "group-correlation"
     },
     {
       "type": 12,
@@ -517,7 +587,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where severity >= 20\n| summarize Exposures=count(), UniqueUsers=dcount(email), PlaintextPWs=countif(isnotempty(password_plaintext)), Devices=dcount(infected_machine_id) by bin(TimeGenerated, 1d)\n| extend AnomalyScore = iff(Exposures > avg_of(Exposures) + 2 * stdev_of(Exposures), \"ANOMALY\", \"NORMAL\")\n| order by TimeGenerated desc)",
+              "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| where severity >= 20\n| summarize Exposures=count(), UniqueUsers=dcount(email), PlaintextPWs=countif(isnotempty(password_plaintext)), Devices=dcount(infected_machine_id) by bin(TimeGenerated, 1d)\n| order by TimeGenerated desc)",
               "size": 0,
               "title": "Daily Anomaly Detection - Exposure Volume Spikes",
               "queryType": 0,
@@ -527,7 +597,12 @@
           }
         ]
       },
-      "name": "tabHuntingDashboard"
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "hunting"
+      },
+      "name": "group-hunting"
     }
   ],
   "styleSettings": {},

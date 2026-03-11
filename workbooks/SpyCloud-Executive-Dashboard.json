@@ -24,12 +24,24 @@
             },
             "typeSettings": {
               "selectableValues": [
-                { "durationMs": 86400000 },
-                { "durationMs": 259200000 },
-                { "durationMs": 604800000 },
-                { "durationMs": 2592000000 },
-                { "durationMs": 7776000000 },
-                { "durationMs": 15552000000 }
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 7776000000
+                },
+                {
+                  "durationMs": 15552000000
+                }
               ],
               "allowCustom": true
             },
@@ -46,7 +58,9 @@
             "delimiter": ",",
             "query": "SpyCloudBreachWatchlist_CL | distinct severity | order by severity desc",
             "typeSettings": {
-              "additionalResourceOptions": [ "value::all" ]
+              "additionalResourceOptions": [
+                "value::all"
+              ]
             },
             "defaultValue": "value::all",
             "label": "Severity"
@@ -62,14 +76,125 @@
             "delimiter": ",",
             "query": "SpyCloudBreachWatchlist_CL | where isnotempty(email_domain) | distinct email_domain | order by email_domain asc | take 50",
             "typeSettings": {
-              "additionalResourceOptions": [ "value::all" ]
+              "additionalResourceOptions": [
+                "value::all"
+              ]
             },
             "defaultValue": "value::all",
             "label": "Email Domain"
+          },
+          {
+            "id": "selected_tab",
+            "version": "KqlParameterItem/1.0",
+            "name": "selectedTab",
+            "type": 1,
+            "isRequired": false,
+            "isHiddenWhenLocked": true,
+            "value": "overview"
           }
         ]
       },
       "name": "globalParams"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "b0f53a6f-d462-48f4-bac1-c28d2f4604b2",
+            "cellValue": "overview",
+            "linkTarget": "parameter",
+            "linkLabel": "Executive Summary",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "e5848d67-f294-45e8-b710-da151266a62c",
+            "cellValue": "identity",
+            "linkTarget": "parameter",
+            "linkLabel": "Identity Threat Overview",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "f0f45775-501d-4e6c-b128-ac900570d52c",
+            "cellValue": "devices",
+            "linkTarget": "parameter",
+            "linkLabel": "Device & Endpoint Security",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "dc39edb0-3688-4cca-a606-cc7ab740ba07",
+            "cellValue": "o365ca",
+            "linkTarget": "parameter",
+            "linkLabel": "O365 & Conditional Access",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "2f591c41-2146-44a6-bdb1-84b3eaeaadc2",
+            "cellValue": "firewall",
+            "linkTarget": "parameter",
+            "linkLabel": "Firewall & Network Correlation",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "52afb9ef-6668-4d06-9534-e2be8f967680",
+            "cellValue": "ueba",
+            "linkTarget": "parameter",
+            "linkLabel": "UEBA & Behavioral Analytics",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "d924a91c-aeac-46d1-a0c0-a41757f17884",
+            "cellValue": "remediation",
+            "linkTarget": "parameter",
+            "linkLabel": "Remediation Tracking",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "1e05bbcf-f996-4820-89b5-3536482dde7d",
+            "cellValue": "breachintel",
+            "linkTarget": "parameter",
+            "linkLabel": "Breach Intelligence",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "ead06805-c270-409f-b76d-fcf2495bfb4c",
+            "cellValue": "datahealth",
+            "linkTarget": "parameter",
+            "linkLabel": "Data Health & Monitoring",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          },
+          {
+            "id": "cd5cc191-3806-4b44-afc2-bddbb5692347",
+            "cellValue": "compliance",
+            "linkTarget": "parameter",
+            "linkLabel": "Compliance & Risk Scoring",
+            "subTarget": "selectedTab",
+            "style": "link",
+            "preText": ""
+          }
+        ]
+      },
+      "name": "tabControl"
     },
     {
       "type": 12,
@@ -95,8 +220,17 @@
               "queryType": 0,
               "visualization": "tiles",
               "tileSettings": {
-                "titleContent": { "columnMatch": "Label", "formatter": 1 },
-                "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+                "titleContent": {
+                  "columnMatch": "Label",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "Value",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  }
+                }
               }
             },
             "name": "totalExposuresTile"
@@ -111,8 +245,17 @@
               "queryType": 0,
               "visualization": "tiles",
               "tileSettings": {
-                "titleContent": { "columnMatch": "Label", "formatter": 1 },
-                "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+                "titleContent": {
+                  "columnMatch": "Label",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "Value",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  }
+                }
               }
             },
             "name": "execSummaryTiles"
@@ -128,10 +271,22 @@
               "visualization": "piechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "Critical", "color": "redBright" },
-                  { "seriesName": "High", "color": "orange" },
-                  { "seriesName": "Medium", "color": "yellow" },
-                  { "seriesName": "Low", "color": "blue" }
+                  {
+                    "seriesName": "Critical",
+                    "color": "redBright"
+                  },
+                  {
+                    "seriesName": "High",
+                    "color": "orange"
+                  },
+                  {
+                    "seriesName": "Medium",
+                    "color": "yellow"
+                  },
+                  {
+                    "seriesName": "Low",
+                    "color": "blue"
+                  }
                 ]
               }
             },
@@ -148,7 +303,10 @@
               "visualization": "linechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "Count", "color": "blue" }
+                  {
+                    "seriesName": "Count",
+                    "color": "blue"
+                  }
                 ]
               }
             },
@@ -164,7 +322,12 @@
               "queryType": 0,
               "visualization": "table",
               "gridSettings": {
-                "sortBy": [{ "itemKey": "Exposures", "sortOrder": 2 }]
+                "sortBy": [
+                  {
+                    "itemKey": "Exposures",
+                    "sortOrder": 2
+                  }
+                ]
               }
             },
             "name": "top10Users"
@@ -180,8 +343,14 @@
               "visualization": "piechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "Active", "color": "redBright" },
-                  { "seriesName": "Resolved", "color": "green" }
+                  {
+                    "seriesName": "Active",
+                    "color": "redBright"
+                  },
+                  {
+                    "seriesName": "Resolved",
+                    "color": "green"
+                  }
                 ]
               }
             },
@@ -189,7 +358,12 @@
           }
         ]
       },
-      "name": "tabExecutiveSummary"
+      "name": "group-overview",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "overview"
+      }
     },
     {
       "type": 12,
@@ -228,10 +402,22 @@
               "visualization": "piechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "Plaintext", "color": "redBright" },
-                  { "seriesName": "Cracked", "color": "orange" },
-                  { "seriesName": "Hashed", "color": "yellow" },
-                  { "seriesName": "Unknown", "color": "gray" }
+                  {
+                    "seriesName": "Plaintext",
+                    "color": "redBright"
+                  },
+                  {
+                    "seriesName": "Cracked",
+                    "color": "orange"
+                  },
+                  {
+                    "seriesName": "Hashed",
+                    "color": "yellow"
+                  },
+                  {
+                    "seriesName": "Unknown",
+                    "color": "gray"
+                  }
                 ]
               }
             },
@@ -272,8 +458,14 @@
               "visualization": "linechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "New", "color": "redBright" },
-                  { "seriesName": "Recurring", "color": "orange" }
+                  {
+                    "seriesName": "New",
+                    "color": "redBright"
+                  },
+                  {
+                    "seriesName": "Recurring",
+                    "color": "orange"
+                  }
                 ]
               }
             },
@@ -281,7 +473,12 @@
           }
         ]
       },
-      "name": "tabIdentityThreat"
+      "name": "group-identity",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "identity"
+      }
     },
     {
       "type": 12,
@@ -307,8 +504,17 @@
               "queryType": 0,
               "visualization": "tiles",
               "tileSettings": {
-                "titleContent": { "columnMatch": "Label", "formatter": 1 },
-                "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+                "titleContent": {
+                  "columnMatch": "Label",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "Value",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  }
+                }
               }
             },
             "name": "deviceMetricsTiles"
@@ -324,7 +530,10 @@
               "visualization": "linechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "InfectedDevices", "color": "redBright" }
+                  {
+                    "seriesName": "InfectedDevices",
+                    "color": "redBright"
+                  }
                 ]
               }
             },
@@ -341,10 +550,22 @@
               "visualization": "piechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "6+ Infections", "color": "redBright" },
-                  { "seriesName": "4-5 Infections", "color": "orange" },
-                  { "seriesName": "2-3 Infections", "color": "yellow" },
-                  { "seriesName": "Single Infection", "color": "green" }
+                  {
+                    "seriesName": "6+ Infections",
+                    "color": "redBright"
+                  },
+                  {
+                    "seriesName": "4-5 Infections",
+                    "color": "orange"
+                  },
+                  {
+                    "seriesName": "2-3 Infections",
+                    "color": "yellow"
+                  },
+                  {
+                    "seriesName": "Single Infection",
+                    "color": "green"
+                  }
                 ]
               }
             },
@@ -397,9 +618,18 @@
               "visualization": "linechart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "Succeeded", "color": "green" },
-                  { "seriesName": "Failed", "color": "redBright" },
-                  { "seriesName": "Pending", "color": "yellow" }
+                  {
+                    "seriesName": "Succeeded",
+                    "color": "green"
+                  },
+                  {
+                    "seriesName": "Failed",
+                    "color": "redBright"
+                  },
+                  {
+                    "seriesName": "Pending",
+                    "color": "yellow"
+                  }
                 ]
               }
             },
@@ -407,7 +637,12 @@
           }
         ]
       },
-      "name": "tabDeviceEndpoint"
+      "name": "group-devices",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "devices"
+      }
     },
     {
       "type": 12,
@@ -439,7 +674,11 @@
                 "sizeSettings": "RiskySignIns",
                 "labelSettings": "Location",
                 "legendMetric": "RiskySignIns",
-                "itemColorSettings": { "nodeColorField": "RiskySignIns", "type": "heatmap", "heatmapPalette": "greenRed" }
+                "itemColorSettings": {
+                  "nodeColorField": "RiskySignIns",
+                  "type": "heatmap",
+                  "heatmapPalette": "greenRed"
+                }
               }
             },
             "name": "riskySignInsMap"
@@ -454,8 +693,17 @@
               "queryType": 0,
               "visualization": "tiles",
               "tileSettings": {
-                "titleContent": { "columnMatch": "Label", "formatter": 1 },
-                "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+                "titleContent": {
+                  "columnMatch": "Label",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "Value",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  }
+                }
               }
             },
             "name": "caEnforcementTiles"
@@ -498,7 +746,12 @@
           }
         ]
       },
-      "name": "tabO365ConditionalAccess"
+      "name": "group-o365ca",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "o365ca"
+      }
     },
     {
       "type": 12,
@@ -576,7 +829,12 @@
           }
         ]
       },
-      "name": "tabFirewallNetwork"
+      "name": "group-firewall",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "firewall"
+      }
     },
     {
       "type": 12,
@@ -602,7 +860,12 @@
               "queryType": 0,
               "visualization": "table",
               "gridSettings": {
-                "sortBy": [{ "itemKey": "MaxAnomalyScore", "sortOrder": 2 }]
+                "sortBy": [
+                  {
+                    "itemKey": "MaxAnomalyScore",
+                    "sortOrder": 2
+                  }
+                ]
               }
             },
             "name": "uebaAnomalyScores"
@@ -657,7 +920,12 @@
           }
         ]
       },
-      "name": "tabUEBA"
+      "name": "group-ueba",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "ueba"
+      }
     },
     {
       "type": 12,
@@ -735,7 +1003,12 @@
           }
         ]
       },
-      "name": "tabRemediationTracking"
+      "name": "group-remediation",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "remediation"
+      }
     },
     {
       "type": 12,
@@ -813,7 +1086,12 @@
           }
         ]
       },
-      "name": "tabBreachIntelligence"
+      "name": "group-breachintel",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "breachintel"
+      }
     },
     {
       "type": 12,
@@ -846,10 +1124,29 @@
                     "formatOptions": {
                       "thresholdsOptions": "colors",
                       "thresholdsGrid": [
-                        { "operator": "==", "thresholdValue": "Healthy", "representation": "green", "text": "Healthy" },
-                        { "operator": "==", "thresholdValue": "Stale", "representation": "yellow", "text": "Stale" },
-                        { "operator": "==", "thresholdValue": "Critical", "representation": "redBright", "text": "Critical" },
-                        { "operator": "Default", "representation": "gray", "text": "No Data" }
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Healthy",
+                          "representation": "green",
+                          "text": "Healthy"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Stale",
+                          "representation": "yellow",
+                          "text": "Stale"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Critical",
+                          "representation": "redBright",
+                          "text": "Critical"
+                        },
+                        {
+                          "operator": "Default",
+                          "representation": "gray",
+                          "text": "No Data"
+                        }
                       ]
                     }
                   },
@@ -882,10 +1179,29 @@
                     "formatOptions": {
                       "thresholdsOptions": "colors",
                       "thresholdsGrid": [
-                        { "operator": "==", "thresholdValue": "Success", "representation": "green", "text": "Success" },
-                        { "operator": "==", "thresholdValue": "Warning", "representation": "yellow", "text": "Warning" },
-                        { "operator": "==", "thresholdValue": "Failure", "representation": "redBright", "text": "Failure" },
-                        { "operator": "Default", "representation": "gray", "text": "{0}" }
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Success",
+                          "representation": "green",
+                          "text": "Success"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Warning",
+                          "representation": "yellow",
+                          "text": "Warning"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Failure",
+                          "representation": "redBright",
+                          "text": "Failure"
+                        },
+                        {
+                          "operator": "Default",
+                          "representation": "gray",
+                          "text": "{0}"
+                        }
                       ]
                     }
                   }
@@ -905,10 +1221,22 @@
               "visualization": "areachart",
               "chartSettings": {
                 "seriesLabelSettings": [
-                  { "seriesName": "Watchlist", "color": "blue" },
-                  { "seriesName": "Catalog", "color": "green" },
-                  { "seriesName": "Compass Data", "color": "orange" },
-                  { "seriesName": "Compass Devices", "color": "purple" }
+                  {
+                    "seriesName": "Watchlist",
+                    "color": "blue"
+                  },
+                  {
+                    "seriesName": "Catalog",
+                    "color": "green"
+                  },
+                  {
+                    "seriesName": "Compass Data",
+                    "color": "orange"
+                  },
+                  {
+                    "seriesName": "Compass Devices",
+                    "color": "purple"
+                  }
                 ]
               }
             },
@@ -928,12 +1256,16 @@
                   {
                     "columnMatch": "Last1h",
                     "formatter": 4,
-                    "formatOptions": { "palette": "greenDark" }
+                    "formatOptions": {
+                      "palette": "greenDark"
+                    }
                   },
                   {
                     "columnMatch": "Last24h",
                     "formatter": 4,
-                    "formatOptions": { "palette": "blue" }
+                    "formatOptions": {
+                      "palette": "blue"
+                    }
                   }
                 ]
               }
@@ -961,7 +1293,12 @@
           }
         ]
       },
-      "name": "tabDataHealth"
+      "name": "group-datahealth",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "datahealth"
+      }
     },
     {
       "type": 12,
@@ -994,9 +1331,24 @@
                     "formatOptions": {
                       "thresholdsOptions": "colors",
                       "thresholdsGrid": [
-                        { "operator": "==", "thresholdValue": "HIGH", "representation": "redBright", "text": "HIGH RISK" },
-                        { "operator": "==", "thresholdValue": "MEDIUM", "representation": "yellow", "text": "MEDIUM" },
-                        { "operator": "==", "thresholdValue": "LOW", "representation": "green", "text": "LOW" }
+                        {
+                          "operator": "==",
+                          "thresholdValue": "HIGH",
+                          "representation": "redBright",
+                          "text": "HIGH RISK"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "MEDIUM",
+                          "representation": "yellow",
+                          "text": "MEDIUM"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "LOW",
+                          "representation": "green",
+                          "text": "LOW"
+                        }
                       ]
                     }
                   }
@@ -1022,9 +1374,23 @@
                     "formatOptions": {
                       "thresholdsOptions": "colors",
                       "thresholdsGrid": [
-                        { "operator": "==", "thresholdValue": "Improving", "representation": "green", "text": "Improving" },
-                        { "operator": "==", "thresholdValue": "Declining", "representation": "redBright", "text": "Declining" },
-                        { "operator": "Default", "representation": "gray", "text": "" }
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Improving",
+                          "representation": "green",
+                          "text": "Improving"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Declining",
+                          "representation": "redBright",
+                          "text": "Declining"
+                        },
+                        {
+                          "operator": "Default",
+                          "representation": "gray",
+                          "text": ""
+                        }
                       ]
                     }
                   }
@@ -1047,7 +1413,12 @@
           }
         ]
       },
-      "name": "tabComplianceRisk"
+      "name": "group-compliance",
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "compliance"
+      }
     }
   ],
   "styleSettings": {

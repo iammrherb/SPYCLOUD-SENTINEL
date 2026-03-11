@@ -3451,7 +3451,7 @@
           "id": "SpyCloudCCF",
           "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n## About SpyCloud\n\n[SpyCloud](https://spycloud.com) is the leader in **Cybercrime Analytics** \u2014 transforming recaptured darknet data into actionable intelligence. With **600+ billion recaptured darknet assets**, SpyCloud prevents account takeover, ransomware, session hijacking, and fraud.\n\n---\n\n## About This Connector\n\nThe **SpyCloud Connector** uses the Codeless Connector Framework (CCF) to ingest data via **9 REST API pollers** across **6 SpyCloud APIs** into **10 custom Sentinel tables**.\n\n### API Coverage & Tables\n\n| API | Table | Tier |\n|-----|-------|------|\n| Enterprise Breach Watchlist | SpyCloudBreachWatchlist_CL | Enterprise |\n| Enterprise Breach Catalog | SpyCloudBreachCatalog_CL | Enterprise |\n| Identity Exposure | SpyCloudIdentityExposure_CL | Enterprise |\n| Compass Data | SpyCloudCompassData_CL | Enterprise+ |\n| Compass Devices | SpyCloudCompassDevices_CL | Enterprise+ |\n| Compass Applications | SpyCloudCompassApplications_CL | Enterprise+ |\n| SIP Cookies | SpyCloudSipCookies_CL | SIP |\n| Investigations | SpyCloudInvestigations_CL | Investigations |\n\n**Internal audit tables:** Spycloud_MDE_Logs_CL, SpyCloud_ConditionalAccessLogs_CL\n\n### Authentication\nAll pollers use `X-API-Key` header. Optional separate keys for Compass, SIP, and Investigations.\n\n### What Gets Deployed\n- **49 analytics rules** \u2014 scheduled, NRT, Fusion, MSIC\n- **10 playbooks** \u2014 password reset, session revocation, device isolation, MFA, firewall, notifications\n- **28 hunting queries** \u2014 lateral movement, session hijack, data exfil, supply chain\n- **3 workbooks** \u2014 Executive, SOC Ops, Threat Intel\n- **4 watchlists** \u2014 VIP, IOC, Approved Domains, High-Value Assets\n- **Security Copilot** \u2014 90 KQL + 20 API + 17 sub-agent skills\n\n**Get your API key:** [portal.spycloud.com](https://portal.spycloud.com) > Settings > API Keys\n\n**Test:** `curl -H 'X-API-Key: YOUR_KEY' https://api.spycloud.io/enterprise-v2/breach/catalog?limit=1`",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n## SpyCloud Enterprise Protection for Microsoft Sentinel\n\n[SpyCloud](https://spycloud.com) transforms recaptured darknet data into automated threat response. This connector ingests compromised credentials, infostealer artifacts, and identity exposures into Sentinel for detection, investigation, and remediation.\n\n### Capabilities\n\n| Feature | Details |\n|---------|--------|\n| **Data Ingestion** | 10 custom tables via 9 REST API pollers (CCF) |\n| **Detection** | 49 analytics rules \u2014 scheduled, NRT, Fusion |\n| **Response** | 10 automated playbooks \u2014 identity, device, network |\n| **Hunting** | 28 pre-built hunting queries |\n| **Dashboards** | 3 workbooks \u2014 Executive, SOC, Threat Intel |\n| **Copilot** | 90 KQL + 20 API + 17 sub-agent skills |\n\n### Requirements\n\n- SpyCloud Enterprise API key ([portal.spycloud.com](https://portal.spycloud.com))\n- Microsoft Sentinel Contributor role\n- Monitoring Metrics Publisher role on the DCR",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -3672,63 +3672,9 @@
           },
           "instructionSteps": [
             {
-              "title": "Data Tables",
-              "description": "This connector ingests data into 10 custom Sentinel tables via 9 CCF REST API pollers with DCR transforms.",
+              "title": "Step 1 \u2014 API Keys",
+              "description": "Enter your SpyCloud API keys. Get them from [portal.spycloud.com](https://portal.spycloud.com) > Account Settings > API Keys.",
               "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Enterprise Tier (always enabled):**\n\n| Table | Description | API Source |\n|-------|-------------|------------|\n| `SpyCloudBreachWatchlist_CL` | Compromised credentials, PII, device forensics, infostealer artifacts | Enterprise Watchlist API |\n| `SpyCloudBreachCatalog_CL` | Breach metadata \u2014 title, category, record counts, confidence | Enterprise Catalog API |\n| `SpyCloudIdentityExposure_CL` | Deduplicated identity exposure profiles with risk scoring | Identity Exposure API |\n\n**Enterprise+ Tier (requires enableCompass):**\n\n| Table | Description | API Source |\n|-------|-------------|------------|\n| `SpyCloudCompassData_CL` | Deep infostealer data \u2014 stolen cookies, autofill, crypto wallets, C2, malware | Compass Data API |\n| `SpyCloudCompassDevices_CL` | Infected device fingerprints \u2014 hostname, OS, IPs, infection timeline | Compass Devices API |\n| `SpyCloudCompassApplications_CL` | Per-app credential/cookie counts per infected device | Compass Applications API |\n\n**Optional API Tiers:**\n\n| Table | Description | API Source |\n|-------|-------------|------------|\n| `SpyCloudSipCookies_CL` | Stolen session cookies by domain with expiration and flags | SIP API (requires enableSip) |\n| `SpyCloudInvestigations_CL` | Full database searches across breaches, phishing, paste sites | Investigations API (requires enableInvestigations) |\n\n**Internal Audit (playbook-generated):**\n\n| Table | Description |\n|-------|-------------|\n| `Spycloud_MDE_Logs_CL` | MDE device isolation, tagging, IOC audit trail |\n| `SpyCloud_ConditionalAccessLogs_CL` | Password resets, session revocations, CA group assignments |"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Automated Response Playbooks",
-              "description": "10 Logic App playbooks provide automated remediation across identity, device, network, and notification workflows.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "| Playbook | Category | Actions | License Required |\n|----------|----------|---------|------------------|\n| **SpyCloud-ForcePasswordReset** | Identity | Force password change + require MFA on next sign-in | Entra ID P1+ |\n| **SpyCloud-RevokeSessions** | Identity | Revoke all active sign-in sessions for compromised users | Entra ID P1+ |\n| **SpyCloud-EnforceMFA** | Identity | Delete existing MFA methods, force MFA re-registration | Entra ID P1+ |\n| **SpyCloud-BlockConditionalAccess** | Access | Assign users to Conditional Access policy blocking groups | Entra ID P1+ |\n| **SpyCloud-BlockFirewall** | Network | Push block rules for malicious IPs/domains to Fortinet or Palo Alto | Fortinet/PAN-OS |\n| **SpyCloud-IsolateDevice** | Device | Full or selective MDE device isolation for infected machines | Defender P2 |\n| **SpyCloud-NotifyUser** | Notification | Email compromised users with breach details and remediation guidance | \u2014 |\n| **SpyCloud-NotifySOC** | Notification | Send Teams Adaptive Card alerts to SOC channel | \u2014 |\n| **SpyCloud-EnrichIncident** | Enrichment | Add SpyCloud exposure context, timeline, and risk score to Sentinel incidents | \u2014 |\n| **SpyCloud-FullRemediation** | Orchestration | Chain all playbooks in 3 phases: contain \u2192 remediate \u2192 notify | Varies by phase |"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Analytics, Hunting & Dashboards",
-              "description": "Detection rules, hunting queries, workbooks, and watchlists deployed with this connector.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Analytics Rules (49 total):**\n- 38 Scheduled rules \u2014 SpyCloud correlations with Entra ID, MDE, Office 365, DNS, UEBA, Okta, Duo, Ping, Fortinet, Palo Alto, and Compass\n- 5 NRT (Near-Real-Time) rules \u2014 Low-latency detection for critical infostealer events\n- 1 Fusion rule \u2014 ML-powered multistage attack detection combining SpyCloud + Microsoft signals\n- 5 MSIC rules \u2014 Auto-create incidents from Defender, Entra, and MCAS alerts\n\n**Hunting Queries (28):** Session cookie theft, lateral movement, data exfiltration, mailbox compromise, privilege escalation, malware trends, breach impact, password reuse, risk scoring, supply chain, ransomware indicators, identity correlation\n\n**Workbooks (3):**\n- Executive Dashboard \u2014 Risk posture, trends, ROI metrics for leadership\n- SOC Operations \u2014 Active incidents, triage queues, remediation tracking\n- Threat Intelligence \u2014 Malware families, campaigns, IOC analysis, geographic distribution\n\n**Watchlists (4):** VIP/Executive Accounts, IOC Blocklist, Approved Domains, High-Value Assets\n\n**Automation Rules (4):** Auto-trigger playbooks, auto-escalate critical, auto-task device infections, auto-close informational"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Recommended Data Connectors",
-              "description": "Enable these additional Microsoft Sentinel data connectors to maximize SpyCloud correlation and detection coverage.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "The following data connectors enable SpyCloud analytics rules to correlate stolen credentials with sign-in activity, device telemetry, and behavioral analytics. **Check your Sentinel Data Connectors page to verify each is enabled.**\n\n| Data Connector | Status Check | Why It Matters | Used By |\n|---------------|-------------|----------------|--------|\n| **Microsoft Entra ID** (Sign-in & Audit Logs) | `SigninLogs \\| take 1` | Correlate stolen credentials with actual sign-in activity, detect impossible travel | 12 analytics rules |\n| **Microsoft Defender for Endpoint** | `DeviceInfo \\| take 1` | Device isolation playbook, lateral movement detection, endpoint forensics | MDE playbooks, 8 rules |\n| **Microsoft Defender for Identity** | `IdentityLogonEvents \\| take 1` | Track lateral movement (RDP, SMB, NTLM) from compromised accounts | 5 hunting queries |\n| **Microsoft Defender for Cloud Apps** | `CloudAppEvents \\| take 1` | Detect OAuth abuse, mass file downloads, consent grant attacks | Data exfil detection |\n| **Office 365** | `OfficeActivity \\| take 1` | Detect mailbox forwarding rules, inbox manipulation after credential theft | 4 analytics rules |\n| **Azure Active Directory Identity Protection** | `SecurityAlert \\| where ProviderName == 'IPC'` | Risk-based Conditional Access signals combined with SpyCloud exposure | Fusion rule |\n| **Microsoft Defender Threat Intelligence** | `ThreatIntelligenceIndicator \\| take 1` | Cross-reference SpyCloud IOCs with Microsoft TI feeds | TI enrichment agent |\n| **DNS Analytics** (if available) | `DnsEvents \\| take 1` | Detect C2 beaconing from infostealer-infected devices | 3 analytics rules |\n\n**Optional but Recommended:**\n\n| Data Connector | Why |\n|---------------|-----|\n| **Okta SSO** | Correlate SpyCloud exposures with Okta authentication events |\n| **Duo Security** | Cross-reference compromised credentials with Duo MFA bypass attempts |\n| **Ping Identity** | Correlate identity exposures with PingFederate sign-ins |\n| **Fortinet FortiGate** | Firewall playbook integration + network correlation rules |\n| **Palo Alto Networks** | Firewall playbook integration + NGFW correlation rules |\n| **Amazon Web Services** | Detect compromised credentials used against AWS services |"
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 1 \u2014 SpyCloud API Key Configuration",
-              "description": "Enter your SpyCloud API keys. The Enterprise key is required. Compass and SIP keys are optional \u2014 if left blank, the Enterprise key is used for those products too.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Where to Find Your API Keys:**\n\n1. Log in to [portal.spycloud.com](https://portal.spycloud.com)\n2. Navigate to **Account Settings** \u2192 **API Keys**\n3. Copy the relevant API keys for your subscriptions\n\n**API Key Tiers:**\n- **Enterprise API Key** (required) \u2014 Authenticates Watchlist and Breach Catalog pollers\n- **Compass API Key** (optional) \u2014 Only needed if your Compass subscription uses a separate API key. Leave blank to use the Enterprise key.\n- **SIP API Key** (optional) \u2014 Only needed if your Session Identity Protection subscription uses a separate API key. Leave blank to use the Enterprise key.\n\n**Validation:** After deployment, verify API connectivity in the connector health panel or by checking the Data Collection Rule ingestion metrics in Azure Monitor."
-                  }
-                },
                 {
                   "type": "Textbox",
                   "parameters": {
@@ -3767,15 +3713,9 @@
               ]
             },
             {
-              "title": "Step 2 \u2014 Data Filters & Scope",
-              "description": "Configure which exposure data to ingest. These settings control the volume, sensitivity, and scope of data flowing into your Sentinel workspace.",
+              "title": "Step 2 \u2014 Data Filters",
+              "description": "Select severity levels and exposure types to ingest. Start with all levels selected, then narrow based on volume.",
               "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Understanding SpyCloud Severity Levels:**\n\n| Severity | Category | Description | Typical Volume |\n|----------|----------|-------------|---------------|\n| **2** | Breach Credential | Username/password exposed in a data breach | High |\n| **5** | Breach + PII | Breach data enriched with personally identifiable information | Medium |\n| **20** | Infostealer | Credentials stolen by malware (high-risk, active threat) | Medium |\n| **25** | Infostealer + Application | Infostealer with specific application targets (highest risk) | Lower |\n\n**Recommendation:** Start with **all severity levels** selected. After initial ingestion, review volume in the workbook and narrow if needed. Severity 20+ (infostealer) records are the highest priority for SOC response.\n\n**Exposure Types:**\n- **Corporate** \u2014 Exposures matching your organization's email domains\n- **Infected** \u2014 Exposures from devices infected with infostealer malware (includes session cookies, application credentials)\n\n**Recommendation:** Select both for comprehensive coverage."
-                  }
-                },
                 {
                   "type": "Dropdown",
                   "parameters": {
@@ -3857,27 +3797,15 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Plaintext Password Warning:** Enabling plaintext passwords stores cleartext credentials in your Log Analytics workspace. Ensure your organization has a data handling policy, configure table-level RBAC on `SpyCloudBreachWatchlist_CL`, and consider data retention. The `password_plaintext` column is empty when this setting is 'No'."
-                  }
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "---\n\n**Log Table Filtering**\n\nThe MDE Logs and Conditional Access Logs tables are populated by playbook execution. These tables capture remediation audit trails and do not have separate ingestion filters \u2014 they log all actions taken by the automated playbooks.\n\n| Table | Filter Available | Notes |\n|-------|-----------------|-------|\n| Watchlist | Severity, Exposure Type, Plaintext | Filtered at API level via poller parameters |\n| Catalog | None (metadata only) | Small volume \u2014 all catalog entries are ingested |\n| Compass Data | Severity (shared) | Enterprise+ only \u2014 uses the global severity filter |\n| Compass Devices | None | Enterprise+ only \u2014 all infected device records ingested |\n| Compass Applications | None | Enterprise+ only \u2014 all application records ingested |\n| SIP Cookies | Cookie Domain | SIP subscription only \u2014 ingests stolen cookies for configured domain |\n| MDE Logs | N/A | Populated by playbook execution \u2014 logs all MDE actions |\n| CA Logs | N/A | Populated by playbook execution \u2014 logs all identity actions |"
+                    "text": "Enabling plaintext passwords stores cleartext credentials in your workspace. Ensure you have a data handling policy and configure table-level RBAC on `SpyCloudBreachWatchlist_CL`."
                   }
                 }
               ]
             },
             {
-              "title": "Step 3 \u2014 Polling & Performance Settings",
-              "description": "Configure how frequently the connector polls SpyCloud and how it handles retries. These settings affect data freshness, API usage, and resilience.",
+              "title": "Step 3 \u2014 Polling Settings",
+              "description": "Configure polling frequency and initial lookback period. Defaults work for most deployments.",
               "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Polling Interval Guidance:**\n\n| Interval | Best For | API Calls/Day | Notes |\n|----------|----------|---------------|-------|\n| **5 min** | Active incident response | ~1,440 | Highest freshness, highest API usage |\n| **15 min** | High-security environments | ~480 | Good balance of freshness and cost |\n| **30 min** | Most organizations (recommended) | ~240 | Standard recommendation |\n| **60 min** | Large environments, cost-sensitive | ~120 | Acceptable for most SOC workflows |\n| **120 min** | Low-priority monitoring | ~60 | May delay detection of active infostealers |\n| **360 min** | Minimal monitoring | ~20 | 6-hour gap between checks |\n\n**Lookback Days:** How far back to retrieve data on first connection. 365 days (recommended) ensures you capture the full year of historical exposures. Reduce to 30-90 days if you want faster initial sync.\n\n**Retry & Timeout:** Default values (3 retries, 120s timeout) work for most deployments. Maximum retry count is 6. Increase timeout to 180-300s if you have very large watchlists (100K+ records)."
-                  }
-                },
                 {
                   "type": "Dropdown",
                   "parameters": {
@@ -4005,39 +3933,9 @@
               ]
             },
             {
-              "title": "Step 4 \u2014 Architecture & Data Flow",
-              "description": "Understand how SpyCloud data flows through your Sentinel environment.",
+              "title": "Step 4 \u2014 Connect",
+              "description": "Activate the SpyCloud pollers to begin data ingestion. Data typically appears within 5\u201310 minutes.",
               "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Data Pipeline Architecture:**\n\n```\nSpyCloud API (api.spycloud.io)\n    \u2502\n    \u25bc\nCCF Pollers (5 pollers, Codeless Connector Framework)\n    \u2502\n    \u25bc\nData Collection Endpoint (DCE) \u2192 Data Collection Rule (DCR)\n    \u2502                                    \u2502\n    \u2502                            Transform & Normalize\n    \u2502                                    \u2502\n    \u25bc                                    \u25bc\nLog Analytics Workspace (6 Custom Tables)\n    \u2502\n    \u251c\u2500\u2500 Analytics Rules (38) \u2192 Incidents \u2192 Playbooks (4)\n    \u251c\u2500\u2500 Hunting Queries (8) \u2192 Bookmarks \u2192 Investigations\n    \u251c\u2500\u2500 Workbook (19 panels) \u2192 Dashboards\n    \u2514\u2500\u2500 Copilot Plugin \u2192 Natural Language Queries\n```\n\n**Table Schema Overview:**\n\n| Table | Key Columns | Records Per Poll |\n|-------|------------|------------------|\n| `SpyCloudBreachWatchlist_CL` | email, severity, source_id, password_type, infected_machine_id, target_domain | Varies by org size |\n| `SpyCloudBreachCatalog_CL` | uuid, short_title, breach_category, num_records, confidence | ~50-200 total |\n| `SpyCloudCompassData_CL` | email, severity, breach_title, infected_machine_id, target_url | Enterprise+ only |\n| `SpyCloudCompassDevices_CL` | user_hostname, user_os, ip_addresses, application_count | Enterprise+ only |\n| `Spycloud_MDE_Logs_CL` | DeviceName, DeviceId, Action, IsolationType, ActionStatus | Playbook output |\n| `SpyCloud_ConditionalAccessLogs_CL` | UserPrincipalName, Action, PasswordReset, SessionsRevoked | Playbook output |\n\n**Cost Estimation:** Data ingestion costs depend on your Log Analytics pricing tier and data volume. Most organizations ingest 50MB-500MB/day from SpyCloud. Use the workbook's ingestion volume panel to monitor costs after deployment."
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 5 \u2014 Sentinel Configuration Recommendations",
-              "description": "Enable these Microsoft Sentinel features to maximize the value of SpyCloud threat intelligence. Each recommendation includes step-by-step instructions.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Critical \u2014 Enable These First:**\n\n**1. User and Entity Behavior Analytics (UEBA)**\n   - Navigate to: **Sentinel** \u2192 **Settings** \u2192 **Settings tab** \u2192 **User and Entity Behavior Analytics**\n   - Toggle: **ON**\n   - Select data sources: **Azure Active Directory** (Sign-in Logs, Audit Logs)\n   - Why: UEBA creates behavioral baselines for users. When SpyCloud detects an exposed credential, analytics rules correlate with UEBA anomalies to detect active exploitation (e.g., impossible travel after credential exposure).\n\n**2. Fusion Detection**\n   - Navigate to: **Sentinel** \u2192 **Analytics** \u2192 filter by 'Fusion' \u2192 **Enable**\n   - Why: Fusion uses ML to detect multi-stage attacks. SpyCloud exposure + anomalous sign-in + data exfiltration = high-confidence attack chain.\n\n**3. Threat Intelligence Solution**\n   - Navigate to: **Content Hub** \u2192 search 'Threat Intelligence' \u2192 **Install**\n   - Why: Matches SpyCloud infostealer IP addresses against global TI feeds for additional context.\n\n---\n\n**Recommended Sentinel Data Connectors (install from Content Hub):**\n\n| Connector | Priority | Why It Matters |\n|-----------|----------|---------------|\n| **Entra ID (Azure AD)** | Critical | Sign-in log correlation \u2014 detect logins using exposed credentials |\n| **Microsoft Defender for Endpoint** | Critical | Device correlation \u2014 identify infected machines from SpyCloud data |\n| **Office 365** | High | Detect email compromise after credential exposure |\n| **Azure Activity** | High | Track admin actions from compromised accounts |\n| **DNS** | Medium | Detect C2 callbacks from infostealer-infected devices |\n| **Microsoft Cloud App Security** | Medium | Detect OAuth token abuse from stolen session cookies |\n| **Okta SSO / Duo / Ping Identity** | Medium | Correlate MFA bypass with exposed credentials |\n| **AWS CloudTrail / GCP** | Medium | Cross-cloud compromised account detection |\n| **Palo Alto / Fortinet / Zscaler** | Low | Firewall correlation with infostealer C2 traffic |\n\n**Enable Entra ID Connector:**\n1. Content Hub \u2192 search 'Microsoft Entra ID' \u2192 Install\n2. Data Connectors \u2192 Microsoft Entra ID \u2192 Open connector page\n3. Enable: Sign-in Logs, Audit Logs, Non-interactive Sign-in Logs, Managed Identity Sign-in Logs\n4. These feed 12+ SpyCloud analytics rules that detect sign-ins using exposed credentials."
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 6 \u2014 Connect & Activate",
-              "description": "Activate all 5 SpyCloud pollers to begin data ingestion into your Sentinel workspace.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Before Clicking Connect:**\n\n1. Verify your API key is entered correctly in Step 1\n2. Confirm your severity and exposure type selections in Step 2\n3. Review polling settings in Step 3\n\n**What Happens When You Connect:**\n\n1. All 5 pollers activate simultaneously\n2. Initial data pull begins using your lookback period (default: 365 days)\n3. The first poll may take 5-15 minutes depending on your watchlist size\n4. Subsequent polls run at your configured interval\n5. Data flows through the DCR transform pipeline and appears in your custom tables\n\n**Expected Initial Ingestion Timeline:**\n\n| Phase | Time | What Happens |\n|-------|------|--------------|\n| Connection | Immediate | Pollers registered, authentication verified |\n| First Data | 5-10 min | Watchlist and Catalog data begins appearing |\n| Backfill Complete | 15-60 min | Historical lookback period fully ingested |\n| Steady State | Ongoing | Incremental updates at polling interval |"
-                  }
-                },
                 {
                   "type": "ConnectionToggleButton",
                   "parameters": {}
@@ -4045,19 +3943,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "After connecting, proceed to Step 7 for verification queries and troubleshooting guidance."
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 7 \u2014 Verify Data Ingestion",
-              "description": "After connecting, verify data is flowing into all tables.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Health Check Query \u2014 Run in Log Analytics after connecting:**\n\n```kql\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Logs'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA Logs')\n| project Table, Records, Latest\n| order by Table asc\n```\n\n**Expected Results:**\n- **Watchlist** \u2014 Records within 10 minutes of connecting\n- **Catalog** \u2014 50-200+ breach records\n- **Compass** \u2014 Requires Enterprise+ (empty with standard Enterprise)\n- **MDE & CA Logs** \u2014 Populate when playbooks execute against incidents\n\n**Support:** SpyCloud API issues \u2192 support@spycloud.com | Sentinel issues \u2192 GitHub Issues"
+                    "text": "After connecting, verify data ingestion by running this query in Log Analytics:\n\n```kql\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog')\n| project Table, Records, Latest\n| order by Table asc\n```\n\n**Support:** support@spycloud.com"
                   }
                 }
               ]
@@ -4483,6 +4369,7 @@
                   "nextPageParaName": "cursor",
                   "pagingInfoPlacement": "QueryString"
                 },
+                "isActive": true,
                 "etag": "*"
               },
               "dependsOn": [],
@@ -4533,6 +4420,7 @@
                   "nextPageParaName": "cursor",
                   "pagingInfoPlacement": "QueryString"
                 },
+                "isActive": true,
                 "etag": "*"
               },
               "dependsOn": [],
@@ -4583,6 +4471,7 @@
                   "nextPageParaName": "cursor",
                   "pagingInfoPlacement": "QueryString"
                 },
+                "isActive": true,
                 "etag": "*"
               },
               "dependsOn": [],
@@ -4633,6 +4522,7 @@
                   "nextPageParaName": "cursor",
                   "pagingInfoPlacement": "QueryString"
                 },
+                "isActive": true,
                 "etag": "*"
               },
               "dependsOn": [],
@@ -4684,6 +4574,7 @@
                   "nextPageParaName": "cursor",
                   "pagingInfoPlacement": "QueryString"
                 },
+                "isActive": true,
                 "etag": "*"
               },
               "dependsOn": [],
@@ -4734,6 +4625,7 @@
                   "nextPageParaName": "cursor",
                   "pagingInfoPlacement": "QueryString"
                 },
+                "isActive": true,
                 "etag": "*"
               },
               "dependsOn": [],
