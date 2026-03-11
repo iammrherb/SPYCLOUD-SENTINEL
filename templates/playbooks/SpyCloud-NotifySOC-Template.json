@@ -1,0 +1,226 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "templateMetadata": {
+    "templateVersion": "1.0.0",
+    "templateId": "spycloud-notify-soc",
+    "category": "Notification",
+    "requiredPermissions": [
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.Logic/workflows/write",
+      "Microsoft.Web/connections/write"
+    ],
+    "requiredLicenses": [
+      "Microsoft Sentinel"
+    ],
+    "connectorAssociation": [
+      "azuresentinel",
+      "teams"
+    ],
+    "deployAsTemplate": true
+  },
+  "metadata": {
+    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "title": "SpyCloud - Notify SOC",
+    "description": "Sends a Teams message and incident comment to the SOC team when a SpyCloud credential exposure incident is created. Includes severity details and recommended actions.",
+    "prerequisites": [
+      "Microsoft Sentinel workspace",
+      "Microsoft Teams connector or webhook configured",
+      "SOC Teams channel"
+    ],
+    "lastUpdateTime": "2026-03-11T00:00:00.000Z",
+    "support": { "tier": "community" },
+    "author": { "name": "SpyCloud" },
+    "categories": { "domains": ["Security - Threat Protection"] }
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-NotifySOC",
+      "metadata": { "description": "Name of the Logic App playbook" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "TeamsWebhookUrl": {
+      "type": "securestring",
+      "metadata": { "description": "Microsoft Teams incoming webhook URL for SOC channel notifications" }
+    },
+    "SOCEmailDistributionList": {
+      "type": "string",
+      "defaultValue": "soc@contoso.com",
+      "metadata": { "description": "SOC team email distribution list for fallback notifications" }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Compose_Teams_Card": {
+              "type": "Compose",
+              "inputs": {
+                "@@type": "MessageCard",
+                "@@context": "http://schema.org/extensions",
+                "themeColor": "@if(equals(triggerBody()?['object']?['properties']?['severity'], 'High'), 'FF0000', if(equals(triggerBody()?['object']?['properties']?['severity'], 'Medium'), 'FFA500', '0076D7'))",
+                "summary": "SpyCloud Alert: @{triggerBody()?['object']?['properties']?['title']}",
+                "sections": [
+                  {
+                    "activityTitle": "SpyCloud Credential Exposure Alert",
+                    "activitySubtitle": "Incident #@{triggerBody()?['object']?['properties']?['incidentNumber']}",
+                    "facts": [
+                      { "name": "Severity", "value": "@{triggerBody()?['object']?['properties']?['severity']}" },
+                      { "name": "Title", "value": "@{triggerBody()?['object']?['properties']?['title']}" },
+                      { "name": "Status", "value": "@{triggerBody()?['object']?['properties']?['status']}" },
+                      { "name": "Created", "value": "@{triggerBody()?['object']?['properties']?['createdTimeUtc']}" },
+                      { "name": "Alert Count", "value": "@{length(triggerBody()?['object']?['properties']?['alerts'])}" }
+                    ],
+                    "markdown": true
+                  }
+                ],
+                "potentialAction": [
+                  {
+                    "@@type": "OpenUri",
+                    "name": "View in Sentinel",
+                    "targets": [
+                      {
+                        "os": "default",
+                        "uri": "@{triggerBody()?['object']?['properties']?['incidentUrl']}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Post_To_Teams_Webhook": {
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "@parameters('TeamsWebhookUrl')",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": "@outputs('Compose_Teams_Card')"
+              },
+              "runAfter": {
+                "Compose_Teams_Card": ["Succeeded"]
+              }
+            },
+            "Add_SOC_Notification_Comment": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/incident-comments",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "message": "<p><strong>SpyCloud-NotifySOC:</strong> SOC team notified via Teams channel. Incident severity: <strong>@{triggerBody()?['object']?['properties']?['severity']}</strong>.</p>"
+                }
+              },
+              "runAfter": {
+                "Post_To_Teams_Webhook": ["Succeeded"]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "TeamsWebhookUrl": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('TeamsWebhookUrl')]"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  }
+}

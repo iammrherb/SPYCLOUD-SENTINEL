@@ -1,0 +1,310 @@
+# SpyCloud Exposure API Rule Templates
+# These templates detect threats using SpyCloud Exposure API data, providing visibility
+# into credentials and PII exposed through breaches, infostealers, and other sources.
+# Deploy with enabled: true after configuring required data sources.
+
+templateVersion: "1.0.0"
+templateId: spycloud-exposure-templates
+category: SpyCloud Exposure Detection
+deployAsTemplate: true
+requiredDataSources:
+  - SpyCloud Exposure
+  - Microsoft Entra ID Sign-in Logs
+  - Microsoft Entra ID Audit Logs
+  - Microsoft Sentinel UEBA
+requiredTables:
+  - SpyCloudExposure_CL
+  - SigninLogs
+  - AuditLogs
+  - BehaviorAnalytics
+  - OfficeActivity
+connectorAssociation:
+  - SpyCloud Exposure API
+
+---
+id: sc-070-exposure-critical-severity
+name: SpyCloud Exposure — Critical Severity Credential Exposure
+description: |
+  Detects critical-severity credential exposures from the SpyCloud Exposure API.
+  Critical exposures indicate credentials stolen by active infostealers with high confidence,
+  requiring immediate remediation including password reset and session revocation.
+severity: High
+enabled: false
+queryFrequency: 30m
+queryPeriod: 30m
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1555
+  - T1078
+query: |
+  SpyCloudExposure_CL
+  | where TimeGenerated > ago(30m)
+  | where severity_d >= 20
+  | where isnotempty(email_s)
+  | summarize ExposureCount = count(), PasswordTypes = make_set(password_type_s), MaxSeverity = max(severity_d), Sources = make_set(source_id_s), MachineIds = make_set(infected_machine_id_s) by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-071-exposure-corporate-credential-third-party
+name: SpyCloud Exposure — Corporate Credential on Third-Party Service
+description: |
+  Detects corporate email credentials exposed on third-party services via the Exposure API.
+  Employees using corporate email addresses on external services create attack surface
+  through credential stuffing and password reuse.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1078.004
+  - T1110.004
+query: |
+  let corporateDomains = _GetWatchlist('SpyCloud-Approved-Domains') | project SearchKey;
+  SpyCloudExposure_CL
+  | where TimeGenerated > ago(24h)
+  | where email_domain_s in (corporateDomains)
+  | where isnotempty(target_domain_s)
+  | where target_domain_s !in (corporateDomains)
+  | summarize ThirdPartySites = make_set(target_domain_s), SiteCount = dcount(target_domain_s), ExposureCount = count() by email_s, email_domain_s
+  | where SiteCount >= 2
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-072-exposure-active-signin-correlation
+name: SpyCloud Exposure + Entra ID — Exposure with Subsequent Sign-in
+description: |
+  Correlates SpyCloud Exposure API data with successful Entra ID sign-ins.
+  Detects when a user with recently exposed credentials authenticates successfully,
+  potentially indicating exploitation of stolen credentials.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - CredentialAccess
+techniques:
+  - T1078
+  - T1078.004
+query: |
+  let exposedUsers = SpyCloudExposure_CL
+  | where TimeGenerated > ago(7d)
+  | where severity_d >= 20
+  | summarize ExposureTime = min(TimeGenerated), MaxSev = max(severity_d), PasswordExposed = make_set(password_type_s) by email_s;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where ResultType == 0
+  | join kind=inner exposedUsers on $left.UserPrincipalName == $right.email_s
+  | where TimeGenerated > ExposureTime
+  | project TimeGenerated, UserPrincipalName, IPAddress, AppDisplayName, MaxSev, ExposureTime, PasswordExposed, Location, ConditionalAccessStatus
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-073-exposure-bulk-domain-breach
+name: SpyCloud Exposure — Bulk Domain Credential Exposure
+description: |
+  Detects when a large number of credentials from a single corporate domain are exposed
+  simultaneously, indicating a major breach event affecting the organization.
+  Triggers coordinated incident response across affected accounts.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 6h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Reconnaissance
+techniques:
+  - T1589.001
+  - T1078
+query: |
+  let corporateDomains = _GetWatchlist('SpyCloud-Approved-Domains') | project SearchKey;
+  SpyCloudExposure_CL
+  | where TimeGenerated > ago(6h)
+  | where email_domain_s in (corporateDomains)
+  | summarize AffectedUsers = dcount(email_s), UserList = make_set(email_s, 20), MaxSeverity = max(severity_d), Sources = make_set(source_id_s) by email_domain_s
+  | where AffectedUsers >= 10
+
+---
+id: sc-074-exposure-password-hash-crackable
+name: SpyCloud Exposure — Crackable Password Hash Detected
+description: |
+  Detects exposed credentials where password hashes use weak algorithms (MD5, SHA1, unsalted)
+  that are easily crackable. These exposures are nearly equivalent to plaintext passwords
+  and require immediate password reset.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+techniques:
+  - T1110.002
+  - T1552
+query: |
+  SpyCloudExposure_CL
+  | where TimeGenerated > ago(1h)
+  | where password_type_s in ("md5", "sha1", "sha256_unsalted", "ntlm", "des", "lm")
+  | where isnotempty(email_s)
+  | summarize WeakHashCount = count(), HashTypes = make_set(password_type_s), Domains = make_set(target_domain_s) by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-075-exposure-ip-geolocation-anomaly
+name: SpyCloud Exposure — Infection IP Geolocation Anomaly
+description: |
+  Detects exposures where the infected device IP geolocation does not match the user's
+  expected location (based on Entra ID sign-in history). Suggests the credentials were
+  stolen from an unexpected location or by a remote access trojan.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+  - T1090
+query: |
+  let userLocations = SigninLogs
+  | where TimeGenerated > ago(30d)
+  | where ResultType == 0
+  | extend Country = tostring(LocationDetails.countryOrRegion)
+  | summarize KnownCountries = make_set(Country) by UserPrincipalName;
+  SpyCloudExposure_CL
+  | where TimeGenerated > ago(6h)
+  | where severity_d >= 20 and isnotempty(country_code_s)
+  | join kind=inner userLocations on $left.email_s == $right.UserPrincipalName
+  | where country_code_s !in (KnownCountries)
+  | project TimeGenerated, email_s, country_code_s, KnownCountries, infected_machine_id_s, severity_d
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-076-exposure-recurrent-user
+name: SpyCloud Exposure — Recurrently Exposed User
+description: |
+  Detects users who appear in multiple SpyCloud exposure events across different breach sources
+  over time, indicating persistent targeting or repeated credential compromise.
+  These users may need enhanced monitoring and security controls.
+severity: Medium
+enabled: false
+queryFrequency: 12h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Persistence
+techniques:
+  - T1078
+  - T1110
+query: |
+  SpyCloudExposure_CL
+  | where TimeGenerated > ago(30d)
+  | where isnotempty(email_s) and severity_d >= 10
+  | summarize ExposureCount = count(), DistinctSources = dcount(source_id_s), DateRange = make_set(bin(TimeGenerated, 1d)), MaxSeverity = max(severity_d) by email_s, email_domain_s
+  | where DistinctSources >= 3
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-077-exposure-admin-privileged-account
+name: SpyCloud Exposure + Entra ID — Privileged Account Exposure
+description: |
+  Detects exposure of credentials belonging to privileged/admin accounts by correlating
+  SpyCloud Exposure data with Entra ID directory roles. Compromised admin credentials
+  represent the highest-risk scenario requiring immediate action.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - PrivilegeEscalation
+techniques:
+  - T1078.004
+  - T1552
+query: |
+  let adminUsers = AuditLogs
+  | where TimeGenerated > ago(90d)
+  | where OperationName has "Add member to role"
+  | extend RoleName = tostring(TargetResources[0].modifiedProperties[1].newValue)
+  | where RoleName has_any ("Global Administrator", "Privileged Role Administrator", "Security Administrator", "Exchange Administrator", "SharePoint Administrator")
+  | extend AdminUPN = tostring(TargetResources[0].userPrincipalName)
+  | distinct AdminUPN;
+  SpyCloudExposure_CL
+  | where TimeGenerated > ago(1h)
+  | where email_s in (adminUsers)
+  | summarize ExposureCount = count(), MaxSeverity = max(severity_d), PasswordTypes = make_set(password_type_s), Sources = make_set(source_id_s) by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain

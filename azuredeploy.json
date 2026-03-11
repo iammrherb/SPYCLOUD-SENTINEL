@@ -3,8 +3,8 @@
   "contentVersion": "1.0.0.0",
   "metadata": {
     "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel",
-    "description": "Complete deployment of SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel. Includes: CCF data connector (9 REST API pollers covering Enterprise Breach Watchlist, Breach Catalog, Compass Data/Devices/Applications, SIP Cookies, Identity Exposure, and Investigations APIs), 10 custom Log Analytics tables, 10 remediation playbooks, 49 analytics rules, Fusion multistage ML detection, MSIC rules, UEBA/Anomaly settings, 4 automation rules, 28 hunting queries, 4 watchlists, 3 workbooks, TI enrichment playbook, and Security Copilot integration (90 KQL skills + 20 API skills + 17 sub-agent investigation agent).",
-    "version": "8.0.0",
+    "description": "Complete deployment of SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel v9.0. Template-based deployment with separate workbooks and connector-associated analytics. Includes: CCF data connector (13 REST API pollers covering Enterprise Breach, Compass, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP APIs), 14 custom Log Analytics tables, playbook templates (14 remediation playbooks), analytics rule templates (60+ rules), Fusion multistage ML detection, MSIC rules, UEBA/Anomaly settings, automation rule templates, 28 hunting queries, 4 watchlists, 14 focused workbooks, TI enrichment, Jupyter notebooks with Investigations API, and Security Copilot integration (90+ KQL skills + 35+ API skills + 17 sub-agent investigation agent with OpenAI GPT-4o support).",
+    "version": "9.0.0",
     "author": "SpyCloud"
   },
   "parameters": {
@@ -981,7 +981,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "OPTIONAL: Separate API key for SpyCloud Compass endpoints. If blank, the main SpyCloud API key is used. Only needed if your Compass subscription uses a different API key than your Enterprise subscription."
+        "description": "DEPRECATED: Compass uses the same API key as Enterprise. This parameter is kept for backward compatibility. Leave blank - the main SpyCloud API key is automatically used for Compass endpoints."
       }
     },
     "enableSip": {
@@ -1018,12 +1018,82 @@
       "metadata": {
         "description": "OPTIONAL: Separate API key for SpyCloud Investigations endpoints. If blank, the main SpyCloud API key is used. Only needed if your Investigations subscription uses a different API key."
       }
+    },
+    "enableIdLink": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "OPTIONAL: Enable SpyCloud IDLINK connector for identity correlation and graph analysis. IDLINK correlates fragmented identity data across breaches to build unified identity graphs. Requires IDLINK API entitlement and a dedicated API key."
+      }
+    },
+    "idlinkApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "REQUIRED when enableIdLink is TRUE: Dedicated API key for the SpyCloud IDLINK service. This is a separate key from your Enterprise key."
+      }
+    },
+    "enableDataPartnership": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "OPTIONAL: Enable SpyCloud Data Partnership connector for partner-contributed darknet intelligence. Requires Data Partnership API entitlement and a dedicated API key."
+      }
+    },
+    "dataPartnershipApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "REQUIRED when enableDataPartnership is TRUE: Dedicated API key for the SpyCloud Data Partnership service."
+      }
+    },
+    "enableExposure": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "OPTIONAL: Enable SpyCloud Exposure connector for aggregated exposure risk assessments with scoring, timeline analysis, and remediation recommendations. Requires Exposure API entitlement and a dedicated API key."
+      }
+    },
+    "exposureApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "REQUIRED when enableExposure is TRUE: Dedicated API key for the SpyCloud Exposure service."
+      }
+    },
+    "enableCAP": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "OPTIONAL: Enable SpyCloud CAP (Credential Access Program) connector for automated credential access protection policies, automated password resets, and credential lifecycle management. Requires CAP API entitlement and a dedicated API key."
+      }
+    },
+    "capApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "REQUIRED when enableCAP is TRUE: Dedicated API key for the SpyCloud CAP service."
+      }
+    },
+    "enableOpenAIIntegration": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "OPTIONAL: Enable OpenAI GPT-4o integration for advanced AI-powered analysis skills including executive summaries, threat narratives, compliance assessments, and report generation."
+      }
+    },
+    "openAIApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "OPTIONAL: OpenAI API key for GPT-4o analysis skills. Required when enableOpenAIIntegration is TRUE. Get from platform.openai.com/api-keys."
+      }
     }
   },
   "variables": {
     "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
     "_solutionName": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
-    "_solutionVersion": "8.1.0",
+    "_solutionVersion": "9.0.0",
     "_solutionAuthor": "SpyCloud",
     "_solutionId": "azuresentinel.azure-sentinel-solution-spycloud-threatintel",
     "dataConnectorVersionConnectorDefinition": "1.1.0",
@@ -1042,6 +1112,10 @@
     "_logAnalyticsTableId5": "SpyCloudSipCookies_CL",
     "_logAnalyticsTableId6": "SpyCloudIdentityExposure_CL",
     "_logAnalyticsTableId7": "SpyCloudInvestigations_CL",
+    "_logAnalyticsTableId8": "SpyCloudIdLink_CL",
+    "_logAnalyticsTableId9": "SpyCloudDataPartnership_CL",
+    "_logAnalyticsTableId10": "SpyCloudExposure_CL",
+    "_logAnalyticsTableId11": "SpyCloudCAP_CL",
     "dataCollectionEndpointId1": "[concat('/subscriptions/',parameters('subscription'),'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Insights/dataCollectionEndpoints/',parameters('dataCollectionEndpointName'))]",
     "_effectiveWorkspaceLocation": "[if(empty(parameters('workspaceRegionOverride')), parameters('deploymentRegion'), parameters('workspaceRegionOverride'))]",
     "_dcrDisplayName": "[concat('SpyCloud ThreatIntel DCR for ', take(parameters('workspace'), 30))]",
@@ -2017,6 +2091,154 @@
               "name": "record_type",
               "type": "string"
             }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "condition": "[parameters('enableIdLink')]",
+      "name": "[concat(parameters('workspace'), '/SpyCloudIdLink_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudIdLink_CL",
+          "columns": [
+            { "name": "TimeGenerated", "type": "datetime" },
+            { "name": "identity_id", "type": "string" },
+            { "name": "email", "type": "string" },
+            { "name": "email_domain", "type": "string" },
+            { "name": "linked_emails", "type": "dynamic" },
+            { "name": "linked_usernames", "type": "dynamic" },
+            { "name": "linked_ips", "type": "dynamic" },
+            { "name": "linked_devices", "type": "dynamic" },
+            { "name": "link_strength", "type": "real" },
+            { "name": "link_type", "type": "string" },
+            { "name": "breach_sources", "type": "dynamic" },
+            { "name": "first_seen", "type": "string" },
+            { "name": "last_seen", "type": "string" },
+            { "name": "total_exposures", "type": "int" },
+            { "name": "risk_score", "type": "int" },
+            { "name": "graph_depth", "type": "int" },
+            { "name": "log_id", "type": "string" }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "condition": "[parameters('enableDataPartnership')]",
+      "name": "[concat(parameters('workspace'), '/SpyCloudDataPartnership_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudDataPartnership_CL",
+          "columns": [
+            { "name": "TimeGenerated", "type": "datetime" },
+            { "name": "document_id", "type": "string" },
+            { "name": "partner_id", "type": "string" },
+            { "name": "partner_name", "type": "string" },
+            { "name": "email", "type": "string" },
+            { "name": "email_domain", "type": "string" },
+            { "name": "username", "type": "string" },
+            { "name": "domain", "type": "string" },
+            { "name": "password", "type": "string" },
+            { "name": "password_type", "type": "string" },
+            { "name": "severity", "type": "int" },
+            { "name": "source_type", "type": "string" },
+            { "name": "source_description", "type": "string" },
+            { "name": "ip_addresses", "type": "dynamic" },
+            { "name": "country_code", "type": "string" },
+            { "name": "data_classes", "type": "dynamic" },
+            { "name": "spycloud_publish_date", "type": "string" },
+            { "name": "log_id", "type": "string" }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "condition": "[parameters('enableExposure')]",
+      "name": "[concat(parameters('workspace'), '/SpyCloudExposure_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudExposure_CL",
+          "columns": [
+            { "name": "TimeGenerated", "type": "datetime" },
+            { "name": "email", "type": "string" },
+            { "name": "email_domain", "type": "string" },
+            { "name": "exposure_id", "type": "string" },
+            { "name": "risk_score", "type": "int" },
+            { "name": "risk_level", "type": "string" },
+            { "name": "total_breaches", "type": "int" },
+            { "name": "total_infostealers", "type": "int" },
+            { "name": "total_credentials", "type": "int" },
+            { "name": "plaintext_passwords", "type": "int" },
+            { "name": "hashed_passwords", "type": "int" },
+            { "name": "stolen_cookies", "type": "int" },
+            { "name": "infected_devices", "type": "int" },
+            { "name": "first_exposure_date", "type": "string" },
+            { "name": "latest_exposure_date", "type": "string" },
+            { "name": "remediation_status", "type": "string" },
+            { "name": "remediation_actions", "type": "dynamic" },
+            { "name": "data_classes_exposed", "type": "dynamic" },
+            { "name": "breach_sources", "type": "dynamic" },
+            { "name": "timeline", "type": "dynamic" },
+            { "name": "log_id", "type": "string" }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "condition": "[parameters('enableCAP')]",
+      "name": "[concat(parameters('workspace'), '/SpyCloudCAP_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudCAP_CL",
+          "columns": [
+            { "name": "TimeGenerated", "type": "datetime" },
+            { "name": "cap_id", "type": "string" },
+            { "name": "email", "type": "string" },
+            { "name": "email_domain", "type": "string" },
+            { "name": "policy_id", "type": "string" },
+            { "name": "policy_name", "type": "string" },
+            { "name": "action_type", "type": "string" },
+            { "name": "action_status", "type": "string" },
+            { "name": "trigger_severity", "type": "int" },
+            { "name": "trigger_source", "type": "string" },
+            { "name": "credential_type", "type": "string" },
+            { "name": "reset_timestamp", "type": "string" },
+            { "name": "notification_sent", "type": "boolean" },
+            { "name": "affected_applications", "type": "dynamic" },
+            { "name": "compliance_tags", "type": "dynamic" },
+            { "name": "log_id", "type": "string" }
           ]
         },
         "retentionInDays": "[parameters('retentionInDays')]",
@@ -3139,6 +3361,310 @@
               }
             ]
           },
+          "Custom-SpyCloudIdLink_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "identity_id",
+                "type": "string"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "linked_emails",
+                "type": "dynamic"
+              },
+              {
+                "name": "linked_usernames",
+                "type": "dynamic"
+              },
+              {
+                "name": "linked_ips",
+                "type": "dynamic"
+              },
+              {
+                "name": "linked_devices",
+                "type": "dynamic"
+              },
+              {
+                "name": "link_strength",
+                "type": "real"
+              },
+              {
+                "name": "link_type",
+                "type": "string"
+              },
+              {
+                "name": "breach_sources",
+                "type": "dynamic"
+              },
+              {
+                "name": "first_seen",
+                "type": "string"
+              },
+              {
+                "name": "last_seen",
+                "type": "string"
+              },
+              {
+                "name": "total_exposures",
+                "type": "int"
+              },
+              {
+                "name": "risk_score",
+                "type": "int"
+              },
+              {
+                "name": "graph_depth",
+                "type": "int"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudDataPartnership_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "document_id",
+                "type": "string"
+              },
+              {
+                "name": "partner_id",
+                "type": "string"
+              },
+              {
+                "name": "partner_name",
+                "type": "string"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "username",
+                "type": "string"
+              },
+              {
+                "name": "domain",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "source_type",
+                "type": "string"
+              },
+              {
+                "name": "source_description",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "country_code",
+                "type": "string"
+              },
+              {
+                "name": "data_classes",
+                "type": "dynamic"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudExposure_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "exposure_id",
+                "type": "string"
+              },
+              {
+                "name": "risk_score",
+                "type": "int"
+              },
+              {
+                "name": "risk_level",
+                "type": "string"
+              },
+              {
+                "name": "total_breaches",
+                "type": "int"
+              },
+              {
+                "name": "total_infostealers",
+                "type": "int"
+              },
+              {
+                "name": "total_credentials",
+                "type": "int"
+              },
+              {
+                "name": "plaintext_passwords",
+                "type": "int"
+              },
+              {
+                "name": "hashed_passwords",
+                "type": "int"
+              },
+              {
+                "name": "stolen_cookies",
+                "type": "int"
+              },
+              {
+                "name": "infected_devices",
+                "type": "int"
+              },
+              {
+                "name": "first_exposure_date",
+                "type": "string"
+              },
+              {
+                "name": "latest_exposure_date",
+                "type": "string"
+              },
+              {
+                "name": "remediation_status",
+                "type": "string"
+              },
+              {
+                "name": "remediation_actions",
+                "type": "dynamic"
+              },
+              {
+                "name": "data_classes_exposed",
+                "type": "dynamic"
+              },
+              {
+                "name": "breach_sources",
+                "type": "dynamic"
+              },
+              {
+                "name": "timeline",
+                "type": "dynamic"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudCAP_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "cap_id",
+                "type": "string"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "policy_id",
+                "type": "string"
+              },
+              {
+                "name": "policy_name",
+                "type": "string"
+              },
+              {
+                "name": "action_type",
+                "type": "string"
+              },
+              {
+                "name": "action_status",
+                "type": "string"
+              },
+              {
+                "name": "trigger_severity",
+                "type": "int"
+              },
+              {
+                "name": "trigger_source",
+                "type": "string"
+              },
+              {
+                "name": "credential_type",
+                "type": "string"
+              },
+              {
+                "name": "reset_timestamp",
+                "type": "string"
+              },
+              {
+                "name": "notification_sent",
+                "type": "boolean"
+              },
+              {
+                "name": "affected_applications",
+                "type": "dynamic"
+              },
+              {
+                "name": "compliance_tags",
+                "type": "dynamic"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              }
+            ]
+          },
           "Custom-Spycloud_MDE_Logs_CL": {
             "columns": [
               {
@@ -3339,6 +3865,46 @@
           },
           {
             "streams": [
+              "Custom-SpyCloudIdLink_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend linked_emails = iff(gettype(linked_emails) == 'string', parse_json(linked_emails), linked_emails) | extend linked_usernames = iff(gettype(linked_usernames) == 'string', parse_json(linked_usernames), linked_usernames) | extend linked_ips = iff(gettype(linked_ips) == 'string', parse_json(linked_ips), linked_ips) | extend linked_devices = iff(gettype(linked_devices) == 'string', parse_json(linked_devices), linked_devices) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend risk_score = toint(risk_score) | extend total_exposures = toint(total_exposures) | extend graph_depth = toint(graph_depth) | extend link_strength = todouble(link_strength)",
+            "outputStream": "Custom-SpyCloudIdLink_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudDataPartnership_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend severity = toint(severity) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend data_classes = iff(gettype(data_classes) == 'string', parse_json(data_classes), data_classes)",
+            "outputStream": "Custom-SpyCloudDataPartnership_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudExposure_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend risk_score = toint(risk_score) | extend total_breaches = toint(total_breaches) | extend total_infostealers = toint(total_infostealers) | extend total_credentials = toint(total_credentials) | extend plaintext_passwords = toint(plaintext_passwords) | extend hashed_passwords = toint(hashed_passwords) | extend stolen_cookies = toint(stolen_cookies) | extend infected_devices = toint(infected_devices) | extend remediation_actions = iff(gettype(remediation_actions) == 'string', parse_json(remediation_actions), remediation_actions) | extend data_classes_exposed = iff(gettype(data_classes_exposed) == 'string', parse_json(data_classes_exposed), data_classes_exposed) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend timeline = iff(gettype(timeline) == 'string', parse_json(timeline), timeline)",
+            "outputStream": "Custom-SpyCloudExposure_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudCAP_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend trigger_severity = toint(trigger_severity) | extend notification_sent = tobool(notification_sent) | extend affected_applications = iff(gettype(affected_applications) == 'string', parse_json(affected_applications), affected_applications) | extend compliance_tags = iff(gettype(compliance_tags) == 'string', parse_json(compliance_tags), compliance_tags)",
+            "outputStream": "Custom-SpyCloudCAP_CL"
+          },
+          {
+            "streams": [
               "Custom-Spycloud_MDE_Logs_CL"
             ],
             "destinations": [
@@ -3371,7 +3937,11 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassApplications_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudSipCookies_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudIdentityExposure_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudInvestigations_CL')]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudInvestigations_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudIdLink_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudDataPartnership_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudExposure_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCAP_CL')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -3451,7 +4021,7 @@
           "id": "SpyCloudCCF",
           "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n## SpyCloud Enterprise Protection for Microsoft Sentinel\n\n[SpyCloud](https://spycloud.com) transforms recaptured darknet data into automated threat response. This connector ingests compromised credentials, infostealer artifacts, and identity exposures into Sentinel for detection, investigation, and remediation.\n\n### Capabilities\n\n| Feature | Details |\n|---------|--------|\n| **Data Ingestion** | 10 custom tables via 9 REST API pollers (CCF) |\n| **Detection** | 49 analytics rules \u2014 scheduled, NRT, Fusion |\n| **Response** | 10 automated playbooks \u2014 identity, device, network |\n| **Hunting** | 28 pre-built hunting queries |\n| **Dashboards** | 3 workbooks \u2014 Executive, SOC, Threat Intel |\n| **Copilot** | 90 KQL + 20 API + 17 sub-agent skills |\n\n### Requirements\n\n- SpyCloud Enterprise API key ([portal.spycloud.com](https://portal.spycloud.com))\n- Microsoft Sentinel Contributor role\n- Monitoring Metrics Publisher role on the DCR",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n## SpyCloud Enterprise Protection for Microsoft Sentinel v9.0\n\n[SpyCloud](https://spycloud.com) transforms recaptured darknet data into automated threat response. This connector ingests compromised credentials, infostealer artifacts, and identity exposures into Sentinel for detection, investigation, and remediation.\n\n### Capabilities\n\n| Feature | Details |\n|---------|--------|\n| **Data Ingestion** | 14 custom tables via 13 REST API pollers (CCF) |\n| **APIs Supported** | Enterprise, Compass, SIP, Investigations, IDLINK, Data Partnership, Exposure, CAP |\n| **Detection** | 60+ analytics rule templates \u2014 scheduled, NRT, Fusion |\n| **Response** | 14 playbook templates \u2014 identity, device, network, investigation |\n| **Hunting** | 28 pre-built hunting queries |\n| **Dashboards** | 14 focused workbooks (one per data source) |\n| **Copilot** | 90+ KQL + 35+ API + 17 sub-agent skills + GPT-4o |\n| **Notebooks** | 3 Jupyter notebooks with Investigations API |\n\n### API Key Configuration\n\n| API | Key Type | Notes |\n|-----|----------|-------|\n| **Enterprise + Compass** | Shared key | Same API key for both |\n| **SIP** | Separate key | Session Identity Protection |\n| **Investigations** | Separate key | Full database search |\n| **IDLINK** | Separate key | Identity correlation |\n| **Data Partnership** | Separate key | Partner intelligence |\n| **Exposure** | Separate key | Risk assessment |\n| **CAP** | Separate key | Credential Access Program |\n\n### Settings & Management\n\nUse the **Settings** tab below to:\n- Add or modify API keys for each SpyCloud API\n- Enable/disable individual API pollers\n- Deploy analytics rule templates\n- Deploy playbook templates\n- Configure workbooks\n- Manage table retention\n- Redeploy or reinstall components\n\n### Requirements\n\n- SpyCloud Enterprise API key ([portal.spycloud.com](https://portal.spycloud.com))\n- Additional API keys for IDLINK, Data Partnership, Exposure, CAP (separate entitlements)\n- Microsoft Sentinel Contributor role\n- Monitoring Metrics Publisher role on the DCR",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -3503,6 +4073,26 @@
               "metricName": "Total Investigation Records",
               "legend": "SpyCloud Investigations",
               "baseQuery": "SpyCloudInvestigations_CL"
+            },
+            {
+              "metricName": "Total IDLINK Records",
+              "legend": "SpyCloud IDLINK",
+              "baseQuery": "SpyCloudIdLink_CL"
+            },
+            {
+              "metricName": "Total Data Partnership Records",
+              "legend": "SpyCloud Data Partnership",
+              "baseQuery": "SpyCloudDataPartnership_CL"
+            },
+            {
+              "metricName": "Total Exposure Records",
+              "legend": "SpyCloud Exposure",
+              "baseQuery": "SpyCloudExposure_CL"
+            },
+            {
+              "metricName": "Total CAP Records",
+              "legend": "SpyCloud CAP",
+              "baseQuery": "SpyCloudCAP_CL"
             }
           ],
           "sampleQueries": [
@@ -3623,6 +4213,22 @@
             {
               "name": "SpyCloudInvestigations_CL",
               "lastDataReceivedQuery": "SpyCloudInvestigations_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudIdLink_CL",
+              "lastDataReceivedQuery": "SpyCloudIdLink_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudDataPartnership_CL",
+              "lastDataReceivedQuery": "SpyCloudDataPartnership_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudExposure_CL",
+              "lastDataReceivedQuery": "SpyCloudExposure_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCAP_CL",
+              "lastDataReceivedQuery": "SpyCloudCAP_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
             }
           ],
           "connectivityCriteria": [
@@ -3673,32 +4279,29 @@
           "instructionSteps": [
             {
               "title": "Step 1 \u2014 API Keys",
-              "description": "Enter your SpyCloud API keys. Get them from [portal.spycloud.com](https://portal.spycloud.com) > Account Settings > API Keys.",
+              "description": "Enter your SpyCloud API keys. Enterprise and Compass share the same key. Other APIs require separate keys from their respective entitlements. Get keys from [portal.spycloud.com](https://portal.spycloud.com) > Account Settings > API Keys.",
               "instructions": [
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "SpyCloud Enterprise API Key",
+                    "label": "SpyCloud Enterprise/Compass API Key (required)",
                     "name": "apiKey",
-                    "placeholder": "Enter your SpyCloud Enterprise API key (required)",
+                    "placeholder": "Enter your SpyCloud API key (used for Enterprise + Compass)",
                     "type": "password"
+                  }
+                },
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "Enterprise and Compass APIs use the SAME key. If you have Compass entitlement (Enterprise+ tier), it will automatically work with this key."
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "Compass API Key (optional)",
-                    "name": "compassApiKey",
-                    "placeholder": "Leave blank to use Enterprise key for Compass",
-                    "type": "password"
-                  }
-                },
-                {
-                  "type": "Textbox",
-                  "parameters": {
-                    "label": "SIP API Key (optional)",
+                    "label": "SIP API Key (optional \u2014 separate entitlement)",
                     "name": "sipApiKey",
-                    "placeholder": "Leave blank to use Enterprise key for SIP",
+                    "placeholder": "Leave blank to use Enterprise key, or enter dedicated SIP key",
                     "type": "password"
                   }
                 },
@@ -3708,6 +4311,60 @@
                     "label": "SIP Cookie Domain",
                     "name": "sipCookieDomain",
                     "placeholder": "e.g., example.com (required when SIP is enabled)"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "Investigations API Key (optional \u2014 separate entitlement)",
+                    "name": "investigationsApiKey",
+                    "placeholder": "Leave blank to use Enterprise key, or enter dedicated key",
+                    "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "IDLINK API Key (separate entitlement required)",
+                    "name": "idlinkApiKey",
+                    "placeholder": "Enter your IDLINK API key (requires IDLINK entitlement)",
+                    "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "Data Partnership API Key (separate entitlement required)",
+                    "name": "dataPartnershipApiKey",
+                    "placeholder": "Enter your Data Partnership API key",
+                    "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "Exposure API Key (separate entitlement required)",
+                    "name": "exposureApiKey",
+                    "placeholder": "Enter your Exposure API key",
+                    "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "CAP API Key (separate entitlement required)",
+                    "name": "capApiKey",
+                    "placeholder": "Enter your CAP (Credential Access Program) API key",
+                    "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "OpenAI API Key (optional \u2014 for GPT-4o analysis skills)",
+                    "name": "openAIApiKey",
+                    "placeholder": "Enter your OpenAI API key for advanced AI analysis",
+                    "type": "password"
                   }
                 }
               ]
@@ -3944,6 +4601,54 @@
                   "type": "InfoMessage",
                   "parameters": {
                     "text": "After connecting, verify data ingestion by running this query in Log Analytics:\n\n```kql\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog')\n| project Table, Records, Latest\n| order by Table asc\n```\n\n**Support:** support@spycloud.com"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Settings \u2014 API Management",
+              "description": "Manage your SpyCloud API configurations, enable/disable individual API pollers, and modify API keys without redeploying the connector.",
+              "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "### API Status & Management\n\n| API | Table | Key Type | Status |\n|-----|-------|----------|--------|\n| **Enterprise + Compass** | SpyCloudBreachWatchlist_CL, SpyCloudCompassData_CL | Shared key | Active when connected |\n| **SIP** | SpyCloudSipCookies_CL | Separate or shared | Requires SIP entitlement |\n| **Investigations** | SpyCloudInvestigations_CL | Separate or shared | Requires Investigations entitlement |\n| **IDLINK** | SpyCloudIdLink_CL | Separate key | Requires IDLINK entitlement |\n| **Data Partnership** | SpyCloudDataPartnership_CL | Separate key | Requires Data Partnership entitlement |\n| **Exposure** | SpyCloudExposure_CL | Separate key | Requires Exposure entitlement |\n| **CAP** | SpyCloudCAP_CL | Separate key | Requires CAP entitlement |\n\n### To Add/Modify API Keys\n1. Disconnect the connector (toggle off)\n2. Update the API key fields in Step 1\n3. Reconnect (toggle on)\n\n### To Enable New APIs\n1. Obtain the API key from SpyCloud for the new entitlement\n2. Enter the key in Step 1\n3. The corresponding table will be created automatically\n4. Deploy associated analytics/workbook templates from the Templates gallery"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Settings \u2014 Templates & Deployment",
+              "description": "Deploy and manage analytics rules, playbooks, workbooks, and other components from templates. Templates are connector-associated and can be individually enabled.",
+              "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "### Template Deployment\n\nAll analytics rules, playbooks, and workbooks are deployed as **templates** for maximum flexibility:\n\n**Analytics Rule Templates (60+ rules)**\n- Navigate to: Sentinel > Analytics > Rule Templates > filter by 'SpyCloud'\n- Each template shows its connector association and required data sources\n- Enable individual rules based on your environment and APIs\n\n**Playbook Templates (14 playbooks)**\n- Navigate to: Sentinel > Automation > Playbook Templates > filter by 'SpyCloud'\n- Deploy playbooks for your specific API entitlements\n- New: InvestigationsLookup, IdLinkCorrelation, ExposureAssessment, CAPResponse\n\n**Workbook Templates (14 workbooks)**\n- Navigate to: Sentinel > Workbooks > Templates > filter by 'SpyCloud'\n- Each workbook focuses on a single data source (not multi-tab)\n- Deploy only workbooks for APIs you have enabled\n\n**Notebook Templates (3 notebooks)**\n- Navigate to: Sentinel > Notebooks > filter by 'SpyCloud'\n- Includes Investigations API integration for interactive analysis\n\n### Reinstall / Redeploy\nTo reinstall any component:\n1. Delete the existing resource (rule/playbook/workbook)\n2. Re-deploy from the template gallery\n3. Reconfigure any required settings (API keys, managed identity permissions)"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Settings \u2014 Table Management",
+              "description": "View and manage custom SpyCloud tables, retention settings, and data routing.",
+              "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "### Custom Tables\n\n| Table | API Source | Records | Status |\n|-------|-----------|---------|--------|\n| SpyCloudBreachWatchlist_CL | Enterprise | `SpyCloudBreachWatchlist_CL \\| count` | Always created |\n| SpyCloudBreachCatalog_CL | Enterprise | `SpyCloudBreachCatalog_CL \\| count` | Always created |\n| SpyCloudIdentityExposure_CL | Identity | `SpyCloudIdentityExposure_CL \\| count` | Always created |\n| SpyCloudCompassData_CL | Compass | `SpyCloudCompassData_CL \\| count` | Enterprise+ |\n| SpyCloudCompassDevices_CL | Compass | `SpyCloudCompassDevices_CL \\| count` | Enterprise+ |\n| SpyCloudCompassApplications_CL | Compass | `SpyCloudCompassApplications_CL \\| count` | Enterprise+ |\n| SpyCloudSipCookies_CL | SIP | `SpyCloudSipCookies_CL \\| count` | SIP entitlement |\n| SpyCloudInvestigations_CL | Investigations | `SpyCloudInvestigations_CL \\| count` | Investigations entitlement |\n| SpyCloudIdLink_CL | IDLINK | `SpyCloudIdLink_CL \\| count` | IDLINK entitlement |\n| SpyCloudDataPartnership_CL | Data Partnership | `SpyCloudDataPartnership_CL \\| count` | Data Partnership entitlement |\n| SpyCloudExposure_CL | Exposure | `SpyCloudExposure_CL \\| count` | Exposure entitlement |\n| SpyCloudCAP_CL | CAP | `SpyCloudCAP_CL \\| count` | CAP entitlement |\n| Spycloud_MDE_Logs_CL | Internal | `Spycloud_MDE_Logs_CL \\| count` | Playbook-generated |\n| SpyCloud_ConditionalAccessLogs_CL | Internal | `SpyCloud_ConditionalAccessLogs_CL \\| count` | Playbook-generated |\n\n### Full Health Check Query\n```kql\nunion\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudIdentityExposure_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Identity'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass'),\n  (SpyCloudSipCookies_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='SIP'),\n  (SpyCloudInvestigations_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Investigations'),\n  (SpyCloudIdLink_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='IDLINK'),\n  (SpyCloudDataPartnership_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Partnership'),\n  (SpyCloudExposure_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Exposure'),\n  (SpyCloudCAP_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CAP')\n| project Table, Records, Latest\n| order by Table asc\n```\n\n### Modify Retention\nTo change retention for any table: Azure Portal > Log Analytics > Tables > select table > Properties > change Interactive Retention"
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Settings \u2014 Security Copilot",
+              "description": "Configure Security Copilot plugins and agents for SpyCloud integration.",
+              "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "### Security Copilot Integration\n\n**3 Plugin Files to Upload:**\n\n1. **KQL Plugin** (`SpyCloud_Plugin.yaml`) - 90+ skills\n   - No API key required (uses Sentinel workspace)\n   - Queries all 14 custom tables via KQL\n\n2. **API Plugin** (`SpyCloud_API_Plugin.yaml`) - 35+ skills\n   - Requires SpyCloud API key(s)\n   - Direct REST calls to all 9 SpyCloud APIs\n   - Supports per-API key configuration\n\n3. **Investigation Agent** (`SpyCloud_Agent.yaml`) - 58+ skills\n   - 17 specialized sub-agents\n   - 6 GPT-4o AI analysis skills (requires OpenAI key)\n   - Cross-platform: Sentinel, Defender XDR, Intune, Entra\n\n**To Install:** Security Copilot > Sources > Manage Plugins > Custom > Add Plugin\n\n**API Key Mapping for Copilot:**\n- Enterprise + Compass: Single API key\n- Each additional API (IDLINK, Exposure, etc.): Configure as separate settings in the plugin\n\n**OpenAI Integration:**\nFor GPT-4o analysis skills (executive briefings, threat narratives, compliance reports), enter your OpenAI API key in the Agent settings."
                   }
                 }
               ]
@@ -4547,11 +5252,9 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/data/watchlist",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/data/identities",
                   "httpMethod": "GET",
-                  "queryParameters": {
-                    "type": "corporate"
-                  },
+                  "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
@@ -4601,6 +5304,210 @@
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/investigations-v2/data/emails",
+                  "httpMethod": "GET",
+                  "queryParameters": {},
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "startTimeAttributeName": "since",
+                  "rateLimitQPS": 2,
+                  "headers": {
+                    "Accept": "application/json"
+                  },
+                  "queryTimeFormat": "yyyy-MM-dd"
+                },
+                "response": {
+                  "eventsJsonPaths": [
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
+                },
+                "isActive": true,
+                "etag": "*"
+              },
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+              "apiVersion": "2023-12-01-preview",
+              "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudIdLinkConnector')]",
+              "condition": "[parameters('enableIdLink')]",
+              "kind": "RestApiPoller",
+              "properties": {
+                "connectorDefinitionName": "SpyCloudCCF",
+                "dcrConfig": {
+                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "streamName": "Custom-SpyCloudIdLink_CL"
+                },
+                "dataType": "SpyCloud IdLink",
+                "auth": {
+                  "type": "APIKey",
+                  "ApiKeyName": "X-Api-Key",
+                  "ApiKey": "[[parameters('idlinkApiKey')]"
+                },
+                "request": {
+                  "apiEndpoint": "https://api.spycloud.io/idlink-v1/identity/links",
+                  "httpMethod": "GET",
+                  "queryParameters": {},
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "startTimeAttributeName": "since",
+                  "rateLimitQPS": 2,
+                  "headers": {
+                    "Accept": "application/json"
+                  },
+                  "queryTimeFormat": "yyyy-MM-dd"
+                },
+                "response": {
+                  "eventsJsonPaths": [
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
+                },
+                "isActive": true,
+                "etag": "*"
+              },
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+              "apiVersion": "2023-12-01-preview",
+              "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudDataPartnershipConnector')]",
+              "condition": "[parameters('enableDataPartnership')]",
+              "kind": "RestApiPoller",
+              "properties": {
+                "connectorDefinitionName": "SpyCloudCCF",
+                "dcrConfig": {
+                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "streamName": "Custom-SpyCloudDataPartnership_CL"
+                },
+                "dataType": "SpyCloud DataPartnership",
+                "auth": {
+                  "type": "APIKey",
+                  "ApiKeyName": "X-Api-Key",
+                  "ApiKey": "[[parameters('dataPartnershipApiKey')]"
+                },
+                "request": {
+                  "apiEndpoint": "https://api.spycloud.io/data-partnership-v1/breach/data",
+                  "httpMethod": "GET",
+                  "queryParameters": {},
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "startTimeAttributeName": "since",
+                  "rateLimitQPS": 2,
+                  "headers": {
+                    "Accept": "application/json"
+                  },
+                  "queryTimeFormat": "yyyy-MM-dd"
+                },
+                "response": {
+                  "eventsJsonPaths": [
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
+                },
+                "isActive": true,
+                "etag": "*"
+              },
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+              "apiVersion": "2023-12-01-preview",
+              "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudExposureConnector')]",
+              "condition": "[parameters('enableExposure')]",
+              "kind": "RestApiPoller",
+              "properties": {
+                "connectorDefinitionName": "SpyCloudCCF",
+                "dcrConfig": {
+                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "streamName": "Custom-SpyCloudExposure_CL"
+                },
+                "dataType": "SpyCloud Exposure",
+                "auth": {
+                  "type": "APIKey",
+                  "ApiKeyName": "X-Api-Key",
+                  "ApiKey": "[[parameters('exposureApiKey')]"
+                },
+                "request": {
+                  "apiEndpoint": "https://api.spycloud.io/exposure-v1/exposure/data",
+                  "httpMethod": "GET",
+                  "queryParameters": {},
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "startTimeAttributeName": "since",
+                  "rateLimitQPS": 2,
+                  "headers": {
+                    "Accept": "application/json"
+                  },
+                  "queryTimeFormat": "yyyy-MM-dd"
+                },
+                "response": {
+                  "eventsJsonPaths": [
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
+                },
+                "isActive": true,
+                "etag": "*"
+              },
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+              "apiVersion": "2023-12-01-preview",
+              "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCAPConnector')]",
+              "condition": "[parameters('enableCAP')]",
+              "kind": "RestApiPoller",
+              "properties": {
+                "connectorDefinitionName": "SpyCloudCCF",
+                "dcrConfig": {
+                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "streamName": "Custom-SpyCloudCAP_CL"
+                },
+                "dataType": "SpyCloud CAP",
+                "auth": {
+                  "type": "APIKey",
+                  "ApiKeyName": "X-Api-Key",
+                  "ApiKey": "[[parameters('capApiKey')]"
+                },
+                "request": {
+                  "apiEndpoint": "https://api.spycloud.io/cap-v1/credentials/actions",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",

@@ -16,7 +16,7 @@
   "contact_email": "support@spycloud.com",
   "legal_info_url": "https://spycloud.com/terms",
   "privacy_policy_url": "https://spycloud.com/privacy",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "capabilities": {
     "plugins": [
       {
@@ -80,10 +80,11 @@
         "url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin.yaml",
         "openapi_spec": "SpyCloud_API_Plugin_OpenAPI.yaml",
         "openapi_spec_url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml",
-        "skill_count": 20,
-        "auth": "API Key (X-API-Key header)",
-        "description": "Direct REST API access to SpyCloud for real-time darknet intelligence lookups without requiring Sentinel data ingestion.",
-        "required_settings": ["SpyCloud API Key"],
+        "skill_count": 35,
+        "auth": "API Key (X-API-Key header, per-API keys for IDLINK/DataPartnership/Exposure/CAP)",
+        "description": "Direct REST API access to SpyCloud for real-time darknet intelligence lookups across Enterprise, Compass, Identity, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP APIs.",
+        "required_settings": ["SpyCloud Enterprise/Compass API Key"],
+        "optional_settings": ["IDLINK API Key", "Data Partnership API Key", "Exposure API Key", "CAP API Key"],
         "api_coverage": [
           {
             "api": "Enterprise Breach API",
@@ -104,6 +105,22 @@
           {
             "api": "Investigations API",
             "skills": ["InvestigateByEmail", "InvestigateByDomain", "InvestigateByIp", "InvestigateByUsername", "InvestigateByPassword"]
+          },
+          {
+            "api": "IDLINK API",
+            "skills": ["IdLinkLookupByEmail", "IdLinkLookupByDomain", "IdLinkGetIdentity", "IdLinkGetIdentityGraph"]
+          },
+          {
+            "api": "Data Partnership API",
+            "skills": ["DataPartnershipLookupByEmail", "DataPartnershipLookupByDomain", "DataPartnershipListCatalog"]
+          },
+          {
+            "api": "Exposure API",
+            "skills": ["ExposureLookupByEmail", "ExposureLookupByDomain", "ExposureLookupByIp", "ExposureGetSummary"]
+          },
+          {
+            "api": "CAP API",
+            "skills": ["CAPLookupByEmail", "CAPLookupByDomain", "CAPListPolicies", "CAPTriggerReset"]
           }
         ]
       },
@@ -296,9 +313,37 @@
           "description": "CA remediation audit log - password resets, session revocations, CA group assignments (internal, not API-sourced)",
           "api_source": "Internal (playbook-generated)",
           "always_enabled": true
+        },
+        {
+          "name": "SpyCloudIdLink_CL",
+          "columns": 17,
+          "description": "IDLINK identity correlation - unified identity graphs, linked accounts/devices/credentials across breaches",
+          "api_source": "IDLINK API (idlink/data)",
+          "requires": "IDLINK API entitlement (enableIdLink, separate API key)"
+        },
+        {
+          "name": "SpyCloudDataPartnership_CL",
+          "columns": 18,
+          "description": "Partner-contributed darknet intelligence from trusted data sharing partnerships",
+          "api_source": "Data Partnership API (data-partnership/data)",
+          "requires": "Data Partnership API entitlement (enableDataPartnership, separate API key)"
+        },
+        {
+          "name": "SpyCloudExposure_CL",
+          "columns": 21,
+          "description": "Aggregated exposure risk assessments with scoring, timeline analysis, and remediation recommendations",
+          "api_source": "Exposure API (exposure/data)",
+          "requires": "Exposure API entitlement (enableExposure, separate API key)"
+        },
+        {
+          "name": "SpyCloudCAP_CL",
+          "columns": 16,
+          "description": "Credential Access Program - automated credential protection policies, resets, and lifecycle management",
+          "api_source": "CAP API (cap/data)",
+          "requires": "CAP API entitlement (enableCAP, separate API key)"
         }
       ],
-      "analytics_rules": 49,
+      "analytics_rules": "60+ (deployed as templates)",
       "hunting_queries": 28,
       "playbooks": [
         "SpyCloud-ForcePasswordReset",
@@ -310,13 +355,29 @@
         "SpyCloud-NotifyUser",
         "SpyCloud-NotifySOC",
         "SpyCloud-EnrichIncident",
-        "SpyCloud-FullRemediation"
+        "SpyCloud-FullRemediation",
+        "SpyCloud-InvestigationsLookup",
+        "SpyCloud-IdLinkCorrelation",
+        "SpyCloud-ExposureAssessment",
+        "SpyCloud-CAPResponse"
       ],
+      "playbook_deployment": "Templates (deploy from Sentinel > Automation > Playbook Templates)",
       "workbooks": [
-        "SpyCloud-Executive-Dashboard",
-        "SpyCloud-ThreatIntel-Dashboard",
-        "SpyCloud-SOC-Operations"
+        "SpyCloud-BreachWatchlist-Workbook",
+        "SpyCloud-BreachCatalog-Workbook",
+        "SpyCloud-IdentityExposure-Workbook",
+        "SpyCloud-Compass-Workbook",
+        "SpyCloud-SIP-Workbook",
+        "SpyCloud-Investigations-Workbook",
+        "SpyCloud-IdLink-Workbook",
+        "SpyCloud-Exposure-Workbook",
+        "SpyCloud-CAP-Workbook",
+        "SpyCloud-Remediation-Workbook",
+        "SpyCloud-Executive-Summary-Workbook",
+        "SpyCloud-SOC-Operations-Workbook",
+        "SpyCloud-ConnectorHealth-Workbook"
       ],
+      "workbook_deployment": "Separate focused workbooks (one per data source, not multi-tab)",
       "notebooks": [
         "SpyCloud-Incident-Triage",
         "SpyCloud-ThreatHunting",
@@ -340,11 +401,15 @@
       "Microsoft Security Copilot"
     ],
     "spycloud_apis": [
-      "Enterprise Breach API",
-      "Compass Investigation API",
+      "Enterprise Breach API (shared key with Compass)",
+      "Compass Investigation API (shared key with Enterprise)",
       "Identity Exposure API",
       "Session Identity Protection (SIP) API",
-      "Investigations API"
+      "Investigations API",
+      "IDLINK API (separate key)",
+      "Data Partnership API (separate key)",
+      "Exposure API (separate key)",
+      "CAP API (separate key)"
     ],
     "mitre_attack_coverage": [
       "T1078 - Valid Accounts",

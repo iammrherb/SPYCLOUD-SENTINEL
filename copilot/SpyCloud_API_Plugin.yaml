@@ -1,10 +1,10 @@
 Descriptor:
   Name: SpyCloudAPIPlugin
   DisplayName: SpyCloud API Plugin
-  Description: "Direct REST API access to SpyCloud for real-time darknet lookups by email, domain, IP, or username across Breach, Compass, Identity, and SIP APIs."
+  Description: "Comprehensive REST API access to all SpyCloud product APIs for real-time darknet intelligence: Enterprise (breach and infostealer lookups by email, domain, IP, username, password), Compass (deep underground investigations), Identity (exposure profiles and watchlists), SIP (stolen session cookies), Investigations (full-database cybercrime searches), IDLINK (identity resolution and relationship graphs), Data Partnership (partner data catalog and lookups), Exposure (risk-scored exposure assessments), and CAP (credential automated policies and resets). Note: Enterprise and Compass share the same API key."
   DescriptionDisplay: default
   Category: Other
-  Version: 8.0.0
+  Version: 9.0.0
   SupportedAuthTypes:
     - APIKey
   Authorization:
@@ -620,3 +620,406 @@ SkillGroups:
             Required: false
         Settings:
           OpenApiOperationId: getIdentityWatchlist
+
+      # =====================================================================
+      # IDLINK API - IDENTITY RESOLUTION & RELATIONSHIP GRAPHS
+      # =====================================================================
+
+      - Name: IdLinkLookupByEmail
+        DisplayName: Look up identity links for an email
+        Description: "Queries the SpyCloud IDLINK API to resolve all identity fragments linked to an email address across the SpyCloud dataset. Returns associated usernames, phone numbers, addresses, social media handles, alternative emails, and other PII that have been observed alongside the queried email in breach and infostealer records. Use this to map the full digital footprint of an identity and discover linked accounts that may also be compromised. Requires IDLINK API entitlement."
+        ExamplePrompts:
+          - Look up identity links for this email in SpyCloud IDLINK
+          - What identities are linked to this email address
+          - Resolve all accounts connected to this email via IDLINK
+          - Map the digital footprint for this email using SpyCloud
+          - Find linked usernames and phone numbers for this email
+          - What other identities are associated with this email
+        Inputs:
+          - Name: email
+            Description: The email address to look up identity links for.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date (YYYY-MM-DD).
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: idLinkLookupByEmail
+
+      - Name: IdLinkLookupByDomain
+        DisplayName: Look up identity links for a domain
+        Description: "Queries the SpyCloud IDLINK API to resolve all identity fragments linked to a corporate domain. Returns aggregated identity linkages for all users under the domain including associated personal emails, phone numbers, social profiles, and alternative credentials discovered in breach and infostealer data. Use this for organization-wide identity mapping and to discover shadow IT or personal account usage by employees. Requires IDLINK API entitlement."
+        ExamplePrompts:
+          - Look up identity links for this domain in SpyCloud IDLINK
+          - What identities are linked to users at this domain
+          - Map all identity connections for this organization via IDLINK
+          - Find linked personal accounts for employees at this domain
+          - Discover shadow IT accounts linked to this corporate domain
+          - IDLINK domain-wide identity resolution for this organization
+        Inputs:
+          - Name: domain
+            Description: The domain to look up identity links for (e.g., example.com).
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: idLinkLookupByDomain
+
+      - Name: IdLinkGetIdentity
+        DisplayName: Get unified identity profile
+        Description: "Retrieves a unified identity profile from the SpyCloud IDLINK API that consolidates all known attributes and credentials for a resolved identity. Returns a deduplicated view of the identity including all associated emails, usernames, passwords, phone numbers, addresses, and device fingerprints observed across multiple breaches and infostealer infections. Use this after an IDLINK lookup to get the full composite picture of a compromised identity. Requires IDLINK API entitlement."
+        ExamplePrompts:
+          - Get the unified identity profile from SpyCloud IDLINK
+          - Show the full IDLINK identity record for this user
+          - Retrieve the consolidated identity from SpyCloud IDLINK
+          - What is the complete identity profile in IDLINK
+          - Get all known attributes for this identity via IDLINK
+          - Pull the full IDLINK identity composite
+        Inputs:
+          - Name: identity_id
+            Description: The SpyCloud IDLINK identity identifier to retrieve the unified profile for.
+            Required: true
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: idLinkGetIdentity
+
+      - Name: IdLinkGetIdentityGraph
+        DisplayName: Get identity relationship graph
+        Description: "Retrieves the identity relationship graph from the SpyCloud IDLINK API showing how identities, credentials, devices, and accounts are interconnected. Returns nodes representing identity elements (emails, usernames, devices, IPs) and edges representing observed relationships between them across breach and infostealer datasets. Use this for visual link analysis, lateral movement path discovery, and understanding the full blast radius of a compromised credential. Requires IDLINK API entitlement."
+        ExamplePrompts:
+          - Get the identity relationship graph from SpyCloud IDLINK
+          - Show the IDLINK graph for this identity
+          - Map identity connections and relationships via IDLINK
+          - Visualize the identity graph for this user in SpyCloud
+          - What is the relationship graph for this identity in IDLINK
+          - Show lateral movement paths using the IDLINK identity graph
+        Inputs:
+          - Name: identity_id
+            Description: The SpyCloud IDLINK identity identifier to retrieve the relationship graph for.
+            Required: true
+          - Name: depth
+            Description: "Maximum relationship depth to traverse (default 1). Higher values return more distant connections."
+            Required: false
+          - Name: limit
+            Description: Maximum nodes per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: idLinkGetIdentityGraph
+
+      # =====================================================================
+      # DATA PARTNERSHIP API - PARTNER DATA CATALOG & LOOKUPS
+      # =====================================================================
+
+      - Name: DataPartnershipLookupByEmail
+        DisplayName: Search partner data by email
+        Description: "Queries the SpyCloud Data Partnership API for partner-sourced intelligence records associated with an email address. Returns data from SpyCloud's network of trusted data partners including additional breach sources, underground forum activity, paste site appearances, and supplementary threat intelligence not available through the standard Enterprise API. Use this to enrich investigations with partner-exclusive data and expand coverage beyond SpyCloud's primary collection. Requires Data Partnership API entitlement."
+        ExamplePrompts:
+          - Search SpyCloud partner data for this email address
+          - Look up partner intelligence for this email
+          - What partner data exists for this email in SpyCloud
+          - Check SpyCloud Data Partnership records for this email
+          - Find additional breach data from partners for this email
+          - Enrich this email investigation with SpyCloud partner data
+        Inputs:
+          - Name: email
+            Description: The email address to search in partner datasets.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date (YYYY-MM-DD).
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: dataPartnershipLookupByEmail
+
+      - Name: DataPartnershipLookupByDomain
+        DisplayName: Search partner data by domain
+        Description: "Queries the SpyCloud Data Partnership API for partner-sourced intelligence records associated with a corporate domain. Returns aggregated partner data for all identities under the domain including supplementary breach records, underground marketplace listings, and additional threat context from SpyCloud's partner network. Use this for comprehensive domain-wide exposure assessments that include partner-exclusive sources. Requires Data Partnership API entitlement."
+        ExamplePrompts:
+          - Search SpyCloud partner data for this domain
+          - Look up partner intelligence for this organization
+          - What partner breach data exists for this domain
+          - Check Data Partnership records for all users at this domain
+          - Enrich domain investigation with SpyCloud partner sources
+          - Get additional partner data for this corporate domain
+        Inputs:
+          - Name: domain
+            Description: The domain to search in partner datasets (e.g., example.com).
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: dataPartnershipLookupByDomain
+
+      - Name: DataPartnershipListCatalog
+        DisplayName: Browse partner data catalog
+        Description: "Returns the SpyCloud Data Partnership catalog listing all available partner data sources, their descriptions, data types, coverage areas, record counts, and freshness indicators. Use this to understand what partner-sourced intelligence is available, evaluate coverage gaps, and identify relevant partner datasets for specific investigation needs. Requires Data Partnership API entitlement."
+        ExamplePrompts:
+          - Show the SpyCloud Data Partnership catalog
+          - List all available partner data sources in SpyCloud
+          - What partner datasets are available in SpyCloud
+          - Browse the Data Partnership catalog
+          - What types of partner intelligence does SpyCloud offer
+          - Show available partner data sources and their coverage
+        Inputs:
+          - Name: query
+            Description: Free-text search to filter partner catalog entries by name or description.
+            Required: false
+          - Name: since
+            Description: Filter to partner sources updated on or after this date.
+            Required: false
+          - Name: until
+            Description: Filter to partner sources updated on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum entries per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: dataPartnershipListCatalog
+
+      # =====================================================================
+      # EXPOSURE API - RISK-SCORED EXPOSURE ASSESSMENTS
+      # =====================================================================
+
+      - Name: ExposureLookupByEmail
+        DisplayName: Get exposure assessment for email
+        Description: "Queries the SpyCloud Exposure API for a risk-scored exposure assessment of an email address. Returns a comprehensive exposure report including breach count, infostealer infection count, credential exposure timeline, data class breakdown, severity distribution, and an overall exposure risk score. Unlike the Identity API which focuses on identity deduplication, this endpoint provides a quantitative risk assessment optimized for security operations and compliance reporting. Requires Exposure API entitlement."
+        ExamplePrompts:
+          - Get the exposure assessment for this email from SpyCloud
+          - What is the exposure risk score for this email address
+          - Run a SpyCloud Exposure API check on this email
+          - Assess dark web exposure risk for this email
+          - Get the quantitative exposure report for this user
+          - Check SpyCloud Exposure data for this email address
+        Inputs:
+          - Name: email
+            Description: The email address to assess exposure for.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date (YYYY-MM-DD).
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: exposureLookupByEmail
+
+      - Name: ExposureLookupByDomain
+        DisplayName: Get exposure assessment for domain
+        Description: "Queries the SpyCloud Exposure API for a risk-scored exposure assessment of all identities under a corporate domain. Returns an aggregated exposure report with total breach count, infected employee count, credential exposure trends, severity distribution across the organization, and a domain-level exposure risk score. Use this for executive-level reporting on organizational darknet exposure and to benchmark security posture over time. Requires Exposure API entitlement."
+        ExamplePrompts:
+          - Get the exposure assessment for this domain from SpyCloud
+          - What is the organizational exposure risk score for this domain
+          - Run a SpyCloud Exposure check on this corporate domain
+          - Assess dark web exposure risk across this organization
+          - Get the domain-level exposure report from SpyCloud
+          - Check SpyCloud Exposure data for all users at this domain
+        Inputs:
+          - Name: domain
+            Description: The domain to assess exposure for (e.g., example.com).
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: exposureLookupByDomain
+
+      - Name: ExposureLookupByIp
+        DisplayName: Get exposure assessment for IP
+        Description: "Queries the SpyCloud Exposure API for a risk-scored exposure assessment of an IP address. Returns an exposure report showing how many breaches and infostealer infections are associated with the IP, what identities have been compromised from that address, and the overall risk level. Use this to assess whether a network address is associated with significant credential theft activity and to prioritize network-based remediation. Requires Exposure API entitlement."
+        ExamplePrompts:
+          - Get the exposure assessment for this IP from SpyCloud
+          - What is the exposure risk score for this IP address
+          - Run a SpyCloud Exposure check on this IP
+          - Assess dark web exposure risk for this network address
+          - How many compromised identities are linked to this IP
+          - Check SpyCloud Exposure data for this IP address
+        Inputs:
+          - Name: ip
+            Description: The IPv4 or IPv6 address to assess exposure for.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: exposureLookupByIp
+
+      - Name: ExposureGetSummary
+        DisplayName: Get comprehensive exposure summary with risk score
+        Description: "Retrieves a comprehensive exposure summary from the SpyCloud Exposure API that aggregates all exposure data into a single risk-scored dashboard view. Returns total exposure counts, breach timelines, severity trends, data class heatmaps, top compromised credentials, most-targeted applications, infection source breakdown, and an overall composite risk score with contributing factors. Use this for executive dashboards, board-level reporting, and holistic organizational risk assessment. Requires Exposure API entitlement."
+        ExamplePrompts:
+          - Get the comprehensive exposure summary from SpyCloud
+          - Show the overall exposure risk dashboard for this organization
+          - What is the composite exposure risk score from SpyCloud
+          - Pull the full exposure summary report from SpyCloud
+          - Get the executive exposure dashboard from SpyCloud Exposure API
+          - Show the exposure trend and risk score summary
+        Inputs:
+          - Name: domain
+            Description: The domain to generate the exposure summary for.
+            Required: true
+          - Name: since
+            Description: Return data from on or after this date (YYYY-MM-DD).
+            Required: false
+          - Name: until
+            Description: Return data from on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: exposureGetSummary
+
+      # =====================================================================
+      # CAP API - CREDENTIAL AUTOMATED POLICIES & RESETS
+      # =====================================================================
+
+      - Name: CAPLookupByEmail
+        DisplayName: Look up CAP data for email
+        Description: "Queries the SpyCloud Credential Automated Protection (CAP) API for policy-driven exposure data associated with an email address. Returns CAP-specific records indicating whether the email has triggered any active credential reset policies, the current remediation state, policy match details, and automated action history. Use this to check if a specific user has been flagged for automated credential reset and to review their remediation status. Requires CAP API entitlement."
+        ExamplePrompts:
+          - Look up CAP data for this email in SpyCloud
+          - Has this email triggered any CAP credential reset policies
+          - Check SpyCloud CAP status for this user
+          - What is the CAP remediation state for this email
+          - Is this email flagged for automated password reset in CAP
+          - Check credential automated protection status for this email
+        Inputs:
+          - Name: email
+            Description: The email address to look up in CAP.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date (YYYY-MM-DD).
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: capLookupByEmail
+
+      - Name: CAPLookupByDomain
+        DisplayName: Look up CAP data for domain
+        Description: "Queries the SpyCloud Credential Automated Protection (CAP) API for policy-driven exposure data across all identities under a corporate domain. Returns aggregated CAP records showing which employees have triggered credential reset policies, their remediation states, policy match counts, and automated action summaries. Use this for organization-wide visibility into CAP-driven remediation and to identify users with outstanding credential resets. Requires CAP API entitlement."
+        ExamplePrompts:
+          - Look up CAP data for this domain in SpyCloud
+          - Which employees have triggered CAP policies at this domain
+          - Check SpyCloud CAP status for this organization
+          - Show outstanding credential resets for this domain in CAP
+          - Get domain-wide CAP remediation report from SpyCloud
+          - How many users at this domain need credential resets via CAP
+        Inputs:
+          - Name: domain
+            Description: The domain to look up in CAP (e.g., example.com).
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: capLookupByDomain
+
+      - Name: CAPListPolicies
+        DisplayName: List active CAP policies
+        Description: "Returns all active Credential Automated Protection (CAP) policies configured for the organization. Each policy defines the criteria (severity thresholds, data classes, breach types, infection types) that trigger automated credential resets, the target identity populations, notification settings, and integration configurations. Use this to audit the current CAP policy configuration, verify coverage, and ensure policies align with the organization's security requirements. Requires CAP API entitlement."
+        ExamplePrompts:
+          - List all active CAP policies in SpyCloud
+          - Show the credential reset policies configured in CAP
+          - What CAP policies are currently active
+          - Audit the SpyCloud CAP policy configuration
+          - Show all automated credential reset rules in SpyCloud
+          - What triggers an automated password reset in CAP
+        Inputs:
+          - Name: state
+            Description: "Filter by policy state: active or inactive."
+            Required: false
+          - Name: limit
+            Description: Maximum entries per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: capListPolicies
+
+      - Name: CAPTriggerReset
+        DisplayName: Trigger automated credential reset
+        Description: "Triggers an automated credential reset action through the SpyCloud Credential Automated Protection (CAP) API for a specific identity. This initiates the configured remediation workflow which may include password reset enforcement via integrated identity providers (Azure AD, Okta, etc.), user notification, helpdesk ticket creation, and SIEM alert generation. Use this when manual intervention is needed to force a credential reset for a compromised identity outside of normal policy-driven automation. Requires CAP API entitlement and appropriate permissions."
+        ExamplePrompts:
+          - Trigger a CAP credential reset for this email
+          - Force a password reset via SpyCloud CAP for this user
+          - Initiate automated credential reset through CAP
+          - Reset this user's credentials using SpyCloud CAP
+          - Trigger CAP remediation workflow for this compromised user
+          - Force credential reset via CAP for this identity
+        Inputs:
+          - Name: email
+            Description: The email address of the identity to trigger the credential reset for.
+            Required: true
+          - Name: policy_id
+            Description: The CAP policy ID to use for the reset action. If omitted, the default policy is applied.
+            Required: false
+          - Name: reason
+            Description: Reason or justification for triggering the manual reset.
+            Required: false
+        Settings:
+          OpenApiOperationId: capTriggerReset

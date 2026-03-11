@@ -1,0 +1,388 @@
+# SpyCloud Advanced Threat Detection Rule Templates
+# These templates provide advanced multi-stage, cross-signal, and threat intelligence correlation rules.
+# Deploy with enabled: true after configuring required data sources.
+
+templateVersion: "1.0.0"
+templateId: spycloud-advanced-threat-templates
+category: SpyCloud Advanced Threat Detection
+deployAsTemplate: true
+requiredDataSources:
+  - SpyCloud Breach Watchlist
+  - SpyCloud Breach Catalog
+  - SpyCloud Compass Devices
+  - SpyCloud Conditional Access Logs
+  - Microsoft Entra ID Sign-in Logs
+  - Microsoft Entra ID Audit Logs
+  - Office 365 Activity Logs
+  - Microsoft Defender for Endpoint
+  - Threat Intelligence Indicators
+  - Azure Diagnostics
+  - Common Security Log (CEF)
+requiredTables:
+  - SpyCloudBreachWatchlist_CL
+  - SpyCloudBreachCatalog_CL
+  - SpyCloudCompassDevices_CL
+  - SpyCloud_ConditionalAccessLogs_CL
+  - SigninLogs
+  - AuditLogs
+  - OfficeActivity
+  - DeviceEvents
+  - ThreatIntelligenceIndicator
+  - AzureDiagnostics
+  - CommonSecurityLog
+connectorAssociation:
+  - SpyCloud Enterprise Protection API
+  - SpyCloud Compass API
+  - Microsoft Entra ID
+  - Office 365
+  - Microsoft Defender for Endpoint
+  - Threat Intelligence Platforms
+
+---
+id: sc-040-multistage-exposure-signin-exfil
+name: SpyCloud Multi-Stage — Credential Exposure then Sign-in then Data Access
+description: |
+  Detects a multi-stage attack pattern: SpyCloud credential exposure followed by
+  successful sign-in followed by sensitive data access (SharePoint/OneDrive/Exchange).
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - Collection
+  - Exfiltration
+techniques:
+  - T1078
+  - T1114
+  - T1530
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | summarize ExposureTime = min(TimeGenerated), MaxSev = max(severity) by email;
+  let signedInAfterExposure = SigninLogs
+  | where TimeGenerated > ago(7d) and ResultType == 0
+  | join kind=inner exposedUsers on $left.UserPrincipalName == $right.email
+  | where TimeGenerated > ExposureTime
+  | project UserPrincipalName, SignInTime = TimeGenerated, IPAddress, MaxSev;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where Operation in ("FileDownloaded", "FileAccessed", "MailItemsAccessed", "SearchQueryPerformed")
+  | join kind=inner signedInAfterExposure on $left.UserId == $right.UserPrincipalName
+  | where TimeGenerated > SignInTime
+  | summarize DataAccessCount = count(), Operations = make_set(Operation) by UserId, IPAddress, MaxSev
+  | where DataAccessCount >= 10
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-041-ca-policy-bypass
+name: SpyCloud + CA — Exposed User Bypassing Conditional Access
+description: |
+  Detects exposed users who are successfully authenticating despite Conditional Access
+  policies that should be blocking or restricting access. May indicate CA gap.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+  - InitialAccess
+techniques:
+  - T1078
+  - T1550
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (exposedUsers)
+  | where ResultType == 0
+  | where ConditionalAccessStatus == "notApplied" or ConditionalAccessStatus == "success"
+  | extend CAPolicies = tostring(ConditionalAccessPolicies)
+  | project TimeGenerated, UserPrincipalName, IPAddress, AppDisplayName, ConditionalAccessStatus, AuthenticationRequirement, CAPolicies
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-042-user-reexposed-after-reset
+name: SpyCloud — User Re-exposed After Password Reset
+description: |
+  Detects users who appear in new SpyCloud exposure data after a password reset was performed.
+  May indicate persistent device infection or new breach affecting the user.
+severity: High
+enabled: false
+queryFrequency: 12h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - CredentialAccess
+techniques:
+  - T1078
+  - T1547
+query: |
+  let resetUsers = SpyCloud_ConditionalAccessLogs_CL
+  | where TimeGenerated > ago(30d)
+  | where PasswordReset == true and ActionStatus == "Success"
+  | summarize ResetTime = max(TimeGenerated) by Email;
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(12h)
+  | where severity >= 20
+  | join kind=inner resetUsers on $left.email == $right.Email
+  | where TimeGenerated > ResetTime
+  | project TimeGenerated, email, severity, ResetTime, DaysSinceReset = datetime_diff('day', TimeGenerated, ResetTime), infected_machine_id
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-043-dns-ip-sentinel-ti-match
+name: SpyCloud + TI — IP Address Match in Sentinel Threat Intelligence
+description: |
+  Correlates SpyCloud infected device IP addresses with Sentinel Threat Intelligence indicators.
+  Matches indicate known malicious infrastructure associated with compromised devices.
+severity: High
+enabled: false
+queryFrequency: 6h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CommandAndControl
+techniques:
+  - T1071
+query: |
+  let spycloudIPs = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(30d) and severity >= 20
+  | mv-expand ip = ip_addresses
+  | project SpyCloudIP = tostring(ip), email, severity;
+  ThreatIntelligenceIndicator
+  | where TimeGenerated > ago(30d)
+  | where isnotempty(NetworkIP)
+  | where ExpirationDateTime > now()
+  | join kind=inner spycloudIPs on $left.NetworkIP == $right.SpyCloudIP
+  | project TimeGenerated, NetworkIP, email, severity, ThreatType, Description, ConfidenceScore
+entityMappings:
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: NetworkIP
+
+---
+id: sc-044-azure-firewall-compromised-traffic
+name: SpyCloud + Azure Firewall — Compromised IP Traffic
+description: |
+  Detects Azure Firewall network/application rule hits from SpyCloud-identified compromised IPs.
+  Indicates infected device traffic passing through Azure native firewall.
+severity: Medium
+enabled: false
+queryFrequency: 1h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CommandAndControl
+  - LateralMovement
+techniques:
+  - T1071
+  - T1021
+query: |
+  let exposedIPs = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(30d) and severity >= 20
+  | mv-expand ip = ip_addresses
+  | project ExposedIP = tostring(ip);
+  AzureDiagnostics
+  | where TimeGenerated > ago(1h)
+  | where Category in ("AzureFirewallNetworkRule", "AzureFirewallApplicationRule")
+  | extend SourceIP = extract(@"(\d+\.\d+\.\d+\.\d+)", 1, msg_s)
+  | where SourceIP in (exposedIPs)
+  | project TimeGenerated, SourceIP, msg_s, Category, Resource
+entityMappings:
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: SourceIP
+
+---
+id: sc-045-sensitive-source-breach
+name: SpyCloud — Sensitive Source Breach Detection
+description: |
+  Detects new breaches from sensitive sources in the SpyCloud breach catalog.
+  Sensitive sources may contain highly confidential data requiring special handling.
+severity: High
+enabled: false
+queryFrequency: 12h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Reconnaissance
+techniques:
+  - T1589
+  - T1589.001
+query: |
+  SpyCloudBreachCatalog_CL
+  | where TimeGenerated > ago(24h)
+  | where sensitive_source == true
+  | project TimeGenerated, short_title, site, breach_category, malware_family, num_records, confidence, tlp
+
+---
+id: sc-046-first-time-domain-exposure
+name: SpyCloud — First-Time Domain Exposure Detected
+description: |
+  Detects when a new email domain appears in SpyCloud exposure data for the first time.
+  May indicate a new organizational domain or subsidiary being targeted.
+severity: Medium
+enabled: false
+queryFrequency: 12h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Reconnaissance
+techniques:
+  - T1589
+query: |
+  let knownDomains = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated < ago(12h)
+  | distinct email_domain;
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(12h)
+  | where isnotempty(email_domain)
+  | where email_domain !in (knownDomains)
+  | summarize FirstSeen = min(TimeGenerated), ExposureCount = count(), Users = dcount(email) by email_domain
+
+---
+id: sc-047-credential-theft-tool-on-device
+name: SpyCloud + MDE — Credential Theft Tool on Exposed Device
+description: |
+  Detects execution of known credential theft tools (Mimikatz, LaZagne, etc.) on devices
+  identified by SpyCloud as infected by infostealer malware.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Execution
+techniques:
+  - T1003
+  - T1059
+query: |
+  let infectedHosts = SpyCloudCompassDevices_CL
+  | where TimeGenerated > ago(30d)
+  | distinct user_hostname;
+  DeviceEvents
+  | where TimeGenerated > ago(1h)
+  | where DeviceName in (infectedHosts)
+  | where FileName has_any ("mimikatz", "lazagne", "pypykatz", "secretsdump", "procdump", "ntdsutil", "vaultcmd")
+     or ProcessCommandLine has_any ("sekurlsa", "lsadump", "SAM", "NTDS", "credman", "vault::list")
+  | project TimeGenerated, DeviceName, FileName, ProcessCommandLine, AccountName, InitiatingProcessFileName
+  | extend HostName = DeviceName
+entityMappings:
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: HostName
+
+---
+id: sc-048-exposure-country-signin-mismatch
+name: SpyCloud + Entra ID — Exposure Country vs Sign-in Country Mismatch
+description: |
+  Detects when the country of a SpyCloud infection differs from the user's sign-in country.
+  Geographic mismatch between infection source and authentication source is suspicious.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+query: |
+  let exposedUsersWithCountry = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | where isnotempty(country_code) and isnotempty(email)
+  | summarize ExposureCountries = make_set(country_code) by email;
+  SigninLogs
+  | where TimeGenerated > ago(6h)
+  | where ResultType == 0
+  | extend SignInCountry = tostring(LocationDetails.countryOrRegion)
+  | join kind=inner exposedUsersWithCountry on $left.UserPrincipalName == $right.email
+  | where SignInCountry !in (ExposureCountries)
+  | project TimeGenerated, UserPrincipalName, SignInCountry, ExposureCountries, IPAddress, AppDisplayName
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-049-check-point-compromised-session
+name: SpyCloud + Check Point — Compromised User Session
+description: |
+  Detects Check Point firewall sessions from users with SpyCloud credential exposure.
+  Correlates with Check Point SmartEvent and Identity Awareness logs.
+severity: Medium
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - LateralMovement
+techniques:
+  - T1078
+  - T1133
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  CommonSecurityLog
+  | where TimeGenerated > ago(1h)
+  | where DeviceVendor == "Check Point"
+  | where isnotempty(SourceUserName)
+  | where SourceUserName in (exposedUsers) or SourceUserName has_any (exposedUsers)
+  | project TimeGenerated, SourceUserName, SourceIP, DestinationIP, DeviceProduct, Activity
+  | extend AccountName = tostring(split(SourceUserName, "@")[0]), AccountDomain = tostring(split(SourceUserName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain

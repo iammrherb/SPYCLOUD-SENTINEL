@@ -255,22 +255,153 @@
                 "type": "Microsoft.Common.InfoBox",
                 "visible": true,
                 "options": {
-                  "icon": "Warning",
-                  "text": "Only enable if your SpyCloud subscription includes Enterprise+ tier. Enterprise-only keys will get 403 errors on Compass endpoints."
+                  "icon": "Info",
+                  "text": "Compass uses the SAME API key as Enterprise (entered above). Only enable if your SpyCloud subscription includes Enterprise+ tier. Enterprise-only keys will get 403 errors on Compass endpoints. No separate key is needed."
+                }
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionIdLink",
+            "type": "Microsoft.Common.Section",
+            "label": "IDLINK API (Identity Correlation)",
+            "elements": [
+              {
+                "name": "enableIdLink",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable IDLINK Identity Correlation",
+                "defaultValue": false
+              },
+              {
+                "name": "infoIdLink",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "IDLINK correlates fragmented identity data across breaches to build unified identity graphs showing how accounts, devices, and credentials are connected. Requires IDLINK API entitlement."
                 }
               },
               {
-                "name": "compassApiKey",
+                "name": "idlinkApiKey",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": {
-                  "password": "Compass API Key (optional)",
-                  "confirmPassword": "Confirm Compass API Key"
+                  "password": "IDLINK API Key *",
+                  "confirmPassword": "Confirm IDLINK API Key"
                 },
-                "toolTip": "Separate key for Compass endpoints. Leave blank to use your Enterprise key.",
+                "toolTip": "Dedicated API key for the IDLINK service. This is a separate key from your Enterprise key.",
                 "constraints": {
-                  "required": false
+                  "required": true
                 },
-                "visible": "[steps('connectorConfig').sectionCompass.enableCompass]"
+                "visible": "[steps('connectorConfig').sectionIdLink.enableIdLink]"
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionDataPartnership",
+            "type": "Microsoft.Common.Section",
+            "label": "Data Partnership API",
+            "elements": [
+              {
+                "name": "enableDataPartnership",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Data Partnership Intelligence",
+                "defaultValue": false
+              },
+              {
+                "name": "infoDataPartnership",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Data Partnership API provides access to partner-contributed darknet intelligence and threat data from trusted data sharing partnerships. Requires Data Partnership API entitlement."
+                }
+              },
+              {
+                "name": "dataPartnershipApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Data Partnership API Key *",
+                  "confirmPassword": "Confirm Data Partnership API Key"
+                },
+                "toolTip": "Dedicated API key for the Data Partnership service.",
+                "constraints": {
+                  "required": true
+                },
+                "visible": "[steps('connectorConfig').sectionDataPartnership.enableDataPartnership]"
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionExposure",
+            "type": "Microsoft.Common.Section",
+            "label": "Exposure API (Risk Assessment)",
+            "elements": [
+              {
+                "name": "enableExposure",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Exposure Risk Assessment",
+                "defaultValue": false
+              },
+              {
+                "name": "infoExposure",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Exposure API provides aggregated exposure assessments with risk scoring, timeline analysis, and remediation recommendations. Requires Exposure API entitlement."
+                }
+              },
+              {
+                "name": "exposureApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Exposure API Key *",
+                  "confirmPassword": "Confirm Exposure API Key"
+                },
+                "toolTip": "Dedicated API key for the Exposure service.",
+                "constraints": {
+                  "required": true
+                },
+                "visible": "[steps('connectorConfig').sectionExposure.enableExposure]"
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionCAP",
+            "type": "Microsoft.Common.Section",
+            "label": "CAP API (Credential Access Program)",
+            "elements": [
+              {
+                "name": "enableCAP",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable CAP Credential Access Protection",
+                "defaultValue": false
+              },
+              {
+                "name": "infoCAP",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "CAP API enables automated credential access protection policies, automated password resets, and credential lifecycle management. Requires CAP API entitlement."
+                }
+              },
+              {
+                "name": "capApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "CAP API Key *",
+                  "confirmPassword": "Confirm CAP API Key"
+                },
+                "toolTip": "Dedicated API key for the CAP service.",
+                "constraints": {
+                  "required": true
+                },
+                "visible": "[steps('connectorConfig').sectionCAP.enableCAP]"
               }
             ],
             "visible": true
@@ -424,8 +555,261 @@
                 "visible": true,
                 "options": {
                   "icon": "Info",
-                  "text": "The following custom log tables will be created based on your selections:\n\n**Always created:**\n- SpyCloudBreachWatchlist_CL\n- SpyCloudBreachCatalog_CL\n- SpyCloudIdentityExposure_CL\n\n**When Compass enabled:**\n- SpyCloudCompassData_CL\n- SpyCloudCompassDevices_CL\n- SpyCloudCompassApplications_CL\n\n**When SIP enabled:**\n- SpyCloudSipCookies_CL\n\n**When Investigations enabled:**\n- SpyCloudInvestigations_CL\n\n**Always created (internal):**\n- Spycloud_MDE_Logs_CL\n- SpyCloud_ConditionalAccessLogs_CL"
+                  "text": "The following custom log tables will be created based on your selections:\n\n**Always created:**\n- SpyCloudBreachWatchlist_CL\n- SpyCloudBreachCatalog_CL\n- SpyCloudIdentityExposure_CL\n\n**When Compass enabled (uses Enterprise key):**\n- SpyCloudCompassData_CL\n- SpyCloudCompassDevices_CL\n- SpyCloudCompassApplications_CL\n\n**When SIP enabled:**\n- SpyCloudSipCookies_CL\n\n**When Investigations enabled:**\n- SpyCloudInvestigations_CL\n\n**When IDLINK enabled:**\n- SpyCloudIdLink_CL\n\n**When Data Partnership enabled:**\n- SpyCloudDataPartnership_CL\n\n**When Exposure enabled:**\n- SpyCloudExposure_CL\n\n**When CAP enabled:**\n- SpyCloudCAP_CL\n\n**Always created (internal):**\n- Spycloud_MDE_Logs_CL\n- SpyCloud_ConditionalAccessLogs_CL"
                 }
+              }
+            ],
+            "visible": true
+          }
+        ]
+      },
+      {
+        "name": "connectorSettings",
+        "label": "Connector Settings",
+        "elements": [
+          {
+            "name": "infoConnectorSettings",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": true,
+            "options": {
+              "icon": "Info",
+              "text": "Configure advanced settings for each enabled connector/API. These settings control data ingestion behavior, filtering, and enrichment options."
+            }
+          },
+          {
+            "name": "sectionEnterpriseSettings",
+            "type": "Microsoft.Common.Section",
+            "label": "Enterprise & Compass Settings",
+            "elements": [
+              {
+                "name": "infoEntCompass",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Enterprise and Compass APIs share the same API key. Configure shared settings here."
+                }
+              },
+              {
+                "name": "spycloudSeverityThreshold",
+                "type": "Microsoft.Common.Slider",
+                "min": 1,
+                "max": 25,
+                "label": "Minimum Severity Threshold",
+                "defaultValue": 2,
+                "showStepMarkers": true,
+                "toolTip": "Only ingest records at or above this severity. 2=Breach, 5=PII, 20=Infostealer, 25=Session Cookie.",
+                "visible": true
+              },
+              {
+                "name": "watchlistDomains",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Watchlist Domains (comma-separated)",
+                "placeholder": "example.com, corp.example.com",
+                "toolTip": "Corporate domains to monitor for credential exposures. These feed the SpyCloudBreachWatchlist_CL table.",
+                "constraints": {
+                  "required": false
+                }
+              },
+              {
+                "name": "enablePIIIngestion",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Ingest PII fields (SSN, address, phone, DOB)",
+                "toolTip": "WARNING: Enabling PII ingestion stores sensitive personal data in your workspace. Ensure compliance with your data handling policies (GDPR, CCPA, etc.).",
+                "defaultValue": false
+              },
+              {
+                "name": "enablePasswordIngestion",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Ingest password fields (plaintext and hashed)",
+                "toolTip": "WARNING: Storing passwords in logs may violate security policies. Recommended for forensic analysis only.",
+                "defaultValue": false
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionInvestigationsSettings",
+            "type": "Microsoft.Common.Section",
+            "label": "Investigations API Settings",
+            "elements": [
+              {
+                "name": "investigationsSearchScope",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Default Search Scope",
+                "toolTip": "Controls the breadth of Investigations API searches.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Targeted (specific emails/domains only)",
+                      "value": "targeted"
+                    },
+                    {
+                      "label": "Broad (includes related identities)",
+                      "value": "broad"
+                    },
+                    {
+                      "label": "Full (all available data)",
+                      "value": "full"
+                    }
+                  ],
+                  "required": true
+                },
+                "defaultValue": "Targeted (specific emails/domains only)",
+                "visible": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]"
+              },
+              {
+                "name": "investigationsNotebookIntegration",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Jupyter Notebook integration for Investigations",
+                "toolTip": "Deploys notebook templates that use the Investigations API for interactive analysis, link analysis, and threat hunting.",
+                "defaultValue": true,
+                "visible": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]"
+              }
+            ],
+            "visible": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]"
+          },
+          {
+            "name": "sectionIdLinkSettings",
+            "type": "Microsoft.Common.Section",
+            "label": "IDLINK Settings",
+            "elements": [
+              {
+                "name": "idlinkGraphDepth",
+                "type": "Microsoft.Common.Slider",
+                "min": 1,
+                "max": 5,
+                "label": "Identity Graph Depth",
+                "defaultValue": 2,
+                "showStepMarkers": true,
+                "toolTip": "How many hops to traverse in the identity graph. Higher values find more connections but increase processing time and data volume.",
+                "visible": true
+              },
+              {
+                "name": "idlinkAutoCorrelate",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Auto-correlate with Sentinel entities",
+                "toolTip": "Automatically cross-reference IDLINK identity graphs with Sentinel account entities for enriched incident context.",
+                "defaultValue": true
+              }
+            ],
+            "visible": "[steps('connectorConfig').sectionIdLink.enableIdLink]"
+          },
+          {
+            "name": "sectionExposureSettings",
+            "type": "Microsoft.Common.Section",
+            "label": "Exposure API Settings",
+            "elements": [
+              {
+                "name": "exposureRiskScoreThreshold",
+                "type": "Microsoft.Common.Slider",
+                "min": 0,
+                "max": 100,
+                "label": "Risk Score Alert Threshold",
+                "defaultValue": 70,
+                "showStepMarkers": false,
+                "toolTip": "Generate alerts for identities with exposure risk scores above this threshold (0-100).",
+                "visible": true
+              },
+              {
+                "name": "exposureAutoRemediate",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable auto-remediation for critical exposures",
+                "toolTip": "Automatically trigger remediation playbooks when exposure risk score exceeds 90.",
+                "defaultValue": false
+              }
+            ],
+            "visible": "[steps('connectorConfig').sectionExposure.enableExposure]"
+          },
+          {
+            "name": "sectionCAPSettings",
+            "type": "Microsoft.Common.Section",
+            "label": "CAP API Settings",
+            "elements": [
+              {
+                "name": "capAutoResetPolicy",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Auto-Reset Policy",
+                "toolTip": "When to automatically trigger credential resets via CAP.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Manual only (no auto-reset)",
+                      "value": "manual"
+                    },
+                    {
+                      "label": "Critical exposures only (severity 25)",
+                      "value": "critical"
+                    },
+                    {
+                      "label": "High and critical (severity 20+)",
+                      "value": "high"
+                    },
+                    {
+                      "label": "All exposures",
+                      "value": "all"
+                    }
+                  ],
+                  "required": true
+                },
+                "defaultValue": "Manual only (no auto-reset)",
+                "visible": true
+              },
+              {
+                "name": "capNotifyOnReset",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Notify users when credentials are reset",
+                "toolTip": "Send email notification to users when CAP triggers a credential reset.",
+                "defaultValue": true
+              }
+            ],
+            "visible": "[steps('connectorConfig').sectionCAP.enableCAP]"
+          },
+          {
+            "name": "sectionCopilotSettings",
+            "type": "Microsoft.Common.Section",
+            "label": "Security Copilot & Agent Settings",
+            "elements": [
+              {
+                "name": "enableCopilotKQLPlugin",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Deploy Security Copilot KQL Plugin (90+ skills)",
+                "toolTip": "Enables Copilot to query all SpyCloud Sentinel tables using KQL.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableCopilotAPIPlugin",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Deploy Security Copilot API Plugin (35+ skills)",
+                "toolTip": "Enables Copilot to make direct REST API calls to SpyCloud for real-time lookups across all enabled APIs.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableCopilotAgent",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Deploy Security Copilot Investigation Agent (58+ skills)",
+                "toolTip": "Full investigation agent with 17 sub-agents, GPT-4o analysis, and cross-platform correlation.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableOpenAIIntegration",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable OpenAI integration for advanced analysis",
+                "toolTip": "Enables GPT-4o powered analysis skills for executive summaries, threat narratives, compliance assessments, and report generation.",
+                "defaultValue": true
+              },
+              {
+                "name": "openAIApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "OpenAI API Key (optional)",
+                  "confirmPassword": "Confirm OpenAI API Key"
+                },
+                "toolTip": "Required for GPT-4o analysis skills. Get from platform.openai.com/api-keys.",
+                "constraints": {
+                  "required": false
+                },
+                "visible": "[steps('connectorSettings').sectionCopilotSettings.enableOpenAIIntegration]"
               }
             ],
             "visible": true
@@ -442,7 +826,7 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "All analytics rule categories are **ENABLED by default** with recommended settings. Rules that require data sources you haven't connected will auto-skip gracefully. You can disable individual rules post-deployment in Sentinel > Analytics. Uncheck categories below only if you explicitly don't want them."
+              "text": "Analytics rules are deployed as **templates** (disabled by default). After deployment, navigate to Sentinel > Analytics > Rule Templates to review and selectively enable rules based on your environment. Templates include connector associations so you can easily identify which rules work with your enabled APIs.\n\nThis template-based approach follows Microsoft's recommended pattern for Sentinel content packages and gives you full control over which rules are active."
             }
           },
           {
@@ -591,8 +975,8 @@
             "type": "Microsoft.Common.InfoBox",
             "visible": true,
             "options": {
-              "icon": "Warning",
-              "text": "Each playbook is a Logic App with a **system-assigned managed identity**. After deployment, you MUST grant API permissions to each playbook's managed identity.\n\n**Post-Deployment Steps (for ALL playbooks):**\n1. Azure Portal > Resource Group > select Logic App\n2. Click 'Identity' in left menu > 'System assigned' tab > copy Object ID\n3. Go to 'Enterprise Applications' > search by Object ID > 'Permissions' > 'Grant admin consent'\n4. Or run: `scripts/grant-permissions.sh` from Cloud Shell\n\n**Required RBAC on the resource group:**\n- Logic App Contributor\n- Managed Identity Operator\n- Microsoft Sentinel Automation Contributor"
+              "icon": "Info",
+              "text": "Playbooks are deployed as **templates** (disabled by default). After deployment, navigate to Sentinel > Automation > Playbook Templates to review and selectively deploy playbooks based on your environment and API entitlements.\n\nEach playbook template includes:\n- Connector association (which API it requires)\n- Required permissions and licenses\n- Managed identity configuration\n- Post-deployment setup instructions\n\n**Post-Deployment Steps (for deployed playbooks):**\n1. Azure Portal > Resource Group > select Logic App\n2. Click 'Identity' > 'System assigned' > copy Object ID\n3. Grant admin consent via Enterprise Applications or run: `scripts/grant-permissions.sh`"
             }
           },
           {
@@ -1817,27 +2201,104 @@
             "label": "Dashboards & Visualization",
             "elements": [
               {
-                "name": "enableWorkbook",
-                "type": "Microsoft.Common.CheckBox",
-                "label": "Deploy SpyCloud Executive Dashboard (8-tab workbook) \u2014 Recommended",
-                "toolTip": "RECOMMENDED \u2014 Rich executive dashboard with risk scores, exposure trends, breach intelligence, remediation metrics, and compliance reporting.",
-                "defaultValue": true
-              },
-              {
-                "name": "enableSocWorkbook",
-                "type": "Microsoft.Common.CheckBox",
-                "label": "Deploy SpyCloud SOC Operations Dashboard (4-tab workbook) \u2014 Recommended",
-                "toolTip": "RECOMMENDED \u2014 Operational dashboard for SOC analysts: live threat feed, investigation hub, correlation matrix, hunting queries, and automation metrics.",
-                "defaultValue": true
-              },
-              {
-                "name": "infoBox33",
+                "name": "infoWorkbooksApproach",
                 "type": "Microsoft.Common.InfoBox",
                 "visible": true,
                 "options": {
                   "icon": "Info",
-                  "text": "Workbooks are accessible from Sentinel > Workbooks after deployment. No additional configuration needed."
+                  "text": "Workbooks are deployed as **separate, focused workbooks** (one per data source/use case) rather than multi-tab mega-workbooks. Each workbook is associated with its connector/API and automatically shows relevant data. Deploy only the workbooks for the APIs you have enabled."
                 }
+              },
+              {
+                "name": "enableBreachWatchlistWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Breach Watchlist Workbook (credential exposures, severity trends)",
+                "toolTip": "Focused on SpyCloudBreachWatchlist_CL data. Always recommended.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableBreachCatalogWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Breach Catalog Workbook (breach sources, categories)",
+                "toolTip": "Focused on SpyCloudBreachCatalog_CL data. Always recommended.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableIdentityExposureWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Identity Exposure Workbook (identity risk profiles)",
+                "toolTip": "Focused on SpyCloudIdentityExposure_CL data.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableCompassWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Compass Workbook (deep infostealer forensics)",
+                "toolTip": "Requires Compass API enabled. Covers CompassData, CompassDevices, CompassApplications tables.",
+                "defaultValue": "[steps('connectorConfig').sectionCompass.enableCompass]"
+              },
+              {
+                "name": "enableSIPWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "SIP Workbook (stolen session cookies)",
+                "toolTip": "Requires SIP API enabled. Focused on SpyCloudSipCookies_CL.",
+                "defaultValue": "[steps('connectorConfig').sectionSip.enableSip]"
+              },
+              {
+                "name": "enableInvestigationsWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Investigations Workbook (full database investigations)",
+                "toolTip": "Requires Investigations API enabled. Focused on SpyCloudInvestigations_CL.",
+                "defaultValue": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]"
+              },
+              {
+                "name": "enableIdLinkWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "IDLINK Workbook (identity correlation graphs)",
+                "toolTip": "Requires IDLINK API enabled. Focused on SpyCloudIdLink_CL.",
+                "defaultValue": "[steps('connectorConfig').sectionIdLink.enableIdLink]"
+              },
+              {
+                "name": "enableExposureWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Exposure Workbook (risk assessment & scoring)",
+                "toolTip": "Requires Exposure API enabled. Focused on SpyCloudExposure_CL.",
+                "defaultValue": "[steps('connectorConfig').sectionExposure.enableExposure]"
+              },
+              {
+                "name": "enableCAPWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "CAP Workbook (credential access protection)",
+                "toolTip": "Requires CAP API enabled. Focused on SpyCloudCAP_CL.",
+                "defaultValue": "[steps('connectorConfig').sectionCAP.enableCAP]"
+              },
+              {
+                "name": "enableRemediationWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Remediation Workbook (MDE & CA audit trail)",
+                "toolTip": "Focused on Spycloud_MDE_Logs_CL and SpyCloud_ConditionalAccessLogs_CL.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableExecutiveSummaryWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Executive Summary Workbook (cross-table overview)",
+                "toolTip": "Aggregated executive view across all enabled data sources.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableSOCOperationsWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "SOC Operations Workbook (operational monitoring)",
+                "toolTip": "Real-time SOC operations view with live threat feed and investigation hub.",
+                "defaultValue": true
+              },
+              {
+                "name": "enableConnectorHealthWorkbook",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Connector Health Workbook (data pipeline monitoring)",
+                "toolTip": "Monitors ingestion health, latency, and errors across all connectors.",
+                "defaultValue": true
               }
             ],
             "visible": true
@@ -2141,13 +2602,41 @@
       "enableMicrosoftSecurityIncidentRules": "[steps('sentinelFeatures').sectionSentinelSettings.enableMicrosoftSecurityIncidentRules]",
       "apiKey": "[steps('connectorConfig').sectionApiKeys.apiKey]",
       "enableCompass": "[steps('connectorConfig').sectionCompass.enableCompass]",
-      "compassApiKey": "[steps('connectorConfig').sectionCompass.compassApiKey]",
+      "enableIdLink": "[steps('connectorConfig').sectionIdLink.enableIdLink]",
+      "idlinkApiKey": "[steps('connectorConfig').sectionIdLink.idlinkApiKey]",
+      "enableDataPartnership": "[steps('connectorConfig').sectionDataPartnership.enableDataPartnership]",
+      "dataPartnershipApiKey": "[steps('connectorConfig').sectionDataPartnership.dataPartnershipApiKey]",
+      "enableExposure": "[steps('connectorConfig').sectionExposure.enableExposure]",
+      "exposureApiKey": "[steps('connectorConfig').sectionExposure.exposureApiKey]",
+      "enableCAP": "[steps('connectorConfig').sectionCAP.enableCAP]",
+      "capApiKey": "[steps('connectorConfig').sectionCAP.capApiKey]",
       "enableSip": "[steps('connectorConfig').sectionSip.enableSip]",
       "sipApiKey": "[steps('connectorConfig').sectionSip.sipApiKey]",
       "sipCookieDomain": "[steps('connectorConfig').sectionSip.sipCookieDomain]",
       "enableInvestigations": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]",
       "investigationsApiKey": "[steps('connectorConfig').sectionInvestigations.investigationsApiKey]",
-      "enableWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableWorkbook]",
+      "spycloudSeverityThreshold": "[steps('connectorSettings').sectionEnterpriseSettings.spycloudSeverityThreshold]",
+      "watchlistDomains": "[steps('connectorSettings').sectionEnterpriseSettings.watchlistDomains]",
+      "enablePIIIngestion": "[steps('connectorSettings').sectionEnterpriseSettings.enablePIIIngestion]",
+      "enablePasswordIngestion": "[steps('connectorSettings').sectionEnterpriseSettings.enablePasswordIngestion]",
+      "enableCopilotKQLPlugin": "[steps('connectorSettings').sectionCopilotSettings.enableCopilotKQLPlugin]",
+      "enableCopilotAPIPlugin": "[steps('connectorSettings').sectionCopilotSettings.enableCopilotAPIPlugin]",
+      "enableCopilotAgent": "[steps('connectorSettings').sectionCopilotSettings.enableCopilotAgent]",
+      "enableOpenAIIntegration": "[steps('connectorSettings').sectionCopilotSettings.enableOpenAIIntegration]",
+      "openAIApiKey": "[steps('connectorSettings').sectionCopilotSettings.openAIApiKey]",
+      "enableBreachWatchlistWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableBreachWatchlistWorkbook]",
+      "enableBreachCatalogWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableBreachCatalogWorkbook]",
+      "enableIdentityExposureWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableIdentityExposureWorkbook]",
+      "enableCompassWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableCompassWorkbook]",
+      "enableSIPWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableSIPWorkbook]",
+      "enableInvestigationsWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableInvestigationsWorkbook]",
+      "enableIdLinkWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableIdLinkWorkbook]",
+      "enableExposureWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableExposureWorkbook]",
+      "enableCAPWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableCAPWorkbook]",
+      "enableRemediationWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableRemediationWorkbook]",
+      "enableExecutiveSummaryWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableExecutiveSummaryWorkbook]",
+      "enableSOCOperationsWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableSOCOperationsWorkbook]",
+      "enableConnectorHealthWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableConnectorHealthWorkbook]",
       "enableSessionCookieDetection": "[steps('sentinelFeatures').sectionIdp.enableSessionCookieDetection]",
       "enableIdentityProviderAlerts": "[steps('sentinelFeatures').sectionIdp.enableIdentityProviderAlerts]",
       "enableAnalyticsRule": "[steps('sentinelFeatures').sectionAnalyticsConfig.enableAnalyticsRule]",

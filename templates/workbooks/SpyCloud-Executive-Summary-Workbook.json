@@ -1,0 +1,163 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# SpyCloud Executive Summary\n**Cross-Table Risk Overview** - High-level organizational risk posture consolidating all SpyCloud data sources into a single executive view.\n\n> This workbook provides aggregated metrics across all SpyCloud tables for executive reporting and risk assessment.\n\n---"
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "exec_time_range",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 2592000000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 604800000 },
+                { "durationMs": 2592000000 },
+                { "durationMs": 7776000000 },
+                { "durationMs": 15552000000 }
+              ],
+              "allowCustom": true
+            },
+            "label": "Time Range"
+          },
+          {
+            "id": "exec_sev_filter",
+            "version": "KqlParameterItem/1.0",
+            "name": "SeverityFilter",
+            "type": 2,
+            "isRequired": false,
+            "multiSelect": true,
+            "quote": "",
+            "delimiter": ",",
+            "query": "SpyCloudBreachWatchlist_CL | distinct severity | order by severity desc",
+            "typeSettings": {
+              "additionalResourceOptions": ["value::all"]
+            },
+            "defaultValue": "value::all",
+            "label": "Severity"
+          }
+        ]
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(Label:string, Value:long, Order:int)[\"Breach Watchlist\", 0, 1, \"Compass Records\", 0, 2, \"Stolen Cookies\", 0, 3, \"CAP Alerts\", 0, 4, \"Exposures\", 0, 5, \"Investigations\", 0, 6, \"MDE Actions\", 0, 7, \"CA Actions\", 0, 8]),\n(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"Breach Watchlist\", Order=1 | project Label, Value=v, Order),\n(SpyCloudCompassData_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"Compass Records\", Order=2 | project Label, Value=v, Order),\n(SpyCloudSipCookies_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"Stolen Cookies\", Order=3 | project Label, Value=v, Order),\n(SpyCloudCAP_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"CAP Alerts\", Order=4 | project Label, Value=v, Order),\n(SpyCloudExposure_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"Exposures\", Order=5 | project Label, Value=v, Order),\n(SpyCloudInvestigations_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"Investigations\", Order=6 | project Label, Value=v, Order),\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"MDE Actions\", Order=7 | project Label, Value=v, Order),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"CA Actions\", Order=8 | project Label, Value=v, Order)\n| summarize Value=max(Value) by Label, Order\n| order by Order asc",
+        "size": 4,
+        "title": "Cross-Platform Intelligence Summary",
+        "queryType": 0,
+        "visualization": "tiles",
+        "tileSettings": {
+          "titleContent": { "columnMatch": "Label", "formatter": 1 },
+          "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+        }
+      },
+      "name": "crossPlatformTiles"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(union\n(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | summarize Count=count() by bin(TimeGenerated, 1d) | extend Source=\"BreachWatchlist\"),\n(SpyCloudCompassData_CL | where TimeGenerated {TimeRange} | summarize Count=count() by bin(TimeGenerated, 1d) | extend Source=\"Compass\"),\n(SpyCloudExposure_CL | where TimeGenerated {TimeRange} | summarize Count=count() by bin(TimeGenerated, 1d) | extend Source=\"Exposure\"),\n(SpyCloudCAP_CL | where TimeGenerated {TimeRange} | summarize Count=count() by bin(TimeGenerated, 1d) | extend Source=\"CAP\")\n| project TimeGenerated, Count, Source\n| order by TimeGenerated asc)",
+        "size": 0,
+        "title": "Cross-Source Ingestion Trend (Daily)",
+        "queryType": 0,
+        "visualization": "areachart",
+        "chartSettings": {
+          "seriesLabelSettings": [
+            { "seriesName": "BreachWatchlist", "color": "redBright" },
+            { "seriesName": "Compass", "color": "orange" },
+            { "seriesName": "Exposure", "color": "blue" },
+            { "seriesName": "CAP", "color": "green" }
+          ]
+        }
+      },
+      "name": "crossSourceTrend"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let watchlistUsers = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | summarize BWExposures=count(), BWMaxSev=max(severity) by email;\nlet compassUsers = SpyCloudCompassData_CL | where TimeGenerated {TimeRange} | summarize CompassRecords=count() by email;\nlet capUsers = SpyCloudCAP_CL | where TimeGenerated {TimeRange} | summarize CAPAlerts=count() by email;\nlet sipUsers = SpyCloudSipCookies_CL | where TimeGenerated {TimeRange} | summarize StolenCookies=count() by email;\nwatchlistUsers\n| join kind=leftouter compassUsers on email\n| join kind=leftouter capUsers on email\n| join kind=leftouter sipUsers on email\n| extend RiskScore = BWMaxSev + coalesce(CompassRecords, 0) + coalesce(CAPAlerts, 0) * 2 + coalesce(StolenCookies, 0) * 3\n| extend RiskLevel = case(RiskScore >= 50, \"CRITICAL\", RiskScore >= 30, \"HIGH\", RiskScore >= 10, \"MEDIUM\", \"LOW\")\n| top 20 by RiskScore desc\n| project User=email, RiskLevel, RiskScore, BWExposures, CompassRecords=coalesce(CompassRecords, 0), CAPAlerts=coalesce(CAPAlerts, 0), StolenCookies=coalesce(StolenCookies, 0))",
+        "size": 0,
+        "title": "Top 20 Highest Risk Users (Cross-Source Composite Score)",
+        "queryType": 0,
+        "visualization": "table",
+        "gridSettings": {
+          "sortBy": [{ "itemKey": "RiskScore", "sortOrder": 2 }]
+        }
+      },
+      "name": "topRiskUsers"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let total = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | where severity >= 20 | summarize dcount(email));\nlet remediated = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize dcount(user_principal_name_s));\nlet mdeActioned = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize dcount(device_name_s));\ndatatable(Metric:string, Value:long)[\"High-Sev Users Identified\", total, \"Users Remediated (CA)\", remediated, \"Devices Actioned (MDE)\", mdeActioned, \"Remediation Rate %\", iff(total > 0, (remediated * 100) / total, 0)])",
+        "size": 4,
+        "title": "Remediation Effectiveness",
+        "queryType": 0,
+        "visualization": "tiles",
+        "tileSettings": {
+          "titleContent": { "columnMatch": "Metric", "formatter": 1 },
+          "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "auto" } }
+        }
+      },
+      "name": "remediationEffectiveness"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange}\n| extend SeverityLabel = case(severity == 25, \"Critical\", severity == 20, \"High\", severity == 5, \"Medium\", severity == 2, \"Low\", \"Other\")\n| summarize Count=count() by SeverityLabel)",
+        "size": 3,
+        "title": "Overall Severity Distribution",
+        "queryType": 0,
+        "visualization": "piechart",
+        "chartSettings": {
+          "seriesLabelSettings": [
+            { "seriesName": "Critical", "color": "redBright" },
+            { "seriesName": "High", "color": "orange" },
+            { "seriesName": "Medium", "color": "yellow" },
+            { "seriesName": "Low", "color": "blue" }
+          ]
+        }
+      },
+      "name": "overallSeverityPie"
+    }
+  ],
+  "templateMetadata": {
+    "version": "1.0",
+    "connectorAssociation": [
+      {
+        "connectorId": "SpyCloudEnterpriseProtection",
+        "dataTypes": [
+          "SpyCloudBreachWatchlist_CL",
+          "SpyCloudBreachCatalog_CL",
+          "SpyCloudCompassData_CL",
+          "SpyCloudSipCookies_CL",
+          "SpyCloudCAP_CL",
+          "SpyCloudExposure_CL",
+          "SpyCloudInvestigations_CL",
+          "Spycloud_MDE_Logs_CL",
+          "SpyCloud_ConditionalAccessLogs_CL"
+        ]
+      }
+    ]
+  }
+}

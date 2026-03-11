@@ -1,0 +1,516 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "templateMetadata": {
+    "templateVersion": "1.0.0",
+    "templateId": "spycloud-cap-response",
+    "category": "Remediation",
+    "requiredPermissions": [
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.Logic/workflows/write",
+      "Microsoft.Web/connections/write"
+    ],
+    "requiredLicenses": [
+      "Microsoft Sentinel",
+      "SpyCloud Compass (CAP) API",
+      "Azure Active Directory P1"
+    ],
+    "connectorAssociation": [
+      "azuresentinel",
+      "microsoftgraphsecurity"
+    ],
+    "deployAsTemplate": true
+  },
+  "metadata": {
+    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "title": "SpyCloud - CAP Credential Response",
+    "description": "Uses the SpyCloud Compass (CAP) API to check if compromised credentials are actively being traded or used. Triggers automated password reset and session revocation when active credential abuse is detected.",
+    "prerequisites": [
+      "Microsoft Sentinel workspace",
+      "SpyCloud CAP API key",
+      "Managed Identity with User.ReadWrite.All on Microsoft Graph"
+    ],
+    "lastUpdateTime": "2026-03-11T00:00:00.000Z",
+    "support": { "tier": "community" },
+    "author": { "name": "SpyCloud" },
+    "categories": { "domains": ["Security - Threat Protection"] }
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-CAPResponse",
+      "metadata": { "description": "Name of the Logic App playbook" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "SpyCloudCAPApiKey": {
+      "type": "securestring",
+      "metadata": { "description": "SpyCloud CAP (Compass) API key" }
+    },
+    "SpyCloudCAPApiUrl": {
+      "type": "string",
+      "defaultValue": "https://api.spycloud.io/cap-v1",
+      "metadata": { "description": "SpyCloud CAP API base URL" }
+    },
+    "AutoRemediateOnActiveAbuse": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": { "description": "Automatically reset passwords and revoke sessions when active credential abuse is detected" }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Entities_-_Get_Accounts": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/entities/account",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Initialize_CAPResults": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "CAPResults",
+                    "type": "array",
+                    "value": []
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Initialize_RemediationActions": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "RemediationActions",
+                    "type": "array",
+                    "value": []
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Initialize_ActiveAbuseDetected": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "ActiveAbuseDetected",
+                    "type": "boolean",
+                    "value": false
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Process_Each_Account": {
+              "type": "Foreach",
+              "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
+              "actions": {
+                "CAP_Check_Scope": {
+                  "type": "Scope",
+                  "actions": {
+                    "Resolve_Email": {
+                      "type": "Compose",
+                      "inputs": "@concat(items('Process_Each_Account')?['Name'], if(not(empty(items('Process_Each_Account')?['UPNSuffix'])), concat('@', items('Process_Each_Account')?['UPNSuffix']), ''))",
+                      "runAfter": {}
+                    },
+                    "Query_CAP_API": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "GET",
+                        "uri": "@{parameters('SpyCloudCAPApiUrl')}/credentials/check",
+                        "headers": {
+                          "X-API-Key": "@parameters('SpyCloudCAPApiKey')",
+                          "Accept": "application/json"
+                        },
+                        "queries": {
+                          "email": "@outputs('Resolve_Email')"
+                        }
+                      },
+                      "runAfter": {
+                        "Resolve_Email": ["Succeeded"]
+                      }
+                    },
+                    "Parse_CAP_Response": {
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@body('Query_CAP_API')",
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "email": { "type": "string" },
+                            "credential_status": { "type": "string" },
+                            "active_abuse_detected": { "type": "boolean" },
+                            "last_seen_active": { "type": "string" },
+                            "credential_sources": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "source_type": { "type": "string" },
+                                  "first_seen": { "type": "string" },
+                                  "last_seen": { "type": "string" },
+                                  "severity": { "type": "integer" }
+                                }
+                              }
+                            },
+                            "recommended_action": { "type": "string" }
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Query_CAP_API": ["Succeeded"]
+                      }
+                    },
+                    "Check_Active_Abuse": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": ["@body('Parse_CAP_Response')?['active_abuse_detected']", true]
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "Set_Active_Abuse_Flag": {
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "ActiveAbuseDetected",
+                            "value": true
+                          },
+                          "runAfter": {}
+                        },
+                        "Auto_Remediate_If_Enabled": {
+                          "type": "If",
+                          "expression": {
+                            "and": [
+                              {
+                                "equals": ["@parameters('AutoRemediateOnActiveAbuse')", true]
+                              }
+                            ]
+                          },
+                          "actions": {
+                            "Get_User_For_Remediation": {
+                              "type": "Http",
+                              "inputs": {
+                                "method": "GET",
+                                "uri": "https://graph.microsoft.com/v1.0/users/@{outputs('Resolve_Email')}",
+                                "authentication": {
+                                  "type": "ManagedServiceIdentity",
+                                  "audience": "https://graph.microsoft.com"
+                                }
+                              },
+                              "runAfter": {}
+                            },
+                            "Force_Password_Reset": {
+                              "type": "Http",
+                              "inputs": {
+                                "method": "PATCH",
+                                "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_User_For_Remediation')?['id']}",
+                                "headers": { "Content-Type": "application/json" },
+                                "body": {
+                                  "passwordProfile": {
+                                    "forceChangePasswordNextSignIn": true,
+                                    "forceChangePasswordNextSignInWithMfa": true
+                                  }
+                                },
+                                "authentication": {
+                                  "type": "ManagedServiceIdentity",
+                                  "audience": "https://graph.microsoft.com"
+                                }
+                              },
+                              "runAfter": {
+                                "Get_User_For_Remediation": ["Succeeded"]
+                              }
+                            },
+                            "Revoke_Sessions": {
+                              "type": "Http",
+                              "inputs": {
+                                "method": "POST",
+                                "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_User_For_Remediation')?['id']}/revokeSignInSessions",
+                                "authentication": {
+                                  "type": "ManagedServiceIdentity",
+                                  "audience": "https://graph.microsoft.com"
+                                }
+                              },
+                              "runAfter": {
+                                "Force_Password_Reset": ["Succeeded"]
+                              }
+                            },
+                            "Append_Remediation_Action": {
+                              "type": "AppendToArrayVariable",
+                              "inputs": {
+                                "name": "RemediationActions",
+                                "value": "Active abuse on @{outputs('Resolve_Email')}: password reset forced, sessions revoked"
+                              },
+                              "runAfter": {
+                                "Revoke_Sessions": ["Succeeded"]
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {
+                              "Append_Manual_Action": {
+                                "type": "AppendToArrayVariable",
+                                "inputs": {
+                                  "name": "RemediationActions",
+                                  "value": "Active abuse on @{outputs('Resolve_Email')}: MANUAL REMEDIATION REQUIRED"
+                                },
+                                "runAfter": {}
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Set_Active_Abuse_Flag": ["Succeeded"]
+                          }
+                        }
+                      },
+                      "else": { "actions": {} },
+                      "runAfter": {
+                        "Parse_CAP_Response": ["Succeeded"]
+                      }
+                    },
+                    "Append_CAP_Result": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "CAPResults",
+                        "value": {
+                          "email": "@outputs('Resolve_Email')",
+                          "status": "@body('Parse_CAP_Response')?['credential_status']",
+                          "activeAbuse": "@body('Parse_CAP_Response')?['active_abuse_detected']",
+                          "lastSeenActive": "@body('Parse_CAP_Response')?['last_seen_active']",
+                          "recommendedAction": "@body('Parse_CAP_Response')?['recommended_action']"
+                        }
+                      },
+                      "runAfter": {
+                        "Check_Active_Abuse": ["Succeeded"]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Catch_CAP_Errors": {
+                  "type": "Scope",
+                  "actions": {
+                    "Append_CAP_Error": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "CAPResults",
+                        "value": {
+                          "email": "@items('Process_Each_Account')?['Name']",
+                          "error": "Failed to query CAP API"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "CAP_Check_Scope": ["Failed", "TimedOut"]
+                  }
+                }
+              },
+              "runAfter": {
+                "Entities_-_Get_Accounts": ["Succeeded"],
+                "Initialize_CAPResults": ["Succeeded"],
+                "Initialize_RemediationActions": ["Succeeded"],
+                "Initialize_ActiveAbuseDetected": ["Succeeded"]
+              }
+            },
+            "Update_Incident_Severity_On_Abuse": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": ["@variables('ActiveAbuseDetected')", true]
+                  }
+                ]
+              },
+              "actions": {
+                "Escalate_Incident": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
+                    "method": "put",
+                    "path": "/incident",
+                    "body": {
+                      "incidentArmId": "@triggerBody()?['object']?['id']",
+                      "severity": "High",
+                      "tagsToAdd": {
+                        "TagsToAdd": ["SpyCloud-CAP-Checked", "SpyCloud-Active-Abuse"]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                }
+              },
+              "else": {
+                "actions": {
+                  "Tag_Incident_No_Abuse": {
+                    "type": "ApiConnection",
+                    "inputs": {
+                      "host": {
+                        "connection": {
+                          "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                        }
+                      },
+                      "method": "put",
+                      "path": "/incident",
+                      "body": {
+                        "incidentArmId": "@triggerBody()?['object']?['id']",
+                        "tagsToAdd": {
+                          "TagsToAdd": ["SpyCloud-CAP-Checked", "SpyCloud-No-Active-Abuse"]
+                        }
+                      }
+                    },
+                    "runAfter": {}
+                  }
+                }
+              },
+              "runAfter": {
+                "Process_Each_Account": ["Succeeded"]
+              }
+            },
+            "Add_CAP_Summary_Comment": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/incident-comments",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "message": "<p><strong>SpyCloud-CAPResponse:</strong> Credential abuse check complete.<br/><strong>Active Abuse Detected:</strong> @{variables('ActiveAbuseDetected')}<br/><strong>Accounts Checked:</strong> @{length(variables('CAPResults'))}<br/><strong>Remediation Actions:</strong><br/>@{if(greater(length(variables('RemediationActions')), 0), join(variables('RemediationActions'), '<br/>'), 'No remediation actions taken')}<br/><strong>CAP Details:</strong><br/>@{string(variables('CAPResults'))}</p>"
+                }
+              },
+              "runAfter": {
+                "Update_Incident_Severity_On_Abuse": ["Succeeded"]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "SpyCloudCAPApiKey": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('SpyCloudCAPApiKey')]"
+            },
+            "SpyCloudCAPApiUrl": {
+              "type": "String",
+              "defaultValue": "[parameters('SpyCloudCAPApiUrl')]"
+            },
+            "AutoRemediateOnActiveAbuse": {
+              "type": "Bool",
+              "defaultValue": "[parameters('AutoRemediateOnActiveAbuse')]"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  }
+}

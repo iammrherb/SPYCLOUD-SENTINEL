@@ -1,0 +1,297 @@
+# SpyCloud CAP (Compromised Account Protection) API Rule Templates
+# These templates detect threats using SpyCloud CAP API data, which provides automated
+# credential monitoring and compromised account protection capabilities.
+# Deploy with enabled: true after configuring required data sources.
+
+templateVersion: "1.0.0"
+templateId: spycloud-cap-templates
+category: SpyCloud Compromised Account Protection
+deployAsTemplate: true
+requiredDataSources:
+  - SpyCloud CAP
+  - Microsoft Entra ID Sign-in Logs
+  - Microsoft Entra ID Audit Logs
+  - Microsoft Sentinel UEBA
+requiredTables:
+  - SpyCloudCAP_CL
+  - SigninLogs
+  - AuditLogs
+  - BehaviorAnalytics
+  - OfficeActivity
+connectorAssociation:
+  - SpyCloud CAP API
+
+---
+id: sc-080-cap-new-compromised-account
+name: SpyCloud CAP — New Compromised Account Detected
+description: |
+  Detects newly identified compromised accounts from the SpyCloud CAP API.
+  CAP provides automated monitoring of employee credentials and alerts when new
+  compromises are identified, enabling rapid automated or manual response.
+severity: High
+enabled: false
+queryFrequency: 30m
+queryPeriod: 30m
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1078
+  - T1555
+query: |
+  SpyCloudCAP_CL
+  | where TimeGenerated > ago(30m)
+  | where status_s == "new" or is_new_b == true
+  | where isnotempty(email_s)
+  | summarize ExposureCount = count(), MaxSeverity = max(severity_d), PasswordTypes = make_set(password_type_s), BreachSources = make_set(source_id_s) by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-081-cap-compromised-active-session
+name: SpyCloud CAP + Entra ID — Compromised Account with Active Session
+description: |
+  Correlates SpyCloud CAP compromised accounts with active Entra ID sessions.
+  Identifies users flagged by CAP who currently have active sign-in sessions,
+  requiring immediate session revocation and credential reset.
+severity: High
+enabled: false
+queryFrequency: 30m
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - CredentialAccess
+techniques:
+  - T1078
+  - T1078.004
+query: |
+  let capCompromised = SpyCloudCAP_CL
+  | where TimeGenerated > ago(7d)
+  | where severity_d >= 20
+  | summarize CompromiseTime = min(TimeGenerated), MaxSeverity = max(severity_d) by email_s;
+  SigninLogs
+  | where TimeGenerated > ago(30m)
+  | where ResultType == 0
+  | join kind=inner capCompromised on $left.UserPrincipalName == $right.email_s
+  | project TimeGenerated, UserPrincipalName, IPAddress, AppDisplayName, MaxSeverity, CompromiseTime, Location, DeviceDetail, ConditionalAccessStatus
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-082-cap-remediation-gap
+name: SpyCloud CAP — Remediation SLA Breach
+description: |
+  Detects compromised accounts identified by CAP that have not been remediated within
+  the defined SLA window (default 24h for high severity, 72h for medium).
+  Indicates remediation process gaps requiring escalation.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - Persistence
+techniques:
+  - T1078
+query: |
+  let highSevUnremediated = SpyCloudCAP_CL
+  | where TimeGenerated between (ago(7d) .. ago(24h))
+  | where severity_d >= 20
+  | where remediation_status_s != "completed" and remediation_status_s != "resolved"
+  | summarize CompromiseTime = min(TimeGenerated), MaxSeverity = max(severity_d) by email_s, email_domain_s;
+  let medSevUnremediated = SpyCloudCAP_CL
+  | where TimeGenerated between (ago(7d) .. ago(72h))
+  | where severity_d >= 10 and severity_d < 20
+  | where remediation_status_s != "completed" and remediation_status_s != "resolved"
+  | summarize CompromiseTime = min(TimeGenerated), MaxSeverity = max(severity_d) by email_s, email_domain_s;
+  union highSevUnremediated, medSevUnremediated
+  | extend HoursUnremediated = datetime_diff('hour', now(), CompromiseTime)
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-083-cap-password-change-no-reset
+name: SpyCloud CAP + Entra ID — Compromised User Password Change Without CAP Reset
+description: |
+  Detects when a CAP-flagged compromised user changes their password through self-service
+  rather than through the CAP-initiated remediation workflow. May indicate the user is aware
+  of compromise but not following proper remediation procedures.
+severity: Medium
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - CredentialAccess
+techniques:
+  - T1098
+  - T1078
+query: |
+  let capCompromised = SpyCloudCAP_CL
+  | where TimeGenerated > ago(7d)
+  | where severity_d >= 15
+  | where remediation_status_s != "completed"
+  | distinct email_s;
+  AuditLogs
+  | where TimeGenerated > ago(1h)
+  | where OperationName has_any ("Change user password", "Change password (self-service)")
+  | extend UPN = tostring(TargetResources[0].userPrincipalName)
+  | where UPN in (capCompromised)
+  | project TimeGenerated, UPN, OperationName, InitiatedBy = tostring(InitiatedBy.user.userPrincipalName)
+  | extend AccountName = tostring(split(UPN, "@")[0]), AccountDomain = tostring(split(UPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-084-cap-multiple-compromise-sources
+name: SpyCloud CAP — Account Compromised Across Multiple Sources
+description: |
+  Detects accounts identified by CAP as compromised across multiple distinct breach or
+  infostealer sources. Multiple independent compromise sources indicate a high-value
+  target with widely circulated credentials requiring urgent response.
+severity: High
+enabled: false
+queryFrequency: 6h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Reconnaissance
+techniques:
+  - T1589.001
+  - T1078
+query: |
+  SpyCloudCAP_CL
+  | where TimeGenerated > ago(30d)
+  | where isnotempty(email_s)
+  | summarize SourceCount = dcount(source_id_s), Sources = make_set(source_id_s), MaxSeverity = max(severity_d), MalwareFamilies = make_set(malware_family_s), LatestExposure = max(TimeGenerated) by email_s, email_domain_s
+  | where SourceCount >= 3
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-085-cap-ueba-anomaly
+name: SpyCloud CAP + UEBA — Compromised Account Behavioral Anomaly
+description: |
+  Correlates SpyCloud CAP compromised accounts with UEBA behavioral anomalies.
+  Compromised accounts exhibiting unusual behavior patterns have the highest probability
+  of active exploitation and require immediate containment.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+  - T1036
+query: |
+  let capCompromised = SpyCloudCAP_CL
+  | where TimeGenerated > ago(7d)
+  | where severity_d >= 20
+  | distinct email_s;
+  BehaviorAnalytics
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (capCompromised)
+  | where ActivityInsights has_any ("FirstTimeUser", "InvestigationPriorityScore", "AnomalousActivity", "UncommonResourceAccess", "SuspiciousVolume")
+  | project TimeGenerated, UserPrincipalName, ActivityType, ActivityInsights, SourceIPAddress, InvestigationPriority
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: SourceIPAddress
+
+---
+id: sc-086-cap-data-exfiltration-risk
+name: SpyCloud CAP + O365 — Compromised Account Data Access Spike
+description: |
+  Detects unusual data access patterns from CAP-identified compromised accounts.
+  Monitors for bulk file downloads, email access, and search activity that may indicate
+  data exfiltration using stolen credentials.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Exfiltration
+  - Collection
+techniques:
+  - T1530
+  - T1114
+query: |
+  let capCompromised = SpyCloudCAP_CL
+  | where TimeGenerated > ago(7d)
+  | where severity_d >= 20
+  | distinct email_s;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where UserId in (capCompromised)
+  | where Operation in ("FileDownloaded", "FileSyncDownloadedFull", "MailItemsAccessed", "SearchQueryPerformed", "FileAccessed")
+  | summarize ActivityCount = count(), Operations = make_set(Operation), Files = make_set(OfficeObjectId, 10) by UserId, ClientIP
+  | where ActivityCount >= 25
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: ClientIP
