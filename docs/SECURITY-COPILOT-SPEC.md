@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>SpyCloud Darknet & Identity Threat Exposure Intelligence</strong><br/>
-  Microsoft Security Copilot Integration v6.1.0
+  Microsoft Security Copilot Integration v8.0.0
 </p>
 
 ---
@@ -17,8 +17,8 @@
 2. [Architecture](#architecture)
 3. [Plugin Inventory](#plugin-inventory)
 4. [Agent — Autonomous Investigation](#agent--autonomous-investigation)
-5. [KQL Plugin — 85 Promptbook Skills](#kql-plugin--85-promptbook-skills)
-6. [API Plugin — 12 REST API Skills](#api-plugin--12-rest-api-skills)
+5. [KQL Plugin — 90 Promptbook Skills](#kql-plugin--90-promptbook-skills)
+6. [API Plugin — 20 REST API Skills](#api-plugin--20-rest-api-skills)
 7. [Sub-Agent Specifications](#sub-agent-specifications)
 8. [Data Sources & Schema](#data-sources--schema)
 9. [Sentinel Resources](#sentinel-resources)
@@ -32,16 +32,18 @@
 
 ## Executive Overview
 
-The SpyCloud Security Copilot Integration is the most comprehensive dark web threat intelligence solution available for Microsoft Security Copilot. It provides three complementary plugins that together deliver **109 skills**, **12 specialized sub-agents**, and seamless access to **145+ deployed Sentinel resources** — enabling SOC teams to investigate compromised credentials, infostealer infections, exposed PII, device forensics, and automated remediation status through natural-language conversation.
+The SpyCloud Security Copilot Integration is the most comprehensive dark web threat intelligence solution available for Microsoft Security Copilot. It provides three complementary plugins that together deliver **168 skills**, **17 specialized sub-agents**, and seamless access to **155+ deployed Sentinel resources** — enabling SOC teams to investigate compromised credentials, infostealer infections, exposed PII, device forensics, session cookie theft, identity exposure, and automated remediation status through natural-language conversation.
 
 ### Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| **Total Skills** | 109 (85 KQL + 12 API + 12 Agent-internal) |
-| **Sub-Agents** | 12 specialized investigation agents |
-| **Sentinel Tables** | 6 custom SpyCloud + 12 Microsoft native |
-| **Total Columns** | 156 across all SpyCloud tables |
+| **Total Skills** | 168 (90 KQL + 20 API + 58 Agent-internal) |
+| **Sub-Agents** | 17 specialized investigation agents |
+| **Sentinel Tables** | 10 custom SpyCloud tables |
+| **Total Columns** | 233+ across all SpyCloud tables |
+| **SpyCloud APIs** | 6 (Enterprise, Catalog, Compass, SIP, Identity Exposure, Investigations) |
+| **REST API Pollers** | 9 independent CCF pollers |
 | **Analytics Rules** | 49 (38 scheduled, 1 Fusion, 5 NRT, 5 MSIC) |
 | **Hunting Queries** | 28 proactive threat hunting queries |
 | **Playbooks** | 10 Logic App automated response workflows |
@@ -60,9 +62,9 @@ The SpyCloud Security Copilot Integration is the most comprehensive dark web thr
 │                                                                    │
 │  ┌─────────────────┐  ┌──────────────────┐  ┌─────────────────┐  │
 │  │  Investigation   │  │   KQL Plugin     │  │   API Plugin    │  │
-│  │     Agent        │  │  (85 Skills)     │  │  (12 Skills)    │  │
-│  │  (12 Sub-Agents) │  │                  │  │                 │  │
-│  │  (34 Int Skills) │  │  Sentinel KQL    │  │  SpyCloud REST  │  │
+│  │     Agent        │  │  (90 Skills)     │  │  (20 Skills)    │  │
+│  │  (17 Sub-Agents) │  │                  │  │                 │  │
+│  │  (58 Int Skills) │  │  Sentinel KQL    │  │  SpyCloud REST  │  │
 │  └────────┬────────┘  └────────┬─────────┘  └────────┬────────┘  │
 │           │                     │                      │           │
 ├───────────┴─────────────────────┴──────────────────────┴──────────┤
@@ -72,16 +74,20 @@ The SpyCloud Security Copilot Integration is the most comprehensive dark web thr
 │  │          │ │ Queries  │ │  books   │ │  lists   │            │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            │
-│  │3 Work-   │ │3 Note-   │ │6 Custom  │ │UEBA/     │            │
+│  │3 Work-   │ │3 Note-   │ │10 Custom │ │UEBA/     │            │
 │  │  books   │ │  books   │ │ Tables   │ │Fusion/TI │            │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │
 ├──────────────────────────────────────────────────────────────────┤
 │                     SpyCloud APIs                                  │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐              │
-│  │  Enterprise   │ │   Compass    │ │   Identity   │              │
-│  │  Breach API   │ │Investigation │ │  Exposure    │              │
-│  │              │ │     API      │ │    API       │              │
+│  │  Enterprise   │ │   Compass    │ │   SIP        │              │
+│  │  Breach API   │ │Investigation │ │Session Cookie│              │
+│  │  + Catalog    │ │     API      │ │    API       │              │
 │  └──────────────┘ └──────────────┘ └──────────────┘              │
+│  ┌──────────────┐ ┌──────────────┐                                │
+│  │  Identity     │ │Investigations│                                │
+│  │  Exposure API │ │     API      │                                │
+│  └──────────────┘ └──────────────┘                                │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -91,7 +97,7 @@ The SpyCloud Security Copilot Integration is the most comprehensive dark web thr
 
 ### Data Flow
 
-1. **Ingestion**: SpyCloud APIs → Codeless Connector Framework (CCF) → Data Collection Rules (DCR) with KQL transforms → 6 custom Sentinel tables
+1. **Ingestion**: SpyCloud 6 APIs → 9 CCF REST pollers → Data Collection Rules (DCR) with KQL transforms → 10 custom Sentinel tables
 2. **Detection**: 49 analytics rules continuously evaluate ingested data → Sentinel incidents
 3. **Response**: 10 Logic App playbooks auto-remediate (password reset, session revoke, MFA enforce, device isolate, firewall block, user/SOC notify, incident enrich, full orchestration)
 4. **Investigation**: Security Copilot agent + plugins provide natural-language access to all data and actions
@@ -119,9 +125,9 @@ All three plugins are **fully compatible** and can be used simultaneously. The A
 ```
 copilot/
 ├── manifest.json                      # Unified manifest for all plugins
-├── SpyCloud_Agent.yaml                # Autonomous investigation agent (12 sub-agents)
-├── SpyCloud_Plugin.yaml               # KQL plugin (85 promptbook skills)
-├── SpyCloud_API_Plugin.yaml           # API plugin (12 REST API skills)
+├── SpyCloud_Agent.yaml                # Autonomous investigation agent (17 sub-agents)
+├── SpyCloud_Plugin.yaml               # KQL plugin (90 promptbook skills)
+├── SpyCloud_API_Plugin.yaml           # API plugin (20 REST API skills)
 └── SpyCloud_API_Plugin_OpenAPI.yaml   # OpenAPI 3.0.3 specification for API Plugin
 ```
 
@@ -181,9 +187,9 @@ The agent operates as **SENTINEL** — a battle-hardened security analyst with:
 | "Do we have sensitive PII exposed requiring breach notification?" | Compliance Check |
 | "What's the single most dangerous finding right now?" | Top Risk |
 
-### Internal Skills (34 Total)
+### Internal Skills (58 Total)
 
-The Agent orchestrates 34 internal skills:
+The Agent orchestrates 58 internal skills (35 KQL + 6 GPT-4o analysis + 17 sub-agents):
 
 | # | Skill Name | Type | Description |
 |---|-----------|------|-------------|
@@ -425,9 +431,9 @@ The Agent orchestrates 34 internal skills:
 
 ---
 
-## KQL Plugin — 85 Promptbook Skills
+## KQL Plugin — 90 Promptbook Skills
 
-### Skill Categories
+### Skill Categories (29 Categories)
 
 | # | Category | Skills | Description |
 |---|----------|--------|-------------|
@@ -452,10 +458,18 @@ The Agent orchestrates 34 internal skills:
 | 19 | Watchlist & Asset Management | 4 | VIP check, IOC blocklist, approved domains, asset risk |
 | 20 | Operational Health | 3 | Ingestion health, automation metrics, incident summary |
 | 21 | Risk Scoring | 4 | User risk score, org risk posture, trend analysis |
+| 22 | SIP Session Cookie Analysis | 3 | Cookie domain exposure, session hijack risk, SIP summary |
+| 23 | Identity Exposure Profiling | 3 | Identity risk profiles, exposure timeline, corporate impact |
+| 24 | Investigations Deep Dive | 3 | Full database search results, investigation timeline, evidence chain |
+| 25 | Compass Applications | 2 | Application credential exposure, SaaS risk mapping |
+| 26 | Cross-API Correlation | 2 | Multi-table join investigations, API-to-table mapping |
+| 27 | Infostealer Malware Families | 2 | Family-specific detection, infection pattern analysis |
+| 28 | Remediation Gap Analysis | 2 | Unremediated exposure tracking, SLA compliance |
+| 29 | Supply Chain & Third-Party | 2 | Vendor credential exposure, shared account risk |
 
 ---
 
-## API Plugin — 12 REST API Skills
+## API Plugin — 20 REST API Skills
 
 ### Enterprise Breach API (7 Skills)
 
@@ -469,20 +483,38 @@ The Agent orchestrates 34 internal skills:
 | ListBreachCatalog | `GET /breach/catalog` | Browse breach catalog |
 | GetBreachCatalogEntry | `GET /breach/catalog/{id}` | Specific breach details |
 
-### Compass Investigation API (3 Skills)
+### Compass Investigation API (5 Skills)
 
 | Skill | Endpoint | Description |
 |-------|----------|-------------|
 | CompassInvestigateEmail | `GET /compass/data/emails/{email}` | Deep Compass investigation by email |
 | CompassInvestigateDomain | `GET /compass/data/domains/{domain}` | Deep Compass investigation by domain |
 | CompassInvestigateIp | `GET /compass/data/ips/{ip}` | Deep Compass investigation by IP |
+| CompassGetDevices | `GET /compass/devices` | Infected device fingerprints and malware artifacts |
+| CompassGetApplications | `GET /compass/applications` | Application credential exposure data |
 
-### Identity Exposure API (2 Skills)
+### SIP Session Identity Protection API (3 Skills)
 
 | Skill | Endpoint | Description |
 |-------|----------|-------------|
-| GetIdentityExposure | `GET /identity/exposure/{email}` | Identity exposure profile |
+| GetSipCookiesByDomain | `GET /sip/cookies/{domain}` | Stolen session cookies by domain |
+| GetSipCookiesByEmail | `GET /sip/cookies/emails/{email}` | Stolen session cookies by email |
+| GetSipSessionSummary | `GET /sip/summary` | SIP session exposure summary |
+
+### Identity Exposure API (3 Skills)
+
+| Skill | Endpoint | Description |
+|-------|----------|-------------|
+| GetIdentityExposure | `GET /identity/exposure/{email}` | Identity exposure risk profile |
+| GetIdentityExposureByDomain | `GET /identity/exposure/domains/{domain}` | Corporate identity exposure |
 | GetIdentityWatchlist | `GET /identity/watchlist` | Monitored identity watchlist |
+
+### Investigations API (2 Skills)
+
+| Skill | Endpoint | Description |
+|-------|----------|-------------|
+| InvestigationsSearch | `GET /investigations/search` | Full database search across all SpyCloud data |
+| InvestigationsGetDetails | `GET /investigations/{id}` | Detailed investigation record |
 
 ### Common API Parameters
 
@@ -551,6 +583,52 @@ MDE device isolation, tagging, and IOC submission audit trail.
 | MachineTagAdded / MachineTagName | Device tagging |
 | AddedIOCsToDefender | IOC submission status |
 | PlaybookName | Triggering playbook |
+
+#### SpyCloudCompassApplications_CL (15 columns)
+
+Application credential exposure from Compass deep investigation (Enterprise+ only).
+
+| Column Group | Key Fields |
+|-------------|------------|
+| **Application** | app_name, app_domain, app_url, app_category |
+| **Credential** | email, username, password_type |
+| **Metadata** | source_id, severity, spycloud_publish_date |
+
+#### SpyCloudSIPCookies_CL (18 columns)
+
+Stolen session cookies and tokens from infostealer infections (SIP license required).
+
+| Column Group | Key Fields |
+|-------------|------------|
+| **Session** | cookie_domain, cookie_name, cookie_value, session_token |
+| **Identity** | email, target_domain, target_url |
+| **Device** | infected_machine_id, user_hostname, infected_path |
+| **Metadata** | severity, infected_time, spycloud_publish_date |
+
+#### SpyCloudIdentityExposure_CL (23 columns)
+
+Identity risk profiles and exposure scoring across corporate identities.
+
+| Column Group | Key Fields |
+|-------------|------------|
+| **Identity** | email, full_name, username, email_domain |
+| **Exposure** | exposure_count, severity_max, exposure_types |
+| **Risk** | identity_risk_score, risk_tier, first_seen, last_seen |
+| **Corporate** | company_name, job_title, department |
+| **Metadata** | spycloud_publish_date, document_id |
+
+#### SpyCloudInvestigations_CL (28 columns)
+
+Full database search results from Investigations API (Enterprise+ with Investigations add-on).
+
+| Column Group | Key Fields |
+|-------------|------------|
+| **Identity** | email, username, full_name, phone, dob |
+| **Credential** | password, password_type, password_plaintext |
+| **Target** | target_domain, target_url, target_subdomain |
+| **Device** | infected_machine_id, user_hostname, user_os, infected_path |
+| **Source** | source_id, breach_title, severity |
+| **Metadata** | spycloud_publish_date, document_id, investigation_id |
 
 #### SpyCloud_ConditionalAccessLogs_CL (14 columns)
 
@@ -785,15 +863,31 @@ All three plugins are designed to work together seamlessly:
 
 ## Appendix: Complete Skill Reference
 
-### Quick Reference — All 109 Skills
+### Quick Reference — All 168 Skills
 
-**Agent Internal Skills (34)**: GetUserExposures, GetUserFullPIIProfile, GetUserAccountActivity, GetExposedPasswords, GetPlaintextPasswordExposures, GetPasswordTypeBreakdown, GetHighSeverityExposures, GetExposureSummaryBySeverity, GetExposureSummaryByDomain, GetTargetedDomains, GetSensitivePIIExposures, GetSocialMediaExposures, GetInfectedDevices, GetDeviceForensics, GetDeviceToUserCorrelation, GetAVCoverageGaps, GetMalwareInfo, GetRecentBreaches, GetEnrichedExposures, GetMDERemediationActions, GetMDERemediationForDevice, GetMDERemediationStats, GetConditionalAccessActions, GetConditionalAccessForUser, GetConditionalAccessStats, GetFullUserInvestigation, GetGeographicAnalysis, GetSpyCloudHealthStatus, InvestigateFullExposureChain, GenerateIncidentSummary, DetectPermissionGaps, AnalyzeAndSummarize + 12 Sub-Agents
+**Agent Internal Skills (58)**: 35 KQL investigation skills + 6 GPT-4o analysis skills + 17 specialized sub-agents. See SpyCloud_Agent.yaml for complete definitions.
 
-**KQL Plugin Skills (85)**: See SpyCloud_Plugin.yaml for full skill definitions across 21 categories
+**KQL Plugin Skills (90)**: 90 promptbook skills across 29 categories querying 10 custom SpyCloud tables. See SpyCloud_Plugin.yaml for full skill definitions.
 
-**API Plugin Skills (12)**: GetBreachDataByEmail, GetBreachDataByDomain, GetBreachDataByIp, CheckPasswordExposure, GetBreachDataByUsername, ListBreachCatalog, GetBreachCatalogEntry, CompassInvestigateEmail, CompassInvestigateDomain, CompassInvestigateIp, GetIdentityExposure, GetIdentityWatchlist
+**API Plugin Skills (20)**: GetBreachDataByEmail, GetBreachDataByDomain, GetBreachDataByIp, CheckPasswordExposure, GetBreachDataByUsername, ListBreachCatalog, GetBreachCatalogEntry, CompassInvestigateEmail, CompassInvestigateDomain, CompassInvestigateIp, CompassGetDevices, CompassGetApplications, GetSipCookiesByDomain, GetSipCookiesByEmail, GetSipSessionSummary, GetIdentityExposure, GetIdentityExposureByDomain, GetIdentityWatchlist, InvestigationsSearch, InvestigationsGetDetails
+
+### Custom Table Summary
+
+| Table | Columns | API Source | Tier |
+|-------|---------|------------|------|
+| SpyCloudBreachWatchlist_CL | 73 | Enterprise Breach | Enterprise |
+| SpyCloudBreachCatalog_CL | 13 | Breach Catalog | Enterprise |
+| SpyCloudCompassData_CL | 29 | Compass Data | Enterprise+ |
+| SpyCloudCompassDevices_CL | 8 | Compass Devices | Enterprise+ |
+| SpyCloudCompassApplications_CL | 15 | Compass Applications | Enterprise+ |
+| SpyCloudSIPCookies_CL | 18 | SIP Cookies | SIP License |
+| SpyCloudIdentityExposure_CL | 23 | Identity Exposure | Enterprise |
+| SpyCloudInvestigations_CL | 28 | Investigations | Enterprise+ |
+| SpyCloud_ConditionalAccessLogs_CL | 14 | Playbook Output | All |
+| Spycloud_MDE_Logs_CL | 19 | Playbook Output | All |
+| **Total** | **233+** | **6 APIs + 2 playbook logs** | |
 
 ---
 
-*SpyCloud Sentinel v6.1.0 — Darknet & Identity Threat Exposure Intelligence*
+*SpyCloud Sentinel v8.0.0 — Darknet & Identity Threat Exposure Intelligence*
 *Copyright (c) 2024-2026 SpyCloud, Inc. All rights reserved.*

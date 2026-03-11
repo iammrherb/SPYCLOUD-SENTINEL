@@ -80,6 +80,27 @@ resource "azurerm_resource_group_template_deployment" "spycloud" {
     enableAutomationRule = {
       value = var.enable_automation_rule
     }
+    enableInvestigations = {
+      value = var.enable_investigations
+    }
+    investigationsApiKey = {
+      value = var.investigations_api_key
+    }
+    compassApiKey = {
+      value = var.compass_api_key
+    }
+    sipApiKey = {
+      value = var.sip_api_key
+    }
+    sipCookieDomain = {
+      value = var.sip_cookie_domain
+    }
+    enableSip = {
+      value = var.enable_sip
+    }
+    enableCompass = {
+      value = var.enable_compass
+    }
   })
 
   tags = var.tags

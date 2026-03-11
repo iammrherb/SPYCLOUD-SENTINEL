@@ -27,6 +27,26 @@ output "sentinel_url" {
   value       = "https://portal.azure.com/#blade/Microsoft_Azure_Security_Insights/MainMenuBlade/0/subscriptionId/${var.subscription_id}/resourceGroup/${local.resource_group_name}/workspaceName/${var.workspace_name}"
 }
 
+output "identity_exposure_table" {
+  description = "Custom log table for SpyCloud identity exposure data"
+  value       = "SpyCloud_IdentityExposure_CL"
+}
+
+output "investigations_table" {
+  description = "Custom log table for SpyCloud Investigations data (only populated when enable_investigations is true)"
+  value       = var.enable_investigations ? "SpyCloud_Investigations_CL" : "not_deployed"
+}
+
+output "compass_table" {
+  description = "Custom log table for SpyCloud Compass data (only populated when enable_compass is true)"
+  value       = var.enable_compass ? "SpyCloud_Compass_CL" : "not_deployed"
+}
+
+output "sip_table" {
+  description = "Custom log table for SpyCloud SIP stolen session data (only populated when enable_sip is true)"
+  value       = var.enable_sip ? "SpyCloud_SIP_CL" : "not_deployed"
+}
+
 output "post_deployment_steps" {
   description = "Required post-deployment steps"
   value = <<-EOT
@@ -35,5 +55,8 @@ output "post_deployment_steps" {
     2. Enable analytics rules: Sentinel > Analytics > filter 'SpyCloud'
     3. Verify data flow: Sentinel > Data connectors > SpyCloud > Connect
     4. Upload Copilot files: copilot/SpyCloud_Plugin.yaml + SpyCloud_Agent.yaml
+    5. If Investigations enabled: verify SpyCloud_Investigations_CL table in Log Analytics
+    6. If Compass enabled: verify SpyCloud_Compass_CL table in Log Analytics
+    7. If SIP enabled: verify SpyCloud_SIP_CL table and confirm cookie domain setting
   EOT
 }

@@ -6,7 +6,7 @@
     "config": {
       "isWizard": true,
       "basics": {
-        "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel Supreme\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 5 REST API pollers\n- 6 custom log tables (118+ columns)\n- 5 Logic App playbooks (MDE, CA, Credential, Blocklist, TI Enrichment)\n- 43+ analytics rules + Fusion + 5 Microsoft Security Incident Creation rules\n- UEBA, Anomaly Detection, EyesOn audit settings\n- 3 automation rules (auto-triage, device tasks, auto-close)\n- 15 hunting queries across all MITRE ATT&CK tactics\n- 4 watchlists (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- Security Copilot plugin + interactive agent (58+ skills)\n- Comprehensive connector + feature recommendations\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
+        "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel Supreme\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 9 REST API pollers\n- 10 custom log tables (233+ columns)\n- 5 Logic App playbooks (MDE, CA, Credential, Blocklist, TI Enrichment)\n- 43+ analytics rules + Fusion + 5 Microsoft Security Incident Creation rules\n- UEBA, Anomaly Detection, EyesOn audit settings\n- 3 automation rules (auto-triage, device tasks, auto-close)\n- 15 hunting queries across all MITRE ATT&CK tactics\n- 4 watchlists (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- Security Copilot plugin + interactive agent (58+ skills)\n- Comprehensive connector + feature recommendations\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
         "location": {
           "label": "Deployment Region",
           "allowedValues": [
@@ -191,6 +191,241 @@
                 "showStepMarkers": false,
                 "toolTip": "How long to retain data. 90 days included free. Longer retention incurs additional cost.",
                 "visible": true
+              }
+            ],
+            "visible": true
+          }
+        ]
+      },
+      {
+        "name": "connectorConfig",
+        "label": "Data Connector & API Keys",
+        "elements": [
+          {
+            "name": "sectionApiKeys",
+            "type": "Microsoft.Common.Section",
+            "label": "SpyCloud API Keys",
+            "elements": [
+              {
+                "name": "infoApiKeys",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Your SpyCloud API keys authenticate the data connector to pull darknet intelligence. Get keys from portal.spycloud.com > Settings > API Keys."
+                }
+              },
+              {
+                "name": "apiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "SpyCloud Enterprise API Key *",
+                  "confirmPassword": "Confirm SpyCloud Enterprise API Key"
+                },
+                "toolTip": "Primary API key for breach watchlist and catalog data. Required for all SpyCloud data ingestion.",
+                "constraints": {
+                  "required": true
+                }
+              },
+              {
+                "name": "infoApiKeyTest",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Test your key: curl -H 'X-API-Key: YOUR_KEY' https://api.spycloud.io/enterprise-v2/breach/catalog?limit=1"
+                }
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionCompass",
+            "type": "Microsoft.Common.Section",
+            "label": "Compass API (Enterprise+ Tier)",
+            "elements": [
+              {
+                "name": "enableCompass",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Compass Data Ingestion (Enterprise+ tier only)",
+                "defaultValue": false
+              },
+              {
+                "name": "infoCompassWarning",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Warning",
+                  "text": "Only enable if your SpyCloud subscription includes Enterprise+ tier. Enterprise-only keys will get 403 errors on Compass endpoints."
+                }
+              },
+              {
+                "name": "compassApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Compass API Key (optional)",
+                  "confirmPassword": "Confirm Compass API Key"
+                },
+                "toolTip": "Separate key for Compass endpoints. Leave blank to use your Enterprise key.",
+                "constraints": {
+                  "required": false
+                },
+                "visible": "[steps('connectorConfig').sectionCompass.enableCompass]"
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionSip",
+            "type": "Microsoft.Common.Section",
+            "label": "Session Identity Protection (SIP)",
+            "elements": [
+              {
+                "name": "enableSip",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable SIP Cookie Monitoring",
+                "defaultValue": false
+              },
+              {
+                "name": "infoSip",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "SIP monitors stolen session cookies for your domains. Requires SIP API entitlement from SpyCloud."
+                }
+              },
+              {
+                "name": "sipApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "SIP API Key (optional)",
+                  "confirmPassword": "Confirm SIP API Key"
+                },
+                "toolTip": "Separate key for SIP endpoints. Leave blank to use your Enterprise key.",
+                "constraints": {
+                  "required": false
+                },
+                "visible": "[steps('connectorConfig').sectionSip.enableSip]"
+              },
+              {
+                "name": "sipCookieDomain",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Cookie Domain to Monitor *",
+                "placeholder": "example.com",
+                "toolTip": "The domain to monitor for stolen session cookies (e.g., yourcompany.com). Includes all subdomains.",
+                "constraints": {
+                  "required": true,
+                  "regex": "^[a-zA-Z0-9][a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                  "validationMessage": "Enter a valid domain name (e.g., yourcompany.com)."
+                },
+                "visible": "[steps('connectorConfig').sectionSip.enableSip]"
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionInvestigations",
+            "type": "Microsoft.Common.Section",
+            "label": "Investigations API",
+            "elements": [
+              {
+                "name": "enableInvestigations",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Investigations Data Ingestion",
+                "defaultValue": false
+              },
+              {
+                "name": "infoInvestigations",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Investigations API provides the broadest dataset - searches across all breaches, infostealers, phishing, paste sites, and combo lists. Requires Investigations API entitlement."
+                }
+              },
+              {
+                "name": "investigationsApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Investigations API Key (optional)",
+                  "confirmPassword": "Confirm Investigations API Key"
+                },
+                "toolTip": "Separate key for Investigations endpoints. Leave blank to use your Enterprise key.",
+                "constraints": {
+                  "required": false
+                },
+                "visible": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]"
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionPolling",
+            "type": "Microsoft.Common.Section",
+            "label": "Polling Configuration",
+            "elements": [
+              {
+                "name": "pollingInterval",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Polling Interval",
+                "toolTip": "How frequently the data connector polls SpyCloud APIs for new data.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Every 5 minutes (highest freshness, highest API usage)",
+                      "value": "5"
+                    },
+                    {
+                      "label": "Every 15 minutes",
+                      "value": "15"
+                    },
+                    {
+                      "label": "Every 30 minutes (recommended)",
+                      "value": "30"
+                    },
+                    {
+                      "label": "Every 1 hour",
+                      "value": "60"
+                    },
+                    {
+                      "label": "Every 6 hours",
+                      "value": "360"
+                    },
+                    {
+                      "label": "Every 24 hours (lowest API usage)",
+                      "value": "1440"
+                    }
+                  ],
+                  "required": true
+                },
+                "defaultValue": "Every 30 minutes (recommended)"
+              },
+              {
+                "name": "infoPolling",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Shorter intervals mean faster detection but higher API call volume and ingestion costs. 30 minutes is recommended for most deployments. Use 5 minutes only for high-priority environments with active incident response needs."
+                }
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionDataTables",
+            "type": "Microsoft.Common.Section",
+            "label": "Data Tables Summary",
+            "elements": [
+              {
+                "name": "infoDataTables",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "The following custom log tables will be created based on your selections:\n\n**Always created:**\n- SpyCloudBreachWatchlist_CL\n- SpyCloudBreachCatalog_CL\n- SpyCloudIdentityExposure_CL\n\n**When Compass enabled:**\n- SpyCloudCompassData_CL\n- SpyCloudCompassDevices_CL\n- SpyCloudCompassApplications_CL\n\n**When SIP enabled:**\n- SpyCloudSipCookies_CL\n\n**When Investigations enabled:**\n- SpyCloudInvestigations_CL\n\n**Always created (internal):**\n- Spycloud_MDE_Logs_CL\n- SpyCloud_ConditionalAccessLogs_CL"
+                }
               }
             ],
             "visible": true
@@ -1572,13 +1807,6 @@
                 "label": "Create MSIC Rules (4 rules)",
                 "toolTip": "Auto-create incidents from Entra ID Protection, Defender for Cloud, MCAS, and Defender for Identity alerts.",
                 "defaultValue": true
-              },
-              {
-                "name": "enableCompass",
-                "type": "Microsoft.Common.CheckBox",
-                "label": "Enable Compass Connectors (Enterprise+ only)",
-                "toolTip": "IMPORTANT: Only enable if your SpyCloud API key has Enterprise+ tier access. Enterprise-only keys will cause deployment to fail with 403 Forbidden errors on Compass endpoints. Contact SpyCloud to verify your subscription tier before enabling.",
-                "defaultValue": false
               }
             ],
             "visible": true
@@ -1911,7 +2139,14 @@
       "enableAnomalies": "[steps('sentinelFeatures').sectionSentinelSettings.enableAnomalies]",
       "enableFusionRule": "[steps('sentinelFeatures').sectionSentinelSettings.enableFusionRule]",
       "enableMicrosoftSecurityIncidentRules": "[steps('sentinelFeatures').sectionSentinelSettings.enableMicrosoftSecurityIncidentRules]",
-      "enableCompass": "[steps('sentinelFeatures').sectionSentinelSettings.enableCompass]",
+      "apiKey": "[steps('connectorConfig').sectionApiKeys.apiKey]",
+      "enableCompass": "[steps('connectorConfig').sectionCompass.enableCompass]",
+      "compassApiKey": "[steps('connectorConfig').sectionCompass.compassApiKey]",
+      "enableSip": "[steps('connectorConfig').sectionSip.enableSip]",
+      "sipApiKey": "[steps('connectorConfig').sectionSip.sipApiKey]",
+      "sipCookieDomain": "[steps('connectorConfig').sectionSip.sipCookieDomain]",
+      "enableInvestigations": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]",
+      "investigationsApiKey": "[steps('connectorConfig').sectionInvestigations.investigationsApiKey]",
       "enableWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableWorkbook]",
       "enableSessionCookieDetection": "[steps('sentinelFeatures').sectionIdp.enableSessionCookieDetection]",
       "enableIdentityProviderAlerts": "[steps('sentinelFeatures').sectionIdp.enableIdentityProviderAlerts]",

@@ -912,9 +912,9 @@ SkillGroups:
 
         Companion Plugins (use alongside this agent for maximum coverage):
 
-        - SpyCloud KQL Plugin: 85 promptbook skills for natural-language KQL queries across all 6 tables
+        - SpyCloud KQL Plugin: 90 promptbook skills for natural-language KQL queries across all 10 tables
 
-        - SpyCloud API Plugin: 12 direct REST API skills for real-time SpyCloud Enterprise, Compass, and Identity API access
+        - SpyCloud API Plugin: 20 direct REST API skills for real-time SpyCloud Enterprise, Compass, SIP, Identity Exposure, and Investigations API access
 
 
         Severity: 2=Breach Credential, 5=Breach+PII, 20=Infostealer (URGENT), 25=Infostealer+App Data with stolen cookies/sessions (CRITICAL)
@@ -3523,7 +3523,7 @@ SkillGroups:
   - Name: GetConnectorHealthAssessment
     DisplayName: '[Data] Assess connector and data source health'
     Description: Internal data retrieval skill. Evaluates the health and ingestion status of all SpyCloud and Microsoft data sources by checking recent record counts, last ingestion times, and identifying
-      data gaps across all 6 custom tables and key Microsoft security tables.
+      data gaps across all 10 custom tables and key Microsoft security tables.
     Settings:
       Target: Sentinel
       TenantId: '{{TenantId}}'

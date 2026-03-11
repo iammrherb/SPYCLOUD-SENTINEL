@@ -821,9 +821,10 @@ components:
 
   securitySchemes:
     BearerAuth:
-      type: http
-      scheme: bearer
-      description: "SpyCloud API key issued for your organization. When configuring the plugin in Security Copilot, enter your API key as the Bearer token. The plugin translates it to the X-API-Key header required by the SpyCloud API. Keys can be generated and rotated from the SpyCloud portal under Settings > API Keys."
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: "SpyCloud API key issued for your organization. Enter your SpyCloud API key directly — it is sent as the X-API-Key header to the SpyCloud API. Keys can be generated and rotated from the SpyCloud portal under Settings > API Keys."
   # ---------------------------------------------------------------------------
   # Reusable Parameters
   # ---------------------------------------------------------------------------

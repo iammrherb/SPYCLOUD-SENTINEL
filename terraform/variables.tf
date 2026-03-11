@@ -79,6 +79,53 @@ variable "enable_automation_rule" {
   default     = true
 }
 
+# ─── v8.0 Feature Toggles ───────────────────────────────────────────────────
+
+variable "enable_investigations" {
+  description = "Enable SpyCloud Investigations integration — deploys the Investigations data connector, custom log table, and associated analytics rules for deep-dive identity investigation workflows"
+  type        = bool
+  default     = false
+}
+
+variable "investigations_api_key" {
+  description = "SpyCloud Investigations API key (required when enable_investigations is true). Obtain from portal.spycloud.com under Investigations API settings"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "compass_api_key" {
+  description = "SpyCloud Compass API key for automated identity resolution and enrichment. Required when enable_compass is true. Obtain from portal.spycloud.com under Compass API settings"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "sip_api_key" {
+  description = "SpyCloud SIP (Session Identity Protection) API key for stolen session and cookie monitoring. Required when enable_sip is true. Obtain from portal.spycloud.com under SIP API settings"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "sip_cookie_domain" {
+  description = "The corporate cookie domain to monitor for stolen sessions via SIP (e.g., 'example.com'). Only used when enable_sip is true"
+  type        = string
+  default     = ""
+}
+
+variable "enable_sip" {
+  description = "Enable SpyCloud Session Identity Protection (SIP) — deploys the SIP data connector and analytics rules for detecting stolen web sessions and hijacked cookies"
+  type        = bool
+  default     = false
+}
+
+variable "enable_compass" {
+  description = "Enable SpyCloud Compass — deploys the Compass data connector and analytics rules for automated identity exposure monitoring and remediation recommendations"
+  type        = bool
+  default     = false
+}
+
 # ─── Template Source ──────────────────────────────────────────────────────────
 
 variable "arm_template_url" {
