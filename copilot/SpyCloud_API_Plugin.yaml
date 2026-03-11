@@ -17,7 +17,6 @@ Descriptor:
     Sentinel v6.1 solution spanning 145+ deployed resources.
   DescriptionDisplay: default
   Category: Other
-  Publisher: SpyCloud
   Version: 7.0.0
   SupportedAuthTypes:
     - APIKey

@@ -11,7 +11,6 @@ Descriptor:
     Conditional Access. Works alongside the SpyCloud API Plugin and Investigation Agent.
   Category: Other
   DescriptionDisplay: default
-  Publisher: SpyCloud
   Version: 7.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
@@ -543,6 +542,7 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             Spycloud_MDE_Logs_CL
+            | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), MachineTagName = column_ifexists("MachineTagName", "")
             | project TimeGenerated, IncidentId, HostName, NormalizedHostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender, PlaybookName, BreachTitle, InfectedMachineId, DocumentId
             | top 25 by TimeGenerated desc
 
@@ -568,6 +568,7 @@ SkillGroups:
           Template: |-
             Spycloud_MDE_Logs_CL
             | where HostName contains "{{hostName}}" or NormalizedHostName contains "{{hostName}}"
+            | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), MachineTagName = column_ifexists("MachineTagName", "")
             | project TimeGenerated, IncidentId, HostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender, PlaybookName, BreachTitle, InfectedMachineId
             | top 20 by TimeGenerated desc
 
@@ -588,7 +589,8 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             Spycloud_MDE_Logs_CL
-            | summarize TotalActions = count(), IsolationRequested = countif(IsolationRequested == true), IsolationSucceeded = countif(IsolationStatus == true), TagsAdded = countif(MachineTagAdded == true), IOCsSubmitted = countif(AddedIOCsToDefender == true), UniqueDevices = dcount(DeviceId), UniqueIncidents = dcount(IncidentId)
+            | extend _IsolationRequested = column_ifexists("IsolationRequested", false), _IsolationStatus = column_ifexists("IsolationStatus", false), _MachineTagAdded = column_ifexists("MachineTagAdded", false), _AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false)
+            | summarize TotalActions = count(), IsolationRequested = countif(_IsolationRequested == true), IsolationSucceeded = countif(_IsolationStatus == true), TagsAdded = countif(_MachineTagAdded == true), IOCsSubmitted = countif(_AddedIOCsToDefender == true), UniqueDevices = dcount(DeviceId), UniqueIncidents = dcount(IncidentId)
             | extend IsolationSuccessRate = iff(IsolationRequested > 0, round(100.0 * IsolationSucceeded / IsolationRequested, 1), 0.0)
 
       # =====================================================================
@@ -693,7 +695,8 @@ SkillGroups:
               | extend DataSource = "Watchlist Exposures"),
               (Spycloud_MDE_Logs_CL
               | where HostName in ((SpyCloudBreachWatchlist_CL | where email =~ "{{investigateEmail}}" | where isnotempty(user_hostname) | distinct user_hostname))
-              | summarize MDEActions = count(), Isolations = countif(IsolationRequested == true), IsolationSuccesses = countif(IsolationStatus == true)
+              | extend _IsolationRequested = column_ifexists("IsolationRequested", false), _IsolationStatus = column_ifexists("IsolationStatus", false)
+              | summarize MDEActions = count(), Isolations = countif(_IsolationRequested == true), IsolationSuccesses = countif(_IsolationStatus == true)
               | extend DataSource = "MDE Remediation"),
               (SpyCloud_ConditionalAccessLogs_CL
               | where UserEmail =~ "{{investigateEmail}}" or Username =~ "{{investigateEmail}}"
@@ -743,11 +746,13 @@ SkillGroups:
           ResourceGroupName: '{{ResourceGroupName}}'
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
-            union
+            union isfuzzy=true
               (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist Exposures'),
               (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Breach Catalog'),
               (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),
-              (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access')
+              (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access'),
+              (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),
+              (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')
             | project Table, Records, Latest, HoursSinceUpdate = datetime_diff('hour', now(), Latest)
 
       # =====================================================================
@@ -1673,6 +1678,7 @@ SkillGroups:
                   Source = PlaybookName, IncidentId, BreachTitle),
               (Spycloud_MDE_Logs_CL
               | where HostName in ((SpyCloudBreachWatchlist_CL | where email =~ "{{targetEmail}}" | where isnotempty(user_hostname) | distinct user_hostname))
+              | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), MachineTagName = column_ifexists("MachineTagName", "")
               | project TimeGenerated, ActionType = "MDE Device Action",
                   Detail = strcat(
                       iff(IsolationRequested == true, strcat("Isolation:", tostring(IsolationStatus), " "), ""),
@@ -2017,7 +2023,7 @@ SkillGroups:
             | mv-expand Entity = parse_json(AdditionalData).alertProductNames
             | extend Entities = parse_json(tostring(AdditionalData))
             | project Owner, Title;
-            let mde_data = Spycloud_MDE_Logs_CL | where IncidentId == "{{incidentId}}" | summarize MDEActions = count(), Isolations = countif(IsolationRequested == true) by HostName, DeviceId;
+            let mde_data = Spycloud_MDE_Logs_CL | where IncidentId == "{{incidentId}}" | extend _IsolationRequested = column_ifexists("IsolationRequested", false) | summarize MDEActions = count(), Isolations = countif(_IsolationRequested == true) by HostName, DeviceId;
             let ca_data = SpyCloud_ConditionalAccessLogs_CL | where IncidentId == "{{incidentId}}" | summarize CAActions = count(), Resets = countif(ForcedPasswordResetOnNextSignIn == true), Revocations = countif(UserSessionsRevoked == true) by UserEmail;
             union
               (mde_data | extend DataSource = "MDE Remediation"),
@@ -2118,7 +2124,8 @@ SkillGroups:
             ) on $left.IncidentNumber == $right.IncidentId
             | join kind=leftouter (
                 Spycloud_MDE_Logs_CL
-                | summarize MDEIsolations = countif(IsolationRequested == true), MDETags = countif(MachineTagAdded == true), MDEIOCs = countif(AddedIOCsToDefender == true) by IncidentId
+                | extend _IsolationRequested = column_ifexists("IsolationRequested", false), _MachineTagAdded = column_ifexists("MachineTagAdded", false), _AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false)
+                | summarize MDEIsolations = countif(_IsolationRequested == true), MDETags = countif(_MachineTagAdded == true), MDEIOCs = countif(_AddedIOCsToDefender == true) by IncidentId
             ) on $left.IncidentNumber == $right.IncidentId
             | extend HasRemediation = (coalesce(CAResets, 0) + coalesce(CARevocations, 0) + coalesce(MDEIsolations, 0)) > 0
             | project TimeGenerated, IncidentNumber, Title, Severity, Status, HasRemediation, CAResets = coalesce(CAResets, 0), CARevocations = coalesce(CARevocations, 0), CADisabled = coalesce(CADisabled, 0), MDEIsolations = coalesce(MDEIsolations, 0), MDETags = coalesce(MDETags, 0), MDEIOCs = coalesce(MDEIOCs, 0)
@@ -2304,7 +2311,8 @@ SkillGroups:
                 LastSeen = max(TimeGenerated);
             let mde_data = Spycloud_MDE_Logs_CL
             | where InfectedMachineId == "{{machineId}}"
-            | summarize MDEActions = count(), WasIsolated = countif(IsolationRequested == true), IsolationSuccess = countif(IsolationStatus == true), DeviceIds = make_set(DeviceId, 5), RiskScores = make_set(RiskScore, 5);
+            | extend _IsolationRequested = column_ifexists("IsolationRequested", false), _IsolationStatus = column_ifexists("IsolationStatus", false)
+            | summarize MDEActions = count(), WasIsolated = countif(_IsolationRequested == true), IsolationSuccess = countif(_IsolationStatus == true), DeviceIds = make_set(DeviceId, 5), RiskScores = make_set(RiskScore, 5);
             spycloud_data
             | extend MDEActions = toscalar(mde_data | project MDEActions), WasIsolated = toscalar(mde_data | project WasIsolated), IsolationSuccess = toscalar(mde_data | project IsolationSuccess)
 
@@ -2389,6 +2397,7 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             Spycloud_MDE_Logs_CL
+            | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false)
             | where IsolationRequested == true
             | project TimeGenerated, HostName, NormalizedHostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, BreachTitle, InfectedMachineId, PlaybookName, IncidentId
             | extend IsolationResult = iff(IsolationStatus == true, "SUCCESS", "FAILED")
@@ -2479,7 +2488,7 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let remediated_emails = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | where ForcedPasswordResetOnNextSignIn == true | distinct UserEmail;
-            let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d) | where IsolationRequested == true | distinct HostName;
+            let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d) | extend _IsolationRequested = column_ifexists("IsolationRequested", false) | where _IsolationRequested == true | distinct HostName;
             union isfuzzy=true
             (SpyCloudBreachWatchlist_CL
             | where TimeGenerated > ago(7d) and severity >= 25 and email !in~ (remediated_emails)
