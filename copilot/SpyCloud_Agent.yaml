@@ -2,28 +2,12 @@ Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
   Description: >
-    Autonomous Security Copilot agent for SpyCloud darknet & identity threat exposure intelligence
-    spanning 145+ deployed resources including 49 analytics rules (38 scheduled, 1 Fusion, 5 NRT,
-    5 MSIC), 28 hunting queries, 10 playbooks (Force Password Reset, Revoke Sessions, Enforce MFA,
-    Block Conditional Access, Block Firewall, Isolate Device, Notify User, Notify SOC, Enrich Incident,
-    Full Remediation Orchestration), 4 watchlists (VIP/Executive, IOC Blocklist, Approved Domains,
-    High-Value Assets), 4 automation rules, 4 Sentinel settings (UEBA, Anomalies, EyesOn,
-    EntityAnalytics), 6 notification channels (Slack, Teams, Email, ServiceNow, Jira, Azure DevOps),
-    3 workbooks (Executive Dashboard, SOC Operations, Threat Intelligence), and 3 Jupyter notebooks
-    (Incident Triage, Threat Hunting, Threat Landscape). Orchestrates 17 specialized sub-agents
-    for UEBA behavioral analysis, Fusion multistage attacks, TI enrichment & IOC analysis,
-    session cookie & MFA bypass, lateral movement investigation, data exfiltration detection,
-    executive summary & compliance, watchlist & asset management, ransomware impact assessment,
-    identity risk scoring, third-party supply chain exposure, dark web monitoring & alerting,
-    Defender XDR & endpoint investigation, Intune device compliance & posture assessment,
-    CASB & cloud application security analysis, and Compass deep infostealer investigation.
-    Investigates compromised credentials, infostealer infections, exposed PII, device forensics,
-    and automated remediation status across Microsoft Sentinel, Defender XDR, Defender for Endpoint,
-    Defender for Identity, Defender for Office 365, Defender for Cloud Apps, Intune, Entra ID,
-    and CASB. Correlates dark web intelligence with endpoint threats, device compliance, cloud app
-    risks, identity attacks, and email threats for comprehensive cross-platform security coverage.
-    Works alongside the SpyCloud KQL Plugin (85+ promptbook skills) and SpyCloud API Plugin
-    (12 direct REST API skills) for complete Security Copilot coverage.
+    Autonomous Security Copilot agent for SpyCloud darknet intelligence. Orchestrates 17
+    specialized sub-agents to investigate compromised credentials, infostealer infections,
+    exposed PII, and device forensics across Microsoft Sentinel, Defender XDR, Intune,
+    Entra ID, and CASB. Correlates dark web intelligence with endpoint threats, identity
+    attacks, and cloud app risks. Works alongside the SpyCloud KQL Plugin and API Plugin
+    for complete Security Copilot coverage.
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
@@ -2603,7 +2587,7 @@ SkillGroups:
       Description: The raw data and context from previous investigation steps.
       Required: true
     Settings:
-      ModelName: gpt-4.1
+      ModelName: gpt-4o
       Template: "<|im_start|>system\nYou are an expert cybersecurity analyst specializing in dark web threat\nintelligence, identity compromise, and infostealer malware response.\n\nYou will receive raw\
         \ investigation findings from SpyCloud data queries\nacross Microsoft Sentinel tables. Your job is to:\n\n1. ASSESS SEVERITY: Classify the overall threat as CRITICAL, HIGH,\n   MEDIUM, or LOW based\
         \ on: presence of plaintext passwords, infostealer\n   severity (20/25), sensitive PII exposure (SSN, financial, health data),\n   number of affected users and devices, and whether stolen session\n\
@@ -3142,6 +3126,7 @@ SkillGroups:
     - Name: HoursBack
       Description: Hours to look back (default 24).
       Required: false
+      DefaultValue: '24'
     Settings:
       Target: Sentinel
       TenantId: '{{TenantId}}'
@@ -3200,31 +3185,31 @@ AgentDefinitions:
     Label: Azure Tenant ID
     Description: Your Azure Tenant ID
     HintText: Enter your Azure Tenant ID
-    SettingType: String
+    SettingType: string
     Required: true
   - Name: SubscriptionId
     Label: Azure Subscription ID
     Description: Your Azure Subscription ID
     HintText: Enter your Azure Subscription ID
-    SettingType: String
+    SettingType: string
     Required: true
   - Name: ResourceGroupName
     Label: Resource Group Name
     Description: Resource Group containing your Sentinel workspace
     HintText: Enter Resource Group name
-    SettingType: String
+    SettingType: string
     Required: true
   - Name: WorkspaceName
     Label: Sentinel Workspace Name
     Description: Name of the Log Analytics workspace with SpyCloud data
     HintText: Enter workspace name
-    SettingType: String
+    SettingType: string
     Required: true
   - Name: SpyCloudApiKey
     Label: SpyCloud API Key
     Description: SpyCloud API key for direct API access via companion API Plugin (optional)
     HintText: Enter SpyCloud API key for API Plugin integration
-    SettingType: String
+    SettingType: string
     Required: false
   Triggers:
   - Name: Default

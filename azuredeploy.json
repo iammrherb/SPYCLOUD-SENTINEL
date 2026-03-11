@@ -145,6 +145,27 @@
         "description": "Deploy the automation rule that connects the analytics rule to the playbooks for automatic remediation on incident creation."
       }
     },
+    "blockedGroupId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "OPTIONAL — Object ID of the Entra ID security group for blocked users (severity 25). Targeted by a CA policy that blocks all access. Create in Entra ID > Groups > New Group > Security. Leave blank to skip."
+      }
+    },
+    "restrictedGroupId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "OPTIONAL — Object ID of the Entra ID security group for restricted users (severity 20). Targeted by a CA policy requiring compliant device + MFA. Create in Entra ID > Groups > New Group > Security. Leave blank to skip."
+      }
+    },
+    "monitoredGroupId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "OPTIONAL — Object ID of the Entra ID security group for monitored users (severity 5+). Targeted by a CA policy requiring MFA from untrusted locations. Create in Entra ID > Groups > New Group > Security. Leave blank to skip."
+      }
+    },
     "caSecurityGroupId": {
       "type": "string",
       "defaultValue": "",
@@ -977,7 +998,6 @@
     "_logAnalyticsTableId3": "Spycloud_MDE_Logs_CL",
     "_logAnalyticsTableId4": "SpyCloud_ConditionalAccessLogs_CL",
     "dataCollectionEndpointId1": "[concat('/subscriptions/',parameters('subscription'),'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Insights/dataCollectionEndpoints/',parameters('dataCollectionEndpointName'))]",
-    "_logAnalyticsTableId5": "SpyCloudCompassExposures_CL",
     "_effectiveWorkspaceLocation": "[if(empty(parameters('workspaceRegionOverride')), parameters('deploymentRegion'), parameters('workspaceRegionOverride'))]",
     "_dcrDisplayName": "[concat('SpyCloud ThreatIntel DCR for ', take(parameters('workspace'), 30))]",
     "_dceDisplayName": "[concat('SpyCloud ThreatIntel DCE for ', take(parameters('workspace'), 30))]",
@@ -2566,9 +2586,6 @@
         "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassDevices_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassApplications_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCompassData_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachCatalog_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachWatchlist_CL')]"
       ],
@@ -3578,11 +3595,11 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data/watchlist",
                   "httpMethod": "GET",
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "type": "corporate,infected"
+                    "type": "[[join(parameters('watchlistType'), ',')]"
                   },
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
@@ -3629,7 +3646,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices/watchlist",
                   "httpMethod": "GET",
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"
@@ -3679,7 +3696,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications/watchlist",
                   "httpMethod": "GET",
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"

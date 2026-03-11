@@ -8,17 +8,8 @@
         "createNewWorkspace": {
             "value": true
         },
-        "spycloudApiKey": {
-            "value": "REPLACE-WITH-YOUR-SPYCLOUD-API-KEY"
-        },
-        "spycloudApiRegion": {
-            "value": "us"
-        },
         "deploymentRegion": {
             "value": "eastus"
-        },
-        "enableKeyVault": {
-            "value": true
         },
         "enableMdePlaybook": {
             "value": true

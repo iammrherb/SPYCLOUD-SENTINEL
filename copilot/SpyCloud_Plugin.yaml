@@ -2,27 +2,13 @@ Descriptor:
   Name: SpyCloud Darknet & Identity Threat Exposure Intelligence
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence
   Description: >
-    Comprehensive Security Copilot KQL plugin for SpyCloud Darknet & Identity Threat
-    Exposure Intelligence in Microsoft Sentinel. Provides 85 promptbook skills querying
-    6 custom Sentinel tables (BreachWatchlist, BreachCatalog, CompassData, CompassDevices,
-    ConditionalAccessLogs, MDE_Logs) with 156 total columns across 118 base fields.
-    Enables natural-language investigation of compromised credentials, infostealer infections,
-    exposed PII, device forensics, and automated remediation status. Skills span 17 categories:
-    user credential investigation, password analysis, severity and breach category analysis,
-    sensitive PII and financial data exposure, device and malware forensics, breach catalog
-    intelligence, MDE device remediation audit, Conditional Access identity remediation,
-    cross-table investigation, operational health monitoring, Compass consumer identity,
-    cross-connector threat hunting, risk scoring and prioritization, UEBA correlation,
-    Fusion multistage analysis, TI enrichment, automation rule metrics, session cookie theft
-    detection, lateral movement hunting, data exfiltration detection, malware family tracking,
-    watchlist management, MSIC incident correlation, executive reporting, campaign and threat
-    actor intelligence, advanced user analysis, network and infrastructure hunting, compliance
-    and reporting, incident and alert correlation, proactive threat intelligence, device deep
-    dive forensics, and executive dashboarding. Supports all breach categories including
-    infostealers, combo lists, phishing, exfiltration, and scraping. Works alongside the
-    SpyCloud API Plugin (12 direct REST API skills) and SpyCloud Investigation Agent
-    (autonomous interactive investigation with 12 sub-agents) for complete Security Copilot
-    coverage across 145+ deployed Sentinel resources.
+    Security Copilot KQL plugin for SpyCloud darknet intelligence in Microsoft Sentinel.
+    Provides 86 skills querying 6 custom tables for investigating compromised credentials,
+    infostealer infections, exposed PII, device forensics, and remediation status. Covers
+    user investigation, password analysis, breach catalog, Compass consumer identity,
+    UEBA correlation, Fusion multistage detection, cross-connector threat hunting, risk
+    scoring, executive reporting, and automated remediation audit across MDE and
+    Conditional Access. Works alongside the SpyCloud API Plugin and Investigation Agent.
   Category: Other
   DescriptionDisplay: default
   Publisher: SpyCloud
@@ -771,12 +757,20 @@ SkillGroups:
       - Name: GetCompassExposures
         DisplayName: Search Compass consumer exposures
         Description: Finds all consumer identity exposures from SpyCloud Compass for a specific email or domain.
+        ExamplePrompts:
+          - Search Compass for consumer exposures for this email
+          - Show Compass consumer identity data for this domain
+          - Check SpyCloud Compass exposures for this user
         Inputs:
           - Name: SearchTerm
             Description: Email address or email domain to search
             Required: true
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassData_CL
             | where TimeGenerated > ago(30d)
@@ -787,8 +781,16 @@ SkillGroups:
       - Name: GetCompassDevices
         DisplayName: List Compass infected devices
         Description: Shows all infected devices tracked by SpyCloud Compass including OS, application count, and infection timeline.
+        ExamplePrompts:
+          - List Compass infected devices
+          - Show SpyCloud Compass device infections
+          - What devices are tracked in Compass
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassDevices_CL
             | where TimeGenerated > ago(30d)
@@ -799,8 +801,16 @@ SkillGroups:
       - Name: GetCompassCorporateOverlap
         DisplayName: Find Compass + Corporate credential overlap
         Description: Identifies users whose consumer identity exposures in Compass also appear in corporate breach watchlist — indicating personal credential reuse risk.
+        ExamplePrompts:
+          - Find overlap between Compass and corporate breaches
+          - Show users with both consumer and corporate credential exposure
+          - Check Compass corporate credential reuse risk
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassData_CL
             | where TimeGenerated > ago(30d) and severity >= 20
@@ -811,8 +821,16 @@ SkillGroups:
       - Name: GetDeviceReinfections
         DisplayName: Detect device reinfections via Compass
         Description: Identifies devices that appear in Compass multiple times across different time periods, indicating failed remediation or persistent compromise.
+        ExamplePrompts:
+          - Detect device reinfections from Compass data
+          - Which devices were infected multiple times
+          - Show reinfected devices with failed remediation
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassDevices_CL
             | where TimeGenerated > ago(90d)
@@ -828,27 +846,44 @@ SkillGroups:
       - Name: HuntExposedUserSignIns
         DisplayName: Hunt sign-in activity for exposed users
         Description: Correlates SpyCloud exposed credentials with Entra ID sign-in logs to identify potential account takeover. Shows successful sign-ins from exposed users with location and app context.
+        ExamplePrompts:
+          - Hunt sign-in activity for exposed users
+          - Check Entra logins for SpyCloud compromised users
+          - Correlate SpyCloud exposures with sign-in logs
         Inputs:
           - Name: DaysBack
             Description: Number of days to look back (default 7)
             Required: false
+            DefaultValue: '7'
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let lookback = ago({{DaysBack}}d);
-            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > lookback and severity >= 5 | distinct email, severity, breach_title;
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > lookback and severity >= 5 | distinct email, severity, source_id;
             SigninLogs
             | where TimeGenerated > lookback and ResultType == 0
             | where UserPrincipalName in~ (exposed | project email)
             | join kind=inner exposed on $left.UserPrincipalName == $right.email
-            | summarize SignIns=count(), Apps=dcount(AppDisplayName), IPs=dcount(IPAddress), Countries=dcount(tostring(LocationDetails.countryOrRegion)) by UserPrincipalName, severity, breach_title
+            | summarize SignIns=count(), Apps=dcount(AppDisplayName), IPs=dcount(IPAddress), Countries=dcount(tostring(LocationDetails.countryOrRegion)) by UserPrincipalName, severity, source_id
             | order by severity desc, SignIns desc
 
       - Name: HuntExposedUserEmailActivity
         DisplayName: Hunt email activity for exposed users
         Description: Checks Office 365 for suspicious email activity by users with exposed credentials — forwarding rules, delegation changes, and mass sends.
+        ExamplePrompts:
+          - Hunt email activity for exposed users
+          - Check Office 365 activity for compromised users
+          - Show suspicious email rules from SpyCloud exposed users
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email;
             OfficeActivity
@@ -861,8 +896,16 @@ SkillGroups:
       - Name: HuntExposedUserAzureActivity
         DisplayName: Hunt Azure resource changes by exposed users
         Description: Shows Azure subscription activity (creates, deletes, role assignments) by users whose credentials were exposed in SpyCloud.
+        ExamplePrompts:
+          - Hunt Azure activity by exposed users
+          - Show Azure resource changes from compromised accounts
+          - Check Azure operations by SpyCloud exposed users
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;
             AzureActivity
@@ -875,8 +918,16 @@ SkillGroups:
       - Name: HuntInfectedIPsInNetwork
         DisplayName: Hunt infected IPs across all network logs
         Description: Searches for SpyCloud infection source IPs in device network events, DNS, firewall (CEF), and threat intelligence — comprehensive network sweep.
+        ExamplePrompts:
+          - Hunt infected IPs across network logs
+          - Search for SpyCloud IPs in firewall and DNS logs
+          - Find infected device IPs in network events
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let ips = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | mv-expand ip = ip_addresses | extend src_ip = tostring(ip) | where isnotempty(src_ip) | distinct src_ip;
             union isfuzzy=true
@@ -893,12 +944,20 @@ SkillGroups:
       - Name: GetUserRiskScore
         DisplayName: Calculate SpyCloud risk score for a user
         Description: Calculates a composite risk score for a user based on exposure severity, number of breaches, plaintext passwords, device infections, password reuse, and recency.
+        ExamplePrompts:
+          - Calculate risk score for this user
+          - What is the SpyCloud risk score for this email
+          - Score this user based on SpyCloud exposure data
         Inputs:
           - Name: UserEmail
             Description: User email to score
             Required: true
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudBreachWatchlist_CL
             | where TimeGenerated > ago(90d) and email =~ "{{UserEmail}}"
@@ -924,8 +983,16 @@ SkillGroups:
       - Name: GetOrgRiskDashboard
         DisplayName: Organization-wide risk summary
         Description: Provides an executive-level risk summary of the entire organization — total exposures, critical users, unresolved infections, password hygiene, and breach source diversity.
+        ExamplePrompts:
+          - Show organization risk dashboard
+          - Give me an org-wide SpyCloud risk summary
+          - What is the overall exposure risk for the organization
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let w = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d);
             let mde = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d);
@@ -945,11 +1012,19 @@ SkillGroups:
       - Name: GetTopPriorityActions
         DisplayName: Priority action items for SOC
         Description: Lists the highest-priority remediation actions needed right now — unremediated critical exposures, exposed executives, reinfected devices, and stale incidents.
+        ExamplePrompts:
+          - Show top priority actions for the SOC
+          - What are the most urgent SpyCloud remediation items
+          - List highest priority items needing attention
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d);
-            let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;
+            let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct UserEmail;
             let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | distinct DeviceName;
             union isfuzzy=true
             (exposed | where severity == 25 and email !in~ (remediated_users) | summarize Users=dcount(email) | extend Priority="CRITICAL", Action="Sev 25 users NOT yet remediated — immediate password reset + device isolation needed"),
@@ -976,9 +1051,11 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for exposures (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
           - Name: MinSeverity
             Description: Minimum SpyCloud severity level to include (e.g., 5, 20, 25). Default is 5.
             Required: false
+            DefaultValue: '5'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1006,6 +1083,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1033,6 +1111,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for TI enrichment results (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1060,6 +1139,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for automation rule metrics (e.g., 7d, 14d, 30d). Default is 30d.
             Required: false
+            DefaultValue: '30d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1156,6 +1236,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for malware trends (e.g., 30d, 60d, 90d). Default is 30d.
             Required: false
+            DefaultValue: '30d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1244,6 +1325,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for MSIC incidents (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1274,7 +1356,7 @@ SkillGroups:
           ResourceGroupName: '{{ResourceGroupName}}'
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
-            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) and ActionStatus=="Success" | summarize Remediations=dcount(UserPrincipalName); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
+            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | summarize Remediations=dcount(UserEmail); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
 
       # =====================================================================
       # 24. CAMPAIGN AND THREAT ACTOR INTELLIGENCE
@@ -1369,13 +1451,13 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let reference = SpyCloudBreachWatchlist_CL
-            | where source_id == {{sourceId}}
+            | where source_id == "{{sourceId}}"
             | summarize RefEmails = make_set(email, 500), RefIPs = make_set(ip_addresses, 200), RefStart = min(TimeGenerated), RefEnd = max(TimeGenerated);
             let ref_emails = toscalar(reference | project RefEmails);
             let ref_start = toscalar(reference | project RefStart);
             let ref_end = toscalar(reference | project RefEnd);
             SpyCloudBreachWatchlist_CL
-            | where source_id != {{sourceId}}
+            | where source_id != "{{sourceId}}"
             | where TimeGenerated between (datetime_add('day', -30, ref_start) .. datetime_add('day', 30, ref_end))
             | summarize OverlappingUsers = dcountif(email, email in (ref_emails)), TotalRecords = count(), UniqueUsers = dcount(email) by source_id
             | where OverlappingUsers > 0
@@ -1953,6 +2035,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1984,6 +2067,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 30d.
             Required: false
+            DefaultValue: '30d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -2017,6 +2101,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'

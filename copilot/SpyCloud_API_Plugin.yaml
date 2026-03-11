@@ -20,7 +20,7 @@ Descriptor:
   Publisher: SpyCloud
   Version: 7.0.0
   SupportedAuthTypes:
-    - ApiKey
+    - APIKey
   Authorization:
     Type: APIKey
     Key: X-API-Key
@@ -40,7 +40,7 @@ Descriptor:
 SkillGroups:
   - Format: API
     Settings:
-      OpenApiSpecUrl: SpyCloud_API_Plugin_OpenAPI.yaml
+      OpenApiSpecUrl: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml
     Skills:
 
       # =====================================================================
