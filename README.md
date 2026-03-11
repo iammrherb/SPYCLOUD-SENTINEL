@@ -64,12 +64,15 @@
   |   SpyCloud          |       |   Azure Ingestion      |       |   Custom Tables    |
   |   Enterprise API    +------>+                        +------>+                    |
   |                     |       |   CCF Connector         |       |   BreachWatchlist  |
-  |   5 REST Pollers    |       |   DCE / DCR             |       |   BreachCatalog    |
+  |   9 REST Pollers    |       |   DCE / DCR             |       |   BreachCatalog    |
   |   - Breach Watch    |       |   KQL Transforms        |       |   CompassData      |
   |   - Breach Catalog  |       |                        |       |   CompassDevices   |
-  |   - Compass Data    |       +------------------------+       |   CA Logs          |
-  |   - Compass Devices |                                        |   MDE Logs         |
-  |   - Malware Records |                                        |                    |
+  |   - Compass Data    |       +------------------------+       |   CompassApps      |
+  |   - Compass Devices |                                        |   SipCookies       |
+  |   - Compass Apps    |                                        |   IdentityExposure |
+  |   - SIP Cookies     |                                        |   Investigations   |
+  |   - Identity Expose |                                        |   CA Logs          |
+  |   - Investigations  |                                        |   MDE Logs         |
   +---------------------+                                        +---------+----------+
                                                                            |
                           +------------------------------------------------+
@@ -89,7 +92,7 @@
               |   Automated Response  +------>+   Reporting            |
               |                       |       |                        |
               |   10 Playbooks        |       |   3 Workbooks          |
-              |   - Reset / Revoke    |       |   97 Copilot Skills   |
+              |   - Reset / Revoke    |       |   168 Copilot Skills  |
               |   - Isolate / Block   |       |   ServiceNow / Jira   |
               |   - Notify / Enrich   |       |   Teams / Slack       |
               |                       |       |                        |
@@ -102,7 +105,7 @@
 ```mermaid
 graph LR
     subgraph SRC["SpyCloud Intelligence"]
-        API["Enterprise API<br/>5 REST Pollers"]
+        API["Enterprise API<br/>9 REST Pollers"]
     end
 
     subgraph INGEST["Azure Ingestion"]
@@ -110,13 +113,17 @@ graph LR
         DCR["DCE / DCR<br/>KQL Transforms"]
     end
 
-    subgraph TABLES["6 Custom Tables"]
+    subgraph TABLES["10 Custom Tables"]
         T1["BreachWatchlist_CL"]
         T2["BreachCatalog_CL"]
         T3["CompassData_CL"]
         T4["CompassDevices_CL"]
-        T5["ConditionalAccessLogs_CL"]
-        T6["MDE_Logs_CL"]
+        T5["CompassApplications_CL"]
+        T6["SipCookies_CL"]
+        T7["IdentityExposure_CL"]
+        T8["Investigations_CL"]
+        T9["ConditionalAccessLogs_CL"]
+        T10["MDE_Logs_CL"]
     end
 
     subgraph DETECT["Detection Engine"]
@@ -138,17 +145,17 @@ graph LR
 
     subgraph REPORT["Reporting"]
         WB["3 Workbooks"]
-        CP["Security Copilot<br/>97 Skills + Agent"]
+        CP["Security Copilot<br/>168 Skills + Agent"]
         TK["ServiceNow / Jira<br/>Teams / Slack"]
     end
 
-    API --> CCF --> DCR --> T1 & T2 & T3 & T4
+    API --> CCF --> DCR --> T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8
     T1 & T2 --> AR
     CORRELATE --> AR
     AR --> ML
     AR --> PB --> REM
-    PB --> T5 & T6
-    T1 & T2 & T5 & T6 --> WB & CP
+    PB --> T9 & T10
+    T1 & T2 & T9 & T10 --> WB & CP
     PB --> TK
 
     style SRC fill:#FF3E00,stroke:#FF3E00,color:#fff
@@ -270,10 +277,10 @@ gh workflow run deploy.yml \
 | **Playbooks** | 10 | Logic App workflows with managed identity for automated response |
 | **Workbooks** | 3 | Executive, Threat Intel, and SOC Operations dashboards |
 | **Hunting Queries** | 28 | KQL queries for proactive threat hunting |
-| **Copilot Skills** | 97 | 85 KQL promptbook skills + 12 direct API skills |
-| **Copilot Agent** | 1 | Interactive autonomous investigation agent |
-| **Custom Tables** | 6 | Dedicated Log Analytics tables for SpyCloud data |
-| **API Pollers** | 5 | CCF connector streams for each SpyCloud API endpoint |
+| **Copilot Skills** | 168 | 90 KQL skills + 20 API skills + 58 agent skills |
+| **Copilot Agent** | 1 | Interactive autonomous investigation agent with 17 sub-agents |
+| **Custom Tables** | 10 | Dedicated Log Analytics tables for SpyCloud data (6 API-sourced + 2 internal + 2 remediation logs) |
+| **API Pollers** | 9 | CCF connector streams: Breach Watchlist, Breach Catalog, Compass Data/Devices/Applications, SIP Cookies, Identity Exposure, Investigations, and Malware Records |
 | **Notebooks** | 3 | Incident triage, threat hunting, and threat landscape analysis |
 
 </div>
@@ -369,7 +376,7 @@ Deployed via the `hunting-queries.json` template.
 | Firewall integration | **Yes** | Fortinet + Palo Alto block rules |
 | UEBA correlation | **Yes** | Cross-reference exposures with behavioral anomalies |
 | Fusion ML multi-stage detection | **Yes** | Patented ML correlates low-fidelity signals into high-confidence incidents |
-| Security Copilot integration | **Yes** | 97 skills (85 KQL + 12 API) + autonomous investigation agent |
+| Security Copilot integration | **Yes** | 168 skills (90 KQL + 20 API + 58 agent) + autonomous investigation agent |
 | Terraform module | **Yes** | Full IaC alternative in `terraform/` |
 | GitHub Actions CI/CD | **Yes** | Validate + Deploy + Configure pipeline |
 | Key Vault secret storage | **Yes** | Optional secure storage for API keys |
@@ -536,7 +543,7 @@ All workbooks are deployed via the ARM template when `enableWorkbook` is set to 
 
 ## Security Copilot Integration
 
-SpyCloud Sentinel v8.0 includes **three Security Copilot integrations** in the unified `copilot/` directory, providing **100+ skills + 1 autonomous investigation agent with 17 sub-agents** for natural-language investigation of darknet threat exposure data.
+SpyCloud Sentinel v8.0 includes **three Security Copilot integrations** in the unified `copilot/` directory, providing **168 skills (90 KQL + 20 API + 58 agent) + 1 autonomous investigation agent with 17 sub-agents** for natural-language investigation of darknet threat exposure data.
 
 > **New in v8.0:** Connector health assessment, missing data source detection, playbook permission gap analysis, capability matrix, admin-ready recommendation reports, enhanced educational onboarding, and audience-adaptive personality. [Read the full Agents & Plugins Guide](docs/AGENTS-AND-PLUGINS-GUIDE.md) for a deep dive.
 
@@ -545,8 +552,8 @@ SpyCloud Sentinel v8.0 includes **three Security Copilot integrations** in the u
 
 | File | Type | Skills | Description |
 |------|:----:|:------:|-------------|
-| `SpyCloud_Plugin.yaml` | KQL Plugin | 90+ | Promptbook skills querying 6 Sentinel custom tables plus 20+ native Microsoft tables for user investigation, device forensics, breach catalog, UEBA correlation, remediation audit, connector health, executive reporting, and more |
-| `SpyCloud_API_Plugin.yaml` | API Plugin | 12 | Direct REST API skills calling SpyCloud Enterprise, Compass, and Identity APIs for real-time lookups by email, domain, IP, username, or password |
+| `SpyCloud_Plugin.yaml` | KQL Plugin | 90 | Promptbook skills querying 10 Sentinel custom tables plus 20+ native Microsoft tables for user investigation, device forensics, breach catalog, UEBA correlation, remediation audit, connector health, executive reporting, and more |
+| `SpyCloud_API_Plugin.yaml` | API Plugin | 20 | Direct REST API skills calling SpyCloud Enterprise, Compass, Identity Exposure, SIP, and Investigations APIs for real-time lookups by email, domain, IP, username, or password |
 | `SpyCloud_API_Plugin_OpenAPI.yaml` | OpenAPI Spec | -- | OpenAPI 3.0 specification backing the API Plugin |
 | `SpyCloud_Agent.yaml` | Agent | 1 (17 sub-agents) | Autonomous interactive investigation agent with connector awareness, educational mode, and audience adaptation. Orchestrates 17 sub-agents across 11 Microsoft security products |
 | `manifest.json` | OpenAI | -- | Plugin manifest for OpenAI-compatible hosts (not for Security Copilot) |
@@ -589,13 +596,13 @@ SpyCloud Sentinel v8.0 includes **three Security Copilot integrations** in the u
 1. Navigate to **Security Copilot > Settings > Plugins > Add Plugin**
 2. Upload `copilot/SpyCloud_Plugin.yaml`
 3. Enter your Tenant ID, Subscription ID, Resource Group, and Workspace Name
-4. 90+ KQL skills become available in promptbooks and standalone prompts
+4. 90 KQL skills become available in promptbooks and standalone prompts
 
 **API Plugin (direct SpyCloud API access):**
 
 1. Upload `copilot/SpyCloud_API_Plugin.yaml`
-2. Enter your SpyCloud Enterprise API key when prompted
-3. 12 REST API skills for real-time lookups are available immediately
+2. Enter your SpyCloud Enterprise API key when prompted (sent as `X-API-Key` header)
+3. 20 REST API skills for real-time lookups are available immediately
 
 **Investigation Agent (autonomous interactive triage):**
 

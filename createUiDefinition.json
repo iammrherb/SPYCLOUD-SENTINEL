@@ -6,7 +6,7 @@
     "config": {
       "isWizard": true,
       "basics": {
-        "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel Supreme\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 5 REST API pollers\n- 6 custom log tables (118+ columns)\n- 5 Logic App playbooks (MDE, CA, Credential, Blocklist, TI Enrichment)\n- 43+ analytics rules + Fusion + 5 Microsoft Security Incident Creation rules\n- UEBA, Anomaly Detection, EyesOn audit settings\n- 3 automation rules (auto-triage, device tasks, auto-close)\n- 15 hunting queries across all MITRE ATT&CK tactics\n- 4 watchlists (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- Security Copilot plugin + interactive agent (58+ skills)\n- Comprehensive connector + feature recommendations\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
+        "description": "## \ud83d\udee1\ufe0f SpyCloud Sentinel Supreme\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n**Transform recaptured darknet data into automated identity threat protection.**\n\nThis wizard deploys the complete SpyCloud integration including:\n- CCF Data Connector with 9 REST API pollers\n- 10 custom log tables (233+ columns)\n- 5 Logic App playbooks (MDE, CA, Credential, Blocklist, TI Enrichment)\n- 43+ analytics rules + Fusion + 5 Microsoft Security Incident Creation rules\n- UEBA, Anomaly Detection, EyesOn audit settings\n- 3 automation rules (auto-triage, device tasks, auto-close)\n- 15 hunting queries across all MITRE ATT&CK tactics\n- 4 watchlists (VIP, IOC Blocklist, Approved Domains, High-Value Assets)\n- Security Copilot plugin + interactive agent (58+ skills)\n- Comprehensive connector + feature recommendations\n\n**Prerequisite:** SpyCloud Enterprise API key from [portal.spycloud.com](https://portal.spycloud.com)\n\n[Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL) \u00b7 [Architecture](https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/docs/architecture.md)",
         "location": {
           "label": "Deployment Region",
           "allowedValues": [
@@ -325,6 +325,42 @@
             "visible": true
           },
           {
+            "name": "sectionInvestigations",
+            "type": "Microsoft.Common.Section",
+            "label": "Investigations API",
+            "elements": [
+              {
+                "name": "enableInvestigations",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Investigations Data Ingestion",
+                "defaultValue": false
+              },
+              {
+                "name": "infoInvestigations",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Investigations API provides the broadest dataset - searches across all breaches, infostealers, phishing, paste sites, and combo lists. Requires Investigations API entitlement."
+                }
+              },
+              {
+                "name": "investigationsApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Investigations API Key (optional)",
+                  "confirmPassword": "Confirm Investigations API Key"
+                },
+                "toolTip": "Separate key for Investigations endpoints. Leave blank to use your Enterprise key.",
+                "constraints": {
+                  "required": false
+                },
+                "visible": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]"
+              }
+            ],
+            "visible": true
+          },
+          {
             "name": "sectionPolling",
             "type": "Microsoft.Common.Section",
             "label": "Polling Configuration",
@@ -388,7 +424,7 @@
                 "visible": true,
                 "options": {
                   "icon": "Info",
-                  "text": "The following custom log tables will be created based on your selections:\n\n**Always created:**\n- SpyCloudBreachWatchlist_CL\n- SpyCloudBreachCatalog_CL\n\n**When Compass enabled:**\n- SpyCloudCompassData_CL\n- SpyCloudCompassDevices_CL\n- SpyCloudCompassApplications_CL\n\n**When SIP enabled:**\n- SpyCloudSipCookies_CL\n\n**Always created (internal):**\n- Spycloud_MDE_Logs_CL\n- SpyCloud_ConditionalAccessLogs_CL"
+                  "text": "The following custom log tables will be created based on your selections:\n\n**Always created:**\n- SpyCloudBreachWatchlist_CL\n- SpyCloudBreachCatalog_CL\n- SpyCloudIdentityExposure_CL\n\n**When Compass enabled:**\n- SpyCloudCompassData_CL\n- SpyCloudCompassDevices_CL\n- SpyCloudCompassApplications_CL\n\n**When SIP enabled:**\n- SpyCloudSipCookies_CL\n\n**When Investigations enabled:**\n- SpyCloudInvestigations_CL\n\n**Always created (internal):**\n- Spycloud_MDE_Logs_CL\n- SpyCloud_ConditionalAccessLogs_CL"
                 }
               }
             ],
@@ -2109,6 +2145,8 @@
       "enableSip": "[steps('connectorConfig').sectionSip.enableSip]",
       "sipApiKey": "[steps('connectorConfig').sectionSip.sipApiKey]",
       "sipCookieDomain": "[steps('connectorConfig').sectionSip.sipCookieDomain]",
+      "enableInvestigations": "[steps('connectorConfig').sectionInvestigations.enableInvestigations]",
+      "investigationsApiKey": "[steps('connectorConfig').sectionInvestigations.investigationsApiKey]",
       "enableWorkbook": "[steps('sentinelFeatures').sectionDashboards.enableWorkbook]",
       "enableSessionCookieDetection": "[steps('sentinelFeatures').sectionIdp.enableSessionCookieDetection]",
       "enableIdentityProviderAlerts": "[steps('sentinelFeatures').sectionIdp.enableIdentityProviderAlerts]",

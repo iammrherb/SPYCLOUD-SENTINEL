@@ -126,7 +126,7 @@ You *can* use parts individually. But the car is a lot more fun.
 
 **What it does:** Runs pre-built Kusto (KQL) queries against your Sentinel Log Analytics workspace.
 
-**Why you need it:** Your SpyCloud data connector ingests data into 6 custom tables. This plugin has 86+ hand-tuned KQL queries that extract exactly the right insights from those tables.
+**Why you need it:** Your SpyCloud data connector ingests data into 10 custom tables (233+ columns). This plugin has 90 hand-tuned KQL queries across 29 categories that extract exactly the right insights from those tables.
 
 **Skill Categories:**
 
@@ -434,9 +434,9 @@ For maximum correlation power, enable these additional Sentinel data connectors:
 
 **What it is:** Kusto Query Language (KQL) is the query language for Azure Data Explorer and Log Analytics. It's what makes Sentinel tick.
 
-**How SpyCloud uses it:** The KQL Plugin has 86+ pre-built queries covering every investigation scenario. You never need to write KQL — but if you want to, here's what's available:
+**How SpyCloud uses it:** The KQL Plugin has 90 pre-built queries covering every investigation scenario. You never need to write KQL — but if you want to, here's what's available:
 
-**Your 6 Custom Tables:**
+**Your 10 Custom Tables:**
 
 | Table | Columns | Purpose |
 |-------|---------|---------|

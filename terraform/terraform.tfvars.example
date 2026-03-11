@@ -21,6 +21,27 @@ enable_key_vault       = true
 enable_analytics_rules = true
 enable_automation_rule = true
 
+# ─── v8.0 Features ──────────────────────────────────────────────────────────
+
+# SpyCloud Investigations — deep-dive identity investigation workflows
+# Requires a separate Investigations API key from portal.spycloud.com
+enable_investigations = false
+# IMPORTANT: Use TF_VAR_investigations_api_key environment variable instead of hardcoding
+# investigations_api_key = "your-investigations-api-key-here"
+
+# SpyCloud Compass — automated identity exposure monitoring and remediation
+# Requires a separate Compass API key from portal.spycloud.com
+enable_compass = false
+# IMPORTANT: Use TF_VAR_compass_api_key environment variable instead of hardcoding
+# compass_api_key = "your-compass-api-key-here"
+
+# SpyCloud SIP (Session Identity Protection) — stolen session and cookie monitoring
+# Requires a separate SIP API key and your corporate cookie domain
+enable_sip        = false
+sip_cookie_domain = ""  # e.g., "example.com"
+# IMPORTANT: Use TF_VAR_sip_api_key environment variable instead of hardcoding
+# sip_api_key = "your-sip-api-key-here"
+
 # Tags
 tags = {
   Solution    = "SpyCloud-Sentinel"
