@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: SpyCloud Darknet & Identity Threat Exposure Intelligence API
-  version: 6.1.0
+  version: 7.0.0
   description: >
     SpyCloud Darknet & Identity Threat Exposure Intelligence API for Microsoft
     Security Copilot. Part of the SpyCloud Sentinel v6.1 solution spanning 145+
