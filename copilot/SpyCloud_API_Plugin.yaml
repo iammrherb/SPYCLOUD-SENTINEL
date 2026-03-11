@@ -28,7 +28,7 @@ Descriptor:
     Type: APIKey
     Key: X-API-Key
     Location: Header
-    AuthScheme: ''
+    AuthScheme: Bearer
   Settings:
     - Name: ApiBaseUrl
       Description: >

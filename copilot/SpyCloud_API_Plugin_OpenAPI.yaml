@@ -24,7 +24,7 @@ servers:
     description: SpyCloud Production API
 
 security:
-  - ApiKeyHeader: []
+  - BearerAuth: []
 
 tags:
   - name: Enterprise - Email Lookup
@@ -935,14 +935,15 @@ paths:
 components:
 
   securitySchemes:
-    ApiKeyHeader:
-      type: apiKey
-      in: header
-      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
       description: >
-        SpyCloud API key issued for your organization. Include this header in
-        every request. Keys can be generated and rotated from the SpyCloud
-        portal under Settings > API Keys.
+        SpyCloud API key issued for your organization. When configuring
+        the plugin in Security Copilot, enter your API key as the Bearer
+        token. The plugin translates it to the X-API-Key header required
+        by the SpyCloud API. Keys can be generated and rotated from the
+        SpyCloud portal under Settings > API Keys.
 
   # ---------------------------------------------------------------------------
   # Reusable Parameters
