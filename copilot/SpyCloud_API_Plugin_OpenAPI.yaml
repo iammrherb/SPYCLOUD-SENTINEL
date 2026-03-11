@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: SpyCloud Darknet & Identity Threat Exposure Intelligence API
-  version: 7.0.0
+  version: 8.0.0
   description: >
     SpyCloud API for Microsoft Security Copilot providing REST access to recaptured
     darknet data including compromised credentials, infostealer infections, and

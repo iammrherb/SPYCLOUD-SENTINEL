@@ -11,7 +11,7 @@ Descriptor:
     Conditional Access. Works alongside the SpyCloud API Plugin and Investigation Agent.
   Category: Other
   DescriptionDisplay: default
-  Version: 7.0.0
+  Version: 8.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId
@@ -2521,3 +2521,152 @@ SkillGroups:
             | extend Priority = 5, Recommendation = strcat("MEDIUM: ", v, " users show password reuse across multiple target domains. Enforce unique password policy and deploy password manager."))
             | project Priority, Recommendation
             | sort by Priority asc
+
+      # =====================================================================
+      # 32. CONNECTOR HEALTH & DATA SOURCE ASSESSMENT
+      # =====================================================================
+
+      - Name: GetConnectorHealthAssessment
+        DisplayName: Assess all data connector health and coverage gaps
+        Description: |
+          Performs a comprehensive health check across ALL expected Sentinel data sources — SpyCloud custom tables, Microsoft Entra ID, Defender for Endpoint, Defender for Identity, Defender for Office 365, CASB, Intune, UEBA, and TI feeds. Identifies which connectors are active, which are missing, and recommends connectors to enable for better detection coverage. This is your single-pane connector health view.
+        ExamplePrompts:
+          - What data sources am I missing
+          - Check all connector health status
+          - Which connectors should I enable
+          - Show me data source gaps and recommendations
+          - Are there blind spots in our detection coverage
+          - What connectors are not sending data
+          - Assess our Sentinel data connector coverage
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            union isfuzzy=true
+            (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="SpyCloud Breach Watchlist", Category="SpyCloud", Priority="Critical"),
+            (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="SpyCloud Breach Catalog", Category="SpyCloud", Priority="Critical"),
+            (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="SpyCloud Compass Data", Category="SpyCloud", Priority="High"),
+            (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="SpyCloud Compass Devices", Category="SpyCloud", Priority="High"),
+            (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="SpyCloud MDE Remediation", Category="SpyCloud", Priority="High"),
+            (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="SpyCloud CA Remediation", Category="SpyCloud", Priority="High"),
+            (SigninLogs | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Entra ID Sign-in Logs", Category="Identity", Priority="Critical"),
+            (AuditLogs | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Entra ID Audit Logs", Category="Identity", Priority="Critical"),
+            (AADNonInteractiveUserSignInLogs | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Entra Non-Interactive Sign-ins", Category="Identity", Priority="High"),
+            (DeviceInfo | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Endpoint - Devices", Category="Endpoint", Priority="Critical"),
+            (DeviceProcessEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Endpoint - Processes", Category="Endpoint", Priority="High"),
+            (DeviceNetworkEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Endpoint - Network", Category="Endpoint", Priority="High"),
+            (DeviceFileEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Endpoint - Files", Category="Endpoint", Priority="Medium"),
+            (DeviceLogonEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Endpoint - Logons", Category="Endpoint", Priority="High"),
+            (IdentityLogonEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Identity - Logons", Category="Identity", Priority="High"),
+            (IdentityQueryEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Identity - Queries", Category="Identity", Priority="Medium"),
+            (EmailEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Office 365 - Email", Category="Email", Priority="High"),
+            (CloudAppEvents | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Defender for Cloud Apps", Category="Cloud", Priority="High"),
+            (OfficeActivity | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Office 365 Activity", Category="Cloud", Priority="Medium"),
+            (IntuneDevices | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Microsoft Intune Devices", Category="Endpoint", Priority="Medium"),
+            (BehaviorAnalytics | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="UEBA Behavior Analytics", Category="Analytics", Priority="High"),
+            (ThreatIntelligenceIndicator | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Threat Intelligence Feeds", Category="TI", Priority="Medium"),
+            (SecurityIncident | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Security Incidents", Category="Sentinel", Priority="Critical"),
+            (SecurityAlert | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Security Alerts", Category="Sentinel", Priority="Critical"),
+            (SentinelHealth | summarize Records=count(), Latest=max(TimeGenerated) | extend Source="Sentinel Health Diagnostics", Category="Sentinel", Priority="Medium")
+            | extend Status = case(Records > 0 and datetime_diff('hour', now(), Latest) <= 24, "ACTIVE", Records > 0 and datetime_diff('hour', now(), Latest) <= 72, "STALE", Records > 0, "OUTDATED", "NO DATA")
+            | extend HoursSinceUpdate = iff(Records > 0, datetime_diff('hour', now(), Latest), -1)
+            | project Source, Category, Priority, Status, Records, Latest, HoursSinceUpdate
+            | sort by Priority asc, Status asc
+
+      - Name: GetMissingConnectorRecommendations
+        DisplayName: Generate missing connector recommendations for admin
+        Description: |
+          Analyzes which Sentinel data connectors have no data and generates a prioritized recommendation report that can be forwarded to an Azure admin. Includes connector name, what it enables, the impact of not having it, and step-by-step enablement instructions. Designed to be copy-pasted into an email or ticket for your admin team.
+        ExamplePrompts:
+          - Generate connector recommendations for my admin
+          - What should I tell my admin to enable
+          - Create a connector enablement request for IT
+          - Show me what connectors I need and why
+          - Build a data source recommendation report
+          - What am I missing and how do I fix it
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            union isfuzzy=true
+            (SigninLogs | take 1 | summarize HasData=count() | extend Connector="Microsoft Entra ID", Impact="Cannot correlate dark web exposures with actual sign-in activity. Blind to account takeover.", EnablePath="Sentinel > Data Connectors > Microsoft Entra ID > Enable Sign-in and Audit logs", Priority=1),
+            (DeviceInfo | take 1 | summarize HasData=count() | extend Connector="Microsoft Defender for Endpoint", Impact="Cannot see endpoint telemetry for infected devices. No process, network, or file visibility.", EnablePath="Sentinel > Data Connectors > Microsoft 365 Defender > Connect", Priority=2),
+            (IdentityLogonEvents | take 1 | summarize HasData=count() | extend Connector="Microsoft Defender for Identity", Impact="Cannot detect identity attacks (pass-the-hash, golden ticket) from compromised accounts.", EnablePath="Sentinel > Data Connectors > Microsoft 365 Defender > Enable Identity tables", Priority=3),
+            (EmailEvents | take 1 | summarize HasData=count() | extend Connector="Microsoft Defender for Office 365", Impact="Cannot detect phishing and credential harvesting targeting exposed users.", EnablePath="Sentinel > Data Connectors > Microsoft 365 Defender > Enable Email tables", Priority=4),
+            (CloudAppEvents | take 1 | summarize HasData=count() | extend Connector="Microsoft Defender for Cloud Apps", Impact="Cannot detect shadow IT or OAuth abuse from compromised accounts.", EnablePath="Sentinel > Data Connectors > Microsoft Defender for Cloud Apps > Connect", Priority=5),
+            (IntuneDevices | take 1 | summarize HasData=count() | extend Connector="Microsoft Intune", Impact="Cannot verify device compliance or identify unmanaged infected endpoints.", EnablePath="Sentinel > Data Connectors > (Use diagnostic settings on Intune)", Priority=6),
+            (BehaviorAnalytics | take 1 | summarize HasData=count() | extend Connector="UEBA (User Entity Behavior Analytics)", Impact="Cannot detect anomalous user behavior after credential exposure.", EnablePath="Sentinel > Settings > UEBA > Enable for all data sources", Priority=7),
+            (ThreatIntelligenceIndicator | take 1 | summarize HasData=count() | extend Connector="Threat Intelligence Platform", Impact="Cannot cross-reference SpyCloud IOCs with external TI feeds.", EnablePath="Sentinel > Data Connectors > Threat Intelligence - TAXII or MDTI", Priority=8)
+            | where HasData == 0
+            | project Priority, Connector, Impact, EnablePath
+            | sort by Priority asc
+
+      - Name: GetPlaybookPermissionGaps
+        DisplayName: Detect playbook permission gaps preventing automation
+        Description: |
+          Checks whether the SpyCloud automated playbooks are functioning by comparing exposure volume against remediation action volume. If exposures exist but no remediation actions are logged, identifies which playbooks likely have permission issues and what permissions need to be granted.
+        ExamplePrompts:
+          - Are my playbooks working
+          - Check for playbook permission gaps
+          - Why are playbooks not running
+          - Show automation gaps in SpyCloud remediation
+          - Detect permission issues with playbooks
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let exposures_30d = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) and severity >= 20 | count);
+            let mde_actions = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d) | count);
+            let ca_actions = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | count);
+            let incidents = toscalar(SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | count);
+            print
+              HighSeverityExposures = exposures_30d,
+              MDERemediationActions = mde_actions,
+              CARemediationActions = ca_actions,
+              SpyCloudIncidents = incidents,
+              MDEPlaybookStatus = iff(exposures_30d > 0 and mde_actions == 0, "LIKELY NOT RUNNING - Check MDE API permissions (Machine.Isolate, Machine.ReadWrite.All)", iff(mde_actions > 0, "ACTIVE", "No exposures to remediate")),
+              CAPlaybookStatus = iff(exposures_30d > 0 and ca_actions == 0, "LIKELY NOT RUNNING - Check Graph API permissions (User.ReadWrite.All, UserAuthenticationMethod.ReadWrite.All)", iff(ca_actions > 0, "ACTIVE", "No exposures to remediate")),
+              IncidentCreation = iff(exposures_30d > 0 and incidents == 0, "ANALYTICS RULES MAY BE DISABLED - Check Sentinel Analytics rules", iff(incidents > 0, "ACTIVE", "No data to trigger")),
+              AutomationGap = iff(exposures_30d > 0 and (mde_actions == 0 or ca_actions == 0), "GAP DETECTED - Run scripts/post-deploy-auto.sh to configure permissions", "All systems operational")
+
+      # =====================================================================
+      # 33. INTERACTIVE ONBOARDING & EDUCATION
+      # =====================================================================
+
+      - Name: GetCapabilityMatrix
+        DisplayName: Show full SpyCloud capability matrix and coverage map
+        Description: |
+          Displays the complete SpyCloud Sentinel capability matrix including all deployed resources, skill counts, sub-agent inventory, connector coverage, playbook status, analytics rule counts, and feature availability by subscription tier. Use this for onboarding new team members or assessing solution completeness.
+        ExamplePrompts:
+          - Show me everything SpyCloud can do
+          - What capabilities are available
+          - Give me the full feature matrix
+          - Show the capability inventory
+          - What is deployed and available
+          - Onboard me to SpyCloud Sentinel
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            union isfuzzy=true
+            (SpyCloudBreachWatchlist_CL | summarize Records=count(), UniqueUsers=dcount(email), MaxSev=max(severity), Latest=max(TimeGenerated) | extend Component="Breach Watchlist Data", Type="Data Table", Status=iff(Records>0,"Active","Empty")),
+            (SpyCloudBreachCatalog_CL | summarize Records=count(), UniqueUsers=dcount(source_id), MaxSev=0, Latest=max(TimeGenerated) | extend Component="Breach Catalog", Type="Data Table", Status=iff(Records>0,"Active","Empty")),
+            (SpyCloudCompassData_CL | summarize Records=count(), UniqueUsers=dcount(email), MaxSev=max(severity), Latest=max(TimeGenerated) | extend Component="Compass Data (Enterprise+)", Type="Data Table", Status=iff(Records>0,"Active","Not Available")),
+            (SpyCloudCompassDevices_CL | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="Compass Devices (Enterprise+)", Type="Data Table", Status=iff(Records>0,"Active","Not Available")),
+            (Spycloud_MDE_Logs_CL | summarize Records=count(), UniqueUsers=dcount(DeviceId), MaxSev=0, Latest=max(TimeGenerated) | extend Component="MDE Remediation Log", Type="Automation", Status=iff(Records>0,"Active","Pending")),
+            (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), UniqueUsers=dcount(UserEmail), MaxSev=0, Latest=max(TimeGenerated) | extend Component="CA Remediation Log", Type="Automation", Status=iff(Records>0,"Active","Pending")),
+            (SecurityIncident | where Title has "SpyCloud" | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="SpyCloud Incidents", Type="Detection", Status=iff(Records>0,"Active","No Incidents")),
+            (SentinelHealth | where SentinelResourceName has "SpyCloud" | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="Automation Health", Type="Health", Status=iff(Records>0,"Active","Not Monitored"))
+            | project Component, Type, Status, Records, Latest

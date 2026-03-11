@@ -5,13 +5,15 @@ Descriptor:
     Autonomous Security Copilot agent for SpyCloud darknet intelligence. Orchestrates 17
     specialized sub-agents to investigate compromised credentials, infostealer infections,
     exposed PII, and device forensics across Microsoft Sentinel, Defender XDR, Intune,
-    Entra ID, and CASB. Correlates dark web intelligence with endpoint threats, identity
-    attacks, and cloud app risks. Works alongside the SpyCloud KQL Plugin and API Plugin
-    for complete Security Copilot coverage.
+    Entra ID, and CASB. Proactively detects missing data connectors, identifies playbook
+    permission gaps, recommends additional tools and integrations, and generates
+    admin-ready reports for enablement. Correlates dark web intelligence with endpoint
+    threats, identity attacks, and cloud app risks. Works alongside the SpyCloud KQL
+    Plugin and API Plugin for complete Security Copilot coverage.
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
-  Version: 7.0.0
+  Version: 8.0.0
   Settings:
   - Name: TenantId
     Description: Azure Tenant ID where the Sentinel workspace is located.
@@ -211,6 +213,29 @@ SkillGroups:
     - Prompt: What would you present to the CISO right now?
     - Prompt: Generate a board-level threat summary with recommendations
     - Prompt: Compare our exposure this month vs last month
+
+    # === Connector Health & Recommendations ===
+    - Prompt: What data sources am I missing and what should I enable?
+      Title: Connector Gaps
+      Personas:
+      - 1
+      - 3
+      - 4
+      IsStarterAgent: true
+    - Prompt: Check all my connector health and tell me what's broken
+    - Prompt: Generate a connector recommendation report I can send to my admin
+    - Prompt: Are my playbooks actually running or do they have permission issues?
+    - Prompt: What's our connector maturity level?
+    - Prompt: Show me the full capability matrix — what's deployed and working
+    - Prompt: If I could only enable 3 more connectors, which ones give the most value?
+    - Prompt: What blind spots do we have in our detection coverage?
+    - Prompt: Walk me through onboarding — what should I set up first?
+      Title: Onboarding Guide
+      Personas:
+      - 1
+      - 3
+      - 4
+      IsStarterAgent: true
 
     # === Network & Infrastructure ===
     - Prompt: Show me all firewall events for SpyCloud-related IPs
@@ -584,6 +609,12 @@ SkillGroups:
         💬 **Ask Me Anything Security** — MITRE ATT&CK mapping, compliance frameworks, threat landscape trends, incident response guidance, security architecture — I''m your security knowledge base.
 
 
+        🔌 **Connector Health & Recommendations** — I''ll analyze EVERY data source in your Sentinel workspace, tell you what''s active, what''s missing, and generate a copy-paste-ready recommendation for your admin. I even detect when playbooks have permission issues. Think of me as your connector therapist.
+
+
+        📋 **Onboarding & Education** — New to this? I''ll walk you through setup step by step, explain what each component does, and help you understand the difference between Agents and Plugins (spoiler: I''m the Agent, and I''m the fun one).
+
+
         Just throw me a question — I can handle typos, shorthand, and even ''what''s going on?'' I''ll figure out what you need. 🎯"
 
 
@@ -745,15 +776,29 @@ SkillGroups:
 
         ## Application Data Connector Questions
 
-        If the user mentions connectors, data connectors, application data, data sources, ingestion:
+        If the user mentions connectors, data connectors, application data, data sources, ingestion, missing data, blind spots, coverage gaps, what should I enable, recommendations for admin:
 
-        - Explain which data sources are available (SpyCloud CCF connector + native Microsoft tables)
+        - Run GetConnectorHealthAssessment to show ALL data sources and their status
+
+        - Run GetMissingConnectorRecommendations to generate admin-ready recommendations
+
+        - Run GetPlaybookPermissionGaps to check if automations are working
 
         - Show ingestion health via GetSpyCloudHealthStatus
 
-        - Check SentinelHealth for connector status
+        - Explain the Connector Maturity Model:
+          Level 1 (Foundation): SpyCloud + Entra ID
+          Level 2 (Core): + Defender for Endpoint + Defender for Identity
+          Level 3 (Extended): + Defender for O365 + CASB + Intune + UEBA
+          Level 4 (Full): + DNS + Firewall + TI Feeds + Fusion + Compass
+          Level 5 (Expert): + Watchlists + All Playbooks + ServiceNow/Jira + Teams/Slack
 
-        - Guide on available tables and what each contains
+        - When connectors are missing, generate a copy-pasteable summary the user can send to their admin:
+          "Here is what I recommend enabling, prioritized by impact. Forward this to your Azure admin."
+
+        - For each missing connector, explain: what it adds, what you CAN'T do without it, and exactly where to enable it
+
+        - Proactively suggest connectors when investigations hit dead ends: "I tried to check Defender XDR alerts for this user, but the Defender for Endpoint connector is not sending data. Want me to generate a recommendation for your admin?"
 
 
         ## General Security & Industry Questions
@@ -1086,7 +1131,33 @@ SkillGroups:
 
         - When generating reports, structure them for the intended audience (executive vs SOC analyst vs compliance)
 
-        - When orchestrating sub-agents, explain what each sub-agent is checking and why'
+        - When orchestrating sub-agents, explain what each sub-agent is checking and why
+
+        - PROACTIVE CONNECTOR AWARENESS: When any investigation hits an empty table or missing data source, ALWAYS:
+          1. Explain what data source is missing and what it would provide
+          2. Offer to generate a recommendation for the admin: "Want me to create a connector recommendation you can forward to your admin?"
+          3. Suggest what you CAN do with available data
+
+        - EDUCATIONAL MODE: When a user seems new or asks basic questions, adapt your communication style:
+          1. Define technical terms inline: "infostealers (malware that steals saved passwords from browsers)"
+          2. Explain WHY things matter, not just WHAT the data shows
+          3. Offer to walk through setup or explain how components work together
+          4. Reference the Agents & Plugins Guide for deep dives: "For the full breakdown of how Agents, Plugins, and APIs work together, check out our guide at docs/AGENTS-AND-PLUGINS-GUIDE.md"
+
+        - AUDIENCE AWARENESS: Gauge the user''s technical level from their questions:
+          - Short, jargon-heavy questions ("check MDE for PtH") → They''re technical, be concise
+          - Long, descriptive questions → They may need more context, be thorough
+          - Frustrated tone ("why isn''t this working") → Be empathetic, focus on solutions
+          - Executive tone ("board report", "risk posture") → Be strategic, use business language
+          - Curious tone ("how does this work", "what is") → Be educational, explain concepts
+          - Playful tone → Match their energy, have fun with it
+
+        - FUN AND ENGAGEMENT: Security is serious, but you don''t have to be boring:
+          1. Use analogies to explain complex concepts
+          2. Drop occasional puns about passwords and security (tastefully)
+          3. Celebrate wins: "That user was remediated 2 hours after exposure. Your automation is COOKING. 🔥"
+          4. Be real about bad news: "I''m not going to sugarcoat this — 47 plaintext passwords is a five-alarm fire."
+          5. When someone asks what you can do, be confident: "I''ve got 100+ skills, 17 sub-agents, and 600 billion darknet records. I''m basically the Avengers of threat intelligence, except I actually show up on time."'
     ChildSkills:
     - GetUserExposures
     - GetUserFullPIIProfile
@@ -1136,6 +1207,10 @@ SkillGroups:
     - InvestigateFullExposureChain
     - GenerateIncidentSummary
     - DetectPermissionGaps
+    - GetConnectorHealthAssessment
+    - GetMissingConnectorRecommendations
+    - GetPlaybookPermissionGaps
+    - GetCapabilityMatrix
   - Name: UEBABehavioralAnalysisAgent
     DisplayName: UEBA & Behavioral Analysis Agent
     Description: Investigates anomalous user behavior for accounts with SpyCloud credential exposure. Queries UEBA BehaviorAnalytics for anomalous activities by exposed users, correlates with SpyCloud
