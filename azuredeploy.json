@@ -974,14 +974,42 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "OPTIONAL: Enable SpyCloud Compass connectors (consumer/partner identity exposure). Requires Enterprise+ API subscription. WARNING: Enabling this with an Enterprise-only API key will cause deployment failure with 403 Forbidden errors. Verify your API tier at portal.spycloud.com before enabling."
+        "description": "OPTIONAL: Enable SpyCloud Compass connectors (deep infostealer investigation data, device fingerprints, stolen applications). Requires Enterprise+ API subscription. WARNING: Enabling this with an Enterprise-only API key will cause deployment failure with 403 Forbidden errors. Verify your API tier at portal.spycloud.com before enabling."
+      }
+    },
+    "compassApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "OPTIONAL: Separate API key for SpyCloud Compass endpoints. If blank, the main SpyCloud API key is used. Only needed if your Compass subscription uses a different API key than your Enterprise subscription."
+      }
+    },
+    "enableSip": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "OPTIONAL: Enable SpyCloud Session Identity Protection (SIP) connector for stolen cookie and session token ingestion. Requires a SIP API subscription. WARNING: Enabling this with an API key that lacks SIP entitlements will cause 403 Forbidden errors."
+      }
+    },
+    "sipApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "OPTIONAL: Separate API key for SpyCloud SIP (Session Identity Protection) endpoints. If blank, the main SpyCloud API key is used. Only needed if your SIP subscription uses a different API key."
+      }
+    },
+    "sipCookieDomain": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "REQUIRED when enableSip is TRUE: The cookie domain to monitor for stolen session cookies (e.g., 'example.com'). SpyCloud will return all stolen cookies for this domain and its subdomains."
       }
     }
   },
   "variables": {
     "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
     "_solutionName": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
-    "_solutionVersion": "6.0.0",
+    "_solutionVersion": "8.1.0",
     "_solutionAuthor": "SpyCloud",
     "_solutionId": "azuresentinel.azure-sentinel-solution-spycloud-threatintel",
     "dataConnectorVersionConnectorDefinition": "1.1.0",
@@ -997,6 +1025,7 @@
     "_logAnalyticsTableId2": "SpyCloudBreachCatalog_CL",
     "_logAnalyticsTableId3": "Spycloud_MDE_Logs_CL",
     "_logAnalyticsTableId4": "SpyCloud_ConditionalAccessLogs_CL",
+    "_logAnalyticsTableId5": "SpyCloudSipCookies_CL",
     "dataCollectionEndpointId1": "[concat('/subscriptions/',parameters('subscription'),'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Insights/dataCollectionEndpoints/',parameters('dataCollectionEndpointName'))]",
     "_effectiveWorkspaceLocation": "[if(empty(parameters('workspaceRegionOverride')), parameters('deploymentRegion'), parameters('workspaceRegionOverride'))]",
     "_dcrDisplayName": "[concat('SpyCloud ThreatIntel DCR for ', take(parameters('workspace'), 30))]",
@@ -1610,6 +1639,137 @@
       ],
       "tags": "[variables('allTags')]",
       "condition": "[parameters('enableCompass')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudSipCookies_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudSipCookies_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "document_id",
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "cookie_domain",
+              "type": "string"
+            },
+            {
+              "name": "cookie_name",
+              "type": "string"
+            },
+            {
+              "name": "cookie_value",
+              "type": "string"
+            },
+            {
+              "name": "cookie_path",
+              "type": "string"
+            },
+            {
+              "name": "cookie_expiration",
+              "type": "string"
+            },
+            {
+              "name": "cookie_secure",
+              "type": "boolean"
+            },
+            {
+              "name": "cookie_http_only",
+              "type": "boolean"
+            },
+            {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "severity",
+              "type": "int"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "ip_addresses",
+              "type": "dynamic"
+            },
+            {
+              "name": "malware_family",
+              "type": "string"
+            },
+            {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            },
+            {
+              "name": "country_code",
+              "type": "string"
+            },
+            {
+              "name": "username",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "password_type",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]",
+      "condition": "[parameters('enableSip')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
@@ -2391,6 +2551,122 @@
               }
             ]
           },
+          "Custom-SpyCloudSipCookies_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "document_id",
+                "type": "string"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "cookie_domain",
+                "type": "string"
+              },
+              {
+                "name": "cookie_name",
+                "type": "string"
+              },
+              {
+                "name": "cookie_value",
+                "type": "string"
+              },
+              {
+                "name": "cookie_path",
+                "type": "string"
+              },
+              {
+                "name": "cookie_expiration",
+                "type": "string"
+              },
+              {
+                "name": "cookie_secure",
+                "type": "boolean"
+              },
+              {
+                "name": "cookie_http_only",
+                "type": "boolean"
+              },
+              {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "malware_family",
+                "type": "string"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              },
+              {
+                "name": "country_code",
+                "type": "string"
+              },
+              {
+                "name": "username",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
+                "type": "string"
+              }
+            ]
+          },
           "Custom-Spycloud_MDE_Logs_CL": {
             "columns": [
               {
@@ -2558,6 +2834,16 @@
             ],
             "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend severity = toint(severity) | extend credential_count = toint(credential_count) | extend cookie_count = toint(cookie_count) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
             "outputStream": "Custom-SpyCloudCompassApplications_CL"
+          },
+          {
+            "streams": [
+              "Custom-SpyCloudSipCookies_CL"
+            ],
+            "destinations": [
+              "scWorkspace"
+            ],
+            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend severity = toint(severity) | extend email = tolower(tostring(email)) | extend cookie_domain = tolower(tostring(cookie_domain)) | extend target_domain = tolower(tostring(target_domain))",
+            "outputStream": "Custom-SpyCloudSipCookies_CL"
           },
           {
             "streams": [
@@ -2910,21 +3196,47 @@
             },
             {
               "title": "Step 1 — SpyCloud API Key Configuration",
-              "description": "Enter your SpyCloud Enterprise Protection API key. This key authenticates all 5 pollers against the SpyCloud API.",
+              "description": "Enter your SpyCloud API keys. The Enterprise key is required. Compass and SIP keys are optional — if left blank, the Enterprise key is used for those products too.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Where to Find Your API Key:**\n\n1. Log in to [portal.spycloud.com](https://portal.spycloud.com)\n2. Navigate to **Account Settings** → **API Keys**\n3. Copy your **Enterprise API Key** (starts with a long alphanumeric string)\n\n**Important Notes:**\n- The API key is stored securely as a `securestring` parameter and is never exposed in logs or outputs\n- Enterprise tier is required for Watchlist and Breach Catalog pollers\n- Enterprise+ tier is required for Compass Data and Compass Devices pollers\n- If you only have Enterprise (not Enterprise+), Compass pollers will return empty results but will not cause errors\n\n**Validation:** After deployment, you can verify API connectivity in the connector health panel or by checking the Data Collection Rule ingestion metrics in Azure Monitor."
+                    "text": "**Where to Find Your API Keys:**\n\n1. Log in to [portal.spycloud.com](https://portal.spycloud.com)\n2. Navigate to **Account Settings** → **API Keys**\n3. Copy the relevant API keys for your subscriptions\n\n**API Key Tiers:**\n- **Enterprise API Key** (required) — Authenticates Watchlist and Breach Catalog pollers\n- **Compass API Key** (optional) — Only needed if your Compass subscription uses a separate API key. Leave blank to use the Enterprise key.\n- **SIP API Key** (optional) — Only needed if your Session Identity Protection subscription uses a separate API key. Leave blank to use the Enterprise key.\n\n**Validation:** After deployment, verify API connectivity in the connector health panel or by checking the Data Collection Rule ingestion metrics in Azure Monitor."
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "SpyCloud API Key",
+                    "label": "SpyCloud Enterprise API Key",
                     "name": "apiKey",
-                    "placeholder": "Enter your SpyCloud Enterprise API key",
+                    "placeholder": "Enter your SpyCloud Enterprise API key (required)",
                     "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "Compass API Key (optional)",
+                    "name": "compassApiKey",
+                    "placeholder": "Leave blank to use Enterprise key for Compass",
+                    "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "SIP API Key (optional)",
+                    "name": "sipApiKey",
+                    "placeholder": "Leave blank to use Enterprise key for SIP",
+                    "type": "password"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "SIP Cookie Domain",
+                    "name": "sipCookieDomain",
+                    "placeholder": "e.g., example.com (required when SIP is enabled)"
                   }
                 }
               ]
@@ -3026,7 +3338,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "---\n\n**Log Table Filtering**\n\nThe MDE Logs and Conditional Access Logs tables are populated by playbook execution. These tables capture remediation audit trails and do not have separate ingestion filters — they log all actions taken by the automated playbooks.\n\n| Table | Filter Available | Notes |\n|-------|-----------------|-------|\n| Watchlist | Severity, Exposure Type, Plaintext | Filtered at API level via poller parameters |\n| Catalog | None (metadata only) | Small volume — all catalog entries are ingested |\n| Compass Data | Severity (shared) | Enterprise+ only — uses the global severity filter |\n| Compass Devices | None | Enterprise+ only — all infected device records ingested |\n| Compass Applications | None | Enterprise+ only — all application records ingested |\n| MDE Logs | N/A | Populated by playbook execution — logs all MDE actions |\n| CA Logs | N/A | Populated by playbook execution — logs all identity actions |"
+                    "text": "---\n\n**Log Table Filtering**\n\nThe MDE Logs and Conditional Access Logs tables are populated by playbook execution. These tables capture remediation audit trails and do not have separate ingestion filters — they log all actions taken by the automated playbooks.\n\n| Table | Filter Available | Notes |\n|-------|-----------------|-------|\n| Watchlist | Severity, Exposure Type, Plaintext | Filtered at API level via poller parameters |\n| Catalog | None (metadata only) | Small volume — all catalog entries are ingested |\n| Compass Data | Severity (shared) | Enterprise+ only — uses the global severity filter |\n| Compass Devices | None | Enterprise+ only — all infected device records ingested |\n| Compass Applications | None | Enterprise+ only — all application records ingested |\n| SIP Cookies | Cookie Domain | SIP subscription only — ingests stolen cookies for configured domain |\n| MDE Logs | N/A | Populated by playbook execution — logs all MDE actions |\n| CA Logs | N/A | Populated by playbook execution — logs all identity actions |"
                   }
                 }
               ]
@@ -3311,6 +3623,27 @@
                 "description": "SpyCloud Enterprise API Key — sent as 'X-Api-Key: <key>' on every API request. Obtain from portal.spycloud.com → Settings → API Keys. Stored securely as a SecureString, never exposed in logs or outputs."
               }
             },
+            "compassApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "OPTIONAL: Separate API key for SpyCloud Compass endpoints. Leave blank to use the main Enterprise API key."
+              }
+            },
+            "sipApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "OPTIONAL: Separate API key for SpyCloud SIP (Session Identity Protection) endpoints. Leave blank to use the main Enterprise API key."
+              }
+            },
+            "sipCookieDomain": {
+              "defaultValue": "",
+              "type": "string",
+              "metadata": {
+                "description": "Cookie domain to monitor for stolen session cookies (e.g., 'example.com'). Required when SIP is enabled."
+              }
+            },
             "severity": {
               "defaultValue": [
                 "2",
@@ -3593,7 +3926,7 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[parameters('apiKey')]"
+                  "ApiKey": "[[if(empty(parameters('compassApiKey')), parameters('apiKey'), parameters('compassApiKey'))]"
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
@@ -3642,7 +3975,7 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[parameters('apiKey')]"
+                  "ApiKey": "[[if(empty(parameters('compassApiKey')), parameters('apiKey'), parameters('compassApiKey'))]"
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
@@ -3691,10 +4024,59 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[parameters('apiKey')]"
+                  "ApiKey": "[[if(empty(parameters('compassApiKey')), parameters('apiKey'), parameters('compassApiKey'))]"
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications",
+                  "httpMethod": "GET",
+                  "queryParameters": {},
+                  "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
+                  "retryCount": "[[int(first(parameters('retryCount')))]",
+                  "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
+                  "startTimeAttributeName": "since",
+                  "rateLimitQPS": 2,
+                  "headers": {
+                    "Accept": "application/json"
+                  },
+                  "queryTimeFormat": "yyyy-MM-dd"
+                },
+                "response": {
+                  "eventsJsonPaths": [
+                    "$.results[*]"
+                  ],
+                  "format": "json"
+                },
+                "paging": {
+                  "pagingType": "NextPageToken",
+                  "nextPageTokenJsonPath": "$.cursor",
+                  "nextPageParaName": "cursor",
+                  "pagingInfoPlacement": "QueryString"
+                }
+              },
+              "dependsOn": [],
+              "location": "[variables('_effectiveWorkspaceLocation')]"
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+              "apiVersion": "2023-12-01-preview",
+              "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudSipCookiesConnector')]",
+              "condition": "[parameters('enableSip')]",
+              "kind": "RestApiPoller",
+              "properties": {
+                "connectorDefinitionName": "SpyCloudCCF",
+                "dcrConfig": {
+                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "streamName": "Custom-SpyCloudSipCookies_CL"
+                },
+                "dataType": "SpyCloud SipCookies",
+                "auth": {
+                  "type": "APIKey",
+                  "ApiKeyName": "X-Api-Key",
+                  "ApiKey": "[[if(empty(parameters('sipApiKey')), parameters('apiKey'), parameters('sipApiKey'))]"
+                },
+                "request": {
+                  "apiEndpoint": "[[concat('https://api.spycloud.io/sip-v1/breach/data/cookie-domains/', parameters('sipCookieDomain'))]",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",

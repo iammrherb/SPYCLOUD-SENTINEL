@@ -4,8 +4,9 @@ info:
   version: 8.0.0
   description: >
     SpyCloud API for Microsoft Security Copilot providing REST access to recaptured
-    darknet data including compromised credentials, infostealer infections, and
-    identity exposures via the Enterprise Breach, Compass, and Identity APIs.
+    darknet data including compromised credentials, infostealer infections,
+    stolen session cookies, and identity exposures via the Enterprise Breach,
+    Compass, Identity, Session Identity Protection (SIP), and Investigations APIs.
   contact:
     name: SpyCloud Support
     url: https://spycloud.com/support
@@ -48,6 +49,12 @@ tags:
     description: Identity-centric exposure records by email.
   - name: Identity - Watchlist
     description: Manage and query the monitored identity watchlist.
+  - name: SIP - Stolen Cookies
+    description: Session Identity Protection stolen cookie lookups by domain.
+  - name: SIP - Breach Catalog
+    description: SIP breach catalog metadata.
+  - name: Investigations - Data Lookup
+    description: Cybercrime investigation data lookups across all selectors.
 
 paths:
   # ===========================================================================
@@ -567,6 +574,355 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ===========================================================================
+  # SIP API (SESSION IDENTITY PROTECTION)
+  # ===========================================================================
+
+  /sip-v1/breach/data/cookie-domains/{cookie_domain}:
+    get:
+      operationId: sipGetCookiesByDomain
+      summary: Get stolen cookies for a domain
+      description: >
+        Queries the SpyCloud SIP (Session Identity Protection) API for stolen
+        session cookies associated with a cookie domain. Returns cookies
+        exfiltrated by infostealer malware including cookie names, values,
+        expiration dates, associated user identities, malware family attribution,
+        and infection context. Use this to identify active session hijacking risks
+        and invalidate compromised sessions.
+      tags:
+        - SIP - Stolen Cookies
+      parameters:
+        - name: cookie_domain
+          in: path
+          required: true
+          description: >
+            The cookie domain to search for stolen cookies. Results include all
+            subdomains. For example, searching 'example.com' returns cookies for
+            '.example.com', 'app.example.com', etc.
+          schema:
+            type: string
+            example: example.com
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - name: cookie_name
+          in: query
+          required: false
+          description: >
+            Case-sensitive filter to search for a specific cookie name
+            (e.g., 'session_id', 'JSESSIONID', '__Secure-1PSID').
+          schema:
+            type: string
+            example: session_id
+        - name: since_cookie_expiration
+          in: query
+          required: false
+          description: >
+            Filter to cookies with expiration on or after this date (YYYY-MM-DD).
+            Useful for finding cookies that are still valid.
+          schema:
+            type: string
+            example: '2025-01-01'
+        - name: until_cookie_expiration
+          in: query
+          required: false
+          description: >
+            Filter to cookies with expiration on or before this date.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Stolen cookie records for the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SipCookieResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /sip-v1/breach/catalog:
+    get:
+      operationId: sipListBreachCatalog
+      summary: List SIP breach catalog entries
+      description: >
+        Returns the SpyCloud SIP breach catalog with metadata for breaches
+        containing stolen session cookies. Similar to the Enterprise breach
+        catalog but filtered to sources with cookie and session data.
+      tags:
+        - SIP - Breach Catalog
+      parameters:
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: SIP breach catalog entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachCatalogListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /sip-v1/breach/catalog/{id}:
+    get:
+      operationId: sipGetBreachCatalogEntry
+      summary: Get SIP breach catalog entry by ID
+      description: >
+        Returns metadata for a specific breach in the SIP catalog identified
+        by its numeric source ID or UUID. Includes breach title, description,
+        acquisition date, and data classes exposed.
+      tags:
+        - SIP - Breach Catalog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: >
+            Numeric source ID or UUID of the breach. Comma-delimited values
+            supported for batch lookups.
+          schema:
+            type: string
+            example: '41874'
+      responses:
+        '200':
+          description: SIP breach catalog entry details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachCatalogEntryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ===========================================================================
+  # INVESTIGATIONS API
+  # ===========================================================================
+
+  /investigations/data/emails/{email}:
+    get:
+      operationId: investigateByEmail
+      summary: Investigate an email across all SpyCloud data
+      description: >
+        Queries the SpyCloud Investigations API for all records associated with
+        an email address across the full SpyCloud database — breaches,
+        infostealers, phishing, paste sites, and combo lists. The Investigations
+        API provides the broadest dataset and is designed for cybercrime
+        investigators and threat analysts performing link analysis and identity
+        attribution. Returns enriched records with full PII, credential pairs,
+        device context, and source attribution.
+      tags:
+        - Investigations - Data Lookup
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Investigation records for the email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /investigations/data/domains/{domain}:
+    get:
+      operationId: investigateByDomain
+      summary: Investigate a domain across all SpyCloud data
+      description: >
+        Queries the SpyCloud Investigations API for all records under a domain
+        across the full SpyCloud database. Returns breaches, infostealer
+        infections, phishing captures, and paste data for all identities at
+        the domain. Use this for enterprise-wide cybercrime exposure assessments.
+      tags:
+        - Investigations - Data Lookup
+      parameters:
+        - $ref: '#/components/parameters/DomainPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Investigation records for the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /investigations/data/ips/{ip}:
+    get:
+      operationId: investigateByIp
+      summary: Investigate an IP across all SpyCloud data
+      description: >
+        Queries the SpyCloud Investigations API for all records linked to an
+        IP address. Returns breach, infostealer, and botnet data tied to the
+        IP including associated identities and device forensics. Use this to
+        identify all compromised identities connected to an IP during incident
+        investigation.
+      tags:
+        - Investigations - Data Lookup
+      parameters:
+        - $ref: '#/components/parameters/IpPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Investigation records for the IP.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /investigations/data/usernames/{username}:
+    get:
+      operationId: investigateByUsername
+      summary: Investigate a username across all SpyCloud data
+      description: >
+        Queries the SpyCloud Investigations API for all records linked to a
+        username across the full database. Useful for investigating service
+        accounts, forum handles, or non-email identifiers tied to cybercrime
+        activity.
+      tags:
+        - Investigations - Data Lookup
+      parameters:
+        - $ref: '#/components/parameters/UsernamePath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Investigation records for the username.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /investigations/data/passwords/{password}:
+    get:
+      operationId: investigateByPassword
+      summary: Investigate a password across all SpyCloud data
+      description: >
+        Queries the SpyCloud Investigations API for all records containing a
+        specific password. Returns all accounts and identities that used this
+        password, enabling credential reuse analysis and link analysis across
+        threat actor personas.
+      tags:
+        - Investigations - Data Lookup
+      parameters:
+        - $ref: '#/components/parameters/PasswordPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Investigation records containing the password.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachRecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -1506,6 +1862,126 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IdentityRecord'
+
+    # -- SIP Cookie Record ---------------------------------------------------
+
+    SipCookieRecord:
+      type: object
+      description: >
+        A stolen cookie record from the SpyCloud SIP dataset containing
+        session cookies exfiltrated by infostealer malware.
+      properties:
+        document_id:
+          type: string
+          description: Unique SpyCloud document identifier.
+        source_id:
+          type: integer
+          format: int64
+          description: Breach source ID.
+        spycloud_publish_date:
+          type: string
+          format: date-time
+        email:
+          type: string
+          format: email
+          nullable: true
+        email_domain:
+          type: string
+          nullable: true
+        cookie_domain:
+          type: string
+          description: Domain the cookie belongs to.
+          example: .example.com
+        cookie_name:
+          type: string
+          description: Cookie name.
+          example: session_id
+        cookie_value:
+          type: string
+          description: Stolen cookie value.
+        cookie_path:
+          type: string
+          nullable: true
+          example: /
+        cookie_expiration:
+          type: string
+          format: date-time
+          nullable: true
+          description: Cookie expiration date. Cookies expiring in the future may still be valid.
+        cookie_secure:
+          type: boolean
+          nullable: true
+          description: Whether the cookie has the Secure flag set.
+        cookie_http_only:
+          type: boolean
+          nullable: true
+          description: Whether the cookie has the HttpOnly flag set.
+        target_url:
+          type: string
+          format: uri
+          nullable: true
+        target_domain:
+          type: string
+          nullable: true
+        target_subdomain:
+          type: string
+          nullable: true
+        severity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 25
+        infected_machine_id:
+          type: string
+          nullable: true
+        infected_time:
+          type: string
+          format: date-time
+          nullable: true
+        user_hostname:
+          type: string
+          nullable: true
+        user_os:
+          type: string
+          nullable: true
+        ip_addresses:
+          type: array
+          nullable: true
+          items:
+            type: string
+        malware_family:
+          type: string
+          nullable: true
+          example: RedLine
+        log_id:
+          type: string
+          nullable: true
+        country_code:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        password_type:
+          type: string
+          nullable: true
+
+    SipCookieResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+        cursor:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SipCookieRecord'
 
     # -- Watchlist ------------------------------------------------------------
 
