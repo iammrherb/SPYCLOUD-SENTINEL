@@ -3843,6 +3843,154 @@ SkillGroups:
         \ definition\n   - Lessons learned documentation\n\n7. METRICS:\n   - SLA targets for each phase\n   - Success/failure criteria\n   - Reporting requirements\n\nPresent as an actionable playbook with\
         \ decision trees,\nAPI call specifications, and Logic App design guidance.\n<|im_end|>\n<|im_start|>user\nDesign a response playbook for this threat scenario:\n\nScenario: {{ThreatScenario}}\n\n\
         Existing Capabilities: {{ExistingCapabilities}}\n<|im_end|>"
+  - Name: GenerateExecutiveReport
+    DisplayName: '[AI Analysis] Generate Executive Exposure Report'
+    Description: Uses OpenAI GPT-4o to generate a comprehensive executive report on organizational exposure posture, including business impact analysis, risk quantification, trend assessment, automation
+      ROI, and strategic recommendations suitable for C-suite and board audiences.
+    Inputs:
+    - Name: ExposureData
+      Description: Aggregated exposure data, remediation statistics, severity distributions, and health metrics from SpyCloud and Microsoft security sources.
+      Required: true
+    - Name: TimePeriod
+      Description: Reporting period (e.g., last 30 days, last quarter, YTD). Defaults to last 30 days.
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a CISO-level executive report writer specializing in\
+        \ dark web threat intelligence and identity exposure risk.\nYou produce board-ready reports that translate technical findings\ninto business impact language.\n\nGenerate a comprehensive executive report\
+        \ covering:\n\n1. EXECUTIVE SUMMARY (3-5 sentences):\n   - Current risk posture in business terms\n   - Key trend direction (improving/worsening) with percentage change\n   - Most critical finding requiring\
+        \ immediate attention\n   - Automation effectiveness summary\n\n2. KEY PERFORMANCE INDICATORS:\n   - Total credential exposures (with severity breakdown)\n   - Mean time to remediate (MTTR)\n   - Automation\
+        \ coverage percentage\n   - Remediation gap (unremediated critical exposures)\n   - Exposure trajectory (trend over reporting period)\n\n3. RISK QUANTIFICATION:\n   - Estimated financial exposure using\
+        \ Ponemon/IBM breach cost models\n   - Regulatory fine exposure based on exposed data types\n   - Operational risk from active infostealer infections\n   - Reputation risk assessment\n\n4. TOP RISKS\
+        \ (prioritized list):\n   - Risk description in business language\n   - Affected scope (users, devices, applications)\n   - Current mitigation status\n   - Recommended action with estimated effort\n\
+        \n5. AUTOMATION ROI:\n   - Actions auto-remediated vs manual intervention required\n   - Estimated time/cost savings from automation\n   - Coverage gaps requiring additional automation\n\n6. STRATEGIC\
+        \ RECOMMENDATIONS:\n   - Prioritized by business impact and feasibility\n   - Each with owner, deadline, and expected risk reduction\n   - Quick wins vs long-term investments\n\n7. PEER BENCHMARKING:\n\
+        \   - Industry comparison for key metrics\n   - Maturity assessment against best practices\n\nFormat as a polished executive document. Use professional language.\nNo unexplained acronyms. Focus on decisions,\
+        \ not technical details.\n<|im_end|>\n<|im_start|>user\nGenerate an executive exposure report for the following data:\n\nReporting Period: {{TimePeriod}}\n\n{{ExposureData}}\n<|im_end|>"
+  - Name: GenerateBoardPresentation
+    DisplayName: '[AI Analysis] Generate Board Presentation'
+    Description: Uses OpenAI GPT-4o to create a structured board-level presentation on cybersecurity exposure posture with risk ratings, investment justification, competitive benchmarking, and decision
+      points for leadership approval.
+    Inputs:
+    - Name: ExposureMetrics
+      Description: Organizational exposure metrics, trend data, remediation statistics, and security investment context.
+      Required: true
+    - Name: AudienceContext
+      Description: Board composition and specific concerns (e.g., regulatory focus, M&A due diligence, cyber insurance renewal). Defaults to general board briefing.
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a cybersecurity executive advisor who creates board-level\
+        \ presentations. You understand that board members are not security\nprofessionals — they need clear risk ratings, business impact,\nand specific decisions to make.\n\nCreate a structured board presentation\
+        \ covering:\n\n1. SLIDE 1 — RISK DASHBOARD:\n   - Overall cyber risk rating (Critical/High/Medium/Low) with color\n   - 3-5 key metrics with trend arrows\n   - One-sentence risk posture summary\n\n\
+        2. SLIDE 2 — THREAT LANDSCAPE:\n   - Current threats affecting the organization\n   - Industry comparison and peer benchmarking\n   - Emerging threats to prepare for\n\n3. SLIDE 3 — EXPOSURE SUMMARY:\n\
+        \   - Total exposure scope (users, devices, data types)\n   - Severity breakdown with business impact translation\n   - Geographic and departmental distribution\n\n4. SLIDE 4 — RESPONSE EFFECTIVENESS:\n\
+        \   - Automation coverage and success rates\n   - Mean time to remediate with SLA compliance\n   - Gap analysis — what slipped through\n\n5. SLIDE 5 — FINANCIAL IMPACT:\n   - Estimated breach cost exposure\n\
+        \   - Regulatory fine risk by jurisdiction\n   - Cyber insurance implications\n   - ROI of current security investments\n\n6. SLIDE 6 — DECISIONS REQUIRED:\n   - Specific asks for board approval\n   -\
+        \ Investment requests with expected risk reduction\n   - Policy changes requiring board endorsement\n   - Timeline and accountability\n\n7. SLIDE 7 — OUTLOOK & NEXT STEPS:\n   - Risk trajectory forecast\n\
+        \   - Planned initiatives and milestones\n   - Success metrics for next reporting period\n\nUse clear, non-technical language throughout.\nPresent numbers as business metrics.\nInclude visual descriptions\
+        \ (charts, graphs) where appropriate.\nEach slide should have a clear takeaway message.\n<|im_end|>\n<|im_start|>user\nCreate a board presentation from the following data:\n\nAudience Context: {{AudienceContext}}\n\
+        \n{{ExposureMetrics}}\n<|im_end|>"
+  - Name: PredictExposureTrend
+    DisplayName: '[AI Analysis] Predict Exposure Trend'
+    Description: Uses OpenAI GPT-4o to analyze historical exposure patterns and predict future exposure trajectory, including volume forecasts, emerging threat vectors, seasonal patterns, and recommended
+      preparatory actions.
+    Inputs:
+    - Name: HistoricalData
+      Description: Historical exposure data including time-series metrics, severity trends, breach frequency, and remediation effectiveness over time.
+      Required: true
+    - Name: ForecastPeriod
+      Description: Desired forecast period (e.g., next 30 days, next quarter, next 6 months). Defaults to next 90 days.
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a cybersecurity data analyst specializing in threat trend\
+        \ prediction and exposure forecasting. You analyze historical\npatterns to project future risk trajectories.\n\nAnalyze the historical data and generate predictions:\n\n1. TREND ANALYSIS:\n   - Overall\
+        \ exposure volume trajectory (increasing/stable/decreasing)\n   - Severity distribution shifts over time\n   - Infostealer vs breach credential ratio changes\n   - Remediation effectiveness trend\n\n\
+        2. PATTERN IDENTIFICATION:\n   - Seasonal patterns in exposure volume\n   - Campaign-driven spikes and their frequency\n   - Recurring malware family activity cycles\n   - Correlation between external\
+        \ events and exposure spikes\n\n3. FORECAST:\n   - Projected exposure volume for forecast period\n   - Expected severity distribution\n   - Likely threat vectors based on current trends\n   - Confidence\
+        \ intervals for predictions (high/medium/low)\n\n4. RISK FACTORS:\n   - Emerging threats that could accelerate exposure\n   - Industry-specific threat intelligence\n   - Geopolitical factors affecting\
+        \ threat landscape\n   - Technology changes affecting attack surface\n\n5. PREPARATORY RECOMMENDATIONS:\n   - Actions to take now to mitigate predicted risks\n   - Detection capabilities to deploy\n\
+        \   - Automation gaps to address before predicted spikes\n   - Budget and resource planning implications\n\nPresent predictions with clear confidence levels.\nDistinguish between data-driven forecasts\
+        \ and analyst judgment.\nAlways caveat predictions appropriately.\n<|im_end|>\n<|im_start|>user\nAnalyze historical patterns and predict future exposure trends:\n\nForecast Period: {{ForecastPeriod}}\n\
+        \n{{HistoricalData}}\n<|im_end|>"
+  - Name: BuildAttackSimulation
+    DisplayName: '[AI Analysis] Build Attack Simulation Scenario'
+    Description: Uses OpenAI GPT-4o to construct realistic attack simulation scenarios based on actual organizational exposure data, mapping adversary tactics through MITRE ATT&CK and demonstrating
+      potential impact if exposed credentials and data were weaponized.
+    Inputs:
+    - Name: ExposureContext
+      Description: Current exposure data including compromised credentials, infected devices, stolen session tokens, exposed PII, and available attack vectors.
+      Required: true
+    - Name: AdversaryProfile
+      Description: Type of adversary to simulate (e.g., nation-state APT, ransomware group, financially motivated, insider threat). Defaults to financially motivated threat actor.
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a red team lead and adversary simulation expert who\
+        \ builds realistic attack scenarios from actual exposure data.\nYou think like an attacker to help defenders understand their risk.\n\nBuild a comprehensive attack simulation:\n\n1. ADVERSARY PROFILE:\n\
+        \   - Threat actor type and motivation\n   - Typical TTPs for this adversary category\n   - Resources and sophistication level\n   - Historical targeting patterns\n\n2. INITIAL ACCESS (Phase 1):\n  \
+        \ - How the adversary would use the exposed credentials\n   - Entry point selection rationale\n   - Credential validation and testing approach\n   - Success probability assessment\n\n3. PERSISTENCE\
+        \ & PRIVILEGE ESCALATION (Phase 2):\n   - How they would establish persistence using stolen data\n   - Privilege escalation paths from available credentials\n   - Lateral movement opportunities from\
+        \ device infections\n   - Session token replay for MFA bypass\n\n4. OBJECTIVE EXECUTION (Phase 3):\n   - Data exfiltration targets based on accessible systems\n   - Ransomware deployment scenarios\n\
+        \   - Business email compromise opportunities\n   - Supply chain attack possibilities\n\n5. IMPACT ASSESSMENT:\n   - Estimated financial impact of successful attack\n   - Operational disruption scope\n\
+        \   - Data loss and regulatory consequences\n   - Reputation damage assessment\n\n6. MITRE ATT&CK MAPPING:\n   - Full technique chain from Initial Access to Impact\n   - Format: Tactic | Technique ID\
+        \ | Name | How it applies\n\n7. DETECTION OPPORTUNITIES:\n   - Where current detections would catch this attack\n   - Detection gaps the adversary could exploit\n   - Recommended detection improvements\n\
+        \n8. MITIGATION RECOMMENDATIONS:\n   - Immediate actions to close the most critical gaps\n   - Medium-term hardening measures\n   - Long-term strategic improvements\n\nMake the simulation realistic and\
+        \ specific to the actual exposure data.\nDo not create generic scenarios — use the real data provided.\n<|im_end|>\n<|im_start|>user\nBuild an attack simulation from the following exposure data:\n\n\
+        Adversary Profile: {{AdversaryProfile}}\n\n{{ExposureContext}}\n<|im_end|>"
+  - Name: GenerateRiskHeatmap
+    DisplayName: '[AI Analysis] Generate Risk Heatmap'
+    Description: Uses OpenAI GPT-4o to generate a comprehensive risk heatmap mapping exposure severity across organizational dimensions including departments, domains, data classes, geographic regions,
+      and application categories.
+    Inputs:
+    - Name: ExposureData
+      Description: Organizational exposure data with domain, severity, data class, geographic, and application breakdowns.
+      Required: true
+    - Name: Dimensions
+      Description: Organizational dimensions to map (e.g., by department, by domain, by region, by application). Defaults to all available dimensions.
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a cybersecurity risk visualization expert who creates\
+        \ comprehensive risk heatmaps from exposure data. You map risk\nacross multiple organizational dimensions to highlight hotspots.\n\nGenerate a risk heatmap analysis:\n\n1. HEATMAP DIMENSIONS:\n   For\
+        \ each requested dimension, create a risk matrix:\n\n   a) DOMAIN HEATMAP:\n      - Each domain with: exposure count, severity distribution, risk score\n      - Color coding: Critical (red), High (orange),\
+        \ Medium (yellow), Low (green)\n      - Hotspot identification with root cause\n\n   b) DATA CLASS HEATMAP:\n      - Each exposed data class (credentials, PII, financial, health, etc.)\n      - Volume\
+        \ and severity per data class\n      - Compliance implications per data class\n\n   c) GEOGRAPHIC HEATMAP:\n      - Exposure sources by country/region\n      - Infection hotspots with malware family correlation\n\
+        \      - Regulatory jurisdiction mapping\n\n   d) APPLICATION HEATMAP:\n      - Target applications by exposure volume and severity\n      - Corporate vs personal application risk comparison\n      -\
+        \ SSO/IdP exposure cascade risk\n\n   e) TEMPORAL HEATMAP:\n      - Risk intensity by time period\n      - Seasonal patterns and spike identification\n      - Remediation velocity by period\n\n2. COMPOSITE\
+        \ RISK SCORE:\n   - Weighted algorithm combining all dimensions\n   - Overall organizational risk rating\n   - Trend direction with confidence\n\n3. HOTSPOT ANALYSIS:\n   - Top 5 risk hotspots requiring\
+        \ immediate attention\n   - Root cause for each hotspot\n   - Recommended remediation priority\n\n4. RISK DISTRIBUTION:\n   - Pareto analysis (which 20% causes 80% of risk)\n   - Long tail analysis\
+        \ (low-probability high-impact risks)\n\nPresent as structured text with clear visual indicators.\nUse severity emojis and formatting for visual clarity.\nEach hotspot should have a specific action\
+        \ item.\n<|im_end|>\n<|im_start|>user\nGenerate a risk heatmap from the following exposure data:\n\nDimensions: {{Dimensions}}\n\n{{ExposureData}}\n<|im_end|>"
+  - Name: ComposeIncidentNarrative
+    DisplayName: '[AI Analysis] Compose Incident Narrative'
+    Description: Uses OpenAI GPT-4o to compose a detailed, chronological incident narrative reconstructing a security event from initial compromise through detection, response, and lessons learned,
+      suitable for post-incident review, regulatory submission, or insurance claims.
+    Inputs:
+    - Name: IncidentEvidence
+      Description: All available evidence including SpyCloud exposure data, timeline events, remediation actions, Defender alerts, sign-in logs, and device forensics.
+      Required: true
+    - Name: IncidentScope
+      Description: Brief description of the incident scope and primary affected entity (e.g., user email, device hostname, malware campaign name).
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are an expert incident response report writer who composes\
+        \ detailed, chronological incident narratives suitable for\npost-incident review, regulatory submission, and insurance claims.\n\nCompose a comprehensive incident narrative:\n\n1. INCIDENT HEADER:\n  \
+        \ - Incident Title (descriptive, concise)\n   - Severity Rating with justification\n   - Affected Scope (users, devices, data, applications)\n   - Incident Timeline (start, detection, containment, resolution)\n\
+        \   - Current Status (active/contained/resolved)\n\n2. CHRONOLOGICAL RECONSTRUCTION:\n   Build a detailed timeline of events:\n   - [Timestamp] Initial Compromise: how the exposure/infection occurred\n\
+        \   - [Timestamp] Data Exfiltration: what was stolen and when\n   - [Timestamp] Dark Web Publication: when stolen data appeared on dark web\n   - [Timestamp] Detection: how and when SpyCloud/Sentinel\
+        \ detected it\n   - [Timestamp] Alert Triggered: analytics rule or automation that fired\n   - [Timestamp] Response Initiated: first remediation action taken\n   - [Timestamp] Containment: credential\
+        \ reset, device isolation, session revocation\n   - [Timestamp] Resolution: final remediation step completed\n\n3. ROOT CAUSE ANALYSIS:\n   - Initial infection vector (phishing, malvertising, cracked\
+        \ software, etc.)\n   - Contributing factors (missing MFA, outdated AV, user behavior)\n   - Why existing controls failed to prevent the incident\n\n4. IMPACT ASSESSMENT:\n   - Data Impact: types and\
+        \ volume of data exposed\n   - User Impact: number and role of affected users\n   - System Impact: devices, applications, infrastructure affected\n   - Business Impact: operational disruption, financial\
+        \ exposure\n   - Regulatory Impact: notification obligations triggered\n\n5. RESPONSE EFFECTIVENESS:\n   - What automated responses fired and their results\n   - Manual intervention required and why\n\
+        \   - Time-to-detect, time-to-respond, time-to-remediate\n   - What worked well in the response\n   - What could have been faster or better\n\n6. LESSONS LEARNED:\n   - Prevention improvements for next\
+        \ time\n   - Detection enhancements to deploy\n   - Response process improvements\n   - Training and awareness recommendations\n\n7. APPENDICES:\n   - Evidence inventory with source references\n   -\
+        \ IOC list for threat intelligence sharing\n   - Affected entity list (redacted as appropriate)\n   - Regulatory notification timeline and status\n\nWrite in professional, factual language suitable for\n\
+        regulatory submission. Use specific timestamps and entity references.\nDistinguish between confirmed facts and analyst assessments.\n<|im_end|>\n<|im_start|>user\nCompose an incident narrative from the\
+        \ following evidence:\n\nIncident Scope: {{IncidentScope}}\n\n{{IncidentEvidence}}\n<|im_end|>"
 - Format: KQL
   Skills:
   - Name: GetUserExposures
@@ -4499,14 +4647,668 @@ SkillGroups:
         \"),\n(IdentityLogonEvents | take 1 | summarize c=count() | extend Component=\"Defender for Identity\", Category=\"Data Connectors\", Status=iff(c > 0, \"Connected\", \"Not connected\"), Detail=\"\
         \"),\n(CloudAppEvents | take 1 | summarize c=count() | extend Component=\"Defender for Cloud Apps\", Category=\"Data Connectors\", Status=iff(c > 0, \"Connected\", \"Not connected\"), Detail=\"\
         \")\n| project Category, Component, Status, Detail\n| order by Category asc, Component asc"
+  # === IDLINK KQL Skills ===
+  - Name: GetIdLinkByEmail
+    DisplayName: '[Data] Get IDLINK identity correlations for a user'
+    Description: Internal data retrieval skill. Queries SpyCloudIdLink_CL for all identity correlation records linked to a specific email address.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to find identity correlations for.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudIdLink_CL
+
+        | where email_s =~ "{{targetEmail}}" or linked_email_s =~ "{{targetEmail}}"
+
+        | project TimeGenerated, email_s, linked_email_s, correlation_type_s, confidence_score_d, device_id_s, source_id_s, first_seen_t, last_seen_t, link_strength_s
+
+        | top 50 by TimeGenerated desc'
+  - Name: GetIdLinkGraph
+    DisplayName: '[Data] Build IDLINK identity graph for a user'
+    Description: Internal data retrieval skill. Builds an identity correlation graph showing all linked identities, their relationship types, and connection strength.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to build an identity graph for.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudIdLink_CL
+
+        | where email_s =~ "{{targetEmail}}" or linked_email_s =~ "{{targetEmail}}"
+
+        | summarize link_count = count(), correlation_types = make_set(correlation_type_s), avg_confidence = avg(confidence_score_d), first_seen = min(first_seen_t), last_seen = max(last_seen_t)
+        by email_s, linked_email_s, link_strength_s
+
+        | extend node_pair = strcat(email_s, " <-> ", linked_email_s)
+
+        | order by avg_confidence desc, link_count desc
+
+        | top 50 by link_count desc'
+  - Name: GetIdLinkHighRisk
+    DisplayName: '[Data] Find high-risk IDLINK identity clusters'
+    Description: Internal data retrieval skill. Identifies high-risk identity clusters with strong correlations and high confidence scores indicating significant identity overlap.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudIdLink_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | where confidence_score_d >= 80
+
+        | summarize link_count = count(), linked_identities = make_set(linked_email_s), correlation_types = make_set(correlation_type_s), avg_confidence = avg(confidence_score_d)
+        by email_s
+
+        | where link_count >= 3
+
+        | extend risk_level = case(link_count >= 10, "CRITICAL", link_count >= 5, "HIGH", "MEDIUM")
+
+        | order by link_count desc
+
+        | top 25 by link_count desc'
+  - Name: GetIdLinkCrossOrgCorrelation
+    DisplayName: '[Data] Find cross-organization IDLINK correlations'
+    Description: Internal data retrieval skill. Identifies identities correlated across different email domains, revealing cross-organization credential overlap and supply chain risk.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudIdLink_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | extend email_domain = tostring(split(email_s, "@")[1]), linked_domain = tostring(split(linked_email_s, "@")[1])
+
+        | where email_domain != linked_domain
+
+        | summarize cross_org_links = count(), linked_emails = make_set(linked_email_s), correlation_types = make_set(correlation_type_s), avg_confidence = avg(confidence_score_d)
+        by email_s, email_domain, linked_domain
+
+        | order by cross_org_links desc
+
+        | top 25 by cross_org_links desc'
+  - Name: GetIdLinkSharedDevices
+    DisplayName: '[Data] Find IDLINK shared device correlations'
+    Description: Internal data retrieval skill. Identifies multiple identities linked through shared infected devices, indicating multi-user compromise from a single infostealer infection.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudIdLink_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | where correlation_type_s =~ "device" and isnotempty(device_id_s)
+
+        | summarize linked_identities = make_set(email_s), identity_count = dcount(email_s), links = count(), avg_confidence = avg(confidence_score_d)
+        by device_id_s
+
+        | where identity_count >= 2
+
+        | order by identity_count desc
+
+        | top 25 by identity_count desc'
+  - Name: GetIdLinkBreachOverlap
+    DisplayName: '[Data] Find IDLINK breach overlap patterns'
+    Description: Internal data retrieval skill. Identifies identities that appear across multiple breach sources, revealing persistent exposure patterns and re-compromise risk.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to check for breach overlap. If omitted, shows top identities with most breach overlap.
+      Required: false
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudIdLink_CL
+
+        | where TimeGenerated > ago(90d)
+
+        | where correlation_type_s =~ "breach"
+
+        | summarize breach_sources = make_set(source_id_s), breach_count = dcount(source_id_s), linked_identities = make_set(linked_email_s), total_links = count()
+        by email_s
+
+        | where breach_count >= 2
+
+        | order by breach_count desc
+
+        | top 25 by breach_count desc'
+  - Name: GetIdLinkTimeline
+    DisplayName: '[Data] Get IDLINK correlation timeline for a user'
+    Description: Internal data retrieval skill. Returns a chronological timeline of identity correlation events for a specific user showing when links were first and last observed.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to get the correlation timeline for.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudIdLink_CL
+
+        | where email_s =~ "{{targetEmail}}" or linked_email_s =~ "{{targetEmail}}"
+
+        | project TimeGenerated, email_s, linked_email_s, correlation_type_s, confidence_score_d, link_strength_s, first_seen_t, last_seen_t, device_id_s, source_id_s
+
+        | order by TimeGenerated asc
+
+        | top 100 by TimeGenerated asc'
+  - Name: GetIdLinkSummary
+    DisplayName: '[Data] Get IDLINK summary statistics'
+    Description: Internal data retrieval skill. Returns aggregate IDLINK statistics including total correlations, correlation type distribution, confidence distribution, and top linked identities.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'union isfuzzy=true
+        (SpyCloudIdLink_CL | where TimeGenerated > ago(30d) | summarize total_correlations = count(), unique_identities = dcount(email_s), unique_linked = dcount(linked_email_s), avg_confidence = avg(confidence_score_d)
+        | extend Metric = "Overall", Detail = strcat("Total: ", total_correlations, " correlations, ", unique_identities, " identities, ", unique_linked, " linked, avg confidence: ", round(avg_confidence, 1))),
+        (SpyCloudIdLink_CL | where TimeGenerated > ago(30d) | summarize count() by correlation_type_s
+        | extend Metric = "By Type", Detail = strcat(correlation_type_s, ": ", count_)),
+        (SpyCloudIdLink_CL | where TimeGenerated > ago(30d) | summarize count() by link_strength_s
+        | extend Metric = "By Strength", Detail = strcat(link_strength_s, ": ", count_))
+        | project Metric, Detail'
+  # === Data Partnership KQL Skills ===
+  - Name: GetDataPartnershipByEmail
+    DisplayName: '[Data] Get Data Partnership records for a user'
+    Description: Internal data retrieval skill. Queries SpyCloudDataPartnership_CL for all partner-contributed intelligence records for a specific email address.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to check against partner data.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudDataPartnership_CL
+
+        | where email_s =~ "{{targetEmail}}"
+
+        | project TimeGenerated, email_s, email_domain_s, severity_d, source_id_s, partner_source_s, data_classes_s, password_type_s, target_domain_s, confidence_score_d, first_seen_t, last_seen_t
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetDataPartnershipByDomain
+    DisplayName: '[Data] Get Data Partnership records for a domain'
+    Description: Internal data retrieval skill. Queries SpyCloudDataPartnership_CL for all partner-contributed intelligence records for a specific email domain.
+    Inputs:
+    - Name: targetDomain
+      Description: The email domain to check against partner data.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudDataPartnership_CL
+
+        | where email_domain_s =~ "{{targetDomain}}"
+
+        | summarize record_count = count(), severity_avg = avg(severity_d), unique_emails = dcount(email_s), partner_sources = make_set(partner_source_s), data_classes = make_set(data_classes_s)
+        by email_domain_s
+
+        | extend summary = strcat("Domain: ", email_domain_s, " | Records: ", record_count, " | Unique Emails: ", unique_emails, " | Avg Severity: ", round(severity_avg, 1))'
+  - Name: GetDataPartnershipSources
+    DisplayName: '[Data] Analyze Data Partnership source reliability'
+    Description: Internal data retrieval skill. Analyzes partner data sources for reliability metrics including record counts, data completeness, recency, and confidence scores.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudDataPartnership_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | summarize record_count = count(), unique_emails = dcount(email_s), avg_severity = avg(severity_d), avg_confidence = avg(confidence_score_d), latest_record = max(TimeGenerated), earliest_record = min(TimeGenerated),
+        data_classes = make_set(data_classes_s)
+        by partner_source_s
+
+        | extend recency_days = datetime_diff("day", now(), latest_record), reliability_grade = case(avg_confidence >= 90, "A", avg_confidence >= 75, "B", avg_confidence >= 60, "C", "D")
+
+        | order by record_count desc
+
+        | top 25 by record_count desc'
+  - Name: GetDataPartnershipHighSeverity
+    DisplayName: '[Data] Get high-severity Data Partnership records'
+    Description: Internal data retrieval skill. Returns partner-contributed records with high severity ratings requiring immediate attention.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudDataPartnership_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | where severity_d >= 20
+
+        | project TimeGenerated, email_s, email_domain_s, severity_d, partner_source_s, data_classes_s, password_type_s, target_domain_s, confidence_score_d
+
+        | extend severity_label = case(severity_d == 25, "CRITICAL - Infostealer+AppData", severity_d == 20, "URGENT - Infostealer", severity_d >= 5, "HIGH - Breach+PII", "Breach")
+
+        | order by severity_d desc, TimeGenerated desc
+
+        | top 25 by severity_d desc'
+  - Name: GetDataPartnershipDataClasses
+    DisplayName: '[Data] Analyze Data Partnership data class coverage'
+    Description: Internal data retrieval skill. Maps data class coverage across partner sources showing what types of exposed data each partner contributes.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudDataPartnership_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | mv-expand data_class = split(data_classes_s, ",")
+
+        | extend data_class_clean = trim(" ", tostring(data_class))
+
+        | where isnotempty(data_class_clean)
+
+        | summarize record_count = count(), partner_sources = make_set(partner_source_s), unique_emails = dcount(email_s), avg_severity = avg(severity_d)
+        by data_class_clean
+
+        | order by record_count desc
+
+        | top 25 by record_count desc'
+  - Name: GetDataPartnershipTrend
+    DisplayName: '[Data] Analyze Data Partnership trends over time'
+    Description: Internal data retrieval skill. Shows partner data ingestion trends over time including volume, severity distribution, and source diversity.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudDataPartnership_CL
+
+        | where TimeGenerated > ago(90d)
+
+        | summarize record_count = count(), unique_emails = dcount(email_s), avg_severity = avg(severity_d), unique_sources = dcount(partner_source_s)
+        by bin(TimeGenerated, 7d)
+
+        | order by TimeGenerated asc'
+  # === Exposure KQL Skills ===
+  - Name: GetExposureProfileByEmail
+    DisplayName: '[Data] Get Exposure risk profile for a user'
+    Description: Internal data retrieval skill. Queries SpyCloudExposure_CL for a comprehensive exposure risk profile for a specific email address.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to build an exposure risk profile for.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudExposure_CL
+
+        | where email_s =~ "{{targetEmail}}"
+
+        | project TimeGenerated, email_s, email_domain_s, severity_d, risk_score_d, remediation_status_s, data_classes_s, exposure_type_s, source_id_s, first_seen_t, last_seen_t, password_type_s, target_domain_s
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetExposureProfileByDomain
+    DisplayName: '[Data] Get Exposure risk profile for a domain'
+    Description: Internal data retrieval skill. Queries SpyCloudExposure_CL for an aggregate exposure risk profile for a specific email domain.
+    Inputs:
+    - Name: targetDomain
+      Description: The email domain to build an exposure risk profile for.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudExposure_CL
+
+        | where email_domain_s =~ "{{targetDomain}}"
+
+        | summarize total_exposures = count(), unique_emails = dcount(email_s), avg_risk_score = avg(risk_score_d), avg_severity = avg(severity_d),
+        critical_count = countif(severity_d >= 20), high_count = countif(severity_d >= 5 and severity_d < 20),
+        remediated_count = countif(remediation_status_s =~ "remediated"), unremediated_count = countif(remediation_status_s =~ "unremediated" or isempty(remediation_status_s))
+        by email_domain_s
+
+        | extend remediation_rate = round(100.0 * remediated_count / total_exposures, 1), risk_level = case(avg_risk_score >= 80, "CRITICAL", avg_risk_score >= 60, "HIGH", avg_risk_score >= 40, "MEDIUM", "LOW")'
+  - Name: GetExposureCriticalRisk
+    DisplayName: '[Data] Get critical-risk exposure records'
+    Description: Internal data retrieval skill. Returns exposure records with critical risk scores requiring immediate attention and remediation.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudExposure_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | where risk_score_d >= 80 or severity_d >= 20
+
+        | project TimeGenerated, email_s, email_domain_s, severity_d, risk_score_d, remediation_status_s, exposure_type_s, data_classes_s, target_domain_s, password_type_s
+
+        | extend priority = case(risk_score_d >= 90, "P1 - Immediate", risk_score_d >= 80, "P2 - Urgent", severity_d >= 20, "P3 - High", "P4 - Medium")
+
+        | order by risk_score_d desc, severity_d desc
+
+        | top 25 by risk_score_d desc'
+  - Name: GetExposureRemediationStatus
+    DisplayName: '[Data] Get Exposure remediation status overview'
+    Description: Internal data retrieval skill. Returns remediation status metrics showing coverage, gaps, and effectiveness for exposure records.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudExposure_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | summarize total = count(), remediated = countif(remediation_status_s =~ "remediated"), unremediated = countif(remediation_status_s =~ "unremediated" or isempty(remediation_status_s)),
+        in_progress = countif(remediation_status_s =~ "in_progress"), avg_risk = avg(risk_score_d)
+        by severity_bucket = case(severity_d >= 25, "Critical (25)", severity_d >= 20, "Urgent (20)", severity_d >= 5, "High (5+)", "Standard (2)")
+
+        | extend remediation_rate = round(100.0 * remediated / total, 1), gap_count = unremediated
+
+        | order by severity_bucket desc'
+  - Name: GetExposureRemediationGaps
+    DisplayName: '[Data] Find unremediated Exposure gaps'
+    Description: Internal data retrieval skill. Identifies high-severity exposure records that have not been remediated, representing active risk to the organization.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudExposure_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | where severity_d >= 5
+
+        | where remediation_status_s =~ "unremediated" or isempty(remediation_status_s)
+
+        | project TimeGenerated, email_s, email_domain_s, severity_d, risk_score_d, exposure_type_s, data_classes_s, target_domain_s, first_seen_t
+
+        | extend days_unremediated = datetime_diff("day", now(), TimeGenerated)
+
+        | order by severity_d desc, days_unremediated desc
+
+        | top 25 by severity_d desc'
+  - Name: GetExposureTimeline
+    DisplayName: '[Data] Get Exposure timeline over time'
+    Description: Internal data retrieval skill. Returns a chronological timeline of exposure events showing risk trajectory and remediation progress.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudExposure_CL
+
+        | where TimeGenerated > ago(90d)
+
+        | summarize total_exposures = count(), avg_risk = avg(risk_score_d), critical_count = countif(severity_d >= 20), remediated_count = countif(remediation_status_s =~ "remediated"),
+        unique_emails = dcount(email_s)
+        by bin(TimeGenerated, 7d)
+
+        | extend remediation_rate = round(100.0 * remediated_count / total_exposures, 1)
+
+        | order by TimeGenerated asc'
+  - Name: GetExposureDataClasses
+    DisplayName: '[Data] Analyze Exposure data class distribution'
+    Description: Internal data retrieval skill. Maps the distribution of exposed data classes to assess what types of data are most at risk.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudExposure_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | mv-expand data_class = split(data_classes_s, ",")
+
+        | extend data_class_clean = trim(" ", tostring(data_class))
+
+        | where isnotempty(data_class_clean)
+
+        | summarize record_count = count(), unique_emails = dcount(email_s), avg_severity = avg(severity_d), avg_risk = avg(risk_score_d)
+        by data_class_clean
+
+        | extend risk_impact = case(avg_risk >= 80, "CRITICAL", avg_risk >= 60, "HIGH", avg_risk >= 40, "MEDIUM", "LOW")
+
+        | order by record_count desc
+
+        | top 25 by record_count desc'
+  - Name: GetExposureSummaryDashboard
+    DisplayName: '[Data] Generate Exposure summary dashboard'
+    Description: Internal data retrieval skill. Generates a comprehensive exposure summary dashboard with key metrics, severity distribution, remediation rates, and risk indicators.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'union isfuzzy=true
+        (SpyCloudExposure_CL | where TimeGenerated > ago(30d) | summarize total = count(), unique_emails = dcount(email_s), unique_domains = dcount(email_domain_s), avg_risk = round(avg(risk_score_d), 1)
+        | extend Metric = "Overview", Detail = strcat("Total: ", total, " exposures | ", unique_emails, " users | ", unique_domains, " domains | Avg Risk: ", avg_risk)),
+        (SpyCloudExposure_CL | where TimeGenerated > ago(30d) | summarize count() by severity_level = case(severity_d >= 25, "Critical (25)", severity_d >= 20, "Urgent (20)", severity_d >= 5, "High (5+)", "Standard (2)")
+        | extend Metric = "Severity", Detail = strcat(severity_level, ": ", count_)),
+        (SpyCloudExposure_CL | where TimeGenerated > ago(30d) | summarize remediated = countif(remediation_status_s =~ "remediated"), total = count()
+        | extend Metric = "Remediation", Detail = strcat(remediated, " of ", total, " remediated (", round(100.0 * remediated / total, 1), "%)"))
+        | project Metric, Detail'
+  # === CAP KQL Skills ===
+  - Name: GetCAPActionsByEmail
+    DisplayName: '[Data] Get CAP actions for a user'
+    Description: Internal data retrieval skill. Queries SpyCloudCAP_CL for all credential automated protection actions for a specific email address.
+    Inputs:
+    - Name: targetEmail
+      Description: The email address to check for CAP actions.
+      Required: true
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudCAP_CL
+
+        | where email_s =~ "{{targetEmail}}"
+
+        | project TimeGenerated, email_s, action_type_s, action_status_s, policy_name_s, severity_d, failure_reason_s, initiated_t, completed_t, source_id_s
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetCAPActionsByPolicy
+    DisplayName: '[Data] Get CAP actions grouped by policy'
+    Description: Internal data retrieval skill. Returns CAP action statistics grouped by policy to assess policy effectiveness and coverage.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudCAP_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | summarize total_actions = count(), completed = countif(action_status_s =~ "completed"), pending = countif(action_status_s =~ "pending"), failed = countif(action_status_s =~ "failed"),
+        unique_emails = dcount(email_s), avg_severity = avg(severity_d)
+        by policy_name_s
+
+        | extend success_rate = round(100.0 * completed / total_actions, 1)
+
+        | order by total_actions desc'
+  - Name: GetCAPPendingActions
+    DisplayName: '[Data] Get pending CAP actions'
+    Description: Internal data retrieval skill. Returns all CAP actions currently in pending status, prioritized by severity and age.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudCAP_CL
+
+        | where action_status_s =~ "pending"
+
+        | extend hours_pending = datetime_diff("hour", now(), initiated_t)
+
+        | project TimeGenerated, email_s, action_type_s, policy_name_s, severity_d, initiated_t, hours_pending, source_id_s
+
+        | extend sla_status = case(hours_pending >= 24, "SLA BREACHED", hours_pending >= 12, "SLA WARNING", "Within SLA")
+
+        | order by severity_d desc, hours_pending desc
+
+        | top 25 by hours_pending desc'
+  - Name: GetCAPCompletedActions
+    DisplayName: '[Data] Get completed CAP actions'
+    Description: Internal data retrieval skill. Returns recently completed CAP actions with completion metrics.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudCAP_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | where action_status_s =~ "completed"
+
+        | extend completion_hours = datetime_diff("hour", completed_t, initiated_t)
+
+        | project TimeGenerated, email_s, action_type_s, policy_name_s, severity_d, initiated_t, completed_t, completion_hours
+
+        | order by TimeGenerated desc
+
+        | top 25 by TimeGenerated desc'
+  - Name: GetCAPFailedActions
+    DisplayName: '[Data] Get failed CAP actions'
+    Description: Internal data retrieval skill. Returns failed CAP actions with failure reasons for investigation and root cause analysis.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudCAP_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | where action_status_s =~ "failed"
+
+        | project TimeGenerated, email_s, action_type_s, policy_name_s, severity_d, failure_reason_s, initiated_t, source_id_s
+
+        | extend failure_category = case(failure_reason_s has "permission", "Permission Error", failure_reason_s has "timeout", "Timeout", failure_reason_s has "not found", "User Not Found",
+        failure_reason_s has "api", "API Error", "Other")
+
+        | order by severity_d desc, TimeGenerated desc
+
+        | top 25 by severity_d desc'
+  - Name: GetCAPComplianceStatus
+    DisplayName: '[Data] Get CAP compliance status'
+    Description: Internal data retrieval skill. Generates CAP compliance metrics showing SLA adherence, completion rates, and coverage analysis across severity tiers.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudCAP_CL
+
+        | where TimeGenerated > ago(30d)
+
+        | summarize total = count(), completed = countif(action_status_s =~ "completed"), pending = countif(action_status_s =~ "pending"), failed = countif(action_status_s =~ "failed"),
+        avg_completion_hours = avg(case(action_status_s =~ "completed", datetime_diff("hour", completed_t, initiated_t), real(null)))
+        by severity_tier = case(severity_d >= 25, "Critical", severity_d >= 20, "Urgent", severity_d >= 5, "High", "Standard")
+
+        | extend completion_rate = round(100.0 * completed / total, 1), failure_rate = round(100.0 * failed / total, 1),
+        sla_target_hours = case(severity_tier == "Critical", 4, severity_tier == "Urgent", 8, severity_tier == "High", 24, 72),
+        sla_compliant = iff(avg_completion_hours <= case(severity_tier == "Critical", real(4), severity_tier == "Urgent", real(8), severity_tier == "High", real(24), real(72)), "YES", "NO")
+
+        | order by severity_tier desc'
+  - Name: GetCAPActionTimeline
+    DisplayName: '[Data] Get CAP action timeline'
+    Description: Internal data retrieval skill. Returns a chronological timeline of CAP actions showing action volume, status distribution, and operational trends.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'SpyCloudCAP_CL
+
+        | where TimeGenerated > ago(90d)
+
+        | summarize total_actions = count(), completed = countif(action_status_s =~ "completed"), pending = countif(action_status_s =~ "pending"), failed = countif(action_status_s =~ "failed"),
+        unique_emails = dcount(email_s)
+        by bin(TimeGenerated, 7d)
+
+        | extend completion_rate = round(100.0 * completed / total_actions, 1)
+
+        | order by TimeGenerated asc'
+  - Name: GetCAPSummaryDashboard
+    DisplayName: '[Data] Generate CAP summary dashboard'
+    Description: Internal data retrieval skill. Generates a comprehensive CAP operations summary dashboard with key metrics, status distribution, SLA compliance, and operational health indicators.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: 'union isfuzzy=true
+        (SpyCloudCAP_CL | where TimeGenerated > ago(30d) | summarize total = count(), unique_emails = dcount(email_s), unique_policies = dcount(policy_name_s)
+        | extend Metric = "Overview", Detail = strcat("Total: ", total, " actions | ", unique_emails, " users | ", unique_policies, " policies")),
+        (SpyCloudCAP_CL | where TimeGenerated > ago(30d) | summarize count() by action_status_s
+        | extend Metric = "By Status", Detail = strcat(action_status_s, ": ", count_)),
+        (SpyCloudCAP_CL | where TimeGenerated > ago(30d) | where action_status_s =~ "completed" | summarize avg_hours = round(avg(datetime_diff("hour", completed_t, initiated_t)), 1)
+        | extend Metric = "MTTR", Detail = strcat("Average completion time: ", avg_hours, " hours")),
+        (SpyCloudCAP_CL | where action_status_s =~ "pending" | summarize pending_count = count(), max_hours = max(datetime_diff("hour", now(), initiated_t))
+        | extend Metric = "Pending Alert", Detail = strcat(pending_count, " pending actions, oldest: ", max_hours, " hours"))
+        | project Metric, Detail'
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families for threat hunting, or request an organization-wide exposure overview. The agent orchestrates 35 KQL skills across 6 Sentinel tables (156 columns), 17 specialized sub-agents (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration, Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring, Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App, Compass Deep Investigation), GPT-4o analysis, and produces rich investigation reports with data tables, timelines, severity indicators, MITRE ATT&CK mappings, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Includes graceful error handling for missing data, empty tables, and API tier gating with intelligent fallback to available data sources. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping. Compatible with SpyCloud KQL Plugin (90 skills) and SpyCloud API Plugin (20 skills) for complete coverage."
+  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence across 9 SpyCloud APIs (Enterprise, Compass, SIP, Identity, Investigations, IDLINK, Data Partnership, Exposure, CAP) and 14 Sentinel tables. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families for threat hunting, identity correlations, partner intelligence, exposure risk, and credential automated protection. The agent orchestrates 23 specialized sub-agents (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration, Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring, Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App, Compass Deep Investigation, IDLINK Correlation, Data Partnership Intelligence, Exposure Risk, CAP Response, OpenAI Advanced Analysis, Cross-API Investigation), GPT-4o analysis, and produces rich investigation reports with data tables, timelines, severity indicators, MITRE ATT&CK mappings, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Includes graceful error handling for missing data, empty tables, and API tier gating with intelligent fallback to available data sources. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping. Compatible with SpyCloud KQL Plugin (90 skills) and SpyCloud API Plugin (20 skills) for complete coverage."
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other
-  Version: 8.0.0
+  Version: 9.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   RequiredSkillsets:
   - SpyCloud.ThreatIntelligence.SentinelAgent
@@ -4542,6 +5344,36 @@ AgentDefinitions:
     Label: SpyCloud API Key
     Description: SpyCloud API key for direct API access via companion API Plugin (optional)
     HintText: Enter SpyCloud API key for API Plugin integration
+    SettingType: string
+    Required: false
+  - Name: IdLinkApiKey
+    Label: SpyCloud IDLINK API Key
+    Description: SpyCloud IDLINK API key for identity correlation lookups (optional)
+    HintText: Enter your SpyCloud IDLINK API key
+    SettingType: string
+    Required: false
+  - Name: DataPartnershipApiKey
+    Label: SpyCloud Data Partnership API Key
+    Description: SpyCloud Data Partnership API key (optional)
+    HintText: Enter your SpyCloud Data Partnership API key
+    SettingType: string
+    Required: false
+  - Name: ExposureApiKey
+    Label: SpyCloud Exposure API Key
+    Description: SpyCloud Exposure API key for risk assessments (optional)
+    HintText: Enter your SpyCloud Exposure API key
+    SettingType: string
+    Required: false
+  - Name: CAPApiKey
+    Label: SpyCloud CAP API Key
+    Description: SpyCloud CAP API key for credential automated protection (optional)
+    HintText: Enter your SpyCloud CAP API key
+    SettingType: string
+    Required: false
+  - Name: OpenAIApiKey
+    Label: OpenAI API Key
+    Description: OpenAI API key for advanced AI analysis and executive report generation (optional)
+    HintText: Enter your OpenAI API key
     SettingType: string
     Required: false
   Triggers:
