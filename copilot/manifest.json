@@ -3,7 +3,7 @@
   "name_for_human": "SpyCloud Threat Intelligence",
   "name_for_model": "SpyCloudSentinel",
   "description_for_human": "Security Copilot plugin for SpyCloud darknet intelligence. Investigate credential exposures, infostealer infections, and compromised identities across Sentinel, Defender XDR, Intune, and Entra ID.",
-  "description_for_model": "SpyCloud Threat Intelligence plugin suite for Microsoft Security Copilot. This solution connects to both the SpyCloud REST API and Microsoft Sentinel Log Analytics to provide deep investigation capabilities across dark web credential exposure, infostealer malware infections, compromised corporate and consumer identities, device forensics, stolen session cookies, and identity risk posture. The solution spans 3 integrated plugins:\n\n1. KQL Plugin (90 skills): Queries 6 custom Sentinel tables (SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, SpyCloudCompassData_CL, SpyCloudCompassDevices_CL, Spycloud_MDE_Logs_CL, SpyCloud_ConditionalAccessLogs_CL) covering user investigation, password analysis, breach catalog, Compass consumer identity, UEBA correlation, Fusion multistage detection, cross-connector threat hunting, risk scoring, executive reporting, and automated remediation audit.\n\n2. API Plugin (20 skills): Direct REST API access to SpyCloud Enterprise Breach, Compass Investigation, Identity Exposure, Session Identity Protection (SIP), and Investigations APIs for real-time lookups by email, domain, IP, username, or password.\n\n3. Investigation Agent (17 sub-agents): Autonomous conversational agent orchestrating specialized sub-agents for UEBA behavioral analysis, Fusion multistage attack correlation, TI enrichment & IOC analysis, session cookie & MFA bypass detection, lateral movement tracking, data exfiltration detection, executive summary & compliance reporting, watchlist management, ransomware impact assessment, identity risk scoring, supply chain exposure analysis, dark web monitoring, Defender XDR endpoint analysis, Intune device compliance, CASB cloud app security, and Compass deep infostealer forensics.\n\nThe solution integrates with 49 analytics rules, 28 hunting queries, 10 automated remediation playbooks, 3 workbooks, 3 Jupyter notebooks, 4 watchlists, and UEBA/Fusion detection across Microsoft Sentinel.",
+  "description_for_model": "SpyCloud Threat Intelligence plugin suite for Microsoft Security Copilot. This solution connects to both the SpyCloud REST API and Microsoft Sentinel Log Analytics to provide deep investigation capabilities across dark web credential exposure, infostealer malware infections, compromised corporate and consumer identities, device forensics, stolen session cookies, and identity risk posture. The solution spans 3 integrated plugins:\n\n1. KQL Plugin (90 skills): Queries 10 custom Sentinel tables (SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, SpyCloudCompassData_CL, SpyCloudCompassDevices_CL, SpyCloudCompassApplications_CL, SpyCloudSipCookies_CL, SpyCloudIdentityExposure_CL, SpyCloudInvestigations_CL, Spycloud_MDE_Logs_CL, SpyCloud_ConditionalAccessLogs_CL) covering user investigation, password analysis, breach catalog, Compass consumer identity, UEBA correlation, Fusion multistage detection, cross-connector threat hunting, risk scoring, executive reporting, and automated remediation audit.\n\n2. API Plugin (20 skills): Direct REST API access to SpyCloud Enterprise Breach, Compass Investigation, Identity Exposure, Session Identity Protection (SIP), and Investigations APIs for real-time lookups by email, domain, IP, username, or password.\n\n3. Investigation Agent (17 sub-agents): Autonomous conversational agent orchestrating specialized sub-agents for UEBA behavioral analysis, Fusion multistage attack correlation, TI enrichment & IOC analysis, session cookie & MFA bypass detection, lateral movement tracking, data exfiltration detection, executive summary & compliance reporting, watchlist management, ransomware impact assessment, identity risk scoring, supply chain exposure analysis, dark web monitoring, Defender XDR endpoint analysis, Intune device compliance, CASB cloud app security, and Compass deep infostealer forensics.\n\nThe solution integrates with 49 analytics rules, 28 hunting queries, 10 automated remediation playbooks, 3 workbooks, 3 Jupyter notebooks, 4 watchlists, and UEBA/Fusion detection across Microsoft Sentinel.",
   "auth": {
     "type": "api_key",
     "authorization_type": "custom",
@@ -232,33 +232,73 @@
       "custom_tables": [
         {
           "name": "SpyCloudBreachWatchlist_CL",
-          "columns": 73,
-          "description": "Credentials, PII, device forensics, passwords, infostealer artifacts, financial data, social media"
+          "columns": 41,
+          "description": "Enterprise Breach API watchlist - compromised credentials, PII, device forensics, passwords, infostealer artifacts",
+          "api_source": "Enterprise Breach API (breach/data/watchlist)",
+          "always_enabled": true
         },
         {
           "name": "SpyCloudBreachCatalog_CL",
-          "columns": 13,
-          "description": "Breach metadata - title, description, category, record counts, confidence scores"
+          "columns": 17,
+          "description": "Breach catalog metadata - title, description, category, record counts, confidence scores, malware family",
+          "api_source": "Enterprise Breach Catalog API (breach/catalog)",
+          "always_enabled": true
         },
         {
           "name": "SpyCloudCompassData_CL",
-          "columns": 29,
-          "description": "Consumer/partner identity exposures (Enterprise+ only)"
+          "columns": 49,
+          "description": "Compass deep infostealer records - stolen cookies, browser autofill, crypto wallets, installed software, C2 infrastructure",
+          "api_source": "Compass Investigation API (compass/data)",
+          "requires": "Enterprise+ tier (enableCompass)"
         },
         {
           "name": "SpyCloudCompassDevices_CL",
-          "columns": 8,
-          "description": "Infected device fingerprints and malware artifacts (Enterprise+ only)"
+          "columns": 9,
+          "description": "Compass infected device fingerprints - hostname, OS, IPs, infection timeline, application counts",
+          "api_source": "Compass Devices API (compass/devices)",
+          "requires": "Enterprise+ tier (enableCompass)"
+        },
+        {
+          "name": "SpyCloudCompassApplications_CL",
+          "columns": 17,
+          "description": "Compass application targets - URLs, domains, credential/cookie counts per infected machine",
+          "api_source": "Compass Applications API (compass/applications)",
+          "requires": "Enterprise+ tier (enableCompass)"
+        },
+        {
+          "name": "SpyCloudSipCookies_CL",
+          "columns": 23,
+          "description": "Stolen session cookies by domain - cookie name/value/expiration, secure/httpOnly flags, infection context",
+          "api_source": "Session Identity Protection API (sip/breach/data/cookie-domains)",
+          "requires": "SIP entitlement (enableSip)"
+        },
+        {
+          "name": "SpyCloudIdentityExposure_CL",
+          "columns": 24,
+          "description": "Identity exposure profiles - deduplicated credential risk posture per identity with severity scoring",
+          "api_source": "Identity Exposure API (breach/data/watchlist?type=corporate)",
+          "always_enabled": true
+        },
+        {
+          "name": "SpyCloudInvestigations_CL",
+          "columns": 28,
+          "description": "Investigations API - full database searches across breaches, infostealers, phishing, paste sites, combo lists",
+          "api_source": "Investigations API (investigations-v2/data)",
+          "requires": "Investigations API entitlement (enableInvestigations)"
         },
         {
           "name": "Spycloud_MDE_Logs_CL",
-          "columns": 19,
-          "description": "MDE device isolation, tagging, IOC audit trail"
+          "columns": 13,
+          "description": "MDE remediation audit log - device isolation, tagging, IOC actions (internal, not API-sourced)",
+          "api_source": "Internal (playbook-generated)",
+          "always_enabled": true
         },
         {
           "name": "SpyCloud_ConditionalAccessLogs_CL",
-          "columns": 14,
-          "description": "Password resets, session revocations, CA group, account disable audit"
+          "columns": 12,
+          "description": "CA remediation audit log - password resets, session revocations, CA group assignments (internal, not API-sourced)",
+          "api_source": "Internal (playbook-generated)",
+          "always_enabled": true
         }
       ],
       "analytics_rules": 49,
