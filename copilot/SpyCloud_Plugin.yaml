@@ -1,5 +1,5 @@
 Descriptor:
-  Name: SpyCloud Darknet & Identity Threat Exposure Intelligence
+  Name: SpyCloudKQLPlugin
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence
   Description: "Security Copilot KQL plugin for SpyCloud darknet intelligence in Microsoft Sentinel. Provides 86 skills querying 6 custom tables for investigating compromised credentials, infostealer infections, exposed PII, device forensics, and remediation status. Covers user investigation, password analysis, breach catalog, Compass consumer identity, UEBA correlation, Fusion multistage detection, cross-connector threat hunting, risk scoring, executive reporting, and automated remediation audit across MDE and Conditional Access. Works alongside the SpyCloud API Plugin and Investigation Agent."
   Category: Other

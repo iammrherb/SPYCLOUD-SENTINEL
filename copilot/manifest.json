@@ -1,9 +1,9 @@
 {
-  "schema_version": "v1",
-  "name_for_human": "SpyCloud Threat Intelligence",
+  "schema_version": "v2",
+  "name_for_human": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
   "name_for_model": "SpyCloudSentinel",
-  "description_for_human": "Investigate darknet credential exposure, infostealer infections, compromised identities, and stolen sessions via SpyCloud Enterprise, Compass, and Identity APIs.",
-  "description_for_model": "SpyCloud Threat Intelligence plugin for Microsoft Security Copilot. This plugin connects to the SpyCloud REST API to provide deep investigation capabilities across dark web credential exposure, infostealer malware infections, compromised corporate and consumer identities, device forensics, and session hijack detection.",
+  "description_for_human": "Enterprise-grade Microsoft Security Copilot solution for investigating darknet credential exposure, infostealer infections, compromised identities, stolen sessions, and device forensics via SpyCloud threat intelligence. Provides 130+ skills across 3 integrated plugins: a KQL Plugin (90 Sentinel query skills), an API Plugin (20 direct REST API skills), and an Autonomous Investigation Agent (17 specialized sub-agents). Correlates SpyCloud dark web intelligence with Microsoft Defender XDR, Intune, Entra ID, and CASB for comprehensive security operations.",
+  "description_for_model": "SpyCloud Threat Intelligence plugin suite for Microsoft Security Copilot. This solution connects to both the SpyCloud REST API and Microsoft Sentinel Log Analytics to provide deep investigation capabilities across dark web credential exposure, infostealer malware infections, compromised corporate and consumer identities, device forensics, stolen session cookies, and identity risk posture. The solution spans 3 integrated plugins:\n\n1. KQL Plugin (90 skills): Queries 6 custom Sentinel tables (SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, SpyCloudCompassData_CL, SpyCloudCompassDevices_CL, Spycloud_MDE_Logs_CL, SpyCloud_ConditionalAccessLogs_CL) covering user investigation, password analysis, breach catalog, Compass consumer identity, UEBA correlation, Fusion multistage detection, cross-connector threat hunting, risk scoring, executive reporting, and automated remediation audit.\n\n2. API Plugin (20 skills): Direct REST API access to SpyCloud Enterprise Breach, Compass Investigation, Identity Exposure, Session Identity Protection (SIP), and Investigations APIs for real-time lookups by email, domain, IP, username, or password.\n\n3. Investigation Agent (17 sub-agents): Autonomous conversational agent orchestrating specialized sub-agents for UEBA behavioral analysis, Fusion multistage attack correlation, TI enrichment & IOC analysis, session cookie & MFA bypass detection, lateral movement tracking, data exfiltration detection, executive summary & compliance reporting, watchlist management, ransomware impact assessment, identity risk scoring, supply chain exposure analysis, dark web monitoring, Defender XDR endpoint analysis, Intune device compliance, CASB cloud app security, and Compass deep infostealer forensics.\n\nThe solution integrates with 49 analytics rules, 28 hunting queries, 10 automated remediation playbooks, 3 workbooks, 3 Jupyter notebooks, 4 watchlists, and UEBA/Fusion detection across Microsoft Sentinel.",
   "auth": {
     "type": "api_key",
     "authorization_type": "bearer",
@@ -11,10 +11,334 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml"
+    "url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml",
+    "is_user_authenticated": false
   },
   "logo_url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
   "contact_email": "support@spycloud.com",
   "legal_info_url": "https://spycloud.com/terms",
-  "setup_instructions": "IMPORTANT: This manifest.json is provided for OpenAI-compatible plugin hosts only. For Microsoft Security Copilot, upload the YAML files directly:\n\n1. SpyCloud_Agent.yaml — Interactive Investigation Agent (upload as Custom Plugin > Copilot for Security)\n2. SpyCloud_Plugin.yaml — KQL Skills Plugin (upload as Custom Plugin > Copilot for Security)\n3. SpyCloud_API_Plugin.yaml — REST API Plugin (upload as Custom Plugin > Copilot for Security)\n\nDo NOT upload this manifest.json to Security Copilot — it uses a different plugin format (SkillsetDescriptor YAML).\n\nFor API Plugin setup, you will need a SpyCloud API key configured in the plugin settings."
+  "privacy_policy_url": "https://spycloud.com/privacy",
+  "version": "8.0.0",
+  "capabilities": {
+    "plugins": [
+      {
+        "id": "SpyCloudKQLPlugin",
+        "name": "SpyCloud KQL Plugin",
+        "type": "KQL",
+        "file": "SpyCloud_Plugin.yaml",
+        "url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_Plugin.yaml",
+        "skill_count": 90,
+        "auth": "None (uses Sentinel workspace connection)",
+        "description": "Queries 6 custom SpyCloud tables in Microsoft Sentinel for credential exposure investigation, password analysis, breach catalog, device forensics, remediation audit, and executive reporting.",
+        "required_settings": ["TenantId", "SubscriptionId", "ResourceGroupName", "WorkspaceName"],
+        "skill_categories": [
+          {
+            "name": "User Credential & Exposure Investigation",
+            "skills": ["GetUserExposures", "GetUserFullPIIProfile", "GetUserAccountActivity", "GetExposedPasswords", "GetFullUserInvestigation"]
+          },
+          {
+            "name": "Password Analysis",
+            "skills": ["GetPlaintextPasswordExposures", "GetPasswordTypeBreakdown"]
+          },
+          {
+            "name": "Severity & Domain Analysis",
+            "skills": ["GetHighSeverityExposures", "GetExposureSummaryBySeverity", "GetExposureSummaryByDomain", "GetTargetedDomains"]
+          },
+          {
+            "name": "PII & Social Media Exposure",
+            "skills": ["GetSensitivePIIExposures", "GetSocialMediaExposures"]
+          },
+          {
+            "name": "Device Forensics & Infections",
+            "skills": ["GetInfectedDevices", "GetDeviceForensics", "GetDeviceToUserCorrelation", "GetAVCoverageGaps"]
+          },
+          {
+            "name": "Breach Catalog & Malware Intelligence",
+            "skills": ["GetMalwareInfo", "GetRecentBreaches", "GetEnrichedExposures"]
+          },
+          {
+            "name": "MDE Remediation Audit",
+            "skills": ["GetMDERemediationActions", "GetMDERemediationForDevice", "GetMDERemediationStats"]
+          },
+          {
+            "name": "Conditional Access Remediation Audit",
+            "skills": ["GetConditionalAccessActions", "GetConditionalAccessForUser", "GetConditionalAccessStats"]
+          },
+          {
+            "name": "Geographic & Risk Analysis",
+            "skills": ["GetGeographicAnalysis"]
+          },
+          {
+            "name": "Health & Operations",
+            "skills": ["GetSpyCloudHealthStatus"]
+          }
+        ]
+      },
+      {
+        "id": "SpyCloudAPIPlugin",
+        "name": "SpyCloud API Plugin",
+        "type": "API",
+        "file": "SpyCloud_API_Plugin.yaml",
+        "url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin.yaml",
+        "openapi_spec": "SpyCloud_API_Plugin_OpenAPI.yaml",
+        "openapi_spec_url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml",
+        "skill_count": 20,
+        "auth": "API Key (Bearer token via Authorization header)",
+        "description": "Direct REST API access to SpyCloud for real-time darknet intelligence lookups without requiring Sentinel data ingestion.",
+        "required_settings": ["SpyCloud API Key"],
+        "api_coverage": [
+          {
+            "api": "Enterprise Breach API",
+            "skills": ["GetBreachDataByEmail", "GetBreachDataByDomain", "GetBreachDataByIp", "CheckPasswordExposure", "GetBreachDataByUsername", "ListBreachCatalog", "GetBreachCatalogEntry"]
+          },
+          {
+            "api": "Compass Investigation API",
+            "skills": ["CompassInvestigateEmail", "CompassInvestigateDomain", "CompassInvestigateIp"]
+          },
+          {
+            "api": "Identity Exposure API",
+            "skills": ["GetIdentityExposure", "GetIdentityWatchlist"]
+          },
+          {
+            "api": "Session Identity Protection (SIP) API",
+            "skills": ["SipGetCookiesByDomain", "SipListBreachCatalog", "SipGetBreachCatalogEntry"]
+          },
+          {
+            "api": "Investigations API",
+            "skills": ["InvestigateByEmail", "InvestigateByDomain", "InvestigateByIp", "InvestigateByUsername", "InvestigateByPassword"]
+          }
+        ]
+      },
+      {
+        "id": "SpyCloudInvestigationAgent",
+        "name": "SpyCloud Investigation Agent",
+        "type": "Agent",
+        "file": "SpyCloud_Agent.yaml",
+        "url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_Agent.yaml",
+        "skill_count": 58,
+        "sub_agent_count": 17,
+        "gpt_analysis_skills": 6,
+        "kql_data_skills": 35,
+        "auth": "None (uses Sentinel workspace connection; optional SpyCloud API key for API-backed skills)",
+        "description": "Autonomous conversational investigation agent that orchestrates 17 specialized sub-agents, 6 GPT-4o AI analysis skills, and 35 KQL data retrieval skills for comprehensive darknet threat intelligence investigation across Microsoft Sentinel, Defender XDR, Intune, Entra ID, and CASB. The GPT-4o analysis skills provide AI-powered threat narrative construction, compliance assessment, executive briefing generation, external threat intel correlation, and custom response playbook design.",
+        "required_settings": ["TenantId", "SubscriptionId", "ResourceGroupName", "WorkspaceName"],
+        "optional_settings": ["SpyCloudApiKey"],
+        "sub_agents": [
+          {
+            "name": "SpyCloudInvestigationAgent",
+            "description": "Primary orchestrator - triages requests, delegates to sub-agents, synthesizes findings"
+          },
+          {
+            "name": "UEBABehavioralAnalysisAgent",
+            "description": "Correlates credential exposure with UEBA behavioral anomalies"
+          },
+          {
+            "name": "FusionMultistageAttackAgent",
+            "description": "Investigates Fusion-detected multistage attacks involving stolen credentials"
+          },
+          {
+            "name": "TIEnrichmentIOCAnalysisAgent",
+            "description": "Threat intelligence enrichment and IOC analysis for SpyCloud indicators"
+          },
+          {
+            "name": "SessionCookieMFABypassAgent",
+            "description": "Investigates stolen session cookies and MFA bypass attempts"
+          },
+          {
+            "name": "LateralMovementInvestigationAgent",
+            "description": "Tracks lateral movement from compromised credential accounts"
+          },
+          {
+            "name": "DataExfiltrationDetectionAgent",
+            "description": "Detects data theft from compromised accounts via cloud apps and mailbox"
+          },
+          {
+            "name": "ExecutiveSummaryComplianceAgent",
+            "description": "Generates executive reports and compliance assessments"
+          },
+          {
+            "name": "WatchlistAssetManagementAgent",
+            "description": "Manages VIP, IOC, approved domain, and high-value asset watchlists"
+          },
+          {
+            "name": "RansomwareImpactAssessmentAgent",
+            "description": "Assesses ransomware exposure risk from infostealer infections"
+          },
+          {
+            "name": "IdentityRiskScoringAgent",
+            "description": "Calculates composite identity risk scores from multiple data sources"
+          },
+          {
+            "name": "SupplyChainExposureAgent",
+            "description": "Analyzes third-party and supply chain credential exposure"
+          },
+          {
+            "name": "DarkWebMonitoringAlertAgent",
+            "description": "Monitors dark web exposure trends and generates alerts"
+          },
+          {
+            "name": "DefenderXDREndpointAgent",
+            "description": "Cross-correlates with Defender XDR endpoint, identity, email, and cloud app alerts"
+          },
+          {
+            "name": "IntuneDeviceComplianceAgent",
+            "description": "Checks Intune device compliance for infected endpoints"
+          },
+          {
+            "name": "CASBCloudAppSecurityAgent",
+            "description": "Discovers cloud app risk, OAuth abuse, and shadow IT from compromised credentials"
+          },
+          {
+            "name": "CompassDeepInvestigationAgent",
+            "description": "Deep infostealer forensics - stolen cookies, browser data, crypto wallets, C2 infrastructure"
+          }
+        ],
+        "ai_analysis_skills": [
+          {
+            "name": "AnalyzeAndSummarize",
+            "model": "gpt-4o",
+            "description": "Synthesizes raw KQL data into structured investigation reports with threat assessment, risk scoring, and remediation recommendations"
+          },
+          {
+            "name": "BuildThreatNarrative",
+            "model": "gpt-4o",
+            "description": "Constructs chronological attack narratives from multi-source data with MITRE ATT&CK mapping and kill chain analysis across SpyCloud, Defender, Intune, Entra, and CASB"
+          },
+          {
+            "name": "GenerateComplianceAssessment",
+            "model": "gpt-4o",
+            "description": "Assesses exposure against GDPR, CCPA, HIPAA, PCI-DSS, SOX, and NIST frameworks with notification obligations and audit-ready documentation"
+          },
+          {
+            "name": "GenerateExecutiveBriefing",
+            "model": "gpt-4o",
+            "description": "Transforms technical findings into board-level executive briefings with business impact, risk quantification, and automation ROI metrics"
+          },
+          {
+            "name": "CorrelateExternalThreatIntel",
+            "model": "gpt-4o",
+            "description": "Enriches SpyCloud IOCs with malware family analysis, threat actor attribution, C2 infrastructure patterns, and actionable blocking recommendations"
+          },
+          {
+            "name": "DesignResponsePlaybook",
+            "model": "gpt-4o",
+            "description": "Designs custom incident response playbooks with decision trees, API call specifications, escalation criteria, and Logic App integration guidance"
+          }
+        ]
+      }
+    ],
+    "sentinel_integration": {
+      "custom_tables": [
+        {
+          "name": "SpyCloudBreachWatchlist_CL",
+          "columns": 73,
+          "description": "Credentials, PII, device forensics, passwords, infostealer artifacts, financial data, social media"
+        },
+        {
+          "name": "SpyCloudBreachCatalog_CL",
+          "columns": 13,
+          "description": "Breach metadata - title, description, category, record counts, confidence scores"
+        },
+        {
+          "name": "SpyCloudCompassData_CL",
+          "columns": 29,
+          "description": "Consumer/partner identity exposures (Enterprise+ only)"
+        },
+        {
+          "name": "SpyCloudCompassDevices_CL",
+          "columns": 8,
+          "description": "Infected device fingerprints and malware artifacts (Enterprise+ only)"
+        },
+        {
+          "name": "Spycloud_MDE_Logs_CL",
+          "columns": 19,
+          "description": "MDE device isolation, tagging, IOC audit trail"
+        },
+        {
+          "name": "SpyCloud_ConditionalAccessLogs_CL",
+          "columns": 14,
+          "description": "Password resets, session revocations, CA group, account disable audit"
+        }
+      ],
+      "analytics_rules": 49,
+      "hunting_queries": 28,
+      "playbooks": [
+        "SpyCloud-ForcePasswordReset",
+        "SpyCloud-RevokeSessions",
+        "SpyCloud-EnforceMFA",
+        "SpyCloud-BlockConditionalAccess",
+        "SpyCloud-BlockFirewall",
+        "SpyCloud-IsolateDevice",
+        "SpyCloud-NotifyUser",
+        "SpyCloud-NotifySOC",
+        "SpyCloud-EnrichIncident",
+        "SpyCloud-FullRemediation"
+      ],
+      "workbooks": [
+        "SpyCloud-Executive-Dashboard",
+        "SpyCloud-ThreatIntel-Dashboard",
+        "SpyCloud-SOC-Operations"
+      ],
+      "notebooks": [
+        "SpyCloud-Incident-Triage",
+        "SpyCloud-ThreatHunting",
+        "SpyCloud-Threat-Landscape"
+      ],
+      "watchlists": [
+        "SpyCloud-VIP-Watchlist",
+        "SpyCloud-IOC-Blocklist",
+        "SpyCloud-Approved-Domains",
+        "SpyCloud-HighValue-Assets"
+      ]
+    },
+    "microsoft_integrations": [
+      "Microsoft Sentinel (Log Analytics, UEBA, Fusion)",
+      "Microsoft Defender for Endpoint (MDE)",
+      "Microsoft Defender for Identity",
+      "Microsoft Defender for Office 365",
+      "Microsoft Defender for Cloud Apps (CASB)",
+      "Microsoft Intune",
+      "Microsoft Entra ID (Azure AD)",
+      "Microsoft Security Copilot"
+    ],
+    "spycloud_apis": [
+      "Enterprise Breach API",
+      "Compass Investigation API",
+      "Identity Exposure API",
+      "Session Identity Protection (SIP) API",
+      "Investigations API"
+    ],
+    "mitre_attack_coverage": [
+      "T1078 - Valid Accounts",
+      "T1552 - Unsecured Credentials",
+      "T1110 - Brute Force (credential stuffing)",
+      "T1059 - Command & Scripting Interpreter",
+      "T1547 - Boot/Logon Autostart Execution",
+      "T1555 - Credentials from Password Stores",
+      "T1539 - Steal Web Session Cookie",
+      "T1550 - Use Alternate Authentication Material",
+      "T1528 - Steal Application Access Token",
+      "T1606 - Forge Web Credentials",
+      "T1003 - OS Credential Dumping",
+      "T1021 - Remote Services",
+      "T1041 - Exfiltration Over C2 Channel",
+      "T1567 - Exfiltration Over Web Service",
+      "T1071 - Application Layer Protocol"
+    ]
+  },
+  "deployment": {
+    "arm_template": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/azuredeploy.json",
+    "ui_definition": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/createUiDefinition.json",
+    "deploy_to_azure_url": "https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json",
+    "terraform_module": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/terraform/",
+    "total_resources": 155
+  },
+  "setup_instructions": "## Security Copilot Plugin Installation\n\nThis solution includes 3 plugins for Microsoft Security Copilot. Upload the YAML files directly — do NOT upload this manifest.json to Security Copilot.\n\n### Step 1: Install the KQL Plugin\n1. In Security Copilot, go to **Sources** > **Manage plugins** > **Custom** > **Add plugin**\n2. Select **Upload a file** and upload `SpyCloud_Plugin.yaml`\n3. Configure required settings: TenantId, SubscriptionId, ResourceGroupName, WorkspaceName\n4. This provides 90 KQL-based investigation skills querying your Sentinel workspace\n\n### Step 2: Install the API Plugin\n1. In Security Copilot, go to **Sources** > **Manage plugins** > **Custom** > **Add plugin**\n2. Select **Upload a file** and upload `SpyCloud_API_Plugin.yaml`\n3. Configure your SpyCloud API key when prompted\n4. This provides 20 real-time API skills for direct SpyCloud lookups\n\n### Step 3: Install the Investigation Agent\n1. In Security Copilot, go to **Sources** > **Manage plugins** > **Custom** > **Add plugin**\n2. Select **Upload a file** and upload `SpyCloud_Agent.yaml`\n3. Configure required settings: TenantId, SubscriptionId, ResourceGroupName, WorkspaceName\n4. Optionally provide SpyCloud API key for API-backed sub-agent skills\n5. This provides an autonomous investigation agent with 17 specialized sub-agents\n\n### Step 4: Deploy Sentinel Infrastructure\nClick the Deploy to Azure button in the README or use the ARM template/Terraform module to deploy:\n- 6 custom Log Analytics tables\n- Data collection endpoint and rules\n- 49 analytics rules\n- 28 hunting queries\n- 10 automated playbooks\n- 3 workbooks\n- 4 watchlists\n- UEBA and Fusion detection\n\n### Required Permissions\n- **KQL Plugin**: Reader access to the Sentinel Log Analytics workspace\n- **API Plugin**: Valid SpyCloud API key (Enterprise or Enterprise+ tier)\n- **Agent**: Reader access to Sentinel workspace + optional SpyCloud API key\n- **Playbooks**: Managed identity permissions for Microsoft Graph, MDE, and Sentinel APIs\n\n### Post-Deployment\nRun `scripts/post-deploy-auto.sh` to automatically configure RBAC, managed identity permissions, and validate the deployment. Or use `scripts/deploy-wizard.sh` for an interactive guided setup.",
+  "documentation": {
+    "readme": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/README.md",
+    "agents_and_plugins_guide": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/AGENTS-AND-PLUGINS-GUIDE.md",
+    "security_copilot_spec": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/SECURITY-COPILOT-SPEC.md",
+    "architecture": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/architecture.md",
+    "azure_sp_setup": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/azure-sp-setup.md"
+  }
 }
