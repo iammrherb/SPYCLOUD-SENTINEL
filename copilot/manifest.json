@@ -6,8 +6,7 @@
   "description_for_model": "SpyCloud Threat Intelligence plugin for Microsoft Security Copilot. This plugin connects to the SpyCloud REST API to provide deep investigation capabilities across dark web credential exposure, infostealer malware infections, compromised corporate and consumer identities, device forensics, and session hijack detection.",
   "auth": {
     "type": "api_key",
-    "authorization_type": "custom",
-    "custom_auth_header": "X-API-Key",
+    "authorization_type": "bearer",
     "verification_tokens": {}
   },
   "api": {
