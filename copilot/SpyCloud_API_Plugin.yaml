@@ -3,18 +3,22 @@ Descriptor:
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence - API Plugin
   Description: >
     Production-grade Microsoft Security Copilot plugin providing direct REST API access
-    to the SpyCloud API for real-time darknet & identity threat exposure intelligence. Covers 12
-    skills across the Enterprise Breach, Compass Investigation, and Identity
-    Exposure APIs. Enables SOC analysts and incident responders to look up
-    compromised credentials by email, domain, IP, username, or password; perform
-    deep Compass investigations into infostealer infections with malware
-    attribution, stolen cookies, and device forensics; query identity exposure
-    posture; browse the breach catalog; and audit the monitored identity
-    watchlist -- all without leaving the Copilot experience. Works alongside
-    the SpyCloud KQL Plugin (90+ promptbook skills for Sentinel data) and
-    SpyCloud Investigation Agent (autonomous interactive investigation with
-    17 sub-agents) for complete Security Copilot coverage. Part of the SpyCloud
-    Sentinel v8.0 solution spanning 145+ deployed resources.
+    to the SpyCloud API for real-time darknet & identity threat exposure intelligence. Covers 22
+    skills across the Enterprise Breach, Compass Investigation, Identity
+    Exposure, Session Identity Protection (SIP), and Investigations APIs.
+    Enables SOC analysts and incident responders to look up compromised
+    credentials by email, domain, IP, username, or password; perform deep
+    Compass investigations into infostealer infections with malware
+    attribution, stolen cookies, and device forensics; query stolen session
+    cookies for session hijacking detection via SIP; run full cybercrime
+    investigations across the entire SpyCloud database; query identity
+    exposure posture; browse the breach catalog; and audit the monitored
+    identity watchlist -- all without leaving the Copilot experience. Works
+    alongside the SpyCloud KQL Plugin (90+ promptbook skills for Sentinel
+    data) and SpyCloud Investigation Agent (autonomous interactive
+    investigation with 17 sub-agents) for complete Security Copilot
+    coverage. Part of the SpyCloud Sentinel v8.0 solution spanning 155+
+    deployed resources.
   DescriptionDisplay: default
   Category: Other
   Version: 8.0.0
@@ -468,6 +472,257 @@ SkillGroups:
             Required: false
         Settings:
           OpenApiOperationId: getIdentityExposure
+
+      # =====================================================================
+      # IDENTITY API - WATCHLIST
+      # =====================================================================
+
+      # =====================================================================
+      # SIP API - STOLEN COOKIE LOOKUPS
+      # =====================================================================
+
+      - Name: SipGetCookiesByDomain
+        DisplayName: Get stolen cookies for a domain (SIP)
+        Description: >
+          Queries the SpyCloud Session Identity Protection (SIP) API for stolen
+          session cookies associated with a cookie domain. Returns cookies
+          exfiltrated by infostealer malware including cookie names, values,
+          expiration dates, associated user identities, and malware attribution.
+          Use this to identify active session hijacking risks and determine
+          which sessions need invalidation. Requires SIP API entitlement.
+        ExamplePrompts:
+          - Get stolen cookies for this domain from SpyCloud SIP
+          - Check for hijacked sessions on this domain
+          - What stolen session cookies exist for this domain
+          - Find stolen cookies for this website using SpyCloud
+          - Check SpyCloud SIP for session hijacking risk on this domain
+          - Are there any stolen cookies for our domain
+        Inputs:
+          - Name: cookie_domain
+            Description: The cookie domain to search (e.g., example.com). Includes all subdomains.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date (YYYY-MM-DD).
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: cookie_name
+            Description: Case-sensitive filter for a specific cookie name (e.g., session_id, JSESSIONID).
+            Required: false
+          - Name: since_cookie_expiration
+            Description: Filter to cookies expiring on or after this date (finds still-valid cookies).
+            Required: false
+          - Name: until_cookie_expiration
+            Description: Filter to cookies expiring on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: sipGetCookiesByDomain
+
+      - Name: SipListBreachCatalog
+        DisplayName: List SIP breach catalog entries
+        Description: >
+          Returns the SpyCloud SIP breach catalog containing metadata for
+          breaches that include stolen session cookies. Use this to identify
+          which infostealer campaigns have captured session data and assess
+          the timeline and scale of cookie theft operations.
+        ExamplePrompts:
+          - Show the SpyCloud SIP breach catalog
+          - List breaches with stolen cookies in SpyCloud
+          - What infostealer campaigns have captured session cookies
+          - Browse SIP breach catalog entries
+        Inputs:
+          - Name: since
+            Description: Filter to breaches acquired on or after this date.
+            Required: false
+          - Name: until
+            Description: Filter to breaches acquired on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum entries per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: sipListBreachCatalog
+
+      - Name: SipGetBreachCatalogEntry
+        DisplayName: Get SIP breach catalog entry by ID
+        Description: >
+          Returns metadata for a specific breach in the SIP catalog. Includes
+          breach title, description, acquisition date, and data classes.
+          Use this to understand the context of a breach source found in
+          stolen cookie records.
+        ExamplePrompts:
+          - Show details for this SIP breach ID
+          - What is this SIP breach source
+          - Get SIP breach catalog entry details
+        Inputs:
+          - Name: id
+            Description: Numeric source ID or UUID of the breach.
+            Required: true
+        Settings:
+          OpenApiOperationId: sipGetBreachCatalogEntry
+
+      # =====================================================================
+      # INVESTIGATIONS API - CYBERCRIME INVESTIGATIONS
+      # =====================================================================
+
+      - Name: InvestigateByEmail
+        DisplayName: Investigate email across full SpyCloud database
+        Description: >
+          Queries the SpyCloud Investigations API for all records associated
+          with an email address across the entire SpyCloud database including
+          breaches, infostealers, phishing, paste sites, and combo lists.
+          Provides the broadest dataset for cybercrime investigators performing
+          link analysis and identity attribution. Requires Investigations API
+          entitlement.
+        ExamplePrompts:
+          - Investigate this email across all SpyCloud data
+          - Run a full SpyCloud investigation on this email
+          - Search the entire SpyCloud database for this email
+          - Deep investigate this email for cybercrime links
+          - What does SpyCloud Investigations know about this email
+        Inputs:
+          - Name: email
+            Description: The email address to investigate.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: investigateByEmail
+
+      - Name: InvestigateByDomain
+        DisplayName: Investigate domain across full SpyCloud database
+        Description: >
+          Queries the SpyCloud Investigations API for all records under a domain
+          across the full database. Returns breaches, infostealer infections,
+          phishing captures, and paste data for all identities at the domain.
+        ExamplePrompts:
+          - Investigate this domain across all SpyCloud data
+          - Run a full investigation on this domain
+          - What does SpyCloud Investigations have for this domain
+          - Search entire SpyCloud database for this organization
+        Inputs:
+          - Name: domain
+            Description: The domain to investigate.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: investigateByDomain
+
+      - Name: InvestigateByIp
+        DisplayName: Investigate IP across full SpyCloud database
+        Description: >
+          Queries the SpyCloud Investigations API for all records linked to an
+          IP address. Returns breach, infostealer, and botnet data tied to the
+          IP including all associated identities.
+        ExamplePrompts:
+          - Investigate this IP across all SpyCloud data
+          - Run a full investigation on this IP address
+          - What identities are linked to this IP in SpyCloud
+          - Search SpyCloud Investigations for this IP
+        Inputs:
+          - Name: ip
+            Description: The IPv4 or IPv6 address to investigate.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: investigateByIp
+
+      - Name: InvestigateByUsername
+        DisplayName: Investigate username across full SpyCloud database
+        Description: >
+          Queries the SpyCloud Investigations API for all records linked to a
+          username. Useful for investigating forum handles, service accounts,
+          or non-email identifiers tied to cybercrime activity.
+        ExamplePrompts:
+          - Investigate this username across all SpyCloud data
+          - Search SpyCloud Investigations for this username
+          - What cybercrime data exists for this username
+          - Find all records linked to this handle in SpyCloud
+        Inputs:
+          - Name: username
+            Description: The username to investigate.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: severity
+            Description: Minimum severity threshold (1-25).
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: investigateByUsername
+
+      - Name: InvestigateByPassword
+        DisplayName: Investigate password across full SpyCloud database
+        Description: >
+          Queries the SpyCloud Investigations API for all records containing a
+          specific password. Returns all accounts and identities that used this
+          password, enabling credential reuse analysis and link analysis across
+          threat actor personas.
+        ExamplePrompts:
+          - Search SpyCloud Investigations for this password
+          - What accounts use this password according to SpyCloud
+          - Find all identities using this password
+          - Investigate password reuse across SpyCloud data
+        Inputs:
+          - Name: password
+            Description: The password to search for.
+            Required: true
+          - Name: since
+            Description: Return records published on or after this date.
+            Required: false
+          - Name: until
+            Description: Return records published on or before this date.
+            Required: false
+          - Name: limit
+            Description: Maximum records per page.
+            Required: false
+        Settings:
+          OpenApiOperationId: investigateByPassword
 
       # =====================================================================
       # IDENTITY API - WATCHLIST
