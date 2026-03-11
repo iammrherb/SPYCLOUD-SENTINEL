@@ -1,15 +1,7 @@
 Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: >
-    Autonomous Security Copilot agent for SpyCloud darknet intelligence. Orchestrates 17
-    specialized sub-agents to investigate compromised credentials, infostealer infections,
-    exposed PII, and device forensics across Microsoft Sentinel, Defender XDR, Intune,
-    Entra ID, and CASB. Proactively detects missing data connectors, identifies playbook
-    permission gaps, recommends additional tools and integrations, and generates
-    admin-ready reports for enablement. Correlates dark web intelligence with endpoint
-    threats, identity attacks, and cloud app risks. Works alongside the SpyCloud KQL
-    Plugin and API Plugin for complete Security Copilot coverage.
+  Description: "Autonomous Security Copilot agent for SpyCloud darknet intelligence. Orchestrates 17 specialized sub-agents to investigate compromised credentials, infostealer infections, exposed PII, and device forensics across Microsoft Sentinel, Defender XDR, Intune, Entra ID, and CASB. Proactively detects missing data connectors, identifies playbook permission gaps, recommends additional tools and integrations, and generates admin-ready reports for enablement. Correlates dark web intelligence with endpoint threats, identity attacks, and cloud app risks. Works alongside the SpyCloud KQL Plugin and API Plugin for complete Security Copilot coverage."
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
@@ -796,7 +788,7 @@ SkillGroups:
         - When connectors are missing, generate a copy-pasteable summary the user can send to their admin:
           "Here is what I recommend enabling, prioritized by impact. Forward this to your Azure admin."
 
-        - For each missing connector, explain: what it adds, what you CAN'T do without it, and exactly where to enable it
+        - For each missing connector, explain: what it adds, what you CAN''T do without it, and exactly where to enable it
 
         - Proactively suggest connectors when investigations hit dead ends: "I tried to check Defender XDR alerts for this user, but the Defender for Endpoint connector is not sending data. Want me to generate a recommendation for your admin?"
 
@@ -3412,22 +3404,7 @@ SkillGroups:
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: >
-    Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence.
-    Investigate email addresses for credential compromise, device hostnames for infostealer forensics,
-    malware families for threat hunting, or request an organization-wide exposure overview. The agent
-    orchestrates 34 KQL skills across 6 Sentinel tables (156 columns), 17 specialized sub-agents
-    (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration,
-    Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring,
-    Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App,
-    Compass Deep Investigation), GPT-4o analysis, and produces rich investigation
-    reports with data tables, timelines, severity indicators, MITRE ATT&CK mappings,
-    remediation gap analysis, compliance impact, and contextual follow-up questions for
-    continued pivoting. Includes graceful error handling for missing data, empty tables,
-    and API tier gating with intelligent fallback to available data sources. Supports all
-    breach categories including infostealers, combo lists, phishing, exfiltration, and
-    scraping. Compatible with SpyCloud KQL Plugin (86 skills) and SpyCloud API Plugin
-    (12 skills) for complete coverage.
+  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families for threat hunting, or request an organization-wide exposure overview. The agent orchestrates 34 KQL skills across 6 Sentinel tables (156 columns), 17 specialized sub-agents (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration, Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring, Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App, Compass Deep Investigation), GPT-4o analysis, and produces rich investigation reports with data tables, timelines, severity indicators, MITRE ATT&CK mappings, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Includes graceful error handling for missing data, empty tables, and API tier gating with intelligent fallback to available data sources. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping. Compatible with SpyCloud KQL Plugin (86 skills) and SpyCloud API Plugin (12 skills) for complete coverage."
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other

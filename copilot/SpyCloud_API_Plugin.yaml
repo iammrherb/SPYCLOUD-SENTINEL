@@ -1,24 +1,7 @@
 Descriptor:
   Name: SpyCloudAPIPlugin
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence - API Plugin
-  Description: >
-    Production-grade Microsoft Security Copilot plugin providing direct REST API access
-    to the SpyCloud API for real-time darknet & identity threat exposure intelligence. Covers 22
-    skills across the Enterprise Breach, Compass Investigation, Identity
-    Exposure, Session Identity Protection (SIP), and Investigations APIs.
-    Enables SOC analysts and incident responders to look up compromised
-    credentials by email, domain, IP, username, or password; perform deep
-    Compass investigations into infostealer infections with malware
-    attribution, stolen cookies, and device forensics; query stolen session
-    cookies for session hijacking detection via SIP; run full cybercrime
-    investigations across the entire SpyCloud database; query identity
-    exposure posture; browse the breach catalog; and audit the monitored
-    identity watchlist -- all without leaving the Copilot experience. Works
-    alongside the SpyCloud KQL Plugin (90+ promptbook skills for Sentinel
-    data) and SpyCloud Investigation Agent (autonomous interactive
-    investigation with 17 sub-agents) for complete Security Copilot
-    coverage. Part of the SpyCloud Sentinel v8.0 solution spanning 155+
-    deployed resources.
+  Description: "Production-grade Microsoft Security Copilot plugin providing direct REST API access to the SpyCloud API for real-time darknet & identity threat exposure intelligence. Covers 22 skills across the Enterprise Breach, Compass Investigation, Identity Exposure, Session Identity Protection (SIP), and Investigations APIs. Enables SOC analysts and incident responders to look up compromised credentials by email, domain, IP, username, or password; perform deep Compass investigations into infostealer infections with malware attribution, stolen cookies, and device forensics; query stolen session cookies for session hijacking detection via SIP; run full cybercrime investigations across the entire SpyCloud database; query identity exposure posture; browse the breach catalog; and audit the monitored identity watchlist -- all without leaving the Copilot experience. Works alongside the SpyCloud KQL Plugin (90+ promptbook skills for Sentinel data) and SpyCloud Investigation Agent (autonomous interactive investigation with 17 sub-agents) for complete Security Copilot coverage. Part of the SpyCloud Sentinel v8.0 solution spanning 155+ deployed resources."
   DescriptionDisplay: default
   Category: Other
   Version: 8.0.0
@@ -31,9 +14,7 @@ Descriptor:
     AuthScheme: Bearer
   Settings:
     - Name: ApiBaseUrl
-      Description: >
-        Base URL of the SpyCloud API. Override only if directed by SpyCloud
-        support for regional or on-premises deployments.
+      Description: "Base URL of the SpyCloud API. Override only if directed by SpyCloud support for regional or on-premises deployments."
       HintText: https://api.spycloud.io
       SettingType: string
       Required: false
@@ -44,6 +25,7 @@ SkillGroups:
   - Format: API
     Settings:
       OpenApiSpecUrl: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml
+      BaseUrl: https://api.spycloud.io
     Skills:
 
       # =====================================================================
@@ -52,12 +34,7 @@ SkillGroups:
 
       - Name: GetBreachDataByEmail
         DisplayName: Look up breach records by email
-        Description: >
-          Queries the SpyCloud Enterprise API for all breach and infostealer
-          records associated with a specific email address. Returns exposed
-          credentials, target applications, password types, severity scores,
-          infection metadata, device context, and PII fields. This is the
-          primary skill for investigating a compromised user identity.
+        Description: "Queries the SpyCloud Enterprise API for all breach and infostealer records associated with a specific email address. Returns exposed credentials, target applications, password types, severity scores, infection metadata, device context, and PII fields. This is the primary skill for investigating a compromised user identity."
         ExamplePrompts:
           - Look up SpyCloud breach data for this email
           - Has this email been compromised according to SpyCloud
@@ -70,27 +47,19 @@ SkillGroups:
             Description: The email address to search for in breach records.
             Required: true
           - Name: since
-            Description: >
-              Return records published on or after this date (YYYY-MM-DD).
-              Defaults to all time if omitted.
+            Description: "Return records published on or after this date (YYYY-MM-DD). Defaults to all time if omitted."
             Required: false
           - Name: until
-            Description: >
-              Return records published on or before this date (YYYY-MM-DD).
+            Description: "Return records published on or before this date (YYYY-MM-DD)."
             Required: false
           - Name: severity
-            Description: >
-              Minimum severity threshold (1-25). Only records at or above this
-              severity are returned.
+            Description: "Minimum severity threshold (1-25). Only records at or above this severity are returned."
             Required: false
           - Name: password_type
-            Description: >
-              Filter by password representation: plaintext, hashed, cracked,
-              or unknown.
+            Description: "Filter by password representation: plaintext, hashed, cracked, or unknown."
             Required: false
           - Name: type
-            Description: >
-              Record category filter: corporate or infected.
+            Description: "Record category filter: corporate or infected."
             Required: false
           - Name: limit
             Description: Maximum records per page (1-10000, default 100).
@@ -104,12 +73,7 @@ SkillGroups:
 
       - Name: GetBreachDataByDomain
         DisplayName: Look up breach records by domain
-        Description: >
-          Queries the SpyCloud Enterprise API for all breach and infostealer
-          records where the compromised email belongs to the specified corporate
-          domain. Returns aggregated exposure data across all employees and
-          service accounts under that domain. Use this for organization-wide
-          credential exposure assessments and to prioritize bulk password resets.
+        Description: "Queries the SpyCloud Enterprise API for all breach and infostealer records where the compromised email belongs to the specified corporate domain. Returns aggregated exposure data across all employees and service accounts under that domain. Use this for organization-wide credential exposure assessments and to prioritize bulk password resets."
         ExamplePrompts:
           - Search SpyCloud for breaches affecting this domain
           - How many credentials were stolen for this company domain
@@ -148,12 +112,7 @@ SkillGroups:
 
       - Name: GetBreachDataByIp
         DisplayName: Look up breach records by IP address
-        Description: >
-          Queries the SpyCloud Enterprise API for breach and infostealer
-          records associated with a specific IP address. The IP may represent
-          an infected device's external address or a login IP captured in
-          stolen credentials. Use this to correlate network-layer observables
-          with credential theft events during incident response.
+        Description: "Queries the SpyCloud Enterprise API for breach and infostealer records associated with a specific IP address. The IP may represent an infected device's external address or a login IP captured in stolen credentials. Use this to correlate network-layer observables with credential theft events during incident response."
         ExamplePrompts:
           - Search SpyCloud for breach data linked to this IP
           - Is this IP associated with any infostealer infections
@@ -188,13 +147,7 @@ SkillGroups:
 
       - Name: CheckPasswordExposure
         DisplayName: Check if a password is exposed in breaches
-        Description: >
-          Checks whether a specific password has appeared in any breach or
-          infostealer dataset tracked by SpyCloud. Returns matching records
-          with associated accounts, severity, and breach context. Use this
-          to validate that passwords in active use have not been previously
-          compromised, or to assess the risk of a password found during
-          forensic analysis.
+        Description: "Checks whether a specific password has appeared in any breach or infostealer dataset tracked by SpyCloud. Returns matching records with associated accounts, severity, and breach context. Use this to validate that passwords in active use have not been previously compromised, or to assess the risk of a password found during forensic analysis."
         ExamplePrompts:
           - Has this password appeared in any SpyCloud breaches
           - Check if this password was stolen or leaked
@@ -223,12 +176,7 @@ SkillGroups:
 
       - Name: GetBreachDataByUsername
         DisplayName: Look up breach records by username
-        Description: >
-          Queries the SpyCloud Enterprise API for breach records where the
-          compromised identity used a non-email username. Useful for
-          investigating service accounts, legacy systems, gaming platforms,
-          and applications that use usernames rather than email addresses
-          for authentication.
+        Description: "Queries the SpyCloud Enterprise API for breach records where the compromised identity used a non-email username. Useful for investigating service accounts, legacy systems, gaming platforms, and applications that use usernames rather than email addresses for authentication."
         ExamplePrompts:
           - Search SpyCloud for breaches with this username
           - Has this username been compromised in any breaches
@@ -266,13 +214,7 @@ SkillGroups:
 
       - Name: ListBreachCatalog
         DisplayName: Browse the SpyCloud breach catalog
-        Description: >
-          Returns the full SpyCloud breach catalog with metadata for every
-          tracked breach including title, description, affected site,
-          acquisition date, record count, data classes exposed, confidence
-          rating, and breach category. Use this for situational awareness,
-          trend analysis, identifying specific breaches by keyword, or
-          cross-referencing source IDs found in breach records.
+        Description: "Returns the full SpyCloud breach catalog with metadata for every tracked breach including title, description, affected site, acquisition date, record count, data classes exposed, confidence rating, and breach category. Use this for situational awareness, trend analysis, identifying specific breaches by keyword, or cross-referencing source IDs found in breach records."
         ExamplePrompts:
           - Show me the SpyCloud breach catalog
           - List all breaches tracked by SpyCloud
@@ -282,17 +224,13 @@ SkillGroups:
           - Find breaches related to this keyword in the catalog
         Inputs:
           - Name: query
-            Description: >
-              Free-text search term to filter breach catalog entries by
-              title or description.
+            Description: "Free-text search term to filter breach catalog entries by title or description."
             Required: false
           - Name: since
-            Description: >
-              Filter to breaches acquired on or after this date (YYYY-MM-DD).
+            Description: "Filter to breaches acquired on or after this date (YYYY-MM-DD)."
             Required: false
           - Name: until
-            Description: >
-              Filter to breaches acquired on or before this date.
+            Description: "Filter to breaches acquired on or before this date."
             Required: false
           - Name: limit
             Description: Maximum entries per page.
@@ -302,13 +240,7 @@ SkillGroups:
 
       - Name: GetBreachCatalogEntry
         DisplayName: Get details for a specific breach
-        Description: >
-          Returns complete metadata for a single breach catalog entry
-          identified by its numeric SpyCloud source ID. Includes the breach
-          title, description, affected site, acquisition and breach dates,
-          total record count, confidence rating, and the full list of data
-          classes exposed. Use this after finding a source_id in breach
-          records to understand the breach context.
+        Description: "Returns complete metadata for a single breach catalog entry identified by its numeric SpyCloud source ID. Includes the breach title, description, affected site, acquisition and breach dates, total record count, confidence rating, and the full list of data classes exposed. Use this after finding a source_id in breach records to understand the breach context."
         ExamplePrompts:
           - Show me details for this SpyCloud breach ID
           - What breach does this source ID refer to
@@ -328,15 +260,7 @@ SkillGroups:
 
       - Name: CompassInvestigateEmail
         DisplayName: Deep Compass investigation by email
-        Description: >
-          Performs a comprehensive SpyCloud Compass investigation of an email
-          address across underground marketplaces, paste sites, botnet logs,
-          and infostealer datasets. Returns enriched records with malware
-          family attribution, infection timelines, device fingerprints, stolen
-          session cookies, browser autofill data, cryptocurrency wallets,
-          installed software, and command-and-control infrastructure. Provides
-          significantly deeper context than the standard Enterprise endpoint
-          for incident response and advanced threat hunting.
+        Description: "Performs a comprehensive SpyCloud Compass investigation of an email address across underground marketplaces, paste sites, botnet logs, and infostealer datasets. Returns enriched records with malware family attribution, infection timelines, device fingerprints, stolen session cookies, browser autofill data, cryptocurrency wallets, installed software, and command-and-control infrastructure. Provides significantly deeper context than the standard Enterprise endpoint for incident response and advanced threat hunting."
         ExamplePrompts:
           - Run a deep SpyCloud Compass investigation on this email
           - Investigate this email with SpyCloud Compass
@@ -365,13 +289,7 @@ SkillGroups:
 
       - Name: CompassInvestigateDomain
         DisplayName: Deep Compass investigation by domain
-        Description: >
-          Performs a comprehensive SpyCloud Compass investigation of all
-          identities under a corporate domain across underground marketplaces,
-          paste sites, botnet logs, and infostealer datasets. Returns enriched
-          records with malware attribution, stolen cookies, device forensics,
-          and session hijack risk across the entire organization. Use this for
-          enterprise-wide threat exposure assessments and proactive hunting.
+        Description: "Performs a comprehensive SpyCloud Compass investigation of all identities under a corporate domain across underground marketplaces, paste sites, botnet logs, and infostealer datasets. Returns enriched records with malware attribution, stolen cookies, device forensics, and session hijack risk across the entire organization. Use this for enterprise-wide threat exposure assessments and proactive hunting."
         ExamplePrompts:
           - Run a Compass investigation on this domain
           - Deep investigate all users at this domain with SpyCloud Compass
@@ -399,14 +317,7 @@ SkillGroups:
 
       - Name: CompassInvestigateIp
         DisplayName: Deep Compass investigation by IP
-        Description: >
-          Performs a comprehensive SpyCloud Compass investigation of an IP
-          address across underground sources. Returns enriched records tying
-          the IP to infected machines, botnet membership, credential theft
-          events, malware command-and-control infrastructure, and associated
-          identities. Use this to determine whether a network observable is
-          linked to active infostealer operations and to identify all
-          compromised identities connected to the IP.
+        Description: "Performs a comprehensive SpyCloud Compass investigation of an IP address across underground sources. Returns enriched records tying the IP to infected machines, botnet membership, credential theft events, malware command-and-control infrastructure, and associated identities. Use this to determine whether a network observable is linked to active infostealer operations and to identify all compromised identities connected to the IP."
         ExamplePrompts:
           - Run a Compass investigation on this IP address
           - Deep investigate this IP with SpyCloud Compass
@@ -438,15 +349,7 @@ SkillGroups:
 
       - Name: GetIdentityExposure
         DisplayName: Get identity exposure profile for an email
-        Description: >
-          Queries the SpyCloud Identity API for the aggregated exposure profile
-          of an email address. Unlike the Enterprise endpoint which returns
-          individual breach records, this endpoint deduplicates credentials
-          and provides a unified view of the identity's current risk posture
-          including total exposure count, distinct breach sources, highest
-          severity score, infected device count, exposed data classes, and
-          whether the current password is compromised. Use this for rapid
-          risk assessment and identity-centric triage.
+        Description: "Queries the SpyCloud Identity API for the aggregated exposure profile of an email address. Unlike the Enterprise endpoint which returns individual breach records, this endpoint deduplicates credentials and provides a unified view of the identity's current risk posture including total exposure count, distinct breach sources, highest severity score, infected device count, exposed data classes, and whether the current password is compromised. Use this for rapid risk assessment and identity-centric triage."
         ExamplePrompts:
           - What is the identity exposure profile for this email
           - Show the SpyCloud identity risk summary for this user
@@ -483,13 +386,7 @@ SkillGroups:
 
       - Name: SipGetCookiesByDomain
         DisplayName: Get stolen cookies for a domain (SIP)
-        Description: >
-          Queries the SpyCloud Session Identity Protection (SIP) API for stolen
-          session cookies associated with a cookie domain. Returns cookies
-          exfiltrated by infostealer malware including cookie names, values,
-          expiration dates, associated user identities, and malware attribution.
-          Use this to identify active session hijacking risks and determine
-          which sessions need invalidation. Requires SIP API entitlement.
+        Description: "Queries the SpyCloud Session Identity Protection (SIP) API for stolen session cookies associated with a cookie domain. Returns cookies exfiltrated by infostealer malware including cookie names, values, expiration dates, associated user identities, and malware attribution. Use this to identify active session hijacking risks and determine which sessions need invalidation. Requires SIP API entitlement."
         ExamplePrompts:
           - Get stolen cookies for this domain from SpyCloud SIP
           - Check for hijacked sessions on this domain
@@ -527,11 +424,7 @@ SkillGroups:
 
       - Name: SipListBreachCatalog
         DisplayName: List SIP breach catalog entries
-        Description: >
-          Returns the SpyCloud SIP breach catalog containing metadata for
-          breaches that include stolen session cookies. Use this to identify
-          which infostealer campaigns have captured session data and assess
-          the timeline and scale of cookie theft operations.
+        Description: "Returns the SpyCloud SIP breach catalog containing metadata for breaches that include stolen session cookies. Use this to identify which infostealer campaigns have captured session data and assess the timeline and scale of cookie theft operations."
         ExamplePrompts:
           - Show the SpyCloud SIP breach catalog
           - List breaches with stolen cookies in SpyCloud
@@ -552,11 +445,7 @@ SkillGroups:
 
       - Name: SipGetBreachCatalogEntry
         DisplayName: Get SIP breach catalog entry by ID
-        Description: >
-          Returns metadata for a specific breach in the SIP catalog. Includes
-          breach title, description, acquisition date, and data classes.
-          Use this to understand the context of a breach source found in
-          stolen cookie records.
+        Description: "Returns metadata for a specific breach in the SIP catalog. Includes breach title, description, acquisition date, and data classes. Use this to understand the context of a breach source found in stolen cookie records."
         ExamplePrompts:
           - Show details for this SIP breach ID
           - What is this SIP breach source
@@ -574,13 +463,7 @@ SkillGroups:
 
       - Name: InvestigateByEmail
         DisplayName: Investigate email across full SpyCloud database
-        Description: >
-          Queries the SpyCloud Investigations API for all records associated
-          with an email address across the entire SpyCloud database including
-          breaches, infostealers, phishing, paste sites, and combo lists.
-          Provides the broadest dataset for cybercrime investigators performing
-          link analysis and identity attribution. Requires Investigations API
-          entitlement.
+        Description: "Queries the SpyCloud Investigations API for all records associated with an email address across the entire SpyCloud database including breaches, infostealers, phishing, paste sites, and combo lists. Provides the broadest dataset for cybercrime investigators performing link analysis and identity attribution. Requires Investigations API entitlement."
         ExamplePrompts:
           - Investigate this email across all SpyCloud data
           - Run a full SpyCloud investigation on this email
@@ -608,10 +491,7 @@ SkillGroups:
 
       - Name: InvestigateByDomain
         DisplayName: Investigate domain across full SpyCloud database
-        Description: >
-          Queries the SpyCloud Investigations API for all records under a domain
-          across the full database. Returns breaches, infostealer infections,
-          phishing captures, and paste data for all identities at the domain.
+        Description: "Queries the SpyCloud Investigations API for all records under a domain across the full database. Returns breaches, infostealer infections, phishing captures, and paste data for all identities at the domain."
         ExamplePrompts:
           - Investigate this domain across all SpyCloud data
           - Run a full investigation on this domain
@@ -638,10 +518,7 @@ SkillGroups:
 
       - Name: InvestigateByIp
         DisplayName: Investigate IP across full SpyCloud database
-        Description: >
-          Queries the SpyCloud Investigations API for all records linked to an
-          IP address. Returns breach, infostealer, and botnet data tied to the
-          IP including all associated identities.
+        Description: "Queries the SpyCloud Investigations API for all records linked to an IP address. Returns breach, infostealer, and botnet data tied to the IP including all associated identities."
         ExamplePrompts:
           - Investigate this IP across all SpyCloud data
           - Run a full investigation on this IP address
@@ -668,10 +545,7 @@ SkillGroups:
 
       - Name: InvestigateByUsername
         DisplayName: Investigate username across full SpyCloud database
-        Description: >
-          Queries the SpyCloud Investigations API for all records linked to a
-          username. Useful for investigating forum handles, service accounts,
-          or non-email identifiers tied to cybercrime activity.
+        Description: "Queries the SpyCloud Investigations API for all records linked to a username. Useful for investigating forum handles, service accounts, or non-email identifiers tied to cybercrime activity."
         ExamplePrompts:
           - Investigate this username across all SpyCloud data
           - Search SpyCloud Investigations for this username
@@ -698,11 +572,7 @@ SkillGroups:
 
       - Name: InvestigateByPassword
         DisplayName: Investigate password across full SpyCloud database
-        Description: >
-          Queries the SpyCloud Investigations API for all records containing a
-          specific password. Returns all accounts and identities that used this
-          password, enabling credential reuse analysis and link analysis across
-          threat actor personas.
+        Description: "Queries the SpyCloud Investigations API for all records containing a specific password. Returns all accounts and identities that used this password, enabling credential reuse analysis and link analysis across threat actor personas."
         ExamplePrompts:
           - Search SpyCloud Investigations for this password
           - What accounts use this password according to SpyCloud
@@ -730,14 +600,7 @@ SkillGroups:
 
       - Name: GetIdentityWatchlist
         DisplayName: List monitored identities on the watchlist
-        Description: >
-          Returns all identities currently on the organization's SpyCloud
-          watchlist including monitored email addresses, domains, and IP
-          ranges with their monitoring state, alert history, and cumulative
-          exposure counts. The watchlist drives automated alerting when new
-          dark web exposures are detected. Use this to audit monitoring
-          coverage, verify critical identities are tracked, and review
-          recent alert activity.
+        Description: "Returns all identities currently on the organization's SpyCloud watchlist including monitored email addresses, domains, and IP ranges with their monitoring state, alert history, and cumulative exposure counts. The watchlist drives automated alerting when new dark web exposures are detected. Use this to audit monitoring coverage, verify critical identities are tracked, and review recent alert activity."
         ExamplePrompts:
           - Show the SpyCloud identity watchlist
           - What identities are we monitoring in SpyCloud
@@ -747,12 +610,10 @@ SkillGroups:
           - Show recent watchlist alerts from SpyCloud
         Inputs:
           - Name: type
-            Description: >
-              Filter by asset type: email, domain, or ip.
+            Description: "Filter by asset type: email, domain, or ip."
             Required: false
           - Name: state
-            Description: >
-              Filter by monitoring state: active or inactive.
+            Description: "Filter by monitoring state: active or inactive."
             Required: false
           - Name: limit
             Description: Maximum entries per page.
