@@ -2,27 +2,13 @@ Descriptor:
   Name: SpyCloud Darknet & Identity Threat Exposure Intelligence
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence
   Description: >
-    Comprehensive Security Copilot KQL plugin for SpyCloud Darknet & Identity Threat
-    Exposure Intelligence in Microsoft Sentinel. Provides 85 promptbook skills querying
-    6 custom Sentinel tables (BreachWatchlist, BreachCatalog, CompassData, CompassDevices,
-    ConditionalAccessLogs, MDE_Logs) with 156 total columns across 118 base fields.
-    Enables natural-language investigation of compromised credentials, infostealer infections,
-    exposed PII, device forensics, and automated remediation status. Skills span 17 categories:
-    user credential investigation, password analysis, severity and breach category analysis,
-    sensitive PII and financial data exposure, device and malware forensics, breach catalog
-    intelligence, MDE device remediation audit, Conditional Access identity remediation,
-    cross-table investigation, operational health monitoring, Compass consumer identity,
-    cross-connector threat hunting, risk scoring and prioritization, UEBA correlation,
-    Fusion multistage analysis, TI enrichment, automation rule metrics, session cookie theft
-    detection, lateral movement hunting, data exfiltration detection, malware family tracking,
-    watchlist management, MSIC incident correlation, executive reporting, campaign and threat
-    actor intelligence, advanced user analysis, network and infrastructure hunting, compliance
-    and reporting, incident and alert correlation, proactive threat intelligence, device deep
-    dive forensics, and executive dashboarding. Supports all breach categories including
-    infostealers, combo lists, phishing, exfiltration, and scraping. Works alongside the
-    SpyCloud API Plugin (12 direct REST API skills) and SpyCloud Investigation Agent
-    (autonomous interactive investigation with 12 sub-agents) for complete Security Copilot
-    coverage across 145+ deployed Sentinel resources.
+    Security Copilot KQL plugin for SpyCloud darknet intelligence in Microsoft Sentinel.
+    Provides 86 skills querying 6 custom tables for investigating compromised credentials,
+    infostealer infections, exposed PII, device forensics, and remediation status. Covers
+    user investigation, password analysis, breach catalog, Compass consumer identity,
+    UEBA correlation, Fusion multistage detection, cross-connector threat hunting, risk
+    scoring, executive reporting, and automated remediation audit across MDE and
+    Conditional Access. Works alongside the SpyCloud API Plugin and Investigation Agent.
   Category: Other
   DescriptionDisplay: default
   Publisher: SpyCloud
@@ -868,6 +854,7 @@ SkillGroups:
           - Name: DaysBack
             Description: Number of days to look back (default 7)
             Required: false
+            DefaultValue: '7'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -876,12 +863,12 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let lookback = ago({{DaysBack}}d);
-            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > lookback and severity >= 5 | distinct email, severity, breach_title;
+            let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > lookback and severity >= 5 | distinct email, severity, source_id;
             SigninLogs
             | where TimeGenerated > lookback and ResultType == 0
             | where UserPrincipalName in~ (exposed | project email)
             | join kind=inner exposed on $left.UserPrincipalName == $right.email
-            | summarize SignIns=count(), Apps=dcount(AppDisplayName), IPs=dcount(IPAddress), Countries=dcount(tostring(LocationDetails.countryOrRegion)) by UserPrincipalName, severity, breach_title
+            | summarize SignIns=count(), Apps=dcount(AppDisplayName), IPs=dcount(IPAddress), Countries=dcount(tostring(LocationDetails.countryOrRegion)) by UserPrincipalName, severity, source_id
             | order by severity desc, SignIns desc
 
       - Name: HuntExposedUserEmailActivity
@@ -1037,7 +1024,7 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d);
-            let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;
+            let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct UserEmail;
             let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | distinct DeviceName;
             union isfuzzy=true
             (exposed | where severity == 25 and email !in~ (remediated_users) | summarize Users=dcount(email) | extend Priority="CRITICAL", Action="Sev 25 users NOT yet remediated — immediate password reset + device isolation needed"),
@@ -1064,9 +1051,11 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for exposures (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
           - Name: MinSeverity
             Description: Minimum SpyCloud severity level to include (e.g., 5, 20, 25). Default is 5.
             Required: false
+            DefaultValue: '5'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1094,6 +1083,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1121,6 +1111,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for TI enrichment results (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1148,6 +1139,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for automation rule metrics (e.g., 7d, 14d, 30d). Default is 30d.
             Required: false
+            DefaultValue: '30d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1244,6 +1236,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for malware trends (e.g., 30d, 60d, 90d). Default is 30d.
             Required: false
+            DefaultValue: '30d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1332,6 +1325,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for MSIC incidents (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -1362,7 +1356,7 @@ SkillGroups:
           ResourceGroupName: '{{ResourceGroupName}}'
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
-            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) and ActionStatus=="Success" | summarize Remediations=dcount(UserPrincipalName); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
+            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | summarize Remediations=dcount(UserEmail); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
 
       # =====================================================================
       # 24. CAMPAIGN AND THREAT ACTOR INTELLIGENCE
@@ -1457,13 +1451,13 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let reference = SpyCloudBreachWatchlist_CL
-            | where source_id == {{sourceId}}
+            | where source_id == "{{sourceId}}"
             | summarize RefEmails = make_set(email, 500), RefIPs = make_set(ip_addresses, 200), RefStart = min(TimeGenerated), RefEnd = max(TimeGenerated);
             let ref_emails = toscalar(reference | project RefEmails);
             let ref_start = toscalar(reference | project RefStart);
             let ref_end = toscalar(reference | project RefEnd);
             SpyCloudBreachWatchlist_CL
-            | where source_id != {{sourceId}}
+            | where source_id != "{{sourceId}}"
             | where TimeGenerated between (datetime_add('day', -30, ref_start) .. datetime_add('day', 30, ref_end))
             | summarize OverlappingUsers = dcountif(email, email in (ref_emails)), TotalRecords = count(), UniqueUsers = dcount(email) by source_id
             | where OverlappingUsers > 0
@@ -2041,6 +2035,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -2072,6 +2067,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 30d.
             Required: false
+            DefaultValue: '30d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -2105,6 +2101,7 @@ SkillGroups:
           - Name: Lookback
             Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 14d.
             Required: false
+            DefaultValue: '14d'
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
