@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: SpyCloud Darknet & Identity Threat Exposure Intelligence API
-  version: 8.0.0
-  description: "SpyCloud API for Microsoft Security Copilot providing REST access to recaptured darknet data including compromised credentials, infostealer infections, stolen session cookies, and identity exposures via the Enterprise Breach, Compass, Identity, Session Identity Protection (SIP), and Investigations APIs."
+  version: 9.0.0
+  description: "SpyCloud API for Microsoft Security Copilot providing REST access to recaptured darknet data including compromised credentials, infostealer infections, stolen session cookies, identity exposures, identity correlation, partner breach data, exposure risk assessments, and credential access program actions via the Enterprise Breach, Compass, Identity, Session Identity Protection (SIP), Investigations, IDLINK, Data Partnership, Exposure, and CAP APIs."
   contact:
     name: SpyCloud Support
     url: https://spycloud.com/support
@@ -51,6 +51,34 @@ tags:
     description: SIP breach catalog metadata.
   - name: Investigations - Data Lookup
     description: Cybercrime investigation data lookups across all selectors.
+  - name: IDLINK - Email Lookup
+    description: Identity correlation by email.
+  - name: IDLINK - Domain Lookup
+    description: Identity correlation by domain.
+  - name: IDLINK - Identity Graph
+    description: Identity graph retrieval.
+  - name: Data Partnership - Email Lookup
+    description: Partner data by email.
+  - name: Data Partnership - Domain Lookup
+    description: Partner data by domain.
+  - name: Data Partnership - Catalog
+    description: Partner breach catalog.
+  - name: Exposure - Email Assessment
+    description: Exposure risk by email.
+  - name: Exposure - Domain Assessment
+    description: Exposure risk by domain.
+  - name: Exposure - IP Assessment
+    description: Exposure risk by IP.
+  - name: Exposure - Summary
+    description: Exposure summary statistics.
+  - name: CAP - Email Lookup
+    description: CAP actions by email.
+  - name: CAP - Domain Lookup
+    description: CAP actions by domain.
+  - name: CAP - Policies
+    description: CAP policy management.
+  - name: CAP - Reset
+    description: CAP credential reset trigger.
 
 paths:
   # ===========================================================================
@@ -813,6 +841,490 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  # ===========================================================================
+  # IDLINK API
+  # ===========================================================================
+
+  /idlink-v1/identity/emails/{email}:
+    get:
+      operationId: idLinkLookupByEmail
+      summary: Get identity links for an email
+      description: "Returns all identity correlations and linked accounts for the given email address including linked emails, usernames, IPs, devices, link strength scores, and breach source overlap."
+      tags:
+        - IDLINK - Email Lookup
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Identity link records for the email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdLinkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /idlink-v1/identity/domains/{domain}:
+    get:
+      operationId: idLinkLookupByDomain
+      summary: Get identity links for a domain
+      description: "Returns all identity correlations and linked accounts across all identities at the specified domain."
+      tags:
+        - IDLINK - Domain Lookup
+      parameters:
+        - $ref: '#/components/parameters/DomainPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Identity link records for the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdLinkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /idlink-v1/identity/{identity_id}:
+    get:
+      operationId: idLinkGetIdentity
+      summary: Get specific identity record
+      tags:
+        - IDLINK - Identity Graph
+      parameters:
+        - $ref: '#/components/parameters/IdentityIdPath'
+      responses:
+        '200':
+          description: Identity record details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdLinkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /idlink-v1/identity/{identity_id}/graph:
+    get:
+      operationId: idLinkGetIdentityGraph
+      summary: Get identity relationship graph
+      description: "Returns the full identity graph showing all relationships, linked accounts, shared devices, and credential overlap for a specific identity."
+      tags:
+        - IDLINK - Identity Graph
+      parameters:
+        - $ref: '#/components/parameters/IdentityIdPath'
+        - $ref: '#/components/parameters/Depth'
+      responses:
+        '200':
+          description: Identity relationship graph.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdLinkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ===========================================================================
+  # DATA PARTNERSHIP API
+  # ===========================================================================
+
+  /data-partnership-v1/breach/data/emails/{email}:
+    get:
+      operationId: dataPartnershipLookupByEmail
+      summary: Get partner-contributed breach data for an email
+      tags:
+        - Data Partnership - Email Lookup
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Partner-contributed breach records for the email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataPartnershipResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /data-partnership-v1/breach/data/domains/{domain}:
+    get:
+      operationId: dataPartnershipLookupByDomain
+      summary: Get partner-contributed breach data for a domain
+      tags:
+        - Data Partnership - Domain Lookup
+      parameters:
+        - $ref: '#/components/parameters/DomainPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/SeverityFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Partner-contributed breach records for the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataPartnershipResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /data-partnership-v1/breach/catalog:
+    get:
+      operationId: dataPartnershipListCatalog
+      summary: List data partnership breach catalog
+      tags:
+        - Data Partnership - Catalog
+      parameters:
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Data partnership breach catalog entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreachCatalogListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ===========================================================================
+  # EXPOSURE API
+  # ===========================================================================
+
+  /exposure-v1/exposure/emails/{email}:
+    get:
+      operationId: exposureLookupByEmail
+      summary: Get exposure risk assessment for an email
+      description: "Returns the aggregated exposure risk profile for an email including risk score, breach counts, credential types, remediation status, and timeline."
+      tags:
+        - Exposure - Email Assessment
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+      responses:
+        '200':
+          description: Exposure risk assessment for the email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /exposure-v1/exposure/domains/{domain}:
+    get:
+      operationId: exposureLookupByDomain
+      summary: Get exposure risk assessment for a domain
+      tags:
+        - Exposure - Domain Assessment
+      parameters:
+        - $ref: '#/components/parameters/DomainPath'
+      responses:
+        '200':
+          description: Exposure risk assessment for the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /exposure-v1/exposure/ips/{ip}:
+    get:
+      operationId: exposureLookupByIp
+      summary: Get exposure risk assessment for an IP
+      tags:
+        - Exposure - IP Assessment
+      parameters:
+        - $ref: '#/components/parameters/IpPath'
+      responses:
+        '200':
+          description: Exposure risk assessment for the IP.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /exposure-v1/exposure/summary:
+    get:
+      operationId: exposureGetSummary
+      summary: Get organization-wide exposure summary
+      description: "Returns aggregate exposure statistics across the entire organization."
+      tags:
+        - Exposure - Summary
+      parameters:
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+      responses:
+        '200':
+          description: Organization-wide exposure summary statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ===========================================================================
+  # CAP API (CREDENTIAL ACCESS PROGRAM)
+  # ===========================================================================
+
+  /cap-v1/credentials/emails/{email}:
+    get:
+      operationId: capLookupByEmail
+      summary: Get CAP actions for an email
+      description: "Returns all Credential Access Program actions (password resets, notifications, policy enforcement) for the specified email."
+      tags:
+        - CAP - Email Lookup
+      parameters:
+        - $ref: '#/components/parameters/EmailPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: CAP action records for the email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAPResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /cap-v1/credentials/domains/{domain}:
+    get:
+      operationId: capLookupByDomain
+      summary: Get CAP actions for a domain
+      tags:
+        - CAP - Domain Lookup
+      parameters:
+        - $ref: '#/components/parameters/DomainPath'
+        - $ref: '#/components/parameters/Since'
+        - $ref: '#/components/parameters/Until'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: CAP action records for the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAPResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /cap-v1/policies:
+    get:
+      operationId: capListPolicies
+      summary: List CAP policies
+      tags:
+        - CAP - Policies
+      responses:
+        '200':
+          description: List of CAP policies.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAPResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /cap-v1/credentials/reset:
+    post:
+      operationId: capTriggerReset
+      summary: Trigger credential reset for exposed credentials
+      tags:
+        - CAP - Reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - policy_id
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email address of the identity to trigger reset for.
+                  example: john.doe@example.com
+                policy_id:
+                  type: string
+                  description: CAP policy ID to apply for the reset action.
+                  example: pol_abc123
+                reason:
+                  type: string
+                  description: Human-readable reason for triggering the reset.
+                  example: Credential exposed in recent infostealer breach
+      responses:
+        '200':
+          description: Reset action completed synchronously.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAPResponse'
+        '202':
+          description: Reset action accepted and processing asynchronously.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAPResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
 # =============================================================================
 # COMPONENTS
 # =============================================================================
@@ -961,6 +1473,28 @@ components:
         maximum: 10000
         default: 100
         example: 100
+
+    IdentityIdPath:
+      name: identity_id
+      in: path
+      required: true
+      description: "The SpyCloud identity identifier for an IDLINK identity record."
+      schema:
+        type: string
+        example: id_a1b2c3d4e5f6
+
+    Depth:
+      name: depth
+      in: query
+      required: false
+      description: "Graph traversal depth controlling how many relationship hops to follow. Minimum 1, maximum 5, default 2."
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 5
+        default: 2
+        example: 2
 
   # ---------------------------------------------------------------------------
   # Reusable Response Definitions
@@ -1860,3 +2394,482 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchlistEntry'
+
+    # -- IDLINK Record ---------------------------------------------------------
+
+    IdLinkRecord:
+      type: object
+      description: "An identity correlation record from the SpyCloud IDLINK dataset showing linked accounts, devices, and credential overlap across breach sources."
+      properties:
+        identity_id:
+          type: string
+          description: SpyCloud unique identity identifier.
+          example: id_a1b2c3d4e5f6
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Primary email address for this identity.
+        email_domain:
+          type: string
+          nullable: true
+          description: Domain portion of the primary email.
+        linked_emails:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Other email addresses correlated to this identity.
+        linked_usernames:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Usernames correlated to this identity.
+        linked_ips:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: IP addresses correlated to this identity.
+        linked_devices:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Device identifiers correlated to this identity.
+        link_strength:
+          type: number
+          format: double
+          nullable: true
+          description: "Confidence score for the identity correlation from 0.0 to 1.0."
+          example: 0.92
+        link_type:
+          type: string
+          nullable: true
+          description: "Type of correlation link (e.g., credential_reuse, shared_device, email_alias)."
+          example: credential_reuse
+        breach_sources:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Breach sources contributing to this identity correlation.
+        first_seen:
+          type: string
+          format: date-time
+          nullable: true
+          description: When this identity correlation was first observed.
+        last_seen:
+          type: string
+          format: date-time
+          nullable: true
+          description: When this identity correlation was most recently observed.
+        risk_score:
+          type: integer
+          format: int32
+          nullable: true
+          description: Computed risk score for this identity.
+          example: 85
+        total_exposures:
+          type: integer
+          format: int32
+          nullable: true
+          description: Total exposure count across all linked accounts.
+          example: 27
+        graph_depth:
+          type: integer
+          format: int32
+          nullable: true
+          description: Depth level in the identity graph where this record was found.
+          example: 2
+        correlation_id:
+          type: string
+          nullable: true
+          description: Unique identifier for this specific correlation link.
+          example: corr_x1y2z3
+
+    IdLinkResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+          description: Total matching identity link records.
+        cursor:
+          type: string
+          nullable: true
+          description: Pagination cursor for the next page.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdLinkRecord'
+
+    # -- Data Partnership Record -----------------------------------------------
+
+    DataPartnershipRecord:
+      type: object
+      description: "A partner-contributed breach record from the SpyCloud Data Partnership dataset."
+      properties:
+        partner_id:
+          type: string
+          nullable: true
+          description: Identifier of the contributing data partner.
+          example: partner_abc123
+        partner_name:
+          type: string
+          nullable: true
+          description: Human-readable name of the contributing partner.
+          example: ThreatPartner Inc.
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Compromised email address.
+        email_domain:
+          type: string
+          nullable: true
+          description: Domain portion of the compromised email.
+        username:
+          type: string
+          nullable: true
+          description: Non-email username if available.
+        password:
+          type: string
+          nullable: true
+          description: "Password value. May be plaintext, hashed, or cracked depending on password_type."
+        password_type:
+          type: string
+          nullable: true
+          description: Classification of the password representation.
+          enum:
+            - plaintext
+            - hashed
+            - cracked
+            - unknown
+        severity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 25
+          nullable: true
+          description: "Severity score from 1 (low) to 25 (critical)."
+          example: 20
+        source_type:
+          type: string
+          nullable: true
+          description: "Type of source contributing this record (e.g., breach, infostealer, phishing)."
+        data_classes:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: "Types of data exposed in this record."
+          example:
+            - email
+            - password
+            - phone
+        breach_date:
+          type: string
+          format: date
+          nullable: true
+          description: Estimated date the breach occurred.
+        ip_addresses:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: IP addresses associated with the record.
+        country_code:
+          type: string
+          nullable: true
+          description: ISO 3166-1 alpha-2 country code.
+          example: US
+        target_domain:
+          type: string
+          nullable: true
+          description: Domain of the targeted service.
+        target_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Login URL or service targeted by the stolen credential.
+        document_id:
+          type: string
+          nullable: true
+          description: Unique SpyCloud document identifier for this record.
+          example: d8f3a1b2-4c5e-6f7a-8b9c-0d1e2f3a4b5c
+        source_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Numeric breach source ID referencing the breach catalog.
+
+    DataPartnershipResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+          description: Total matching partner-contributed records.
+        cursor:
+          type: string
+          nullable: true
+          description: Pagination cursor for the next page.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataPartnershipRecord'
+
+    # -- Exposure Record -------------------------------------------------------
+
+    ExposureRecord:
+      type: object
+      description: "An exposure risk assessment record from the SpyCloud Exposure dataset providing aggregated risk profiles."
+      properties:
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Email address assessed.
+        email_domain:
+          type: string
+          nullable: true
+          description: Domain portion of the assessed email.
+        risk_score:
+          type: integer
+          format: int32
+          nullable: true
+          description: "Computed exposure risk score from 0 to 100."
+          example: 78
+        risk_level:
+          type: string
+          nullable: true
+          description: "Human-readable risk classification (e.g., critical, high, medium, low)."
+          example: high
+        total_breaches:
+          type: integer
+          format: int32
+          nullable: true
+          description: Total number of breaches affecting this identity.
+          example: 12
+        total_infostealers:
+          type: integer
+          format: int32
+          nullable: true
+          description: Total infostealer infections affecting this identity.
+          example: 3
+        total_credentials:
+          type: integer
+          format: int32
+          nullable: true
+          description: Total exposed credential pairs.
+          example: 18
+        plaintext_passwords:
+          type: integer
+          format: int32
+          nullable: true
+          description: Number of credentials with plaintext passwords.
+          example: 7
+        hashed_passwords:
+          type: integer
+          format: int32
+          nullable: true
+          description: Number of credentials with hashed passwords.
+          example: 5
+        stolen_cookies:
+          type: integer
+          format: int32
+          nullable: true
+          description: Number of stolen session cookies.
+          example: 14
+        infected_devices:
+          type: integer
+          format: int32
+          nullable: true
+          description: Number of infected devices associated.
+          example: 2
+        first_exposure:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the earliest exposure.
+        last_exposure:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the most recent exposure.
+        remediation_status:
+          type: string
+          nullable: true
+          description: "Current remediation status (e.g., pending, in_progress, completed, not_started)."
+          example: in_progress
+        remediation_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: When remediation was last performed.
+        remediation_actions:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: "List of remediation actions taken (e.g., password_reset, session_invalidation)."
+        data_classes_exposed:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: "All data classes exposed for this identity."
+          example:
+            - email
+            - password
+            - phone
+            - credit_card
+        breach_sources:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Names of breach sources contributing to the exposure.
+        timeline:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date-time
+              event_type:
+                type: string
+              source:
+                type: string
+          description: Chronological timeline of exposure events.
+        assessment_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: When this exposure assessment was computed.
+
+    ExposureResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+          description: Total matching exposure records.
+        cursor:
+          type: string
+          nullable: true
+          description: Pagination cursor for the next page.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExposureRecord'
+
+    # -- CAP Record ------------------------------------------------------------
+
+    CAPRecord:
+      type: object
+      description: "A Credential Access Program action record tracking password resets, notifications, and policy enforcement."
+      properties:
+        cap_id:
+          type: string
+          nullable: true
+          description: Unique CAP action identifier.
+          example: cap_abc123xyz
+        policy_id:
+          type: string
+          nullable: true
+          description: CAP policy ID applied for this action.
+          example: pol_abc123
+        policy_name:
+          type: string
+          nullable: true
+          description: Human-readable name of the CAP policy.
+          example: Default Password Reset Policy
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Email address of the affected identity.
+        email_domain:
+          type: string
+          nullable: true
+          description: Domain portion of the affected email.
+        action_type:
+          type: string
+          nullable: true
+          description: "Type of CAP action (e.g., password_reset, notification, force_mfa, account_lock)."
+          example: password_reset
+        action_status:
+          type: string
+          nullable: true
+          description: "Current status of the action (e.g., pending, in_progress, completed, failed)."
+          example: completed
+        trigger_severity:
+          type: integer
+          format: int32
+          nullable: true
+          description: Severity score of the exposure that triggered this action.
+          example: 22
+        credential_type:
+          type: string
+          nullable: true
+          description: "Type of credential that was exposed (e.g., plaintext, hashed, cookie)."
+          example: plaintext
+        notification_sent:
+          type: boolean
+          nullable: true
+          description: Whether a notification was sent to the affected user.
+        affected_applications:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Applications affected by the exposed credential.
+          example:
+            - Office 365
+            - Salesforce
+            - VPN
+        compliance_tags:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: "Compliance frameworks relevant to this action (e.g., SOC2, NIST, PCI-DSS)."
+          example:
+            - SOC2
+            - NIST
+        created_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the CAP action was created.
+        completed_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the CAP action was completed.
+        last_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the CAP action was last updated.
+
+    CAPResponse:
+      type: object
+      properties:
+        hits:
+          type: integer
+          format: int64
+          description: Total matching CAP action records.
+        cursor:
+          type: string
+          nullable: true
+          description: Pagination cursor for the next page.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CAPRecord'

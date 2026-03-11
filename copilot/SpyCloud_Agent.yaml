@@ -1,11 +1,11 @@
 Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
   DisplayName: SpyCloud Investigation Agent
-  Description: "Autonomous agent orchestrating 17 sub-agents to investigate credential exposure, infostealers, and identity threats across Sentinel, Defender XDR, Intune, and Entra ID."
+  Description: "Autonomous agent orchestrating 23 sub-agents across 9 SpyCloud APIs (Enterprise, Compass, SIP, Identity, Investigations, IDLINK, Data Partnership, Exposure, CAP) to investigate credential exposure, infostealers, identity threats, identity correlations, partner intelligence, exposure risk, and credential automated protection across 14 Sentinel tables, Defender XDR, Intune, and Entra ID."
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
-  Version: 8.0.0
+  Version: 9.0.0
   Settings:
   - Name: TenantId
     Description: Azure Tenant ID where the Sentinel workspace is located.
@@ -30,6 +30,31 @@ Descriptor:
   - Name: SpyCloudApiKey
     Description: SpyCloud API key for direct API access via the companion API Plugin. Required only for API-backed skills.
     HintText: Enter your SpyCloud API key (optional - for API Plugin integration)
+    SettingType: string
+    Required: false
+  - Name: IdLinkApiKey
+    Description: SpyCloud IDLINK API key for identity correlation lookups. Required only for IDLINK API-backed skills.
+    HintText: Enter your SpyCloud IDLINK API key (optional)
+    SettingType: string
+    Required: false
+  - Name: DataPartnershipApiKey
+    Description: SpyCloud Data Partnership API key. Required only for Data Partnership API-backed skills.
+    HintText: Enter your SpyCloud Data Partnership API key (optional)
+    SettingType: string
+    Required: false
+  - Name: ExposureApiKey
+    Description: SpyCloud Exposure API key for risk assessments. Required only for Exposure API-backed skills.
+    HintText: Enter your SpyCloud Exposure API key (optional)
+    SettingType: string
+    Required: false
+  - Name: CAPApiKey
+    Description: SpyCloud CAP API key for credential automated protection. Required only for CAP API-backed skills.
+    HintText: Enter your SpyCloud CAP API key (optional)
+    SettingType: string
+    Required: false
+  - Name: OpenAIApiKey
+    Description: OpenAI API key for advanced AI analysis, executive report generation, and threat narrative construction.
+    HintText: Enter your OpenAI API key (optional)
     SettingType: string
     Required: false
   SupportedAuthTypes:
@@ -326,6 +351,39 @@ SkillGroups:
     - Prompt: What would a SOC maturity assessment say about our SpyCloud response?
     - Prompt: Help me design an exposure response SOP for our team
     - Prompt: What are all the things you can help me with? Give me the full menu
+
+    # === IDLINK, Data Partnership, Exposure, CAP, OpenAI, Cross-API ===
+    - Prompt: Investigate identity links and correlations for this user
+      Title: IDLINK Correlation
+      Personas:
+      - 1
+      - 2
+    - Prompt: Show exposure risk assessment for our domain
+      Title: Exposure Risk
+      Personas:
+      - 1
+      - 2
+      - 3
+    - Prompt: What CAP actions are pending or failed?
+      Title: CAP Status
+      Personas:
+      - 1
+      - 3
+    - Prompt: Run a cross-API investigation on this email
+      Title: Cross-API Investigation
+      Personas:
+      - 1
+      - 2
+    - Prompt: Generate an executive board report on our exposure posture
+      Title: Board Report
+      Personas:
+      - 3
+      - 5
+    - Prompt: Show partner intelligence data for this domain
+      Title: Partner Intel
+      Personas:
+      - 1
+      - 2
     Settings:
       OrchestratorSkill: DefaultAgentOrchestrator
       Instructions: '# Identity & Personality
@@ -437,8 +495,8 @@ SkillGroups:
         threats using SpyCloud data in Microsoft Sentinel. You have access to 145+ deployed resources including 49 analytics rules (38 scheduled, 1 Fusion, 5 NRT, 5 MSIC), 28 hunting queries,
         10 automated playbooks (password reset, session revocation, MFA enforcement, Conditional Access blocking, firewall blocking, device isolation, user notification, SOC notification,
         incident enrichment, full remediation orchestration), 4 watchlists, 3 workbooks, 3 Jupyter notebooks, UEBA behavioral analytics, Fusion multistage attack detection,
-        5 Microsoft Security Incident Creation rules, TI enrichment, and 6 notification channels. You orchestrate 17 specialized sub-agents for deep investigations including
-        Defender XDR endpoint analysis, Intune device compliance, CASB cloud app security, and Compass deep infostealer forensics.
+        5 Microsoft Security Incident Creation rules, TI enrichment, and 6 notification channels. You orchestrate 23 specialized sub-agents for deep investigations including
+        Defender XDR endpoint analysis, Intune device compliance, CASB cloud app security, Compass deep infostealer forensics, IDLINK identity correlation, Data Partnership intelligence, Exposure risk assessment, CAP credential automated protection, OpenAI advanced analysis, and Cross-API investigation.
 
 
         You are a UNIVERSAL security conversation partner. You can discuss, investigate, and correlate findings across the ENTIRE Microsoft security ecosystem:
@@ -1074,7 +1132,7 @@ SkillGroups:
         # Multi-Agent Orchestration
 
 
-        You orchestrate 17 specialized sub-agents. Use them strategically:
+        You orchestrate 23 specialized sub-agents (including IDLINK correlation, Data Partnership intelligence, Exposure risk assessment, CAP response monitoring, OpenAI advanced analysis, and Cross-API investigation). Use them strategically:
 
         1. **Always start with data**: Query the relevant KQL skills FIRST to get raw data
         2. **Enrich with sub-agents**: Delegate to specialized sub-agents for deep analysis
@@ -1196,6 +1254,48 @@ SkillGroups:
     - IntuneDeviceComplianceAgent
     - CASBCloudAppSecurityAgent
     - CompassDeepInvestigationAgent
+    - IdLinkCorrelationAgent
+    - DataPartnershipIntelAgent
+    - ExposureRiskAgent
+    - CAPResponseAgent
+    - OpenAIAdvancedAnalysisAgent
+    - CrossAPIInvestigationAgent
+    - GetIdLinkByEmail
+    - GetIdLinkGraph
+    - GetIdLinkHighRisk
+    - GetIdLinkCrossOrgCorrelation
+    - GetIdLinkSharedDevices
+    - GetIdLinkBreachOverlap
+    - GetIdLinkTimeline
+    - GetIdLinkSummary
+    - GetDataPartnershipByEmail
+    - GetDataPartnershipByDomain
+    - GetDataPartnershipSources
+    - GetDataPartnershipHighSeverity
+    - GetDataPartnershipDataClasses
+    - GetDataPartnershipTrend
+    - GetExposureProfileByEmail
+    - GetExposureProfileByDomain
+    - GetExposureCriticalRisk
+    - GetExposureRemediationStatus
+    - GetExposureRemediationGaps
+    - GetExposureTimeline
+    - GetExposureDataClasses
+    - GetExposureSummaryDashboard
+    - GetCAPActionsByEmail
+    - GetCAPActionsByPolicy
+    - GetCAPPendingActions
+    - GetCAPCompletedActions
+    - GetCAPFailedActions
+    - GetCAPComplianceStatus
+    - GetCAPActionTimeline
+    - GetCAPSummaryDashboard
+    - GenerateExecutiveReport
+    - GenerateBoardPresentation
+    - PredictExposureTrend
+    - BuildAttackSimulation
+    - GenerateRiskHeatmap
+    - ComposeIncidentNarrative
     - InvestigateFullExposureChain
     - GenerateIncidentSummary
     - DetectPermissionGaps
