@@ -3,18 +3,9 @@ info:
   title: SpyCloud Darknet & Identity Threat Exposure Intelligence API
   version: 7.0.0
   description: >
-    SpyCloud Darknet & Identity Threat Exposure Intelligence API for Microsoft
-    Security Copilot. Part of the SpyCloud Sentinel v6.1 solution spanning 145+
-    deployed resources. Provides direct REST API access to recaptured darknet data
-    including compromised credentials, stolen identities, infostealer infections,
-    and malware-infected devices. Covers the Enterprise Breach, Compass Investigation,
-    and Identity Exposure APIs with 12 skills enabling SOC analysts to query breach
-    records by email, domain, IP, username, or password; perform deep Compass
-    investigations into infostealer infections with malware attribution, stolen
-    cookies, and device forensics; query identity exposure posture; browse the
-    breach catalog; and audit the monitored identity watchlist. Compatible with
-    the SpyCloud KQL Plugin (85 promptbook skills) and SpyCloud Investigation Agent
-    (autonomous interactive investigation with 12 sub-agents).
+    SpyCloud API for Microsoft Security Copilot providing REST access to recaptured
+    darknet data including compromised credentials, infostealer infections, and
+    identity exposures via the Enterprise Breach, Compass, and Identity APIs.
   contact:
     name: SpyCloud Support
     url: https://spycloud.com/support
@@ -839,28 +830,6 @@ components:
           type: string
           description: Human-readable error description.
           example: Invalid or missing API key.
-
-    # -- Pagination -----------------------------------------------------------
-
-    PaginationMeta:
-      type: object
-      properties:
-        cursor:
-          type: string
-          nullable: true
-          description: >
-            Opaque cursor for the next page. Null when there are no more
-            results.
-        total_records:
-          type: integer
-          format: int64
-          description: Total number of records matching the query.
-          example: 2437
-        limit:
-          type: integer
-          format: int32
-          description: Page size used for this response.
-          example: 100
 
     # -- Enterprise Breach Record ---------------------------------------------
 

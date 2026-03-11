@@ -771,12 +771,20 @@ SkillGroups:
       - Name: GetCompassExposures
         DisplayName: Search Compass consumer exposures
         Description: Finds all consumer identity exposures from SpyCloud Compass for a specific email or domain.
+        ExamplePrompts:
+          - Search Compass for consumer exposures for this email
+          - Show Compass consumer identity data for this domain
+          - Check SpyCloud Compass exposures for this user
         Inputs:
           - Name: SearchTerm
             Description: Email address or email domain to search
             Required: true
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassData_CL
             | where TimeGenerated > ago(30d)
@@ -787,8 +795,16 @@ SkillGroups:
       - Name: GetCompassDevices
         DisplayName: List Compass infected devices
         Description: Shows all infected devices tracked by SpyCloud Compass including OS, application count, and infection timeline.
+        ExamplePrompts:
+          - List Compass infected devices
+          - Show SpyCloud Compass device infections
+          - What devices are tracked in Compass
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassDevices_CL
             | where TimeGenerated > ago(30d)
@@ -799,8 +815,16 @@ SkillGroups:
       - Name: GetCompassCorporateOverlap
         DisplayName: Find Compass + Corporate credential overlap
         Description: Identifies users whose consumer identity exposures in Compass also appear in corporate breach watchlist — indicating personal credential reuse risk.
+        ExamplePrompts:
+          - Find overlap between Compass and corporate breaches
+          - Show users with both consumer and corporate credential exposure
+          - Check Compass corporate credential reuse risk
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassData_CL
             | where TimeGenerated > ago(30d) and severity >= 20
@@ -811,8 +835,16 @@ SkillGroups:
       - Name: GetDeviceReinfections
         DisplayName: Detect device reinfections via Compass
         Description: Identifies devices that appear in Compass multiple times across different time periods, indicating failed remediation or persistent compromise.
+        ExamplePrompts:
+          - Detect device reinfections from Compass data
+          - Which devices were infected multiple times
+          - Show reinfected devices with failed remediation
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudCompassDevices_CL
             | where TimeGenerated > ago(90d)
@@ -828,12 +860,20 @@ SkillGroups:
       - Name: HuntExposedUserSignIns
         DisplayName: Hunt sign-in activity for exposed users
         Description: Correlates SpyCloud exposed credentials with Entra ID sign-in logs to identify potential account takeover. Shows successful sign-ins from exposed users with location and app context.
+        ExamplePrompts:
+          - Hunt sign-in activity for exposed users
+          - Check Entra logins for SpyCloud compromised users
+          - Correlate SpyCloud exposures with sign-in logs
         Inputs:
           - Name: DaysBack
             Description: Number of days to look back (default 7)
             Required: false
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let lookback = ago({{DaysBack}}d);
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > lookback and severity >= 5 | distinct email, severity, breach_title;
@@ -847,8 +887,16 @@ SkillGroups:
       - Name: HuntExposedUserEmailActivity
         DisplayName: Hunt email activity for exposed users
         Description: Checks Office 365 for suspicious email activity by users with exposed credentials — forwarding rules, delegation changes, and mass sends.
+        ExamplePrompts:
+          - Hunt email activity for exposed users
+          - Check Office 365 activity for compromised users
+          - Show suspicious email rules from SpyCloud exposed users
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email;
             OfficeActivity
@@ -861,8 +909,16 @@ SkillGroups:
       - Name: HuntExposedUserAzureActivity
         DisplayName: Hunt Azure resource changes by exposed users
         Description: Shows Azure subscription activity (creates, deletes, role assignments) by users whose credentials were exposed in SpyCloud.
+        ExamplePrompts:
+          - Hunt Azure activity by exposed users
+          - Show Azure resource changes from compromised accounts
+          - Check Azure operations by SpyCloud exposed users
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;
             AzureActivity
@@ -875,8 +931,16 @@ SkillGroups:
       - Name: HuntInfectedIPsInNetwork
         DisplayName: Hunt infected IPs across all network logs
         Description: Searches for SpyCloud infection source IPs in device network events, DNS, firewall (CEF), and threat intelligence — comprehensive network sweep.
+        ExamplePrompts:
+          - Hunt infected IPs across network logs
+          - Search for SpyCloud IPs in firewall and DNS logs
+          - Find infected device IPs in network events
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let ips = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | mv-expand ip = ip_addresses | extend src_ip = tostring(ip) | where isnotempty(src_ip) | distinct src_ip;
             union isfuzzy=true
@@ -893,12 +957,20 @@ SkillGroups:
       - Name: GetUserRiskScore
         DisplayName: Calculate SpyCloud risk score for a user
         Description: Calculates a composite risk score for a user based on exposure severity, number of breaches, plaintext passwords, device infections, password reuse, and recency.
+        ExamplePrompts:
+          - Calculate risk score for this user
+          - What is the SpyCloud risk score for this email
+          - Score this user based on SpyCloud exposure data
         Inputs:
           - Name: UserEmail
             Description: User email to score
             Required: true
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloudBreachWatchlist_CL
             | where TimeGenerated > ago(90d) and email =~ "{{UserEmail}}"
@@ -924,8 +996,16 @@ SkillGroups:
       - Name: GetOrgRiskDashboard
         DisplayName: Organization-wide risk summary
         Description: Provides an executive-level risk summary of the entire organization — total exposures, critical users, unresolved infections, password hygiene, and breach source diversity.
+        ExamplePrompts:
+          - Show organization risk dashboard
+          - Give me an org-wide SpyCloud risk summary
+          - What is the overall exposure risk for the organization
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let w = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d);
             let mde = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d);
@@ -945,8 +1025,16 @@ SkillGroups:
       - Name: GetTopPriorityActions
         DisplayName: Priority action items for SOC
         Description: Lists the highest-priority remediation actions needed right now — unremediated critical exposures, exposed executives, reinfected devices, and stale incidents.
+        ExamplePrompts:
+          - Show top priority actions for the SOC
+          - What are the most urgent SpyCloud remediation items
+          - List highest priority items needing attention
         Settings:
           Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d);
             let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;
