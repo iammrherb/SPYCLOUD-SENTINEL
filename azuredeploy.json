@@ -974,7 +974,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "OPTIONAL: Enable SpyCloud Compass connectors (consumer/partner identity exposure). Requires Enterprise+ API subscription. Set to false if you only have Enterprise tier - Compass connectors will be skipped."
+        "description": "OPTIONAL: Enable SpyCloud Compass connectors (consumer/partner identity exposure). Requires Enterprise+ API subscription. WARNING: Enabling this with an Enterprise-only API key will cause deployment failure with 403 Forbidden errors. Verify your API tier at portal.spycloud.com before enabling."
       }
     }
   },
@@ -3580,6 +3580,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDataConnector')]",
+              "condition": "[parameters('enableCompass')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -3631,6 +3632,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDevicesConnector')]",
+              "condition": "[parameters('enableCompass')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -3681,6 +3683,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassApplicationsConnector')]",
+              "condition": "[parameters('enableCompass')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",

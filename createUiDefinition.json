@@ -1577,7 +1577,7 @@
                 "name": "enableCompass",
                 "type": "Microsoft.Common.CheckBox",
                 "label": "Enable Compass Connectors (Enterprise+ only)",
-                "toolTip": "Enable SpyCloud Compass consumer/partner identity exposure connectors. Requires Enterprise+ API subscription. Leave unchecked if you only have Enterprise tier.",
+                "toolTip": "IMPORTANT: Only enable if your SpyCloud API key has Enterprise+ tier access. Enterprise-only keys will cause deployment to fail with 403 Forbidden errors on Compass endpoints. Contact SpyCloud to verify your subscription tier before enabling.",
                 "defaultValue": false
               }
             ],
