@@ -3578,11 +3578,11 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data/watchlist",
                   "httpMethod": "GET",
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]",
-                    "type": "corporate,infected"
+                    "type": "[[join(parameters('watchlistType'), ',')]"
                   },
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
@@ -3629,7 +3629,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices/watchlist",
                   "httpMethod": "GET",
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"
@@ -3679,7 +3679,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications/watchlist",
                   "httpMethod": "GET",
                   "queryParameters": {
                     "severity": "[[join(parameters('severity'), ',')]"
