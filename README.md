@@ -16,7 +16,7 @@
 
 <br>
 
-![Version](https://img.shields.io/badge/version-6.0.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
+![Version](https://img.shields.io/badge/version-8.0.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-Compatible-844FBA?style=flat-square&logo=terraform&logoColor=white)
 ![Copilot](https://img.shields.io/badge/Security_Copilot-Enabled-6366F1?style=flat-square&logo=githubcopilot&logoColor=white)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/iammrherb/SPYCLOUD-SENTINEL/deploy.yml?style=flat-square&label=CI%2FCD&logo=githubactions&logoColor=white)](https://github.com/iammrherb/SPYCLOUD-SENTINEL/actions/workflows/deploy.yml)
@@ -536,27 +536,48 @@ All workbooks are deployed via the ARM template when `enableWorkbook` is set to 
 
 ## Security Copilot Integration
 
-SpyCloud Sentinel includes **three Security Copilot integrations** in the unified `copilot/` directory, providing **97 skills + 1 autonomous investigation agent** for natural-language investigation of darknet threat exposure data.
+SpyCloud Sentinel v8.0 includes **three Security Copilot integrations** in the unified `copilot/` directory, providing **100+ skills + 1 autonomous investigation agent with 17 sub-agents** for natural-language investigation of darknet threat exposure data.
+
+> **New in v8.0:** Connector health assessment, missing data source detection, playbook permission gap analysis, capability matrix, admin-ready recommendation reports, enhanced educational onboarding, and audience-adaptive personality. [Read the full Agents & Plugins Guide](docs/AGENTS-AND-PLUGINS-GUIDE.md) for a deep dive.
 
 <details>
 <summary><strong>All files in <code>copilot/</code></strong></summary>
 
 | File | Type | Skills | Description |
 |------|:----:|:------:|-------------|
-| `SpyCloud_Plugin.yaml` | KQL Plugin | 85 | Promptbook skills querying 6 Sentinel custom tables for user investigation, device forensics, breach catalog, UEBA correlation, remediation audit, executive reporting, and more |
+| `SpyCloud_Plugin.yaml` | KQL Plugin | 90+ | Promptbook skills querying 6 Sentinel custom tables plus 20+ native Microsoft tables for user investigation, device forensics, breach catalog, UEBA correlation, remediation audit, connector health, executive reporting, and more |
 | `SpyCloud_API_Plugin.yaml` | API Plugin | 12 | Direct REST API skills calling SpyCloud Enterprise, Compass, and Identity APIs for real-time lookups by email, domain, IP, username, or password |
 | `SpyCloud_API_Plugin_OpenAPI.yaml` | OpenAPI Spec | -- | OpenAPI 3.0 specification backing the API Plugin |
-| `SpyCloud_Agent.yaml` | Agent | 1 | Autonomous interactive investigation agent that triages incidents, pivots across data sources, and produces rich investigation reports |
+| `SpyCloud_Agent.yaml` | Agent | 1 (17 sub-agents) | Autonomous interactive investigation agent with connector awareness, educational mode, and audience adaptation. Orchestrates 17 sub-agents across 11 Microsoft security products |
+| `manifest.json` | OpenAI | -- | Plugin manifest for OpenAI-compatible hosts (not for Security Copilot) |
+
+</details>
+
+<details>
+<summary><strong>What's the difference between Agents and Plugins?</strong></summary>
+
+| Feature | Plugin | Agent |
+|---------|--------|-------|
+| **Nature** | Collection of discrete skills | Conversational AI personality |
+| **Memory** | None — stateless | Remembers context across conversation |
+| **Chaining** | Manual — one skill at a time | Automatic — chains skills intelligently |
+| **Interpretation** | Returns raw data | Interprets, analyzes, recommends |
+| **Personality** | None | SENTINEL — witty, thorough, empathetic |
+| **Use case** | Automation, promptbooks, quick lookups | Investigations, correlations, reporting |
+
+**Use all three together for maximum coverage.** [Full guide here](docs/AGENTS-AND-PLUGINS-GUIDE.md).
 
 </details>
 
 **Example prompts:**
 
 - "Show me all users exposed in the last 24 hours with severity 25"
-- "What malware families have targeted our organization this quarter?"
-- "Is this user's device still compromised? Show remediation status."
-- "Summarize the breach exposure for user@company.com"
-- "Which exposed credentials have not been remediated within SLA?"
+- "What data sources am I missing and what should I enable?" *(NEW)*
+- "Generate a connector recommendation report for my admin" *(NEW)*
+- "Are my playbooks actually running?" *(NEW)*
+- "What's the single most dangerous finding right now?"
+- "If you were an attacker with our exposed data, what would you do?"
+- "Walk me through onboarding — what should I set up first?" *(NEW)*
 - "Look up SpyCloud breach data for this email" *(API Plugin)*
 - "Investigate this user's full dark web exposure" *(Agent)*
 
@@ -568,7 +589,7 @@ SpyCloud Sentinel includes **three Security Copilot integrations** in the unifie
 1. Navigate to **Security Copilot > Settings > Plugins > Add Plugin**
 2. Upload `copilot/SpyCloud_Plugin.yaml`
 3. Enter your Tenant ID, Subscription ID, Resource Group, and Workspace Name
-4. 85 KQL skills become available in promptbooks and standalone prompts
+4. 90+ KQL skills become available in promptbooks and standalone prompts
 
 **API Plugin (direct SpyCloud API access):**
 
@@ -582,7 +603,9 @@ SpyCloud Sentinel includes **three Security Copilot integrations** in the unifie
 2. Configure the same Sentinel workspace settings
 3. Use the agent for guided, multi-step investigations with automatic pivoting
 
-All three integrations work together -- the KQL plugin queries historical Sentinel data, the API plugin pulls real-time data from SpyCloud, and the agent orchestrates complex investigations across both.
+All three integrations work together -- the KQL plugin queries historical Sentinel data, the API plugin pulls real-time data from SpyCloud, and the agent orchestrates complex investigations across both. The agent proactively identifies missing connectors and generates admin-ready recommendations.
+
+**For detailed setup instructions, role-based use cases, and optimization tips, see the [Agents & Plugins Guide](docs/AGENTS-AND-PLUGINS-GUIDE.md).**
 
 </details>
 

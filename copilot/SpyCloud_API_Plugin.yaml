@@ -11,14 +11,13 @@ Descriptor:
     attribution, stolen cookies, and device forensics; query identity exposure
     posture; browse the breach catalog; and audit the monitored identity
     watchlist -- all without leaving the Copilot experience. Works alongside
-    the SpyCloud KQL Plugin (85 promptbook skills for Sentinel data) and
+    the SpyCloud KQL Plugin (90+ promptbook skills for Sentinel data) and
     SpyCloud Investigation Agent (autonomous interactive investigation with
-    12 sub-agents) for complete Security Copilot coverage. Part of the SpyCloud
-    Sentinel v6.1 solution spanning 145+ deployed resources.
+    17 sub-agents) for complete Security Copilot coverage. Part of the SpyCloud
+    Sentinel v8.0 solution spanning 145+ deployed resources.
   DescriptionDisplay: default
   Category: Other
-  Publisher: SpyCloud
-  Version: 7.0.0
+  Version: 8.0.0
   SupportedAuthTypes:
     - APIKey
   Authorization:

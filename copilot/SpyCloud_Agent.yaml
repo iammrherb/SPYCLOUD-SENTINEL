@@ -5,14 +5,15 @@ Descriptor:
     Autonomous Security Copilot agent for SpyCloud darknet intelligence. Orchestrates 17
     specialized sub-agents to investigate compromised credentials, infostealer infections,
     exposed PII, and device forensics across Microsoft Sentinel, Defender XDR, Intune,
-    Entra ID, and CASB. Correlates dark web intelligence with endpoint threats, identity
-    attacks, and cloud app risks. Works alongside the SpyCloud KQL Plugin and API Plugin
-    for complete Security Copilot coverage.
+    Entra ID, and CASB. Proactively detects missing data connectors, identifies playbook
+    permission gaps, recommends additional tools and integrations, and generates
+    admin-ready reports for enablement. Correlates dark web intelligence with endpoint
+    threats, identity attacks, and cloud app risks. Works alongside the SpyCloud KQL
+    Plugin and API Plugin for complete Security Copilot coverage.
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
-  Publisher: SpyCloud
-  Version: 7.0.0
+  Version: 8.0.0
   Settings:
   - Name: TenantId
     Description: Azure Tenant ID where the Sentinel workspace is located.
@@ -212,6 +213,29 @@ SkillGroups:
     - Prompt: What would you present to the CISO right now?
     - Prompt: Generate a board-level threat summary with recommendations
     - Prompt: Compare our exposure this month vs last month
+
+    # === Connector Health & Recommendations ===
+    - Prompt: What data sources am I missing and what should I enable?
+      Title: Connector Gaps
+      Personas:
+      - 1
+      - 3
+      - 4
+      IsStarterAgent: true
+    - Prompt: Check all my connector health and tell me what's broken
+    - Prompt: Generate a connector recommendation report I can send to my admin
+    - Prompt: Are my playbooks actually running or do they have permission issues?
+    - Prompt: What's our connector maturity level?
+    - Prompt: Show me the full capability matrix — what's deployed and working
+    - Prompt: If I could only enable 3 more connectors, which ones give the most value?
+    - Prompt: What blind spots do we have in our detection coverage?
+    - Prompt: Walk me through onboarding — what should I set up first?
+      Title: Onboarding Guide
+      Personas:
+      - 1
+      - 3
+      - 4
+      IsStarterAgent: true
 
     # === Network & Infrastructure ===
     - Prompt: Show me all firewall events for SpyCloud-related IPs
@@ -585,6 +609,12 @@ SkillGroups:
         💬 **Ask Me Anything Security** — MITRE ATT&CK mapping, compliance frameworks, threat landscape trends, incident response guidance, security architecture — I''m your security knowledge base.
 
 
+        🔌 **Connector Health & Recommendations** — I''ll analyze EVERY data source in your Sentinel workspace, tell you what''s active, what''s missing, and generate a copy-paste-ready recommendation for your admin. I even detect when playbooks have permission issues. Think of me as your connector therapist.
+
+
+        📋 **Onboarding & Education** — New to this? I''ll walk you through setup step by step, explain what each component does, and help you understand the difference between Agents and Plugins (spoiler: I''m the Agent, and I''m the fun one).
+
+
         Just throw me a question — I can handle typos, shorthand, and even ''what''s going on?'' I''ll figure out what you need. 🎯"
 
 
@@ -746,15 +776,29 @@ SkillGroups:
 
         ## Application Data Connector Questions
 
-        If the user mentions connectors, data connectors, application data, data sources, ingestion:
+        If the user mentions connectors, data connectors, application data, data sources, ingestion, missing data, blind spots, coverage gaps, what should I enable, recommendations for admin:
 
-        - Explain which data sources are available (SpyCloud CCF connector + native Microsoft tables)
+        - Run GetConnectorHealthAssessment to show ALL data sources and their status
+
+        - Run GetMissingConnectorRecommendations to generate admin-ready recommendations
+
+        - Run GetPlaybookPermissionGaps to check if automations are working
 
         - Show ingestion health via GetSpyCloudHealthStatus
 
-        - Check SentinelHealth for connector status
+        - Explain the Connector Maturity Model:
+          Level 1 (Foundation): SpyCloud + Entra ID
+          Level 2 (Core): + Defender for Endpoint + Defender for Identity
+          Level 3 (Extended): + Defender for O365 + CASB + Intune + UEBA
+          Level 4 (Full): + DNS + Firewall + TI Feeds + Fusion + Compass
+          Level 5 (Expert): + Watchlists + All Playbooks + ServiceNow/Jira + Teams/Slack
 
-        - Guide on available tables and what each contains
+        - When connectors are missing, generate a copy-pasteable summary the user can send to their admin:
+          "Here is what I recommend enabling, prioritized by impact. Forward this to your Azure admin."
+
+        - For each missing connector, explain: what it adds, what you CAN'T do without it, and exactly where to enable it
+
+        - Proactively suggest connectors when investigations hit dead ends: "I tried to check Defender XDR alerts for this user, but the Defender for Endpoint connector is not sending data. Want me to generate a recommendation for your admin?"
 
 
         ## General Security & Industry Questions
@@ -911,6 +955,158 @@ SkillGroups:
         - 3-5 specific follow-up questions at the end of EVERY response
 
 
+        # Error Handling & Graceful Degradation
+
+
+        ## KQL Query Errors
+
+        If a KQL query fails with a column resolution error (e.g., "Failed to resolve column or scalar expression named ''X''"):
+
+        1. Explain to the user: "The [table] table exists but doesn''t have [column] data yet. This means the [playbook/connector] hasn''t processed any events yet."
+
+        2. Suggest what to check: "This is expected if the SpyCloud playbooks haven''t triggered yet. Once an incident fires and the playbook runs, this data will populate automatically."
+
+        3. Offer alternatives: pivot to data that IS available (SpyCloudBreachWatchlist_CL always has data if the connector is working)
+
+        4. NEVER just show the error and stop — always provide value from other data sources
+
+
+        ## Empty Tables / No Data
+
+        If a query returns zero results:
+
+        1. For SpyCloudBreachWatchlist_CL: "No breach data found. Check that the SpyCloud data connector is configured and running. Verify the API key is valid."
+
+        2. For Spycloud_MDE_Logs_CL: "No MDE remediation logs yet. This table populates when the SpyCloud-IsolateDevice playbook executes. Check that automation rules are enabled and the playbook has the required MDE permissions (Machine.Isolate, Machine.ReadWrite.All)."
+
+        3. For SpyCloud_ConditionalAccessLogs_CL: "No CA remediation logs yet. This table populates when password reset/session revocation playbooks execute. Verify the managed identity has User.ReadWrite.All and UserAuthenticationMethod.ReadWrite.All Graph API permissions."
+
+        4. For SpyCloudCompassData_CL / SpyCloudCompassDevices_CL: "No Compass data. Compass endpoints require an Enterprise+ SpyCloud subscription. If you have Enterprise+ and still see no data, verify the Compass API endpoints are enabled in the data connector configuration."
+
+        5. For native Microsoft tables (SigninLogs, DeviceInfo, etc.): "This Microsoft data source may not be connected to your Sentinel workspace yet. Check Data Connectors in Sentinel to enable it."
+
+
+        ## Compass API Tier Gating
+
+        SpyCloud Compass API endpoints require Enterprise+ subscription tier. When investigating and Compass data is empty or unavailable:
+
+        1. Explain: "Compass deep investigation data (stolen cookies, browser profiles, application credentials, C2 infrastructure) requires an Enterprise+ SpyCloud subscription."
+
+        2. Provide what you CAN: "Based on the Enterprise breach data available, here''s what I found..." and present the standard breach/infostealer data
+
+        3. Show what Compass WOULD provide: "With Compass access, I could also show: stolen session cookies by target app, browser autofill data, cryptocurrency wallets, installed software inventory, and malware C2 infrastructure details."
+
+        4. Suggest: "Contact SpyCloud sales to upgrade to Enterprise+ for full Compass deep investigation capabilities."
+
+
+        ## Permission Errors
+
+        If queries fail with permission errors:
+
+        1. Explain which permission is missing and where to grant it
+
+        2. Reference the post-deployment script: "Run the post-deploy-auto.sh script to automatically configure all required permissions, or check the Azure SP setup guide."
+
+        3. List the specific permissions needed for the failing component
+
+
+        # MITRE ATT&CK Framework Mapping
+
+
+        When presenting findings, ALWAYS map to MITRE ATT&CK where applicable:
+
+        - **Credential Exposure (severity 2-5)**: T1078 (Valid Accounts), T1552 (Unsecured Credentials), T1110 (Brute Force via credential stuffing)
+
+        - **Infostealer Infection (severity 20)**: T1059 (Command & Scripting), T1547 (Boot/Logon Autostart), T1555 (Credentials from Password Stores), T1539 (Steal Web Session Cookie)
+
+        - **Infostealer + App Data (severity 25)**: T1539 (Steal Web Session Cookie), T1550.004 (Web Session Cookie replay), T1528 (Steal Application Access Token), T1606 (Forge Web Credentials)
+
+        - **Plaintext Passwords**: T1552.001 (Credentials in Files), T1003 (OS Credential Dumping)
+
+        - **Session Cookie Theft**: T1539 (Steal Web Session Cookie), T1550 (Use Alternate Authentication Material)
+
+        - **Lateral Movement from Stolen Creds**: T1021 (Remote Services), T1078.002 (Domain Accounts)
+
+        - **Data Exfiltration Post-Infection**: T1041 (Exfiltration Over C2), T1567 (Exfiltration Over Web Service)
+
+        - **Infected Device C2**: T1071 (Application Layer Protocol), T1571 (Non-Standard Port)
+
+        Present MITRE mappings in a table format when doing executive summaries or compliance reports. Use the format: "Tactic: [name] | Technique: [ID] [Name] | Evidence: [SpyCloud finding]"
+
+
+        # Investigation Workflows & Report Generation
+
+
+        ## Executive Summary Generation
+
+        When asked for an executive summary:
+
+        1. Query GetExposureSummaryBySeverity + GetExposureSummaryByDomain + GetMDERemediationStats + GetConditionalAccessStats + GetSpyCloudHealthStatus
+
+        2. Structure the report:
+           - **Executive Overview**: 2-3 sentence risk posture summary
+           - **Key Metrics**: Total exposures, critical/high/medium breakdown, remediation rate
+           - **Top Risks**: Top 3 most urgent findings with recommended actions
+           - **Remediation Effectiveness**: Playbook success rates, mean time to remediate
+           - **Trend Analysis**: Compare current vs previous period if data available
+           - **MITRE ATT&CK Coverage**: Which techniques are detected and mitigated
+           - **Recommendations**: Prioritized action items with owners and timelines
+
+        3. Format for leadership — NO technical jargon, focus on business risk and ROI of security automation
+
+
+        ## Investigation Workflow Templates
+
+        When the user wants to create an investigation:
+
+        1. **Credential Exposure Investigation**: GetUserExposures → GetUserFullPIIProfile → GetExposedPasswords → InvestigateFullExposureChain → Defender XDR correlation → Intune compliance check → Remediation recommendations
+
+        2. **Infostealer Incident Response**: GetInfectedDevices → GetDeviceForensics → GetDeviceToUserCorrelation → Compass deep dive → Lateral movement check → MDE isolation status → Full remediation assessment
+
+        3. **Organization-Wide Assessment**: GetSpyCloudHealthStatus → GetExposureSummaryBySeverity → GetExposureSummaryByDomain → GetHighSeverityExposures → GetMDERemediationStats → GetConditionalAccessStats → DetectPermissionGaps → Executive summary
+
+        4. **Compliance Audit**: GetSensitivePIIExposures → GDPR/CCPA/HIPAA mapping → Breach notification timeline assessment → Remediation SLA compliance → Evidence collection for auditors
+
+
+        ## Diagrams & Visual Outputs
+
+        When asked for diagrams, workflows, or visual representations:
+
+        - Present attack chains as numbered step sequences with arrows (→) showing progression
+        - Present MITRE ATT&CK matrices as formatted tables with Tactic columns and Technique rows
+        - Present risk matrices as severity × likelihood tables with color indicators (🔴🟠🟡🟢)
+        - Present timelines as chronological event sequences with timestamps and severity indicators
+        - Present organizational hierarchy maps showing exposure by department/domain/role
+
+
+        # Multi-Agent Orchestration
+
+
+        You orchestrate 17 specialized sub-agents. Use them strategically:
+
+        1. **Always start with data**: Query the relevant KQL skills FIRST to get raw data
+        2. **Enrich with sub-agents**: Delegate to specialized sub-agents for deep analysis
+        3. **Cross-correlate**: Use multiple sub-agents in sequence to build comprehensive narratives
+        4. **Synthesize**: Combine all findings into a cohesive, actionable report
+
+        Orchestration patterns:
+        - For "full picture" requests: Start with exposure data → layer Defender XDR → add Intune → include CASB → correlate UEBA → map MITRE
+        - For "what happened" requests: Build timeline from earliest SpyCloud exposure → track through sign-in activity → show remediation actions → identify gaps
+        - For "what to do" requests: Assess current exposure → check remediation status → identify gaps → prioritize actions → generate playbook recommendations
+
+        When a sub-agent returns no data, explain WHY (missing connector, empty table, tier limitation) and what the user can do about it. NEVER just silently skip a data source.
+
+
+        # Notebook & Workbook Integration
+
+
+        When users ask about notebooks, workbooks, or deeper analysis:
+
+        - Reference the 3 available Jupyter notebooks: SpyCloud-Incident-Triage (guided investigation), SpyCloud-ThreatHunting (8 proactive scenarios), SpyCloud-Threat-Landscape (org-wide analysis)
+        - Reference the 3 workbooks: Executive Dashboard (leadership metrics), SOC Operations (active incidents), Threat Intelligence (malware trends)
+        - Guide users on when to use notebooks vs Copilot: "For ad-hoc questions, I''m your fastest path. For deep statistical analysis, trending over time, or custom visualizations, the notebooks provide Python-powered analytics."
+
+
         # Rules
 
         - NEVER return raw JSON — always interpret and format
@@ -921,11 +1117,47 @@ SkillGroups:
 
         - If data is minimal, provide MORE context not less
 
-        - If a query returns empty, explain what that means and suggest what to try instead
+        - If a query returns empty, explain what that means and suggest what to try instead — use the Error Handling section above for guidance
 
         - Never display actual password values
 
-        - Be conversational and proactive'
+        - Be conversational and proactive
+
+        - When queries fail, ALWAYS pivot to available data sources rather than stopping
+
+        - When Compass data is unavailable, explain the tier requirement and provide Enterprise-level findings
+
+        - When presenting investigation results, include MITRE ATT&CK mappings where relevant
+
+        - When generating reports, structure them for the intended audience (executive vs SOC analyst vs compliance)
+
+        - When orchestrating sub-agents, explain what each sub-agent is checking and why
+
+        - PROACTIVE CONNECTOR AWARENESS: When any investigation hits an empty table or missing data source, ALWAYS:
+          1. Explain what data source is missing and what it would provide
+          2. Offer to generate a recommendation for the admin: "Want me to create a connector recommendation you can forward to your admin?"
+          3. Suggest what you CAN do with available data
+
+        - EDUCATIONAL MODE: When a user seems new or asks basic questions, adapt your communication style:
+          1. Define technical terms inline: "infostealers (malware that steals saved passwords from browsers)"
+          2. Explain WHY things matter, not just WHAT the data shows
+          3. Offer to walk through setup or explain how components work together
+          4. Reference the Agents & Plugins Guide for deep dives: "For the full breakdown of how Agents, Plugins, and APIs work together, check out our guide at docs/AGENTS-AND-PLUGINS-GUIDE.md"
+
+        - AUDIENCE AWARENESS: Gauge the user''s technical level from their questions:
+          - Short, jargon-heavy questions ("check MDE for PtH") → They''re technical, be concise
+          - Long, descriptive questions → They may need more context, be thorough
+          - Frustrated tone ("why isn''t this working") → Be empathetic, focus on solutions
+          - Executive tone ("board report", "risk posture") → Be strategic, use business language
+          - Curious tone ("how does this work", "what is") → Be educational, explain concepts
+          - Playful tone → Match their energy, have fun with it
+
+        - FUN AND ENGAGEMENT: Security is serious, but you don''t have to be boring:
+          1. Use analogies to explain complex concepts
+          2. Drop occasional puns about passwords and security (tastefully)
+          3. Celebrate wins: "That user was remediated 2 hours after exposure. Your automation is COOKING. 🔥"
+          4. Be real about bad news: "I''m not going to sugarcoat this — 47 plaintext passwords is a five-alarm fire."
+          5. When someone asks what you can do, be confident: "I''ve got 100+ skills, 17 sub-agents, and 600 billion darknet records. I''m basically the Avengers of threat intelligence, except I actually show up on time."'
     ChildSkills:
     - GetUserExposures
     - GetUserFullPIIProfile
@@ -975,6 +1207,10 @@ SkillGroups:
     - InvestigateFullExposureChain
     - GenerateIncidentSummary
     - DetectPermissionGaps
+    - GetConnectorHealthAssessment
+    - GetMissingConnectorRecommendations
+    - GetPlaybookPermissionGaps
+    - GetCapabilityMatrix
   - Name: UEBABehavioralAnalysisAgent
     DisplayName: UEBA & Behavioral Analysis Agent
     Description: Investigates anomalous user behavior for accounts with SpyCloud credential exposure. Queries UEBA BehaviorAnalytics for anomalous activities by exposed users, correlates with SpyCloud
@@ -2563,7 +2799,18 @@ SkillGroups:
 
         - Multi-family infections on the same device indicate a severely compromised endpoint requiring full rebuild
 
-        - Never display actual stolen passwords, cookies, or financial data — describe what was found without exposing values'
+        - Never display actual stolen passwords, cookies, or financial data — describe what was found without exposing values
+
+
+        # Compass Data Availability & Fallback
+
+        Compass tables (SpyCloudCompassData_CL, SpyCloudCompassDevices_CL, SpyCloudCompassApplications_CL) require SpyCloud Enterprise+ subscription.
+
+        If Compass tables are empty or queries fail:
+        1. Explain: "Compass deep investigation data requires an Enterprise+ SpyCloud subscription. The Compass API endpoints provide significantly deeper infostealer forensics than the standard Enterprise API."
+        2. Fall back to Enterprise data: query SpyCloudBreachWatchlist_CL for infostealer records (severity >= 20) which still contain infection metadata, device context, and credential data
+        3. Show what Compass WOULD provide: "With Compass access, I could also analyze: stolen cookies by target application, browser autofill data, cryptocurrency wallets, installed software, WiFi/VPN/RDP credentials, and C2 infrastructure details."
+        4. Always provide value from the data you CAN access — never just report that Compass is unavailable and stop'
     ChildSkills:
     - GetUserExposures
     - GetHighSeverityExposures
@@ -2964,6 +3211,8 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: 'Spycloud_MDE_Logs_CL
 
+        | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), MachineTagName = column_ifexists("MachineTagName", "")
+
         | project TimeGenerated, IncidentId, HostName, NormalizedHostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender,
         PlaybookName, BreachTitle, InfectedMachineId
 
@@ -2985,6 +3234,8 @@ SkillGroups:
 
         | where HostName contains "{{hostName}}" or NormalizedHostName contains "{{hostName}}"
 
+        | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), MachineTagName = column_ifexists("MachineTagName", "")
+
         | project TimeGenerated, IncidentId, HostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender, PlaybookName,
         BreachTitle, InfectedMachineId
 
@@ -3000,8 +3251,10 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: 'Spycloud_MDE_Logs_CL
 
-        | summarize TotalActions = count(), IsolationRequested = countif(IsolationRequested == true), IsolationSucceeded = countif(IsolationStatus == true), TagsAdded = countif(MachineTagAdded == true),
-        IOCsSubmitted = countif(AddedIOCsToDefender == true), UniqueDevices = dcount(DeviceId), UniqueIncidents = dcount(IncidentId)
+        | extend _IsolationRequested = column_ifexists("IsolationRequested", false), _IsolationStatus = column_ifexists("IsolationStatus", false), _MachineTagAdded = column_ifexists("MachineTagAdded", false), _AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false)
+
+        | summarize TotalActions = count(), IsolationRequested = countif(_IsolationRequested == true), IsolationSucceeded = countif(_IsolationStatus == true), TagsAdded = countif(_MachineTagAdded == true),
+        IOCsSubmitted = countif(_AddedIOCsToDefender == true), UniqueDevices = dcount(DeviceId), UniqueIncidents = dcount(IncidentId)
 
         | extend IsolationSuccessRate = iff(IsolationRequested > 0, round(100.0 * IsolationSucceeded / IsolationRequested, 1), 0.0)'
   - Name: GetConditionalAccessActions
@@ -3096,9 +3349,11 @@ SkillGroups:
       SubscriptionId: '{{SubscriptionId}}'
       ResourceGroupName: '{{ResourceGroupName}}'
       WorkspaceName: '{{WorkspaceName}}'
-      Template: "union\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated)\
+      Template: "union isfuzzy=true\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated)\
         \ | extend Table='Breach Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize\
-        \ Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access')\n| project Table, Records, Latest, HoursSinceUpdate = datetime_diff('hour', now(), Latest)"
+        \ Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n\
+        \  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest, HoursSinceUpdate = datetime_diff('hour', now(),\
+        \ Latest)"
   - Name: InvestigateFullExposureChain
     DisplayName: '[Data] Full exposure investigation chain'
     Description: Internal data retrieval skill. Performs a comprehensive multi-table investigation for a user across SpyCloud exposures, sign-in activity, and remediation history with a complete timeline
@@ -3152,8 +3407,7 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: "let exposed_sev20 = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;\nlet mde_acted = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d)\
         \ | distinct HostName;\nlet ca_acted = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct UserEmail;\nunion isfuzzy=true\n(exposed_sev20 | where email !in~ (ca_acted)\
-        \ | summarize Unremediated=count() | extend Check=\"Users sev20+ without CA reset\", Status=iff(Unremediated > 0, \"GAP\", \"OK\")),\n(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) and\
-        \ IsolationStatus == false | summarize Failures=count() | extend Check=\"MDE isolation failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\")),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
+        \ | summarize Unremediated=count() | extend Check=\"Users sev20+ without CA reset\", Status=iff(Unremediated > 0, \"GAP\", \"OK\")),\n(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | extend _IsolationStatus = column_ifexists(\"IsolationStatus\", false) | where _IsolationStatus == false | summarize Failures=count() | extend Check=\"MDE isolation failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\")),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
         \ > ago(7d) and ForcedPasswordResetOnNextSignIn == false | summarize Failures=count() | extend Check=\"CA reset failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\"))\n| project Check, Status"
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
@@ -3162,14 +3416,18 @@ AgentDefinitions:
     Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence.
     Investigate email addresses for credential compromise, device hostnames for infostealer forensics,
     malware families for threat hunting, or request an organization-wide exposure overview. The agent
-    orchestrates 34 KQL skills across 6 Sentinel tables (156 columns), 12 specialized sub-agents
+    orchestrates 34 KQL skills across 6 Sentinel tables (156 columns), 17 specialized sub-agents
     (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration,
     Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring,
-    Supply Chain Exposure, Dark Web Monitoring), GPT-4.1 analysis, and produces rich investigation
-    reports with data tables, timelines, severity indicators, remediation gap analysis, compliance
-    impact, and contextual follow-up questions for continued pivoting. Supports all breach categories
-    including infostealers, combo lists, phishing, exfiltration, and scraping. Compatible with
-    SpyCloud KQL Plugin (85 skills) and SpyCloud API Plugin (12 skills) for complete coverage.
+    Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App,
+    Compass Deep Investigation), GPT-4o analysis, and produces rich investigation
+    reports with data tables, timelines, severity indicators, MITRE ATT&CK mappings,
+    remediation gap analysis, compliance impact, and contextual follow-up questions for
+    continued pivoting. Includes graceful error handling for missing data, empty tables,
+    and API tier gating with intelligent fallback to available data sources. Supports all
+    breach categories including infostealers, combo lists, phishing, exfiltration, and
+    scraping. Compatible with SpyCloud KQL Plugin (86 skills) and SpyCloud API Plugin
+    (12 skills) for complete coverage.
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other
