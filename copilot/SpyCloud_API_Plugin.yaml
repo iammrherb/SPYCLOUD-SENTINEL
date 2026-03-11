@@ -16,9 +16,9 @@ Descriptor:
     12 sub-agents) for complete Security Copilot coverage. Part of the SpyCloud
     Sentinel v6.1 solution spanning 145+ deployed resources.
   DescriptionDisplay: default
-  Category: Threat Intelligence
+  Category: Other
   Publisher: SpyCloud
-  Version: 6.1.0
+  Version: 7.0.0
   SupportedAuthTypes:
     - ApiKey
   Authorization:

@@ -23,10 +23,10 @@ Descriptor:
     SpyCloud API Plugin (12 direct REST API skills) and SpyCloud Investigation Agent
     (autonomous interactive investigation with 12 sub-agents) for complete Security Copilot
     coverage across 145+ deployed Sentinel resources.
-  Category: Threat Intelligence
+  Category: Other
   DescriptionDisplay: default
   Publisher: SpyCloud
-  Version: 6.1.0
+  Version: 7.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId
