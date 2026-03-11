@@ -20,7 +20,7 @@ servers:
     description: SpyCloud Production API
 
 security:
-  - BearerAuth: []
+  - ApiKeyAuth: []
 
 tags:
   - name: Enterprise - Email Lookup
@@ -820,7 +820,7 @@ paths:
 components:
 
   securitySchemes:
-    BearerAuth:
+    ApiKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key
