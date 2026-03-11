@@ -3596,12 +3596,9 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data/watchlist",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
                   "httpMethod": "GET",
-                  "queryParameters": {
-                    "severity": "[[join(parameters('severity'), ',')]",
-                    "type": "[[join(parameters('watchlistType'), ',')]"
-                  },
+                  "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
@@ -3648,11 +3645,9 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices/watchlist",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
                   "httpMethod": "GET",
-                  "queryParameters": {
-                    "severity": "[[join(parameters('severity'), ',')]"
-                  },
+                  "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
@@ -3699,11 +3694,9 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications/watchlist",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications",
                   "httpMethod": "GET",
-                  "queryParameters": {
-                    "severity": "[[join(parameters('severity'), ',')]"
-                  },
+                  "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
                   "retryCount": "[[int(first(parameters('retryCount')))]",
                   "timeoutInSeconds": "[[int(first(parameters('timeoutInSeconds')))]",
