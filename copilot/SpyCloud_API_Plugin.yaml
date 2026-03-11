@@ -9,9 +9,10 @@ Descriptor:
     - APIKey
   Authorization:
     Type: APIKey
-    Key: X-API-Key
+    Key: api_key
     Location: Header
     AuthScheme: Bearer
+    AuthorizationHeader: Authorization
   Settings:
     - Name: ApiBaseUrl
       Description: "Base URL of the SpyCloud API. Override only if directed by SpyCloud support for regional or on-premises deployments."

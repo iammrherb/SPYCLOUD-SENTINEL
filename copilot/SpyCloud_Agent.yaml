@@ -1203,6 +1203,11 @@ SkillGroups:
     - GetMissingConnectorRecommendations
     - GetPlaybookPermissionGaps
     - GetCapabilityMatrix
+    - BuildThreatNarrative
+    - GenerateComplianceAssessment
+    - GenerateExecutiveBriefing
+    - CorrelateExternalThreatIntel
+    - DesignResponsePlaybook
   - Name: UEBABehavioralAnalysisAgent
     DisplayName: UEBA & Behavioral Analysis Agent
     Description: Investigates anomalous user behavior for accounts with SpyCloud credential exposure. Queries UEBA BehaviorAnalytics for anomalous activities by exposed users, correlates with SpyCloud
@@ -2837,6 +2842,120 @@ SkillGroups:
         \ with clear headers, bullet points for findings, and\nbold text for critical items. Use severity indicators:\n\U0001F534 CRITICAL  \U0001F7E0 HIGH  \U0001F7E1 MEDIUM  \U0001F7E2 LOW\n\nNever fabricate\
         \ data. If information is missing, state what additional\ninvestigation is needed.\n<|im_end|>\n<|im_start|>user\nAnalyze the following SpyCloud investigation findings and produce a\nstructured\
         \ report:\n\n{{RawFindings}}\n<|im_end|>"
+  - Name: BuildThreatNarrative
+    DisplayName: '[Analysis] Build Attack Narrative from Multi-Source Data'
+    Description: Takes investigation data from multiple sources (SpyCloud, Defender XDR, Intune, Entra ID, CASB) and constructs a chronological attack narrative showing the full kill chain from initial
+      credential theft through lateral movement and potential data exfiltration. Maps findings to MITRE ATT&CK and generates a complete incident timeline.
+    Inputs:
+    - Name: MultiSourceData
+      Description: Combined investigation data from multiple security sources including SpyCloud, Defender, Intune, Entra, and CASB queries.
+      Required: true
+    - Name: FocusEntity
+      Description: The primary entity being investigated (email, hostname, IP, or malware family name).
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are an expert threat intelligence analyst and incident responder\
+        \ who specializes in building comprehensive attack narratives\nfrom multi-source security data. You correlate dark web intelligence\n(SpyCloud), endpoint telemetry (Defender XDR/MDE), device compliance\n\
+        (Intune), identity security (Entra ID), and cloud app security (CASB)\ninto a single coherent story.\n\nYour task:\n1. BUILD TIMELINE: Create a chronological event sequence from earliest\n   exposure\
+        \ to current state. Include specific timestamps and entity names.\n\n2. MAP KILL CHAIN: Map events to MITRE ATT&CK tactics/techniques:\n   - Initial Access (T1078, T1566)\n   - Credential Access\
+        \ (T1555, T1539, T1552)\n   - Persistence (T1547, T1098)\n   - Lateral Movement (T1021, T1550)\n   - Exfiltration (T1041, T1567)\n   Present as: Tactic | Technique ID | Technique Name | Evidence\n\
+        \n3. ASSESS BLAST RADIUS: Determine all affected systems, accounts,\n   applications, and data. Quantify the scope.\n\n4. IDENTIFY ACTIVE THREATS: Flag any indicators of ongoing compromise\n  \
+        \ vs historical exposure.\n\n5. GENERATE RESPONSE PLAN: Provide containment, eradication, and\n   recovery recommendations in PICERL format.\n\n6. CROSS-PLATFORM CORRELATION: Specifically connect:\n\
+        \   - SpyCloud exposure → Defender alerts for same user/device\n   - Stolen credentials → Sign-in activity in Entra ID\n   - Infected devices → Intune compliance state\n   - Compromised accounts\
+        \ → Cloud app access in CASB\n\nPresent as a compelling security story with clear sections,\ntimeline visualization, and actionable conclusions.\n<|im_end|>\n<|im_start|>user\nBuild a comprehensive\
+        \ attack narrative from the following\nmulti-source investigation data:\n\nFocus Entity: {{FocusEntity}}\n\n{{MultiSourceData}}\n<|im_end|>"
+  - Name: GenerateComplianceAssessment
+    DisplayName: '[Analysis] Generate Compliance & Regulatory Assessment'
+    Description: Analyzes SpyCloud exposure data against major compliance frameworks (GDPR, CCPA, HIPAA, PCI-DSS, SOX, NIST) to determine breach notification obligations, regulatory exposure, and
+      required remediation timelines. Produces audit-ready documentation.
+    Inputs:
+    - Name: ExposureData
+      Description: SpyCloud exposure data including PII fields, severity levels, affected users, and remediation status.
+      Required: true
+    - Name: Frameworks
+      Description: Specific compliance frameworks to assess against (e.g., GDPR, HIPAA, PCI-DSS). Defaults to all applicable frameworks if omitted.
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a cybersecurity compliance specialist with deep expertise\
+        \ in data breach regulations across multiple jurisdictions and\nindustry frameworks.\n\nAnalyze the exposure data and assess:\n\n1. GDPR (EU General Data Protection Regulation):\n   - Is this a\
+        \ reportable breach under Article 33? (72-hour DPA notification)\n   - Is individual notification required under Article 34?\n   - What categories of personal data are affected?\n   - Risk to rights\
+        \ and freedoms assessment\n\n2. CCPA/CPRA (California Consumer Privacy Act):\n   - Does this constitute a breach of unencrypted personal information?\n   - Is consumer notification required? (Section\
+        \ 1798.82)\n   - Attorney General notification threshold (500+ residents)\n\n3. HIPAA (Health Insurance Portability and Accountability Act):\n   - Is Protected Health Information (PHI) exposed?\n\
+        \   - Breach notification timeline (60 days to individuals, HHS)\n   - Breach Risk Assessment per 45 CFR 164.402\n\n4. PCI-DSS (Payment Card Industry Data Security Standard):\n   - Is cardholder\
+        \ data exposed? (PAN, CVV, expiry)\n   - Incident response per PCI-DSS Requirement 12.10\n   - Card brand notification obligations\n\n5. SOX (Sarbanes-Oxley Act):\n   - Material weakness assessment\
+        \ for financial reporting systems\n   - Internal control impact evaluation\n\n6. NIST Cybersecurity Framework:\n   - Map to Identify, Protect, Detect, Respond, Recover functions\n   - CSF profile\
+        \ gap analysis\n\nFor each applicable framework:\n- Determine if notification is required\n- Specify notification deadlines\n- Identify required recipients (regulators, individuals, partners)\n\
+        - Recommend specific remediation steps\n- Provide audit-ready evidence documentation format\n\nPresent in a structured compliance report format suitable for\nlegal review and regulatory submission.\n\
+        <|im_end|>\n<|im_start|>user\nAssess the following exposure data against compliance frameworks:\n\nTarget Frameworks: {{Frameworks}}\n\n{{ExposureData}}\n<|im_end|>"
+  - Name: GenerateExecutiveBriefing
+    DisplayName: '[Analysis] Generate Executive Risk Briefing'
+    Description: Transforms technical SpyCloud investigation findings into a board-level executive briefing with business impact analysis, risk quantification, trend assessment, strategic recommendations,
+      and ROI metrics for security automation investment.
+    Inputs:
+    - Name: TechnicalFindings
+      Description: Technical investigation data and metrics from SpyCloud, remediation statistics, and detection coverage.
+      Required: true
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a CISO-level security advisor who translates technical\
+        \ threat intelligence into business-impact language for executive\nleadership and board audiences.\n\nTransform the technical findings into:\n\n1. EXECUTIVE SUMMARY (2-3 sentences):\n   - Overall\
+        \ risk posture in business terms\n   - Key trend (improving/worsening/stable)\n   - Most urgent action required\n\n2. RISK DASHBOARD:\n   - Overall Risk Rating: Critical/High/Medium/Low with justification\n\
+        \   - Exposure Trend: Arrow indicator with percentage change\n   - Remediation Effectiveness: Percentage with SLA compliance\n   - Top 3 Risk Factors with business impact descriptions\n\n3. BUSINESS\
+        \ IMPACT ANALYSIS:\n   - Quantify potential financial exposure (data breach cost models)\n   - Regulatory risk (fines, notification costs)\n   - Reputation risk (customer trust, partner confidence)\n\
+        \   - Operational risk (system downtime, incident response costs)\n\n4. AUTOMATION ROI:\n   - Number of incidents auto-remediated\n   - Estimated time saved vs manual response\n   - Coverage gap\
+        \ requiring human intervention\n\n5. STRATEGIC RECOMMENDATIONS:\n   - Prioritized by business impact (not technical severity)\n   - Each with estimated effort, cost, and risk reduction\n   - Quick\
+        \ wins vs long-term investments\n\n6. PEER COMPARISON (if applicable):\n   - Industry benchmarks for credential exposure rates\n   - Mean time to remediate vs industry average\n\nUse clear, non-technical\
+        \ language. No acronyms without definition.\nPresent numbers as business metrics, not raw counts.\nFocus on decisions executives need to make, not technical details.\n<|im_end|>\n<|im_start|>user\n\
+        Generate an executive risk briefing from the following findings:\n\n{{TechnicalFindings}}\n<|im_end|>"
+  - Name: CorrelateExternalThreatIntel
+    DisplayName: '[Analysis] Correlate with External Threat Intelligence'
+    Description: Takes SpyCloud indicators (IPs, domains, malware families, hashes) and generates enriched analysis by correlating with known threat intelligence context including VirusTotal reputation,
+      AbuseIPDB confidence, MITRE ATT&CK technique mapping, and threat actor attribution. Uses AI to synthesize available context into actionable intelligence.
+    Inputs:
+    - Name: Indicators
+      Description: IOCs and threat indicators extracted from SpyCloud data (IPs, domains, malware names, file hashes, URLs).
+      Required: true
+    - Name: ContextData
+      Description: Additional context from Sentinel ThreatIntelligenceIndicator table, IOC blocklist watchlist, or previous enrichment results.
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a threat intelligence analyst specializing in IOC\
+        \ enrichment, threat actor attribution, and malware family analysis.\nYou have deep knowledge of:\n\n- Infostealer malware families: RedLine, LummaC2, Vidar, Raccoon,\n  StealC, Mars, Titan, Aurora,\
+        \ MetaStealer, Mystic, Stealc,\n  RisePro, Atomic (macOS), Bandit, Erbium\n- Threat actor groups and their TTPs\n- Dark web marketplaces and forums\n- C2 infrastructure patterns\n- VirusTotal,\
+        \ AbuseIPDB, Shodan indicator context\n- MITRE ATT&CK technique mapping\n\nFor the provided indicators:\n\n1. MALWARE ANALYSIS: For each malware family identified:\n   - Known capabilities (what\
+        \ data it steals)\n   - Distribution methods (phishing, malvertising, cracked software)\n   - C2 infrastructure patterns\n   - Detection difficulty and AV evasion techniques\n   - MITRE ATT&CK\
+        \ techniques used\n\n2. IOC ENRICHMENT: For IPs, domains, URLs:\n   - Likely purpose (C2, exfil, distribution, legitimate)\n   - Geographic attribution\n   - Historical threat context\n   - Hosting\
+        \ infrastructure analysis\n   - Confidence assessment (high/medium/low)\n\n3. THREAT ACTOR ATTRIBUTION:\n   - Link malware families to known threat actor groups\n   - Assess whether this is targeted\
+        \ or opportunistic\n   - Identify campaign patterns\n\n4. ACTIONABLE RECOMMENDATIONS:\n   - IOCs to block immediately (high confidence)\n   - IOCs requiring further investigation\n   - Detection\
+        \ signatures or hunting queries to deploy\n   - Defensive measures specific to the identified malware/actor\n\nPresent as structured threat intelligence report with confidence levels.\n<|im_end|>\n\
+        <|im_start|>user\nEnrich and analyze the following threat indicators:\n\nIndicators:\n{{Indicators}}\n\nAdditional Context:\n{{ContextData}}\n<|im_end|>"
+  - Name: DesignResponsePlaybook
+    DisplayName: '[Analysis] Design Custom Response Playbook'
+    Description: Analyzes specific threat scenarios from SpyCloud findings and designs custom incident response playbooks with step-by-step procedures, automation opportunities, decision trees, escalation
+      criteria, and integration points with existing Microsoft security tooling.
+    Inputs:
+    - Name: ThreatScenario
+      Description: The specific threat scenario or finding to design a response playbook for (e.g., mass credential exposure, VIP infostealer infection, session cookie theft).
+      Required: true
+    - Name: ExistingCapabilities
+      Description: Available automation and tooling context (playbooks deployed, connectors active, permissions granted).
+      Required: false
+    Settings:
+      ModelName: gpt-4o
+      Template: "<|im_start|>system\nYou are a security automation architect who designs incident\
+        \ response playbooks for Microsoft Sentinel and Security Copilot.\nYou understand Logic Apps, Defender XDR actions, Entra ID APIs,\nIntune device actions, and SpyCloud data structures.\n\nDesign\
+        \ a complete response playbook:\n\n1. TRIGGER CONDITIONS:\n   - What analytics rule or condition triggers this playbook\n   - Severity threshold for automatic vs manual execution\n   - Rate limiting\
+        \ and deduplication logic\n\n2. TRIAGE PHASE:\n   - Automated data collection steps (KQL queries to run)\n   - Entity extraction (users, devices, IPs, malware)\n   - Severity scoring criteria\n\
+        \   - Escalation decision tree\n\n3. CONTAINMENT PHASE:\n   - Immediate containment actions (auto-execute for critical)\n   - Microsoft Graph API calls (password reset, session revoke, MFA enforce)\n\
+        \   - MDE API calls (device isolation, IOC submission)\n   - Conditional Access policy changes\n   - Firewall rule updates\n\n4. INVESTIGATION PHASE:\n   - Cross-platform queries to run\n   - Evidence\
+        \ collection checklist\n   - Timeline reconstruction steps\n   - Correlation with Defender XDR, Intune, CASB\n\n5. REMEDIATION PHASE:\n   - User notification templates\n   - SOC team notification\
+        \ with context\n   - Incident enrichment with SpyCloud data\n   - Compliance assessment triggers\n\n6. RECOVERY PHASE:\n   - Verification steps (confirm remediation effective)\n   - Monitoring period\
+        \ definition\n   - Lessons learned documentation\n\n7. METRICS:\n   - SLA targets for each phase\n   - Success/failure criteria\n   - Reporting requirements\n\nPresent as an actionable playbook with\
+        \ decision trees,\nAPI call specifications, and Logic App design guidance.\n<|im_end|>\n<|im_start|>user\nDesign a response playbook for this threat scenario:\n\nScenario: {{ThreatScenario}}\n\n\
+        Existing Capabilities: {{ExistingCapabilities}}\n<|im_end|>"
 - Format: KQL
   Skills:
   - Name: GetUserExposures
@@ -3401,14 +3520,106 @@ SkillGroups:
         \ | distinct HostName;\nlet ca_acted = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct UserEmail;\nunion isfuzzy=true\n(exposed_sev20 | where email !in~ (ca_acted)\
         \ | summarize Unremediated=count() | extend Check=\"Users sev20+ without CA reset\", Status=iff(Unremediated > 0, \"GAP\", \"OK\")),\n(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | extend _IsolationStatus = column_ifexists(\"IsolationStatus\", false) | where _IsolationStatus == false | summarize Failures=count() | extend Check=\"MDE isolation failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\")),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
         \ > ago(7d) and ForcedPasswordResetOnNextSignIn == false | summarize Failures=count() | extend Check=\"CA reset failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\"))\n| project Check, Status"
+  - Name: GetConnectorHealthAssessment
+    DisplayName: '[Data] Assess connector and data source health'
+    Description: Internal data retrieval skill. Evaluates the health and ingestion status of all SpyCloud and Microsoft data sources by checking recent record counts, last ingestion times, and identifying
+      data gaps across all 6 custom tables and key Microsoft security tables.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: "union isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), LastIngestion=max(TimeGenerated) | extend Source=\"SpyCloudBreachWatchlist_CL\", Status=iff(LastIngestion\
+        \ > ago(7d), \"Active\", \"Stale\")),\n(SpyCloudBreachCatalog_CL | summarize Records=count(), LastIngestion=max(TimeGenerated) | extend Source=\"SpyCloudBreachCatalog_CL\", Status=iff(LastIngestion\
+        \ > ago(7d), \"Active\", \"Stale\")),\n(SpyCloudCompassData_CL | summarize Records=count(), LastIngestion=max(TimeGenerated) | extend Source=\"SpyCloudCompassData_CL\", Status=iff(LastIngestion\
+        \ > ago(7d), \"Active\", \"Stale\")),\n(SpyCloudCompassDevices_CL | summarize Records=count(), LastIngestion=max(TimeGenerated) | extend Source=\"SpyCloudCompassDevices_CL\", Status=iff(LastIngestion\
+        \ > ago(7d), \"Active\", \"Stale\")),\n(Spycloud_MDE_Logs_CL | summarize Records=count(), LastIngestion=max(TimeGenerated) | extend Source=\"Spycloud_MDE_Logs_CL\", Status=iff(LastIngestion >\
+        \ ago(7d), \"Active\", \"Stale\")),\n(SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), LastIngestion=max(TimeGenerated) | extend Source=\"SpyCloud_ConditionalAccessLogs_CL\", Status=iff(LastIngestion\
+        \ > ago(7d), \"Active\", \"Stale\")),\n(SigninLogs | take 1 | summarize Records=count() | extend Source=\"SigninLogs\", LastIngestion=now(), Status=iff(Records > 0, \"Connected\", \"Not Connected\"\
+        )),\n(SecurityAlert | take 1 | summarize Records=count() | extend Source=\"SecurityAlert\", LastIngestion=now(), Status=iff(Records > 0, \"Connected\", \"Not Connected\")),\n(DeviceInfo | take\
+        \ 1 | summarize Records=count() | extend Source=\"DeviceInfo (MDE)\", LastIngestion=now(), Status=iff(Records > 0, \"Connected\", \"Not Connected\")),\n(BehaviorAnalytics | take 1 | summarize\
+        \ Records=count() | extend Source=\"BehaviorAnalytics (UEBA)\", LastIngestion=now(), Status=iff(Records > 0, \"Connected\", \"Not Connected\"))\n| project Source, Status, Records, LastIngestion\n\
+        | order by Status asc, Source asc"
+  - Name: GetMissingConnectorRecommendations
+    DisplayName: '[Data] Generate missing connector recommendations'
+    Description: Internal data retrieval skill. Identifies which Microsoft data sources are not connected to the Sentinel workspace and generates prioritized recommendations for enabling them, including
+      the security value each connector provides for SpyCloud correlation.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: "let check_table = (T: (c: long), name: string, desc: string, priority: int) { T | extend Source=name, Description=desc, Priority=priority };\nunion isfuzzy=true\n(SigninLogs | take\
+        \ 1 | summarize c=count() | where c == 0 | extend Source=\"Entra ID Sign-in Logs\", Description=\"User authentication events, MFA status, Conditional Access results\", Priority=1, Status=\"\
+        Missing\"),\n(SecurityAlert | where ProviderName has \"Fusion\" | take 1 | summarize c=count() | where c == 0 | extend Source=\"Fusion ML Detection\", Description=\"Multistage attack detection\
+        \ correlating SpyCloud with other signals\", Priority=2, Status=\"Missing\"),\n(DeviceInfo | take 1 | summarize c=count() | where c == 0 | extend Source=\"Defender for Endpoint\", Description=\"\
+        Endpoint alerts, device isolation, process/network telemetry\", Priority=1, Status=\"Missing\"),\n(IdentityLogonEvents | take 1 | summarize c=count() | where c == 0 | extend Source=\"Defender\
+        \ for Identity\", Description=\"Identity attacks: pass-the-hash, golden ticket, lateral movement\", Priority=2, Status=\"Missing\"),\n(EmailEvents | take 1 | summarize c=count() | where c ==\
+        \ 0 | extend Source=\"Defender for Office 365\", Description=\"Email threats, phishing, credential harvesting targeting exposed users\", Priority=3, Status=\"Missing\"),\n(CloudAppEvents | take\
+        \ 1 | summarize c=count() | where c == 0 | extend Source=\"Defender for Cloud Apps (CASB)\", Description=\"Shadow IT, OAuth abuse, DLP violations from compromised accounts\", Priority=2, Status=\"\
+        Missing\"),\n(BehaviorAnalytics | take 1 | summarize c=count() | where c == 0 | extend Source=\"UEBA (User Entity Behavior)\", Description=\"Behavioral anomalies for users with credential exposure\"\
+        , Priority=2, Status=\"Missing\"),\n(ThreatIntelligenceIndicator | take 1 | summarize c=count() | where c == 0 | extend Source=\"Threat Intelligence Feeds\", Description=\"TI correlation with\
+        \ SpyCloud infection IPs and domains\", Priority=3, Status=\"Missing\")\n| project Source, Description, Priority, Status\n| order by Priority asc"
+  - Name: GetPlaybookPermissionGaps
+    DisplayName: '[Data] Check playbook permission gaps'
+    Description: Internal data retrieval skill. Identifies permission gaps preventing SpyCloud playbooks from executing properly by checking remediation coverage, execution failures, and comparing
+      high-severity exposures against actual remediation actions taken.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: "let sev20_users = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email;\nlet sev20_devices = SpyCloudBreachWatchlist_CL | where TimeGenerated\
+        \ > ago(14d) and severity >= 20 and isnotempty(infected_machine_id) | distinct infected_machine_id;\nlet ca_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(14d) | distinct\
+        \ UserEmail;\nlet mde_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | distinct HostName;\nlet ca_total = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated >\
+        \ ago(14d) | count);\nlet mde_total = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | count);\nlet ca_failures = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
+        \ > ago(14d) and ForcedPasswordResetOnNextSignIn == false | count);\nlet mde_failures = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | extend _IsolationStatus = column_ifexists(\"\
+        IsolationStatus\", false) | where _IsolationStatus == false | count);\nunion isfuzzy=true\n(print Check=\"Identity remediation (CA/password reset) coverage\", Metric=strcat(toscalar(sev20_users\
+        \ | where email in~ (ca_users) | count), \" of \", toscalar(sev20_users | count), \" sev20+ users remediated\"), Status=iff(toscalar(sev20_users | where email !in~ (ca_users) | count) > 0, \"\
+        GAP\", \"OK\")),\n(print Check=\"MDE device isolation coverage\", Metric=strcat(toscalar(sev20_devices | where infected_machine_id in~ (mde_devices) | count), \" of \", toscalar(sev20_devices\
+        \ | count), \" infected devices acted on\"), Status=iff(toscalar(sev20_devices | where infected_machine_id !in~ (mde_devices) | count) > 0, \"GAP\", \"OK\")),\n(print Check=\"CA playbook execution\
+        \ failures\", Metric=strcat(ca_failures, \" failures out of \", ca_total, \" total executions\"), Status=iff(ca_failures > 0, \"CHECK\", \"OK\")),\n(print Check=\"MDE playbook execution failures\"\
+        , Metric=strcat(mde_failures, \" failures out of \", mde_total, \" total executions\"), Status=iff(mde_failures > 0, \"CHECK\", \"OK\")),\n(print Check=\"CA playbook active (any executions)\"\
+        , Metric=iff(ca_total > 0, \"Active\", \"No executions found — check permissions\"), Status=iff(ca_total > 0, \"OK\", \"GAP\")),\n(print Check=\"MDE playbook active (any executions)\", Metric=iff(mde_total\
+        \ > 0, \"Active\", \"No executions found — check permissions\"), Status=iff(mde_total > 0, \"OK\", \"GAP\"))\n| project Check, Metric, Status"
+  - Name: GetCapabilityMatrix
+    DisplayName: '[Data] Generate full capability matrix'
+    Description: Internal data retrieval skill. Generates a comprehensive capability matrix showing the deployment status of all SpyCloud Sentinel solution components including tables, analytics rules,
+      playbooks, workbooks, hunting queries, UEBA, Fusion, and data connectors.
+    Settings:
+      Target: Sentinel
+      TenantId: '{{TenantId}}'
+      SubscriptionId: '{{SubscriptionId}}'
+      ResourceGroupName: '{{ResourceGroupName}}'
+      WorkspaceName: '{{WorkspaceName}}'
+      Template: "union isfuzzy=true\n(SpyCloudBreachWatchlist_CL | summarize c=count() | extend Component=\"SpyCloud Breach Watchlist Table\", Category=\"Data Tables\", Status=iff(c > 0, \"Deployed\
+        \ & Active\", \"Empty\"), Detail=strcat(c, \" records\")),\n(SpyCloudBreachCatalog_CL | summarize c=count() | extend Component=\"SpyCloud Breach Catalog Table\", Category=\"Data Tables\", Status=iff(c\
+        \ > 0, \"Deployed & Active\", \"Empty\"), Detail=strcat(c, \" records\")),\n(SpyCloudCompassData_CL | summarize c=count() | extend Component=\"SpyCloud Compass Data Table\", Category=\"Data\
+        \ Tables\", Status=iff(c > 0, \"Deployed & Active\", \"Empty (Enterprise+ required)\"), Detail=strcat(c, \" records\")),\n(SpyCloudCompassDevices_CL | summarize c=count() | extend Component=\"\
+        SpyCloud Compass Devices Table\", Category=\"Data Tables\", Status=iff(c > 0, \"Deployed & Active\", \"Empty (Enterprise+ required)\"), Detail=strcat(c, \" records\")),\n(Spycloud_MDE_Logs_CL\
+        \ | summarize c=count() | extend Component=\"MDE Remediation Logs Table\", Category=\"Data Tables\", Status=iff(c > 0, \"Active\", \"No playbook executions yet\"), Detail=strcat(c, \" records\"\
+        )),\n(SpyCloud_ConditionalAccessLogs_CL | summarize c=count() | extend Component=\"CA Remediation Logs Table\", Category=\"Data Tables\", Status=iff(c > 0, \"Active\", \"No playbook executions\
+        \ yet\"), Detail=strcat(c, \" records\")),\n(SecurityAlert | where ProviderName == \"Azure Sentinel\" | summarize c=count() | extend Component=\"Analytics Rules\", Category=\"Detection\", Status=iff(c\
+        \ > 0, \"Active — generating alerts\", \"No alerts yet\"), Detail=strcat(c, \" alerts generated\")),\n(SecurityAlert | where ProviderName has \"Fusion\" | summarize c=count() | extend Component=\"\
+        Fusion ML Detection\", Category=\"Detection\", Status=iff(c > 0, \"Active\", \"No Fusion detections\"), Detail=strcat(c, \" Fusion alerts\")),\n(BehaviorAnalytics | summarize c=count() | extend\
+        \ Component=\"UEBA Behavioral Analytics\", Category=\"Detection\", Status=iff(c > 0, \"Active\", \"Not enabled or no data\"), Detail=strcat(c, \" anomalies\")),\n(SentinelHealth | where SentinelResourceType\
+        \ == \"Automation rule\" | summarize c=count() | extend Component=\"Automation Rules\", Category=\"Response\", Status=iff(c > 0, \"Active\", \"No automation executions\"), Detail=strcat(c, \"\
+        \ executions\")),\n(SigninLogs | take 1 | summarize c=count() | extend Component=\"Entra ID Sign-in Logs\", Category=\"Data Connectors\", Status=iff(c > 0, \"Connected\", \"Not connected\"),\
+        \ Detail=\"\"),\n(DeviceInfo | take 1 | summarize c=count() | extend Component=\"Defender for Endpoint\", Category=\"Data Connectors\", Status=iff(c > 0, \"Connected\", \"Not connected\"), Detail=\"\
+        \"),\n(IdentityLogonEvents | take 1 | summarize c=count() | extend Component=\"Defender for Identity\", Category=\"Data Connectors\", Status=iff(c > 0, \"Connected\", \"Not connected\"), Detail=\"\
+        \"),\n(CloudAppEvents | take 1 | summarize c=count() | extend Component=\"Defender for Cloud Apps\", Category=\"Data Connectors\", Status=iff(c > 0, \"Connected\", \"Not connected\"), Detail=\"\
+        \")\n| project Category, Component, Status, Detail\n| order by Category asc, Component asc"
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families for threat hunting, or request an organization-wide exposure overview. The agent orchestrates 34 KQL skills across 6 Sentinel tables (156 columns), 17 specialized sub-agents (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration, Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring, Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App, Compass Deep Investigation), GPT-4o analysis, and produces rich investigation reports with data tables, timelines, severity indicators, MITRE ATT&CK mappings, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Includes graceful error handling for missing data, empty tables, and API tier gating with intelligent fallback to available data sources. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping. Compatible with SpyCloud KQL Plugin (86 skills) and SpyCloud API Plugin (12 skills) for complete coverage."
+  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence. Investigate email addresses for credential compromise, device hostnames for infostealer forensics, malware families for threat hunting, or request an organization-wide exposure overview. The agent orchestrates 35 KQL skills across 6 Sentinel tables (156 columns), 17 specialized sub-agents (UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration, Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring, Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App, Compass Deep Investigation), GPT-4o analysis, and produces rich investigation reports with data tables, timelines, severity indicators, MITRE ATT&CK mappings, remediation gap analysis, compliance impact, and contextual follow-up questions for continued pivoting. Includes graceful error handling for missing data, empty tables, and API tier gating with intelligent fallback to available data sources. Supports all breach categories including infostealers, combo lists, phishing, exfiltration, and scraping. Compatible with SpyCloud KQL Plugin (90 skills) and SpyCloud API Plugin (20 skills) for complete coverage."
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other
-  Version: 7.0.0
+  Version: 8.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   RequiredSkillsets:
   - SpyCloud.ThreatIntelligence.SentinelAgent
