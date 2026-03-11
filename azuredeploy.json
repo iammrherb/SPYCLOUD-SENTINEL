@@ -2650,7 +2650,7 @@
           "id": "SpyCloudCCF",
           "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "## About SpyCloud\n\n[SpyCloud](https://spycloud.com) is the leader in **Cybercrime Analytics** — transforming recaptured darknet data into actionable intelligence that protects businesses from cyberattacks. SpyCloud's autonomous identity threat protection platform uses proprietary technology, advanced AI analytics, and a team of world-class intelligence analysts to recapture data from the criminal underground at scale, enriching it with context that enables automated remediation. With **600+ billion recaptured darknet assets** including billions of credentials and PII, SpyCloud helps organizations prevent account takeover, ransomware, session hijacking, and online fraud.\n\nSpyCloud's intelligence spans:\n- **Breach Data** — Stolen credentials from data breaches, combo lists, and paste sites\n- **Infostealer Data** — Credentials, cookies, autofill data, and device artifacts stolen by malware families including RedLine, LummaC2, Vidar, Raccoon, StealC, and 50+ others\n- **Identity Data** — Aggregated identity exposure profiles with PII, financial data, and employment records\n\n---\n\n## About This Connector\n\nThe **SpyCloud Darknet & Identity Threat Exposure Intelligence Connector** uses the Codeless Connector Framework (CCF) to ingest SpyCloud data into Microsoft Sentinel via 5 REST API pollers with Data Collection Rule (DCR) transforms. It provides automated ingestion, detection, and remediation of compromised credentials and identity threats — enabling SOC teams to respond to dark web exposures before attackers can use them.\n\n**Key Capabilities:**\n- Automated ingestion from 3 SpyCloud APIs (Enterprise, Compass, Identity) into 6 custom Sentinel tables\n- 49 analytics rules for real-time threat detection across breaches, infostealers, and identity compromise\n- 10 automated response playbooks for credential reset, session revocation, device isolation, and more\n- 28 proactive hunting queries spanning lateral movement, session hijacking, data exfiltration, and supply chain risk\n- 3 interactive workbooks for executive, SOC operations, and threat intelligence dashboards\n- 4 watchlists for VIP monitoring, IOC management, domain validation, and critical asset tracking\n- Full integration with Microsoft Security Copilot (85 KQL skills + 12 API skills + autonomous investigation agent)\n\n**Requires:** SpyCloud Enterprise API Key — [portal.spycloud.com](https://portal.spycloud.com)",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n## About SpyCloud\n\n[SpyCloud](https://spycloud.com) is the leader in **Cybercrime Analytics** — transforming recaptured darknet data into actionable intelligence that protects businesses from cyberattacks. SpyCloud's autonomous identity threat protection platform uses proprietary technology, advanced AI analytics, and a team of world-class intelligence analysts to recapture data from the criminal underground at scale, enriching it with context that enables automated remediation. With **600+ billion recaptured darknet assets** including billions of credentials and PII, SpyCloud helps organizations prevent account takeover, ransomware, session hijacking, and online fraud.\n\nSpyCloud's intelligence spans:\n- **Breach Data** — Stolen credentials from data breaches, combo lists, and paste sites\n- **Infostealer Data** — Credentials, cookies, autofill data, and device artifacts stolen by malware families including RedLine, LummaC2, Vidar, Raccoon, StealC, and 50+ others\n- **Identity Data** — Aggregated identity exposure profiles with PII, financial data, and employment records\n\n---\n\n## About This Connector\n\nThe **SpyCloud Darknet & Identity Threat Exposure Intelligence Connector** uses the Codeless Connector Framework (CCF) to ingest SpyCloud data into Microsoft Sentinel via 5 REST API pollers with Data Collection Rule (DCR) transforms. It provides automated ingestion, detection, and remediation of compromised credentials and identity threats — enabling SOC teams to respond to dark web exposures before attackers can use them.\n\n**Key Capabilities:**\n- Automated ingestion from 3 SpyCloud APIs (Enterprise, Compass, Identity) into 6 custom Sentinel tables\n- 49 analytics rules for real-time threat detection across breaches, infostealers, and identity compromise\n- 10 automated response playbooks for credential reset, session revocation, device isolation, and more\n- 28 proactive hunting queries spanning lateral movement, session hijacking, data exfiltration, and supply chain risk\n- 3 interactive workbooks for executive, SOC operations, and threat intelligence dashboards\n- 4 watchlists for VIP monitoring, IOC management, domain validation, and critical asset tracking\n- Full integration with Microsoft Security Copilot (85 KQL skills + 12 API skills + autonomous investigation agent)\n\n**Requires:** SpyCloud Enterprise API Key — [portal.spycloud.com](https://portal.spycloud.com)",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -3009,61 +3009,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "---\n\n**Compass Data Filters (Enterprise+ Only)**\n\nCompass pollers ingest enriched infostealer investigation data including stolen cookies, autofill data, installed software, and device forensics. These settings only apply if you have an Enterprise+ subscription."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Compass Severity Filter",
-                    "name": "compassSeverity",
-                    "options": [
-                      {
-                        "key": "2",
-                        "text": "2+ - All severity levels"
-                      },
-                      {
-                        "key": "20",
-                        "text": "20+ - Infostealer only (recommended)"
-                      },
-                      {
-                        "key": "25",
-                        "text": "25 - Critical infostealer + app data only"
-                      }
-                    ],
-                    "placeholder": "Minimum severity for Compass data ingestion",
-                    "isMultiSelect": false,
-                    "defaultValue": [
-                      "20"
-                    ]
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Compass Data Scope",
-                    "name": "compassScope",
-                    "options": [
-                      {
-                        "key": "full",
-                        "text": "Full — All Compass data including cookies, autofill, software inventory"
-                      },
-                      {
-                        "key": "credentials",
-                        "text": "Credentials only — Compass credential pairs without extended device data"
-                      }
-                    ],
-                    "placeholder": "Scope of Compass data to ingest",
-                    "isMultiSelect": false,
-                    "defaultValue": [
-                      "full"
-                    ]
-                  }
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "---\n\n**Log Table Filtering**\n\nThe MDE Logs and Conditional Access Logs tables are populated by playbook execution. These tables capture remediation audit trails and do not have separate ingestion filters — they log all actions taken by the automated playbooks.\n\n| Table | Filter Available | Notes |\n|-------|-----------------|-------|\n| Watchlist | Severity, Exposure Type, Plaintext | Filtered at API level via poller parameters |\n| Catalog | None (metadata only) | Small volume — all catalog entries are ingested |\n| Compass Data | Severity, Data Scope | Enterprise+ only — filtered at API level |\n| Compass Devices | None | Enterprise+ only — all infected device records ingested |\n| MDE Logs | N/A | Populated by playbook execution — logs all MDE actions |\n| CA Logs | N/A | Populated by playbook execution — logs all identity actions |"
+                    "text": "---\n\n**Log Table Filtering**\n\nThe MDE Logs and Conditional Access Logs tables are populated by playbook execution. These tables capture remediation audit trails and do not have separate ingestion filters — they log all actions taken by the automated playbooks.\n\n| Table | Filter Available | Notes |\n|-------|-----------------|-------|\n| Watchlist | Severity, Exposure Type, Plaintext | Filtered at API level via poller parameters |\n| Catalog | None (metadata only) | Small volume — all catalog entries are ingested |\n| Compass Data | Severity (shared) | Enterprise+ only — uses the global severity filter |\n| Compass Devices | None | Enterprise+ only — all infected device records ingested |\n| Compass Applications | None | Enterprise+ only — all application records ingested |\n| MDE Logs | N/A | Populated by playbook execution — logs all MDE actions |\n| CA Logs | N/A | Populated by playbook execution — logs all identity actions |"
                   }
                 }
               ]
