@@ -1111,8 +1111,8 @@
     "_solutionVersion": "9.0.0",
     "_solutionAuthor": "SpyCloud",
     "_solutionId": "azuresentinel.azure-sentinel-solution-spycloud-threatintel",
-    "dataConnectorVersionConnectorDefinition": "1.1.0",
-    "dataConnectorVersionConnections": "1.1.0",
+    "dataConnectorVersionConnectorDefinition": "1.2.0",
+    "dataConnectorVersionConnections": "1.2.0",
     "_solutionTier": "Community",
     "_solutionEmail": "support@spycloud.com",
     "_solutionLink": "https://portal.spycloud.com",
@@ -4643,6 +4643,13 @@
               "type": "securestring",
               "metadata": {
                 "description": "Dedicated API key for SpyCloud CAP (Credential Access Program) service."
+              }
+            },
+            "openAIApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "Optional OpenAI API key for GPT-4o analysis skills in Security Copilot integration."
               }
             },
             "enableCompass": {
