@@ -1,7 +1,7 @@
 {
   "name": "spycloud-sentinel-solution",
   "version": "10.0.0",
-  "description": "SpyCloud Identity Threat Protection for Microsoft Sentinel - Enterprise darknet intelligence with automated detection and response",
+  "description": "SpyCloud Identity Threat Protection for Microsoft Sentinel",
   "author": "SpyCloud, Inc.",
   "license": "MIT",
   "homepage": "https://spycloud.com",
@@ -12,13 +12,15 @@
   "keywords": [
     "spycloud",
     "microsoft-sentinel",
-    "identity-threat",
-    "darknet-intelligence",
-    "credential-exposure",
-    "infostealer",
-    "soar",
+    "azure",
     "siem",
-    "azure"
+    "soar",
+    "threat-intelligence",
+    "darknet",
+    "identity-protection",
+    "infostealer",
+    "breach-detection",
+    "security-copilot"
   ],
   "files": [
     "azuredeploy.json",
@@ -27,16 +29,25 @@
     "solutionMetadata.json",
     "playbooks/**/*.json",
     "templates/**/*.json",
-    "templates/**/*.yaml",
     "workbooks/**/*.json",
     "analytics-rules/**/*.yaml",
-    "analytics-rules.json",
     "hunting-queries.json",
     "copilot/**/*",
     "scripts/**/*",
     "docs/**/*"
   ],
   "engines": {
-    "sentinel": ">=2023-04-01"
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "validate": "node scripts/validate-templates.js",
+    "package": "node scripts/package-solution.js",
+    "test": "node scripts/run-tests.js",
+    "deploy:staging": "az deployment group create --resource-group $STAGING_RG --template-file azuredeploy.json --parameters @azuredeploy.parameters.json",
+    "deploy:production": "az deployment group create --resource-group $PRODUCTION_RG --template-file azuredeploy.json --parameters @azuredeploy.parameters.json"
+  },
+  "devDependencies": {
+    "@azure/arm-resources": "^5.0.0",
+    "@azure/identity": "^4.0.0"
   }
 }

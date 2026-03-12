@@ -1,15 +1,11 @@
 {
-  "publisherId": "spycloudinc",
+  "publisherId": "spycloud",
   "offerId": "spycloud-sentinel-solution",
   "firstPublishDate": "2024-01-15",
   "lastPublishDate": "2026-03-11",
   "providers": ["SpyCloud, Inc."],
   "categories": {
-    "domains": [
-      "Security - Threat Protection",
-      "Security - Automation (SOAR)",
-      "Security - Identity"
-    ],
+    "domains": ["Security - Threat Protection", "Security - Automation (SOAR)"],
     "verticals": []
   },
   "support": {
@@ -24,23 +20,89 @@
     "name": "SpyCloud Identity Threat Protection"
   },
   "contentSchemaVersion": "3.0.0",
-  "icon": "<img src=\"https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.svg\" width=\"75px\" height=\"75px\">",
-  "metadata": {
-    "title": "SpyCloud Identity Threat Protection",
-    "description": "Enterprise identity threat protection powered by SpyCloud's recaptured darknet intelligence for Microsoft Sentinel.",
-    "prerequisites": [
-      "Microsoft Sentinel enabled on a Log Analytics workspace",
-      "SpyCloud Enterprise API key from portal.spycloud.com",
-      "Contributor role on the target resource group"
-    ],
-    "dataConnectors": [
-      "SpyCloud Enterprise Protection API (CCF-based, 9 REST API pollers)"
-    ],
-    "analyticRulesCount": 60,
-    "playbooksCount": 14,
-    "workbooksCount": 14,
-    "huntingQueriesCount": 28,
-    "watchlistsCount": 4,
-    "customTablesCount": 14
-  }
+  "author": {
+    "name": "SpyCloud, Inc.",
+    "email": "integrations@spycloud.com"
+  },
+  "description": "The SpyCloud Identity Threat Protection solution for Microsoft Sentinel delivers comprehensive darknet intelligence integration with 9 API data connectors, 60+ analytic rules, 14 automated playbooks, 14 workbooks, 28 hunting queries, and Security Copilot integration.",
+  "title": "SpyCloud Identity Threat Protection",
+  "icon": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.svg",
+  "preview": false,
+  "dependencies": {
+    "operator": "AND",
+    "criteria": [
+      {
+        "kind": "DataConnector",
+        "contentId": "SpyCloudDataConnector",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "Workbook",
+        "contentId": "SpyCloudExecutiveDashboard",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "Workbook",
+        "contentId": "SpyCloudSOCOperations",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "Workbook",
+        "contentId": "SpyCloudThreatIntelDashboard",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "AnalyticsRule",
+        "contentId": "spycloud-infostealer-detection",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "AnalyticsRule",
+        "contentId": "spycloud-credential-exposure",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "AnalyticsRule",
+        "contentId": "spycloud-darknet-breach-alert",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "AnalyticsRule",
+        "contentId": "spycloud-session-hijack-detection",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "AnalyticsRule",
+        "contentId": "spycloud-malware-infected-device",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "AnalyticsRule",
+        "contentId": "spycloud-botnet-credential-theft",
+        "version": "10.0.0"
+      },
+      {
+        "kind": "HuntingQuery",
+        "contentId": "spycloud-hunting-queries",
+        "version": "10.0.0"
+      }
+    ]
+  },
+  "threatAnalysisTactics": [
+    "CredentialAccess",
+    "InitialAccess",
+    "Collection",
+    "Exfiltration",
+    "Persistence",
+    "LateralMovement",
+    "PrivilegeEscalation"
+  ],
+  "threatAnalysisTechniques": [
+    "T1078",
+    "T1110",
+    "T1539",
+    "T1528",
+    "T1550",
+    "T1556"
+  ]
 }
