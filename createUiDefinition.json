@@ -6,7 +6,7 @@
     "config": {
       "isWizard": true,
       "basics": {
-        "description": "## SpyCloud for Microsoft Sentinel\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-logo-dark.svg)\n\n**Version 10.0 -- Enterprise Identity Threat Protection**\n\nDeploy automated identity threat detection and response powered by SpyCloud's recaptured darknet intelligence, fully integrated into Microsoft Sentinel.\n\n[SpyCloud Portal](https://portal.spycloud.com) | [Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL)",
+        "description": "## SpyCloud for Microsoft Sentinel\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-connector-logo.svg)\n\n**Version 10.0 -- Enterprise Identity Threat Protection**\n\nDeploy automated identity threat detection and response powered by SpyCloud's recaptured darknet intelligence, fully integrated into Microsoft Sentinel.\n\n[SpyCloud Portal](https://portal.spycloud.com) | [Documentation](https://github.com/iammrherb/SPYCLOUD-SENTINEL)",
         "location": {
           "label": "Deployment Region",
           "resourceTypes": [
