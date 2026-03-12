@@ -1,0 +1,203 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "10.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "SpyCloud Solution Packager",
+      "version": "10.0.0"
+    },
+    "title": "SpyCloud Identity Threat Protection for Microsoft Sentinel",
+    "description": "Enterprise identity threat protection powered by SpyCloud's recaptured darknet intelligence.",
+    "version": "10.0.0",
+    "author": "SpyCloud, Inc."
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": { "description": "Location for all resources" }
+    },
+    "workspace-location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": { "description": "Region for workspace resources" }
+    },
+    "workspace": {
+      "type": "string",
+      "metadata": { "description": "Name of the Log Analytics workspace" }
+    },
+    "formattedTimeNow": {
+      "type": "string",
+      "defaultValue": "[utcNow('g')]",
+      "metadata": { "description": "Deployment timestamp" }
+    }
+  },
+  "variables": {
+    "solutionId": "spycloudinc.spycloud-sentinel-solution",
+    "_solutionId": "[variables('solutionId')]",
+    "solutionVersion": "10.0.0",
+    "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
+    "dataConnectorContentId": "SpyCloudEnterpriseProtection",
+    "_dataConnectorContentId": "[variables('dataConnectorContentId')]",
+    "dataConnectorVersion": "10.0.0",
+    "analyticRuleIds": {
+      "infostealerDetection": "spycloud-infostealer-credential-exposure",
+      "plaintextPassword": "spycloud-plaintext-password-exposure",
+      "sessionCookieTheft": "spycloud-session-cookie-theft",
+      "piiExposure": "spycloud-pii-ssn-exposure",
+      "deviceReinfection": "spycloud-device-reinfection",
+      "credentialReuse": "spycloud-credential-reuse",
+      "vipExposure": "spycloud-vip-executive-exposure",
+      "massExposure": "spycloud-mass-credential-exposure"
+    },
+    "workbookIds": {
+      "executiveSummary": "spycloud-executive-summary-workbook",
+      "socOperations": "spycloud-soc-operations-workbook",
+      "connectorHealth": "spycloud-connector-health-workbook",
+      "exposureAnalysis": "spycloud-exposure-analysis-workbook",
+      "remediationTracking": "spycloud-remediation-tracking-workbook",
+      "breachCatalog": "spycloud-breach-catalog-workbook",
+      "compass": "spycloud-compass-workbook",
+      "idlink": "spycloud-idlink-workbook",
+      "investigations": "spycloud-investigations-workbook",
+      "cap": "spycloud-cap-workbook",
+      "sip": "spycloud-sip-workbook",
+      "breachWatchlist": "spycloud-breach-watchlist-workbook",
+      "identityExposure": "spycloud-identity-exposure-workbook",
+      "threatIntel": "spycloud-threat-intel-workbook"
+    },
+    "playbookIds": {
+      "forcePasswordReset": "SpyCloud-ForcePasswordReset",
+      "revokeSessions": "SpyCloud-RevokeSessions",
+      "enforceMfa": "SpyCloud-EnforceMFA",
+      "blockConditionalAccess": "SpyCloud-BlockConditionalAccess",
+      "blockFirewall": "SpyCloud-BlockFirewall",
+      "isolateDevice": "SpyCloud-IsolateDevice",
+      "notifySOC": "SpyCloud-NotifySOC",
+      "notifyUser": "SpyCloud-NotifyUser",
+      "enrichIncident": "SpyCloud-EnrichIncident",
+      "fullRemediation": "SpyCloud-FullRemediation",
+      "slackNotify": "SpyCloud-SlackNotify",
+      "emailNotify": "SpyCloud-EmailNotify",
+      "webhookNotify": "SpyCloud-WebhookNotify",
+      "serviceNow": "SpyCloud-ServiceNow"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('_dataConnectorContentId'), '-ct')]",
+      "location": "[parameters('workspace-location')]",
+      "properties": {
+        "contentId": "[variables('_dataConnectorContentId')]",
+        "displayName": "SpyCloud Enterprise Protection",
+        "contentKind": "DataConnector",
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('dataConnectorVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+              "apiVersion": "2023-04-01-preview",
+              "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('_dataConnectorContentId'))]",
+              "properties": {
+                "kind": "DataConnector",
+                "contentId": "[variables('_dataConnectorContentId')]",
+                "version": "[variables('dataConnectorVersion')]",
+                "source": { "kind": "Solution", "name": "SpyCloud Identity Threat Protection", "sourceId": "[variables('_solutionId')]" },
+                "author": { "name": "SpyCloud, Inc." },
+                "support": { "name": "SpyCloud, Inc.", "email": "support@spycloud.com", "tier": "Partner", "link": "https://spycloud.com/support" }
+              }
+            }
+          ]
+        },
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(variables('_solutionId'),'-dc-', uniqueString(variables('_dataConnectorContentId')))]",
+        "version": "[variables('dataConnectorVersion')]"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentPackages",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('_solutionId'))]",
+      "location": "[parameters('workspace-location')]",
+      "properties": {
+        "version": "[variables('solutionVersion')]",
+        "kind": "Solution",
+        "contentSchemaVersion": "3.0.0",
+        "displayName": "SpyCloud Identity Threat Protection",
+        "publisherDisplayName": "SpyCloud, Inc.",
+        "descriptionHtml": "<p><strong>SpyCloud for Microsoft Sentinel</strong> provides comprehensive identity threat protection by integrating recaptured darknet intelligence directly into your security operations workflow.</p><h3>Capabilities</h3><ul><li><strong>9 API Data Connectors</strong> - Breach Watchlist, Breach Catalog, Compass, SIP, Investigations, IDLink, Exposure, CAP, Data Partnership</li><li><strong>60+ Analytic Rule Templates</strong> - Deployed as templates for selective enablement</li><li><strong>14 Automated Response Playbooks</strong> - Password reset, session revocation, device isolation, multi-channel notifications, ITSM ticketing</li><li><strong>14 Interactive Workbooks</strong> - Executive dashboards, SOC operations, exposure analysis, remediation tracking</li><li><strong>28 Hunting Queries</strong> - Proactive threat hunting across all MITRE ATT&CK tactics</li><li><strong>Security Copilot Integration</strong> - 90+ KQL skills, 35+ API skills, 17 sub-agent investigation capabilities</li></ul>",
+        "contentKind": "Solution",
+        "threatAnalysisTactics": [
+          "CredentialAccess",
+          "InitialAccess",
+          "Collection",
+          "Exfiltration",
+          "Persistence",
+          "LateralMovement",
+          "PrivilegeEscalation",
+          "Impact",
+          "Reconnaissance"
+        ],
+        "threatAnalysisTechniques": [
+          "T1078",
+          "T1110",
+          "T1539",
+          "T1528",
+          "T1550",
+          "T1556",
+          "T1552",
+          "T1555",
+          "T1606"
+        ],
+        "source": { "kind": "Solution", "name": "SpyCloud Identity Threat Protection" },
+        "author": { "name": "SpyCloud, Inc." },
+        "support": {
+          "name": "SpyCloud, Inc.",
+          "email": "support@spycloud.com",
+          "tier": "Partner",
+          "link": "https://spycloud.com/support"
+        },
+        "dependencies": {
+          "operator": "AND",
+          "criteria": [
+            {
+              "kind": "DataConnector",
+              "contentId": "[variables('_dataConnectorContentId')]",
+              "version": "[variables('dataConnectorVersion')]"
+            }
+          ]
+        },
+        "firstPublishDate": "2024-01-15",
+        "lastPublishDate": "2026-03-11",
+        "providers": ["SpyCloud, Inc."],
+        "categories": {
+          "domains": [
+            "Security - Threat Protection",
+            "Security - Automation (SOAR)",
+            "Security - Identity"
+          ],
+          "verticals": []
+        },
+        "contentId": "[variables('_solutionId')]"
+      }
+    }
+  ],
+  "outputs": {
+    "solutionId": {
+      "type": "string",
+      "value": "[variables('_solutionId')]"
+    },
+    "solutionVersion": {
+      "type": "string",
+      "value": "[variables('solutionVersion')]"
+    }
+  }
+}

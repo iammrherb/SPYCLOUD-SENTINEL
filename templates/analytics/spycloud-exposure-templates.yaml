@@ -1,7 +1,7 @@
 # SpyCloud Exposure API Rule Templates
 # These templates detect threats using SpyCloud Exposure API data, providing visibility
 # into credentials and PII exposed through breaches, infostealers, and other sources.
-# Deploy with enabled: true after configuring required data sources.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
 
 templateVersion: "1.0.0"
 templateId: spycloud-exposure-templates

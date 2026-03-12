@@ -1,7 +1,7 @@
 # SpyCloud Investigations API Rule Templates
 # These templates detect threats using SpyCloud Investigations API data for deep-dive
 # identity and credential intelligence analysis.
-# Deploy with enabled: true after configuring required data sources.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
 
 templateVersion: "1.0.0"
 templateId: spycloud-investigations-templates

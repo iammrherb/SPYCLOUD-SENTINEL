@@ -1,6 +1,6 @@
 # SpyCloud Core Detection Rule Templates
 # These templates provide foundational SpyCloud breach and exposure detection rules.
-# Deploy with enabled: true after configuring required data sources.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
 
 templateVersion: "1.0.0"
 templateId: spycloud-core-detection-templates

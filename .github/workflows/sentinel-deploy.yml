@@ -8,7 +8,7 @@
 #   ![Validate](https://github.com/<OWNER>/<REPO>/actions/workflows/sentinel-deploy.yml/badge.svg?branch=main)
 ###############################################################################
 
-name: "SpyCloud Sentinel v8.0 CI/CD"
+name: "SpyCloud Sentinel v10.0 CI/CD"
 
 # ──────────────────────────────────────────────────────────────── Triggers ──
 on:
@@ -419,7 +419,7 @@ jobs:
             enableSip=${{ inputs.enable_sip || false }}
             sipApiKey=${{ secrets.SPYCLOUD_SIP_API_KEY || '' }}
             sipCookieDomain=${{ inputs.sip_cookie_domain || '' }}
-          deploymentName: test-v8-${{ github.run_number }}
+          deploymentName: test-v10-${{ github.run_number }}
           failOnStdErr: false
 
       # ── Validate all expected resources exist ──────────────────────────
@@ -571,7 +571,7 @@ jobs:
             enableSip=${{ inputs.enable_sip || false }}
             sipApiKey=${{ secrets.SPYCLOUD_SIP_API_KEY || '' }}
             sipCookieDomain=${{ inputs.sip_cookie_domain || '' }}
-          deploymentName: staging-v8-${{ github.run_number }}
+          deploymentName: staging-v10-${{ github.run_number }}
           failOnStdErr: false
 
       # ── Smoke tests ────────────────────────────────────────────────────
@@ -729,7 +729,7 @@ jobs:
             enableSip=${{ inputs.enable_sip || false }}
             sipApiKey=${{ secrets.SPYCLOUD_SIP_API_KEY || '' }}
             sipCookieDomain=${{ inputs.sip_cookie_domain || '' }}
-          deploymentName: prod-v8-${{ github.run_number }}
+          deploymentName: prod-v10-${{ github.run_number }}
           failOnStdErr: false
 
       # ── Post-deploy configuration ──────────────────────────────────────

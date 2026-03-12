@@ -1103,7 +1103,7 @@
           {
             "type": 1,
             "content": {
-              "json": "## Data Health & Connector Monitoring\nReal-time health status of all SpyCloud data tables, connector pollers, ingestion rates, and pipeline diagnostics. Use this tab to verify deployment health and troubleshoot data flow issues.\n\n---"
+              "json": "## Data Health & Connector Monitoring\nReal-time health status of all SpyCloud data tables, connector pollers, ingestion rates, and pipeline diagnostics.\n\n---"
             },
             "name": "healthHeader"
           },
@@ -1287,7 +1287,7 @@
           {
             "type": 1,
             "content": {
-              "json": "---\n### Diagnostic Queries\nCopy and run these in Log Analytics for deeper troubleshooting:\n\n```kql\n// Check connector health\nSentinelHealth\n| where TimeGenerated > ago(24h)\n| where SentinelResourceType == \"Data connector\"\n| where SentinelResourceName contains \"SpyCloud\"\n| project TimeGenerated, Status, Description, ExtendedProperties\n| order by TimeGenerated desc\n```\n\n```kql\n// Check DCR metrics\nAzureMetrics\n| where TimeGenerated > ago(24h)\n| where ResourceProvider == \"MICROSOFT.INSIGHTS\"\n| where MetricName has_any (\"LogsIngestionRequests\", \"LogsIngestionErrors\")\n| summarize Total=sum(Total), Errors=sumif(Total, MetricName has \"Error\") by bin(TimeGenerated, 1h)\n```\n\n```kql\n// Check for ingestion gaps (no data for 6+ hours)\nrange TimeSlot from ago(7d) to now() step 1h\n| extend HasData = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated between (TimeSlot .. (TimeSlot + 1h)) | count)\n| where HasData == 0\n| project GapStart=TimeSlot, GapEnd=TimeSlot + 1h\n```"
+              "json": "---\n### Diagnostic Queries\nCopy and run these in Log Analytics for deeper analysis:\n\n```kql\n// Check connector health\nSentinelHealth\n| where TimeGenerated > ago(24h)\n| where SentinelResourceType == \"Data connector\"\n| where SentinelResourceName contains \"SpyCloud\"\n| project TimeGenerated, Status, Description, ExtendedProperties\n| order by TimeGenerated desc\n```\n\n```kql\n// Check DCR metrics\nAzureMetrics\n| where TimeGenerated > ago(24h)\n| where ResourceProvider == \"MICROSOFT.INSIGHTS\"\n| where MetricName has_any (\"LogsIngestionRequests\", \"LogsIngestionErrors\")\n| summarize Total=sum(Total), Errors=sumif(Total, MetricName has \"Error\") by bin(TimeGenerated, 1h)\n```\n\n```kql\n// Check for ingestion gaps (no data for 6+ hours)\nrange TimeSlot from ago(7d) to now() step 1h\n| extend HasData = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated between (TimeSlot .. (TimeSlot + 1h)) | count)\n| where HasData == 0\n| project GapStart=TimeSlot, GapEnd=TimeSlot + 1h\n```"
             },
             "name": "diagnosticQueries"
           }

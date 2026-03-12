@@ -1,0 +1,42 @@
+{
+  "name": "spycloud-sentinel-solution",
+  "version": "10.0.0",
+  "description": "SpyCloud Identity Threat Protection for Microsoft Sentinel - Enterprise darknet intelligence with automated detection and response",
+  "author": "SpyCloud, Inc.",
+  "license": "MIT",
+  "homepage": "https://spycloud.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iammrherb/SPYCLOUD-SENTINEL"
+  },
+  "keywords": [
+    "spycloud",
+    "microsoft-sentinel",
+    "identity-threat",
+    "darknet-intelligence",
+    "credential-exposure",
+    "infostealer",
+    "soar",
+    "siem",
+    "azure"
+  ],
+  "files": [
+    "azuredeploy.json",
+    "createUiDefinition.json",
+    "mainTemplate.json",
+    "solutionMetadata.json",
+    "playbooks/**/*.json",
+    "templates/**/*.json",
+    "templates/**/*.yaml",
+    "workbooks/**/*.json",
+    "analytics-rules/**/*.yaml",
+    "analytics-rules.json",
+    "hunting-queries.json",
+    "copilot/**/*",
+    "scripts/**/*",
+    "docs/**/*"
+  ],
+  "engines": {
+    "sentinel": ">=2023-04-01"
+  }
+}

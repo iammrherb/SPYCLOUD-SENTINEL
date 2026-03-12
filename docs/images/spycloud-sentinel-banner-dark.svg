@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SpyCloud Sentinel Banner - For Dark Mode Deployment Portal -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 120" width="800" height="120">
+  <defs>
+    <linearGradient id="bannerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0B1929;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0F2440;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0B1929;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="shieldBanner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00D4AA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0099FF;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00D4AA;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#00D4AA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0099FF;stop-opacity:0" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="800" height="120" fill="url(#bannerGrad)" rx="8"/>
+  <!-- Accent line top -->
+  <rect x="100" y="0" width="600" height="2" fill="url(#accentLine)" rx="1"/>
+  <!-- Shield Icon -->
+  <path d="M70 20 L98 28 L98 50 C98 66 90 74 70 78 C50 74 42 66 42 50 L42 28 Z"
+        fill="url(#shieldBanner)" opacity="0.9"/>
+  <ellipse cx="70" cy="46" rx="16" ry="10" fill="none" stroke="#FFFFFF" stroke-width="1.8"/>
+  <circle cx="70" cy="46" r="5.5" fill="#FFFFFF"/>
+  <circle cx="70" cy="46" r="2" fill="#0B1929"/>
+  <!-- Title -->
+  <text x="130" y="45" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="28" font-weight="700" fill="#FFFFFF" letter-spacing="0.5">
+    <tspan fill="#00D4AA">SpyCloud</tspan><tspan fill="#FFFFFF"> for Microsoft Sentinel</tspan>
+  </text>
+  <!-- Subtitle -->
+  <text x="130" y="72" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="13" font-weight="400" fill="#8899AA" letter-spacing="1">
+    Darknet Identity Threat Protection &amp; Automated Remediation Platform
+  </text>
+  <!-- Version badge -->
+  <rect x="130" y="82" width="52" height="20" rx="10" fill="#00D4AA" opacity="0.15"/>
+  <text x="140" y="96" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="10" font-weight="600" fill="#00D4AA">
+    v10.0
+  </text>
+  <!-- Accent line bottom -->
+  <rect x="100" y="118" width="600" height="2" fill="url(#accentLine)" rx="1"/>
+</svg>

@@ -1,6 +1,6 @@
 # SpyCloud Advanced Threat Detection Rule Templates
 # These templates provide advanced multi-stage, cross-signal, and threat intelligence correlation rules.
-# Deploy with enabled: true after configuring required data sources.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
 
 templateVersion: "1.0.0"
 templateId: spycloud-advanced-threat-templates
