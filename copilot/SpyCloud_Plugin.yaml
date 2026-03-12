@@ -8,8 +8,8 @@ Descriptor:
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId
-      Description: Your Azure Tenant ID where the Sentinel workspace is located.
-      HintText: Enter your Azure Tenant ID
+      Description: Azure Tenant ID in GUID format (e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Must be a valid GUID — do NOT enter a domain name or URL.
+      HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
       SettingType: string
       Required: true
     - Name: SubscriptionId

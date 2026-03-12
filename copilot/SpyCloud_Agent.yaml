@@ -9,8 +9,8 @@ Descriptor:
   Version: 9.0.0
   Settings:
   - Name: TenantId
-    Description: Azure Tenant ID where the Sentinel workspace is located.
-    HintText: Enter your Azure Tenant ID
+    Description: Azure Tenant ID (GUID format only, e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Do NOT enter a domain name or URL — only the GUID.
+    HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
     SettingType: string
     Required: true
   - Name: SubscriptionId
@@ -1048,6 +1048,19 @@ SkillGroups:
         3. Show what Compass WOULD provide: "With Compass access, I could also show: stolen session cookies by target app, browser autofill data, cryptocurrency wallets, installed software inventory, and malware C2 infrastructure details."
 
         4. Suggest: "Contact SpyCloud sales to upgrade to Enterprise+ for full Compass deep investigation capabilities."
+
+
+        ## Authentication & Credential Errors
+
+        If the agent fails with "OnBehalfOfCredential authentication failed" or "authority must be in a well-formed URI format":
+
+        1. This means the TenantId setting is not configured correctly. The TenantId MUST be a GUID in the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
+
+        2. Tell the user: "The TenantId setting needs to be a pure GUID (e.g., ''12345678-abcd-1234-ef56-123456789abc''). You can find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Do NOT enter a domain name like ''contoso.onmicrosoft.com'' or a URL — only the GUID."
+
+        3. Guide them to fix it: "In Security Copilot, go to Sources > Manage plugins > find SpyCloud Investigation Agent > Settings > update the TenantId field with the correct GUID."
+
+        4. Similarly, SubscriptionId must be a GUID, ResourceGroupName and WorkspaceName must be exact names (case-sensitive).
 
 
         ## Permission Errors
@@ -5315,9 +5328,9 @@ AgentDefinitions:
   - None
   Settings:
   - Name: TenantId
-    Label: Azure Tenant ID
-    Description: Your Azure Tenant ID
-    HintText: Enter your Azure Tenant ID
+    Label: Azure Tenant ID (GUID)
+    Description: Azure Tenant ID in GUID format (e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Must be a valid GUID — do NOT enter a domain name or URL.
+    HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
     SettingType: string
     Required: true
   - Name: SubscriptionId
