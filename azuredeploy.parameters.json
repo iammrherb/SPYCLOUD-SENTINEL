@@ -108,6 +108,9 @@
         "dcrImmutableId": {
             "value": ""
         },
+        "dcrImmutableIdExt": {
+            "value": ""
+        },
         "enablePostDeployScript": {
             "value": true
         },
