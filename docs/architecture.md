@@ -27,7 +27,7 @@ graph TB
         T5["SpyCloud_ConditionalAccessLogs_CL<br/>14 columns"]
         T6["Spycloud_MDE_Logs_CL<br/>19 columns"]
         T7["SpyCloudCompassApplications_CL"]
-        T8["SpyCloudSIPCookies_CL"]
+        T8["SpyCloudSipCookies_CL"]
         T9["SpyCloudIdentityExposure_CL"]
         T10["SpyCloudInvestigations_CL"]
     end
@@ -90,7 +90,7 @@ graph TB
 | `SpyCloudCompassData_CL` | 29 | Compass API | Consumer/partner identity exposures (Enterprise+ only) |
 | `SpyCloudCompassDevices_CL` | 8 | Compass API | Infected device fingerprints and malware artifacts |
 | `SpyCloudCompassApplications_CL` | -- | Compass API | Application-level stolen credential data |
-| `SpyCloudSIPCookies_CL` | -- | SIP API | Stolen session cookies and token data |
+| `SpyCloudSipCookies_CL` | -- | SIP API | Stolen session cookies and token data |
 | `SpyCloudIdentityExposure_CL` | -- | Identity API | Aggregated identity exposure profiles |
 | `SpyCloudInvestigations_CL` | -- | Investigations API | Full database investigation records |
 | `SpyCloud_ConditionalAccessLogs_CL` | 14 | Playbook output | Identity remediation audit trail |
@@ -144,7 +144,7 @@ Data Collection Rule (DCR) -- KQL transforms
 | Catalog | `/enterprise-v2/breach/catalog` | SpyCloudBreachCatalog_CL | Enterprise |
 | Compass | `/enterprise-v2/compass/data` | SpyCloudCompassData_CL | Enterprise+ |
 | Compass | `/enterprise-v2/compass/devices` | SpyCloudCompassDevices_CL | Enterprise+ |
-| SIP | `/sip/breach/data/cookies` | SpyCloudSIPCookies_CL | SIP |
+| SIP | `/sip/breach/data/cookies` | SpyCloudSipCookies_CL | SIP |
 | Identity | `/identity/exposure` | SpyCloudIdentityExposure_CL | Enterprise |
 | Investigations | `/investigations/data` | SpyCloudInvestigations_CL | Investigations |
 | Enterprise | (playbook output) | SpyCloud_ConditionalAccessLogs_CL | -- |
