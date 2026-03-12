@@ -77,6 +77,9 @@ DCE_URI=""
 DCR_NAME=""
 DCR_IMMUTABLE_ID=""
 DCR_RESOURCE_ID=""
+DCR_EXT_NAME=""
+DCR_EXT_IMMUTABLE_ID=""
+DCR_EXT_RESOURCE_ID=""
 
 # Playbook definitions: name-suffix -> Graph permissions needed
 # Format: "PlaybookSuffix:GraphPerm1,GraphPerm2|PlaybookSuffix2:..."
@@ -367,6 +370,7 @@ phase1_validate_discover() {
     # --- Set naming conventions ---
     DCE_NAME="dce-spycloud-${WS}"
     DCR_NAME="dcr-spycloud-${WS}"
+    DCR_EXT_NAME="dcr-ccf-ext-${WS}"
 
     # --- List all deployed resources ---
     log "Listing deployed resources in '${RG}'..."
@@ -464,12 +468,35 @@ phase2_resolve_dce_dcr() {
         fi
     fi
 
+    # --- Extended DCR (for Exposure, CAP, MDE Logs, CA Logs) ---
+    log "Resolving Extended Data Collection Rule: ${DCR_EXT_NAME}..."
+    DCR_EXT_IMMUTABLE_ID=$(retry_cmd "Resolve Extended DCR Immutable ID" \
+        az monitor data-collection rule show \
+        --name "$DCR_EXT_NAME" -g "$RG" \
+        --query "immutableId" -o tsv) || true
+
+    if [[ -n "$DCR_EXT_IMMUTABLE_ID" ]]; then
+        DCR_EXT_RESOURCE_ID=$(az monitor data-collection rule show \
+            --name "$DCR_EXT_NAME" -g "$RG" \
+            --query "id" -o tsv 2>/dev/null || echo "")
+        ok "Extended DCR Immutable ID: ${DCR_EXT_IMMUTABLE_ID}"
+        local ext_stream_count ext_flow_count
+        ext_stream_count=$(az monitor data-collection rule show --name "$DCR_EXT_NAME" -g "$RG" \
+            --query "length(streamDeclarations)" -o tsv 2>/dev/null || echo "0")
+        ext_flow_count=$(az monitor data-collection rule show --name "$DCR_EXT_NAME" -g "$RG" \
+            --query "length(dataFlows)" -o tsv 2>/dev/null || echo "0")
+        log "  Extended DCR Streams: ${ext_stream_count} | Data Flows: ${ext_flow_count}"
+    else
+        warn "Extended DCR '${DCR_EXT_NAME}' not found. MDE/CA playbooks may need manual DCR configuration."
+    fi
+
     # Summary display
     echo "" >&2
     echo -e "  ${BOLD}DCE/DCR Reference Values:${NC}" >&2
     echo -e "  ${DIM}(Use these when configuring the data connector)${NC}" >&2
-    echo -e "    DCE URI:          ${CYAN}${DCE_URI:-NOT RESOLVED}${NC}" >&2
-    echo -e "    DCR Immutable ID: ${CYAN}${DCR_IMMUTABLE_ID:-NOT RESOLVED}${NC}" >&2
+    echo -e "    DCE URI:              ${CYAN}${DCE_URI:-NOT RESOLVED}${NC}" >&2
+    echo -e "    DCR Immutable ID:     ${CYAN}${DCR_IMMUTABLE_ID:-NOT RESOLVED}${NC}" >&2
+    echo -e "    DCR Ext Immutable ID: ${CYAN}${DCR_EXT_IMMUTABLE_ID:-NOT RESOLVED}${NC}" >&2
     echo "" >&2
 }
 

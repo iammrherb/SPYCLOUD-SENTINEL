@@ -119,9 +119,9 @@ if [ -n "$DCR_IMMUTABLE" ]; then
   link "$PORTAL/#@$TENANT/resource$DCR_ID/overview"
   
   if [ "$STREAM_COUNT" -ge 4 ] 2>/dev/null; then
-    pass "DCR has $STREAM_COUNT streams (expected 4: Watchlist, Catalog, MDE, CA)"
+    pass "Primary DCR has $STREAM_COUNT streams (max 10 per DCR)"
   else
-    warn "DCR has $STREAM_COUNT streams (expected 4)"
+    warn "Primary DCR has $STREAM_COUNT streams (expected up to 10)"
   fi
 else
   # DCR might have a different name (content template generates it)
@@ -132,6 +132,18 @@ else
   else
     fail "No SpyCloud DCR found in resource group"
   fi
+fi
+
+# Extended DCR (Exposure, CAP, MDE Logs, CA Logs)
+DCR_EXT_NAME="dcr-ccf-ext-$WS"
+DCR_EXT_IMMUTABLE=$(az monitor data-collection rule show --name "$DCR_EXT_NAME" -g "$RG" --query "immutableId" -o tsv 2>/dev/null || echo "")
+if [ -n "$DCR_EXT_IMMUTABLE" ]; then
+  EXT_STREAM_COUNT=$(az monitor data-collection rule show --name "$DCR_EXT_NAME" -g "$RG" --query "length(streamDeclarations)" -o tsv 2>/dev/null || echo "0")
+  EXT_FLOW_COUNT=$(az monitor data-collection rule show --name "$DCR_EXT_NAME" -g "$RG" --query "length(dataFlows)" -o tsv 2>/dev/null || echo "0")
+  pass "Extended DCR '$DCR_EXT_NAME' exists (immutableId=$DCR_EXT_IMMUTABLE)"
+  info "Extended DCR Streams: $EXT_STREAM_COUNT | Data Flows: $EXT_FLOW_COUNT"
+else
+  warn "Extended DCR '$DCR_EXT_NAME' not found — Exposure/CAP/MDE/CA streams may not be configured"
 fi
 
 # ═══════════════════════════════════════════════════════════════

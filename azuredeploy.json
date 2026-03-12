@@ -3,8 +3,8 @@
   "contentVersion": "1.0.0.0",
   "metadata": {
     "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel",
-    "description": "Complete deployment of SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel v9.0. Template-based deployment with separate workbooks and connector-associated analytics. Includes: CCF data connector (13 REST API pollers covering Enterprise Breach, Compass, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP APIs), 14 custom Log Analytics tables, playbook templates (14 remediation playbooks), analytics rule templates (60+ rules), Fusion multistage ML detection, MSIC rules, UEBA/Anomaly settings, automation rule templates, 28 hunting queries, 4 watchlists, 14 focused workbooks, TI enrichment, Jupyter notebooks with Investigations API, and Security Copilot integration (90+ KQL skills + 35+ API skills + 17 sub-agent investigation agent with OpenAI GPT-4o support).",
-    "version": "9.0.0",
+    "description": "Complete deployment of SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel v10.0. Dual-DCR architecture (primary: 10 streams, extended: 4 streams) to comply with Azure 10-dataFlow-per-DCR limit. Includes: CCF data connector (13 REST API pollers covering Enterprise Breach, Compass, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP APIs), 14 custom Log Analytics tables, playbook templates (19 remediation playbooks), analytics rule templates (60+ rules), Fusion multistage ML detection, MSIC rules, UEBA/Anomaly settings, automation rule templates, 28 hunting queries, 4 watchlists, 14 focused workbooks, TI enrichment, Jupyter notebooks, and full Security Copilot integration (120+ KQL skills + 35+ API skills + 23 sub-agent investigation agent with 12 GPT-4o AI analysis skills).",
+    "version": "10.0.0",
     "author": "SpyCloud"
   },
   "parameters": {
@@ -295,6 +295,13 @@
       "defaultValue": "",
       "metadata": {
         "description": "LEAVE BLANK on first deploy. Get after deployment via post-deploy.sh or Azure Portal."
+      }
+    },
+    "dcrImmutableIdExt": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "LEAVE BLANK on first deploy. Immutable ID for the extended DCR (dcr-ccf-ext-*) used by Exposure, CAP, MDE, and CA Logs streams. Auto-resolved by post-deploy.sh."
       }
     },
     "enablePostDeployScript": {
@@ -1146,7 +1153,8 @@
     "mdeBlocklistPlaybookName": "[concat('SpyCloud-MDE-Blocklist-', take(parameters('workspace'), 30))]",
     "teamsConnectionName": "[concat('teams-spycloud-', take(parameters('workspace'), 30))]",
     "allTags": "[union(parameters('resourceTags'), createObject('environment', parameters('tagEnvironment'), 'owner', if(empty(parameters('tagOwner')), 'unassigned', parameters('tagOwner')), 'costCenter', if(empty(parameters('tagCostCenter')), 'unassigned', parameters('tagCostCenter'))))]",
-    "_dcrFullName": "[concat('dcr-ccf-', parameters('workspace'))]"
+    "_dcrFullName": "[concat('dcr-ccf-', parameters('workspace'))]",
+    "_dcrExtFullName": "[concat('dcr-ccf-ext-', parameters('workspace'))]"
   },
   "resources": [
     {
@@ -3516,270 +3524,6 @@
                 "type": "string"
               }
             ]
-          },
-          "Custom-SpyCloudExposure_CL": {
-            "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "email",
-                "type": "string"
-              },
-              {
-                "name": "email_domain",
-                "type": "string"
-              },
-              {
-                "name": "exposure_id",
-                "type": "string"
-              },
-              {
-                "name": "risk_score",
-                "type": "int"
-              },
-              {
-                "name": "risk_level",
-                "type": "string"
-              },
-              {
-                "name": "total_breaches",
-                "type": "int"
-              },
-              {
-                "name": "total_infostealers",
-                "type": "int"
-              },
-              {
-                "name": "total_credentials",
-                "type": "int"
-              },
-              {
-                "name": "plaintext_passwords",
-                "type": "int"
-              },
-              {
-                "name": "hashed_passwords",
-                "type": "int"
-              },
-              {
-                "name": "stolen_cookies",
-                "type": "int"
-              },
-              {
-                "name": "infected_devices",
-                "type": "int"
-              },
-              {
-                "name": "first_exposure_date",
-                "type": "string"
-              },
-              {
-                "name": "latest_exposure_date",
-                "type": "string"
-              },
-              {
-                "name": "remediation_status",
-                "type": "string"
-              },
-              {
-                "name": "remediation_actions",
-                "type": "dynamic"
-              },
-              {
-                "name": "data_classes_exposed",
-                "type": "dynamic"
-              },
-              {
-                "name": "breach_sources",
-                "type": "dynamic"
-              },
-              {
-                "name": "timeline",
-                "type": "dynamic"
-              },
-              {
-                "name": "log_id",
-                "type": "string"
-              }
-            ]
-          },
-          "Custom-SpyCloudCAP_CL": {
-            "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "cap_id",
-                "type": "string"
-              },
-              {
-                "name": "email",
-                "type": "string"
-              },
-              {
-                "name": "email_domain",
-                "type": "string"
-              },
-              {
-                "name": "policy_id",
-                "type": "string"
-              },
-              {
-                "name": "policy_name",
-                "type": "string"
-              },
-              {
-                "name": "action_type",
-                "type": "string"
-              },
-              {
-                "name": "action_status",
-                "type": "string"
-              },
-              {
-                "name": "trigger_severity",
-                "type": "int"
-              },
-              {
-                "name": "trigger_source",
-                "type": "string"
-              },
-              {
-                "name": "credential_type",
-                "type": "string"
-              },
-              {
-                "name": "reset_timestamp",
-                "type": "string"
-              },
-              {
-                "name": "notification_sent",
-                "type": "boolean"
-              },
-              {
-                "name": "affected_applications",
-                "type": "dynamic"
-              },
-              {
-                "name": "compliance_tags",
-                "type": "dynamic"
-              },
-              {
-                "name": "log_id",
-                "type": "string"
-              }
-            ]
-          },
-          "Custom-Spycloud_MDE_Logs_CL": {
-            "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "IncidentId",
-                "type": "string"
-              },
-              {
-                "name": "DeviceName",
-                "type": "string"
-              },
-              {
-                "name": "DeviceId",
-                "type": "string"
-              },
-              {
-                "name": "MachineId",
-                "type": "string"
-              },
-              {
-                "name": "Action",
-                "type": "string"
-              },
-              {
-                "name": "IsolationType",
-                "type": "string"
-              },
-              {
-                "name": "Tag",
-                "type": "string"
-              },
-              {
-                "name": "ActionStatus",
-                "type": "string"
-              },
-              {
-                "name": "Email",
-                "type": "string"
-              },
-              {
-                "name": "Severity",
-                "type": "int"
-              },
-              {
-                "name": "InfectedMachineId",
-                "type": "string"
-              },
-              {
-                "name": "UserHostname",
-                "type": "string"
-              }
-            ]
-          },
-          "Custom-SpyCloud_ConditionalAccessLogs_CL": {
-            "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "IncidentId",
-                "type": "string"
-              },
-              {
-                "name": "UserPrincipalName",
-                "type": "string"
-              },
-              {
-                "name": "UserId",
-                "type": "string"
-              },
-              {
-                "name": "Action",
-                "type": "string"
-              },
-              {
-                "name": "ActionStatus",
-                "type": "string"
-              },
-              {
-                "name": "PasswordReset",
-                "type": "boolean"
-              },
-              {
-                "name": "SessionsRevoked",
-                "type": "boolean"
-              },
-              {
-                "name": "AddedToCAGroup",
-                "type": "boolean"
-              },
-              {
-                "name": "CAGroupId",
-                "type": "string"
-              },
-              {
-                "name": "Email",
-                "type": "string"
-              },
-              {
-                "name": "Severity",
-                "type": "int"
-              }
-            ]
           }
         },
         "destinations": {
@@ -3890,46 +3634,6 @@
             ],
             "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend severity = toint(severity) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend data_classes = iff(gettype(data_classes) == 'string', parse_json(data_classes), data_classes)",
             "outputStream": "Custom-SpyCloudDataPartnership_CL"
-          },
-          {
-            "streams": [
-              "Custom-SpyCloudExposure_CL"
-            ],
-            "destinations": [
-              "scWorkspace"
-            ],
-            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend risk_score = toint(risk_score) | extend total_breaches = toint(total_breaches) | extend total_infostealers = toint(total_infostealers) | extend total_credentials = toint(total_credentials) | extend plaintext_passwords = toint(plaintext_passwords) | extend hashed_passwords = toint(hashed_passwords) | extend stolen_cookies = toint(stolen_cookies) | extend infected_devices = toint(infected_devices) | extend remediation_actions = iff(gettype(remediation_actions) == 'string', parse_json(remediation_actions), remediation_actions) | extend data_classes_exposed = iff(gettype(data_classes_exposed) == 'string', parse_json(data_classes_exposed), data_classes_exposed) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend timeline = iff(gettype(timeline) == 'string', parse_json(timeline), timeline)",
-            "outputStream": "Custom-SpyCloudExposure_CL"
-          },
-          {
-            "streams": [
-              "Custom-SpyCloudCAP_CL"
-            ],
-            "destinations": [
-              "scWorkspace"
-            ],
-            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend trigger_severity = toint(trigger_severity) | extend notification_sent = tobool(notification_sent) | extend affected_applications = iff(gettype(affected_applications) == 'string', parse_json(affected_applications), affected_applications) | extend compliance_tags = iff(gettype(compliance_tags) == 'string', parse_json(compliance_tags), compliance_tags)",
-            "outputStream": "Custom-SpyCloudCAP_CL"
-          },
-          {
-            "streams": [
-              "Custom-Spycloud_MDE_Logs_CL"
-            ],
-            "destinations": [
-              "scWorkspace"
-            ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
-            "outputStream": "Custom-Spycloud_MDE_Logs_CL"
-          },
-          {
-            "streams": [
-              "Custom-SpyCloud_ConditionalAccessLogs_CL"
-            ],
-            "destinations": [
-              "scWorkspace"
-            ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
-            "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
           }
         ]
       },
@@ -3947,9 +3651,139 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudIdentityExposure_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudInvestigations_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudIdLink_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudDataPartnership_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudDataPartnership_CL')]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2022-06-01",
+      "name": "[variables('_dcrExtFullName')]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "properties": {
+        "dataCollectionEndpointId": "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
+        "streamDeclarations": {
+          "Custom-SpyCloudExposure_CL": {
+            "columns": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "email", "type": "string" },
+              { "name": "email_domain", "type": "string" },
+              { "name": "exposure_id", "type": "string" },
+              { "name": "risk_score", "type": "int" },
+              { "name": "risk_level", "type": "string" },
+              { "name": "total_breaches", "type": "int" },
+              { "name": "total_infostealers", "type": "int" },
+              { "name": "total_credentials", "type": "int" },
+              { "name": "plaintext_passwords", "type": "int" },
+              { "name": "hashed_passwords", "type": "int" },
+              { "name": "stolen_cookies", "type": "int" },
+              { "name": "infected_devices", "type": "int" },
+              { "name": "first_exposure_date", "type": "string" },
+              { "name": "latest_exposure_date", "type": "string" },
+              { "name": "remediation_status", "type": "string" },
+              { "name": "remediation_actions", "type": "dynamic" },
+              { "name": "data_classes_exposed", "type": "dynamic" },
+              { "name": "breach_sources", "type": "dynamic" },
+              { "name": "timeline", "type": "dynamic" },
+              { "name": "log_id", "type": "string" }
+            ]
+          },
+          "Custom-SpyCloudCAP_CL": {
+            "columns": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "cap_id", "type": "string" },
+              { "name": "email", "type": "string" },
+              { "name": "email_domain", "type": "string" },
+              { "name": "policy_id", "type": "string" },
+              { "name": "policy_name", "type": "string" },
+              { "name": "action_type", "type": "string" },
+              { "name": "action_status", "type": "string" },
+              { "name": "trigger_severity", "type": "int" },
+              { "name": "trigger_source", "type": "string" },
+              { "name": "credential_type", "type": "string" },
+              { "name": "reset_timestamp", "type": "string" },
+              { "name": "notification_sent", "type": "boolean" },
+              { "name": "affected_applications", "type": "dynamic" },
+              { "name": "compliance_tags", "type": "dynamic" },
+              { "name": "log_id", "type": "string" }
+            ]
+          },
+          "Custom-Spycloud_MDE_Logs_CL": {
+            "columns": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "IncidentId", "type": "string" },
+              { "name": "DeviceName", "type": "string" },
+              { "name": "DeviceId", "type": "string" },
+              { "name": "MachineId", "type": "string" },
+              { "name": "Action", "type": "string" },
+              { "name": "IsolationType", "type": "string" },
+              { "name": "Tag", "type": "string" },
+              { "name": "ActionStatus", "type": "string" },
+              { "name": "Email", "type": "string" },
+              { "name": "Severity", "type": "int" },
+              { "name": "InfectedMachineId", "type": "string" },
+              { "name": "UserHostname", "type": "string" }
+            ]
+          },
+          "Custom-SpyCloud_ConditionalAccessLogs_CL": {
+            "columns": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "IncidentId", "type": "string" },
+              { "name": "UserPrincipalName", "type": "string" },
+              { "name": "UserId", "type": "string" },
+              { "name": "Action", "type": "string" },
+              { "name": "ActionStatus", "type": "string" },
+              { "name": "PasswordReset", "type": "boolean" },
+              { "name": "SessionsRevoked", "type": "boolean" },
+              { "name": "AddedToCAGroup", "type": "boolean" },
+              { "name": "CAGroupId", "type": "string" },
+              { "name": "Email", "type": "string" },
+              { "name": "Severity", "type": "int" }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+              "name": "scWorkspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [ "Custom-SpyCloudExposure_CL" ],
+            "destinations": [ "scWorkspace" ],
+            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend risk_score = toint(risk_score) | extend total_breaches = toint(total_breaches) | extend total_infostealers = toint(total_infostealers) | extend total_credentials = toint(total_credentials) | extend plaintext_passwords = toint(plaintext_passwords) | extend hashed_passwords = toint(hashed_passwords) | extend stolen_cookies = toint(stolen_cookies) | extend infected_devices = toint(infected_devices) | extend remediation_actions = iff(gettype(remediation_actions) == 'string', parse_json(remediation_actions), remediation_actions) | extend data_classes_exposed = iff(gettype(data_classes_exposed) == 'string', parse_json(data_classes_exposed), data_classes_exposed) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend timeline = iff(gettype(timeline) == 'string', parse_json(timeline), timeline)",
+            "outputStream": "Custom-SpyCloudExposure_CL"
+          },
+          {
+            "streams": [ "Custom-SpyCloudCAP_CL" ],
+            "destinations": [ "scWorkspace" ],
+            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend trigger_severity = toint(trigger_severity) | extend notification_sent = tobool(notification_sent) | extend affected_applications = iff(gettype(affected_applications) == 'string', parse_json(affected_applications), affected_applications) | extend compliance_tags = iff(gettype(compliance_tags) == 'string', parse_json(compliance_tags), compliance_tags)",
+            "outputStream": "Custom-SpyCloudCAP_CL"
+          },
+          {
+            "streams": [ "Custom-Spycloud_MDE_Logs_CL" ],
+            "destinations": [ "scWorkspace" ],
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
+            "outputStream": "Custom-Spycloud_MDE_Logs_CL"
+          },
+          {
+            "streams": [ "Custom-SpyCloud_ConditionalAccessLogs_CL" ],
+            "destinations": [ "scWorkspace" ],
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
+            "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudExposure_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCAP_CL')]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCAP_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -4662,7 +4496,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "### Security Copilot Integration\n\n**3 Plugin Files to Upload:**\n\n1. **KQL Plugin** (`SpyCloud_Plugin.yaml`) - 90+ skills\n   - No API key required (uses Sentinel workspace)\n   - Queries all 14 custom tables via KQL\n\n2. **API Plugin** (`SpyCloud_API_Plugin.yaml`) - 35+ skills\n   - Requires SpyCloud API key(s)\n   - Direct REST calls to all 9 SpyCloud APIs\n   - Supports per-API key configuration\n\n3. **Investigation Agent** (`SpyCloud_Agent.yaml`) - 58+ skills\n   - 17 specialized sub-agents\n   - 6 GPT-4o AI analysis skills (requires OpenAI key)\n   - Cross-platform: Sentinel, Defender XDR, Intune, Entra\n\n**To Install:** Security Copilot > Sources > Manage Plugins > Custom > Add Plugin\n\n**API Key Mapping for Copilot:**\n- Enterprise + Compass: Single API key\n- Each additional API (IDLINK, Exposure, etc.): Configure as separate settings in the plugin\n\n**OpenAI Integration:**\nFor GPT-4o analysis skills (executive briefings, threat narratives, compliance reports), enter your OpenAI API key in the Agent settings."
+                    "text": "### Security Copilot Integration — Full Deployment\n\n**3 Plugin Files to Upload (200+ total skills):**\n\n1. **KQL Plugin** (`SpyCloud_Plugin.yaml`) — 120+ skills\n   - No API key required (uses Sentinel workspace connection)\n   - Queries ALL 14 custom SpyCloud tables via KQL\n   - Categories: User Investigation, Password Analysis, Severity/Domain, PII/Social Media, Device Forensics, Breach Catalog, MDE Audit, CA Audit, IDLINK Correlation, Data Partnership, Exposure Risk, CAP Monitoring, Health/Operations\n   - Required Settings: TenantId, SubscriptionId, ResourceGroupName, WorkspaceName\n\n2. **API Plugin** (`SpyCloud_API_Plugin.yaml`) — 35+ skills\n   - Requires SpyCloud API key(s)\n   - Direct REST calls to ALL 9 SpyCloud APIs: Enterprise Breach, Compass, Identity Exposure, SIP, Investigations, IDLINK, Data Partnership, Exposure, CAP\n   - Per-API key configuration: Enterprise/Compass share one key; IDLINK, DataPartnership, Exposure, CAP each need separate keys\n   - OpenAPI spec included for full endpoint documentation\n\n3. **Investigation Agent** (`SpyCloud_Agent.yaml`) — 100+ skills\n   - 23 specialized sub-agents: Primary Orchestrator, UEBA Behavioral, Fusion Multistage, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration, Executive Summary, Watchlist Management, Ransomware Impact, Identity Risk Scoring, Supply Chain, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App, Compass Deep Investigation, IDLINK Correlation, Data Partnership Intel, Exposure Risk, CAP Response, OpenAI Advanced Analysis, Cross-API Investigation\n   - 12 GPT-4o AI analysis skills: AnalyzeAndSummarize, BuildThreatNarrative, GenerateComplianceAssessment, GenerateExecutiveBriefing, CorrelateExternalThreatIntel, DesignResponsePlaybook, GenerateExecutiveReport, GenerateBoardPresentation, PredictExposureTrend, BuildAttackSimulation, GenerateRiskHeatmap, ComposeIncidentNarrative\n   - 65 KQL data retrieval skills spanning all 14 tables\n   - Cross-platform: Sentinel, Defender XDR, Intune, Entra ID, CASB\n\n**Installation Steps:**\n1. Security Copilot > Sources > Manage Plugins > Custom > Add Plugin\n2. Upload each YAML file separately (NOT manifest.json)\n3. Configure required settings (TenantId, SubscriptionId, ResourceGroupName, WorkspaceName)\n4. Add API keys per product entitlement\n5. Optional: Add OpenAI API key for GPT-4o executive reports and board presentations\n\n**API Key Architecture:**\n- Enterprise + Compass: Single shared API key\n- IDLINK: Separate dedicated key\n- Data Partnership: Separate dedicated key\n- Exposure: Separate dedicated key\n- CAP: Separate dedicated key\n- OpenAI: Optional for AI analysis skills"
                   }
                 }
               ]
@@ -4729,7 +4563,8 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
         "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
-        "[resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace')))]"
+        "[resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace')))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('_dcrExtFullName'))]"
       ],
       "properties": {
         "contentId": "[variables('_dataConnectorContentIdConnections')]",
@@ -4871,6 +4706,13 @@
               "defaultValue": {
                 "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
                 "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace'))), '2022-06-01').immutableId]"
+              }
+            },
+            "dcrConfigExt": {
+              "type": "object",
+              "defaultValue": {
+                "dataCollectionEndpoint": "[reference(resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName')), '2022-06-01').logsIngestion.endpoint]",
+                "dataCollectionRuleImmutableId": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', variables('_dcrExtFullName')), '2022-06-01').immutableId]"
               }
             },
             "watchlistType": {
@@ -5522,8 +5364,8 @@
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
                 "dcrConfig": {
-                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
-                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "dataCollectionEndpoint": "[[parameters('dcrConfigExt').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfigExt').dataCollectionRuleImmutableId]",
                   "streamName": "Custom-SpyCloudExposure_CL"
                 },
                 "dataType": "SpyCloud Exposure",
@@ -5573,8 +5415,8 @@
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
                 "dcrConfig": {
-                  "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
-                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
+                  "dataCollectionEndpoint": "[[parameters('dcrConfigExt').dataCollectionEndpoint]",
+                  "dataCollectionRuleImmutableId": "[[parameters('dcrConfigExt').dataCollectionRuleImmutableId]",
                   "streamName": "Custom-SpyCloudCAP_CL"
                 },
                 "dataType": "SpyCloud CAP",
@@ -5707,7 +5549,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
-        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('_dcrExtFullName'))]"
       ],
       "properties": {
         "state": "Enabled",
@@ -5724,7 +5567,7 @@
               "type": "String"
             },
             "dcrImmutableId": {
-              "defaultValue": "[parameters('dcrImmutableId')]",
+              "defaultValue": "[if(empty(parameters('dcrImmutableIdExt')), parameters('dcrImmutableId'), parameters('dcrImmutableIdExt'))]",
               "type": "String"
             },
             "mdeIsolationType": {
@@ -6154,7 +5997,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
-        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]"
+        "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('_dcrExtFullName'))]"
       ],
       "properties": {
         "state": "Enabled",
@@ -6171,7 +6015,7 @@
               "type": "String"
             },
             "dcrImmutableId": {
-              "defaultValue": "[parameters('dcrImmutableId')]",
+              "defaultValue": "[if(empty(parameters('dcrImmutableIdExt')), parameters('dcrImmutableId'), parameters('dcrImmutableIdExt'))]",
               "type": "String"
             },
             "caSecurityGroupId": {
@@ -11127,7 +10971,8 @@
       "value": {
         "dceName": "[parameters('dataCollectionEndpointName')]",
         "dceResourceId": "[variables('dataCollectionEndpointId1')]",
-        "dcrName": "[parameters('dataCollectionRuleName')]"
+        "dcrName": "[parameters('dataCollectionRuleName')]",
+        "dcrExtName": "[variables('_dcrExtFullName')]"
       }
     },
     "tableNames": {
@@ -11175,9 +11020,10 @@
         "step4_monitoring_publisher": "REQUIRED (if playbooks enabled): Assign 'Monitoring Metrics Publisher' on the DCR to both Logic App identities",
         "step5_key_vault_access": "OPTIONAL: If using Key Vault with Logic Apps, assign Key Vault Secrets User role to Logic App identities",
         "step6_defender_xdr": "OPTIONAL: Enable Microsoft Defender XDR connector via Sentinel \u2192 Content Hub",
-        "step7_copilot_plugin": "OPTIONAL: Upload SpyCloud_Copilot_Plugin_Ultimate.yaml to Security Copilot \u2192 Sources \u2192 Custom",
-        "step8_copilot_agent": "OPTIONAL: Upload SpyCloud_Agent_Manifest.yaml via Security Copilot \u2192 Build \u2192 Upload YAML manifest",
-        "step0_dcr_dce": "REQUIRED (if playbooks enabled): Get the DCE Logs Ingestion URI and DCR Immutable ID. Go to Azure Portal \u2192 Monitor \u2192 Data Collection Endpoints \u2192 copy Logs Ingestion URI. Then Monitor \u2192 Data Collection Rules \u2192 JSON View \u2192 copy immutableId. Update the Logic App parameters with these values, or redeploy the template with them filled in."
+        "step7_copilot_kql_plugin": "OPTIONAL: Upload copilot/SpyCloud_Plugin.yaml to Security Copilot > Sources > Custom (120+ KQL skills, no API key needed)",
+        "step8_copilot_api_plugin": "OPTIONAL: Upload copilot/SpyCloud_API_Plugin.yaml to Security Copilot > Sources > Custom (35+ API skills, requires SpyCloud API key)",
+        "step9_copilot_agent": "OPTIONAL: Upload copilot/SpyCloud_Agent.yaml to Security Copilot > Sources > Custom (23 sub-agents, 12 AI skills, 65 KQL skills)",
+        "step0_dcr_dce": "REQUIRED (if playbooks enabled): Get the DCE Logs Ingestion URI and both DCR Immutable IDs (primary dcr-ccf-* and extended dcr-ccf-ext-*). Go to Azure Portal > Monitor > Data Collection Endpoints > copy Logs Ingestion URI. Then Monitor > Data Collection Rules > JSON View > copy immutableId for both DCRs. Update the Logic App parameters with these values, or redeploy the template with them filled in."
       }
     },
     "notificationInfo": {
@@ -11193,7 +11039,8 @@
       "value": {
         "dceResourceName": "[parameters('dataCollectionEndpointName')]",
         "dcrResourceName": "[parameters('dataCollectionRuleName')]",
-        "note": "Run scripts/post-deploy.sh to auto-resolve DCE URI and DCR Immutable ID"
+        "dcrExtResourceName": "[variables('_dcrExtFullName')]",
+        "note": "Run scripts/post-deploy.sh to auto-resolve DCE URI and DCR Immutable IDs (primary + extended)"
       }
     },
     "analyticsRulesDeployed": {
@@ -11206,6 +11053,38 @@
         "idpCorrelationRules": 4,
         "note": "ALL rules are deployed DISABLED. Review each rule's KQL logic, then enable individually in Sentinel \u2192 Analytics.",
         "idpNote": "Identity Provider correlation rules (Okta, Duo, Ping, Entra) require those IdP logs to be ingested into Sentinel first via their respective Content Hub connectors."
+      }
+    },
+    "securityCopilotDeployment": {
+      "type": "object",
+      "value": {
+        "totalPlugins": 3,
+        "totalSkills": "200+",
+        "kqlPlugin": {
+          "file": "copilot/SpyCloud_Plugin.yaml",
+          "skills": 120,
+          "auth": "None (Sentinel workspace connection)",
+          "tables": 14,
+          "requiredSettings": ["TenantId", "SubscriptionId", "ResourceGroupName", "WorkspaceName"]
+        },
+        "apiPlugin": {
+          "file": "copilot/SpyCloud_API_Plugin.yaml",
+          "skills": 35,
+          "auth": "API Key (X-API-Key header)",
+          "apis": 9,
+          "requiredSettings": ["SpyCloud Enterprise/Compass API Key"],
+          "optionalSettings": ["IDLINK API Key", "Data Partnership API Key", "Exposure API Key", "CAP API Key"]
+        },
+        "investigationAgent": {
+          "file": "copilot/SpyCloud_Agent.yaml",
+          "skills": 100,
+          "subAgents": 23,
+          "gptSkills": 12,
+          "kqlSkills": 65,
+          "requiredSettings": ["TenantId", "SubscriptionId", "ResourceGroupName", "WorkspaceName"],
+          "optionalSettings": ["SpyCloudApiKey", "IdLinkApiKey", "DataPartnershipApiKey", "ExposureApiKey", "CAPApiKey", "OpenAIApiKey"]
+        },
+        "installInstructions": "Upload each YAML file separately in Security Copilot > Sources > Manage Plugins > Custom > Add Plugin. Do NOT upload manifest.json."
       }
     },
     "identityProviderGuidance": {
