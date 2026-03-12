@@ -3,620 +3,632 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpyCloud for Microsoft Sentinel - Deployment Portal</title>
+<title>SpyCloud Sentinel - Deploy to Microsoft Sentinel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-/* Color System */
 :root {
-  --spycloud-green: #00D4AA;
-  --spycloud-blue: #0099FF;
-  --spycloud-gradient: linear-gradient(135deg, #00D4AA, #0099FF);
-  --transition: 0.3s ease;
+  --accent: #00D4AA;
+  --accent-dim: #00B894;
+  --accent-glow: rgba(0, 212, 170, 0.15);
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-code: #f1f3f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #495057;
+  --text-muted: #868e96;
+  --border: #dee2e6;
+  --border-light: #e9ecef;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.05);
+  --radius: 8px;
+  --radius-lg: 12px;
 }
 
-/* Light Mode (default) */
-:root {
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F8FAFC;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F1F5F9;
-  --text-primary: #1A2332;
-  --text-secondary: #556677;
-  --text-muted: #94A3B8;
-  --border: #E2E8F0;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
-  --logo-url: url('images/spycloud-logo-light.svg');
-  --banner-url: url('images/spycloud-sentinel-banner-light.svg');
-}
-
-/* Dark Mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #0B1929;
-    --bg-secondary: #0F2440;
-    --bg-card: #132D4A;
-    --bg-card-hover: #1A3A5C;
-    --text-primary: #FFFFFF;
-    --text-secondary: #8899AA;
-    --text-muted: #556677;
-    --border: #1E3A5F;
-    --shadow: 0 1px 3px rgba(0,0,0,0.3);
-    --shadow-lg: 0 10px 25px rgba(0,0,0,0.4);
-    --logo-url: url('images/spycloud-logo-dark.svg');
-    --banner-url: url('images/spycloud-sentinel-banner-dark.svg');
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-card: #1c2128;
+    --bg-code: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #adbac7;
+    --text-muted: #768390;
+    --border: #30363d;
+    --border-light: #21262d;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.3);
+    --accent-glow: rgba(0, 212, 170, 0.1);
   }
 }
 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg-secondary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
 /* Header */
-.header {
-  background: var(--bg-primary);
+header {
+  background: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
-  padding: 0;
+  padding: 20px 0;
 }
 
 .header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.logo-container {
+.logo-area {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.logo-shield {
-  width: 48px;
-  height: 48px;
+.logo-dark, .logo-light { height: 36px; width: auto; }
+
+@media (prefers-color-scheme: dark) {
+  .logo-dark { display: none; }
+  .logo-light { display: block; }
 }
-
-.logo-text h1 {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-
-.logo-text h1 .green { color: var(--spycloud-green); }
-
-.logo-text .tagline {
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  font-weight: 400;
+@media (prefers-color-scheme: light) {
+  .logo-dark { display: block; }
+  .logo-light { display: none; }
 }
 
 .header-badge {
-  background: rgba(0, 212, 170, 0.1);
-  color: var(--spycloud-green);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-glow);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid rgba(0, 212, 170, 0.2);
+  border: 1px solid var(--accent);
 }
+
+.header-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.header-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.header-links a:hover { color: var(--accent); }
 
 /* Hero */
 .hero {
-  background: var(--spycloud-gradient);
-  padding: 48px 32px;
+  padding: 64px 0 48px;
   text-align: center;
-  position: relative;
-  overflow: hidden;
 }
 
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%);
+.hero h1 {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: var(--text-primary);
 }
 
-.hero-content {
-  position: relative;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.hero h2 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #FFFFFF;
-  margin-bottom: 12px;
-}
+.hero h1 span { color: var(--accent); }
 
 .hero p {
-  font-size: 16px;
-  color: rgba(255,255,255,0.9);
-  margin-bottom: 32px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin: 0 auto 32px;
 }
 
 .deploy-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #FFFFFF;
-  color: #0B1929;
-  padding: 14px 32px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
+  gap: 10px;
+  background: var(--accent);
+  color: #000;
   font-size: 16px;
-  transition: var(--transition);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(0, 212, 170, 0.3);
 }
 
 .deploy-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
 }
 
-.deploy-btn img {
-  height: 20px;
+.deploy-btn svg { width: 20px; height: 20px; }
+
+.deploy-meta {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
-/* Main Content */
-.main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 48px 32px;
-}
-
-/* Section */
-.section {
+/* Stats Bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  padding: 32px 0;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
   margin-bottom: 48px;
 }
 
-.section-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--text-primary);
+.stat {
+  text-align: center;
 }
 
-.section-subtitle {
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Section */
+section {
+  margin-bottom: 48px;
+}
+
+section h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+section h2 .icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
 }
 
 /* Feature Grid */
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
 
 .feature-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 24px;
-  transition: var(--transition);
   box-shadow: var(--shadow);
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
 .feature-card:hover {
-  background: var(--bg-card-hover);
   box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.feature-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--spycloud-gradient);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  color: #FFFFFF;
-  font-size: 18px;
-  font-weight: 700;
+  border-color: var(--accent);
 }
 
 .feature-card h3 {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 8px;
-  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feature-card h3 .badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--accent);
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .feature-card p {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.5;
 }
 
-.feature-stat {
-  display: inline-block;
-  background: rgba(0, 212, 170, 0.1);
-  color: var(--spycloud-green);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 8px;
-}
-
 /* Prerequisites */
-.prereqs {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: var(--shadow);
-}
-
-.prereqs h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
 .prereq-list {
   list-style: none;
+  display: grid;
+  gap: 12px;
 }
 
 .prereq-list li {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.prereq-list li:last-child { border-bottom: none; }
-
-.prereq-check {
-  color: var(--spycloud-green);
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.prereq-list strong {
-  color: var(--text-primary);
-}
-
-/* Architecture */
-.architecture {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  font-size: 14px;
 }
 
-.arch-flow {
+.prereq-list li .check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 24px 0;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.arch-box {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px 20px;
-  text-align: center;
-  min-width: 140px;
+.prereq-list li strong {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
 }
 
-.arch-box.highlight {
-  border-color: var(--spycloud-green);
-  background: rgba(0, 212, 170, 0.05);
-}
-
-.arch-box h4 {
+.prereq-list li span {
+  color: var(--text-secondary);
   font-size: 13px;
+}
+
+/* Architecture Diagram */
+.architecture {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+
+.arch-diagram {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  white-space: pre;
+}
+
+.arch-diagram .hl { color: var(--accent); font-weight: 600; }
+.arch-diagram .dm { color: var(--text-muted); }
+
+/* Quick Start */
+.steps {
+  counter-reset: step;
+  list-style: none;
+  display: grid;
+  gap: 16px;
+}
+
+.steps li {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+}
+
+.steps li::before {
+  counter-increment: step;
+  content: counter(step);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.steps li div strong {
+  display: block;
   font-weight: 600;
   margin-bottom: 4px;
 }
 
-.arch-box p {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.arch-arrow {
-  color: var(--spycloud-green);
-  font-size: 20px;
-  font-weight: 700;
-}
-
-/* Quick Start */
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.step-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow);
-}
-
-.step-number {
-  width: 32px;
-  height: 32px;
-  background: var(--spycloud-gradient);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FFFFFF;
-  font-weight: 700;
+.steps li div p {
   font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.step-card h4 {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.step-card p {
-  font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.5;
+  margin: 0;
+}
+
+.steps li div code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-code);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
 }
 
 /* Footer */
-.footer {
-  background: var(--bg-primary);
+footer {
   border-top: 1px solid var(--border);
-  padding: 32px;
+  padding: 32px 0;
   text-align: center;
-}
-
-.footer p {
-  font-size: 13px;
   color: var(--text-muted);
+  font-size: 13px;
 }
 
-.footer a {
-  color: var(--spycloud-green);
+footer a {
+  color: var(--accent);
   text-decoration: none;
+}
+
+footer a:hover { text-decoration: underline; }
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 12px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header-inner { flex-direction: column; gap: 12px; }
-  .hero h2 { font-size: 24px; }
-  .arch-flow { flex-direction: column; }
-  .arch-arrow { transform: rotate(90deg); }
+  .hero h1 { font-size: 28px; }
+  .hero p { font-size: 16px; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: repeat(3, 1fr); }
+  .header-inner { flex-direction: column; align-items: flex-start; }
+  .architecture { padding: 20px; }
+  .arch-diagram { font-size: 11px; }
 }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-inner">
-    <div class="logo-container">
-      <svg class="logo-shield" viewBox="0 0 64 64" width="48" height="48">
-        <defs>
-          <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#00D4AA"/>
-            <stop offset="100%" style="stop-color:#0099FF"/>
-          </linearGradient>
-        </defs>
-        <path d="M32 4 L56 14 L56 32 C56 48 46 56 32 60 C18 56 8 48 8 32 L8 14 Z" fill="url(#sg)" opacity="0.95"/>
-        <ellipse cx="32" cy="30" rx="14" ry="9" fill="none" stroke="#FFF" stroke-width="2"/>
-        <circle cx="32" cy="30" r="5" fill="#FFF"/>
-        <circle cx="32" cy="30" r="2" fill="#0B1929"/>
-      </svg>
-      <div class="logo-text">
-        <h1><span class="green">SpyCloud</span> for Microsoft Sentinel</h1>
-        <div class="tagline">Identity Threat Protection Platform</div>
-      </div>
+<header>
+  <div class="container header-inner">
+    <div class="logo-area">
+      <img src="images/spycloud-logo-dark.svg" alt="SpyCloud" class="logo-dark">
+      <img src="images/spycloud-logo-light.svg" alt="SpyCloud" class="logo-light">
+      <span class="header-badge">v10.0.0</span>
     </div>
-    <span class="header-badge">v10.0</span>
+    <nav class="header-links">
+      <a href="https://github.com/iammrherb/SPYCLOUD-SENTINEL">GitHub</a>
+      <a href="https://spycloud.com/docs">Documentation</a>
+      <a href="https://spycloud.com/support">Support</a>
+    </nav>
   </div>
 </header>
 
-<section class="hero">
-  <div class="hero-content">
-    <h2>Deploy SpyCloud Identity Threat Protection</h2>
-    <p>Transform recaptured darknet intelligence into automated identity threat detection and response within Microsoft Sentinel.</p>
+<main class="container">
+
+  <section class="hero">
+    <h1>Deploy <span>SpyCloud</span> to Microsoft Sentinel</h1>
+    <p>Integrate SpyCloud's recaptured darknet intelligence directly into your Sentinel workspace. One-click deployment of connectors, analytics, playbooks, and workbooks.</p>
+
     <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" class="deploy-btn" target="_blank" rel="noopener">
-      <img src="https://aka.ms/deploytoazurebutton" alt="Deploy">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 12.5l5-2.5-5-2.5v5z"/></svg>
       Deploy to Azure
     </a>
+
+    <p class="deploy-meta">ARM template deployment via Azure Portal. Requires Contributor access to a resource group with Sentinel enabled.</p>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-value">9</div><div class="stat-label">API Connectors</div></div>
+    <div class="stat"><div class="stat-value">60+</div><div class="stat-label">Analytic Rules</div></div>
+    <div class="stat"><div class="stat-value">14</div><div class="stat-label">Playbooks</div></div>
+    <div class="stat"><div class="stat-value">14</div><div class="stat-label">Workbooks</div></div>
+    <div class="stat"><div class="stat-value">28</div><div class="stat-label">Hunting Queries</div></div>
+    <div class="stat"><div class="stat-value">125+</div><div class="stat-label">Copilot Skills</div></div>
   </div>
-</section>
 
-<main class="main">
-
-  <!-- Features -->
-  <section class="section">
-    <h2 class="section-title">Solution Components</h2>
-    <p class="section-subtitle">Complete identity threat protection with automated detection, investigation, and response capabilities.</p>
+  <section>
+    <h2><span class="icon">&#9881;</span> Solution Components</h2>
     <div class="feature-grid">
       <div class="feature-card">
-        <div class="feature-icon">DC</div>
-        <h3>Data Connectors</h3>
-        <p>CCF-based REST API connector with 9 pollers covering Breach Watchlist, Breach Catalog, Compass, SIP, Investigations, IDLink, Exposure, CAP, and Data Partnership APIs.</p>
-        <span class="feature-stat">9 API Pollers | 14 Custom Tables</span>
+        <h3>Data Connectors <span class="badge">9 APIs</span></h3>
+        <p>Codeless Connector Framework (CCF) integration with Breach Watchlist, Breach Catalog, Compass, SIP, Investigations, IDLink, Exposure, CAP, and Data Partnership APIs. Full DCE/DCR pipeline with 14 custom tables.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">AR</div>
-        <h3>Analytic Rule Templates</h3>
-        <p>60+ detection rules deployed as templates for selective enablement. Covers infostealer detection, credential reuse, session hijacking, PII exposure, UEBA correlation, and cross-source threat detection.</p>
-        <span class="feature-stat">60+ Rules | All Deploy as Templates</span>
+        <h3>Analytic Rules <span class="badge">60+</span></h3>
+        <p>Deployed as templates for selective enablement. Covers infostealer detection, credential exposure, session hijacking, darknet breach alerts, malware-infected devices, and cross-source correlation with Entra ID, O365, and firewall logs.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">PB</div>
-        <h3>Response Playbooks</h3>
-        <p>14 Logic App playbooks for automated remediation including password reset, session revocation, MFA enforcement, device isolation, and multi-channel notifications (Teams, Slack, Email, Webhook).</p>
-        <span class="feature-stat">14 Playbooks | SOAR Integration</span>
+        <h3>Response Playbooks <span class="badge">14</span></h3>
+        <p>Automated remediation via Logic Apps: force password reset, revoke sessions, isolate devices, block conditional access, enforce MFA, enrich incidents, notify SOC and users, firewall blocking, and full orchestrated remediation.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">WB</div>
-        <h3>Interactive Workbooks</h3>
-        <p>14 focused workbooks providing executive dashboards, SOC operations views, exposure analysis, remediation tracking, and connector health monitoring with SpyCloud branding.</p>
-        <span class="feature-stat">14 Workbooks | Executive to SOC</span>
+        <h3>Interactive Workbooks <span class="badge">14</span></h3>
+        <p>Executive dashboards, SOC operations views, threat intelligence analysis, exposure breakdowns, remediation tracking, compliance reporting, and API health monitoring. Parameterized with time and domain filters.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">HQ</div>
-        <h3>Hunting Queries</h3>
-        <p>28 proactive threat hunting queries organized by MITRE ATT&CK tactics. Includes cross-source correlation with Azure AD, Defender for Endpoint, and Office 365 data.</p>
-        <span class="feature-stat">28 Queries | MITRE Mapped</span>
+        <h3>Hunting Queries <span class="badge">28</span></h3>
+        <p>Proactive threat hunting across all MITRE ATT&amp;CK tactics. Hunt for exposed executives, lateral movement via stolen cookies, botnet credential theft, dormant compromised accounts, and cross-breach identity correlation.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">IT</div>
-        <h3>ITSM Integration</h3>
-        <p>Native integrations with ServiceNow, Jira, and Azure DevOps for automated ticket creation. Includes severity mapping, assignment routing, and bi-directional status tracking.</p>
-        <span class="feature-stat">ServiceNow | Jira | Azure DevOps</span>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">CP</div>
-        <h3>Security Copilot</h3>
-        <p>Full Security Copilot integration with 90+ KQL skills, 35+ API skills, and 17 sub-agent investigation capabilities powered by GPT-4o for natural language security analysis.</p>
-        <span class="feature-stat">140+ Skills | AI-Powered</span>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">PT</div>
-        <h3>Purple Team Scenarios</h3>
-        <p>Built-in data simulation and purple team scenario engine for testing detection rules, playbook execution, and end-to-end incident response workflows with synthetic data.</p>
-        <span class="feature-stat">8 Scenarios | Full Simulation</span>
+        <h3>Security Copilot <span class="badge">125+ Skills</span></h3>
+        <p>90+ KQL skills for natural language querying, 35+ API skills for direct SpyCloud lookups, and 17 sub-agent investigation capabilities with multi-step reasoning and automated triage workflows.</p>
       </div>
     </div>
   </section>
 
-  <!-- Architecture -->
-  <section class="section">
-    <h2 class="section-title">Architecture Overview</h2>
-    <p class="section-subtitle">Data flows from SpyCloud APIs through Azure's data collection pipeline into Microsoft Sentinel for detection and response.</p>
+  <section>
+    <h2><span class="icon">&#10003;</span> Prerequisites</h2>
+    <ul class="prereq-list">
+      <li>
+        <span class="check">&#10003;</span>
+        <div>
+          <strong>Azure Subscription with Microsoft Sentinel</strong>
+          <span>An active Azure subscription with a Log Analytics workspace and Microsoft Sentinel enabled on it.</span>
+        </div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div>
+          <strong>Contributor Role on the Resource Group</strong>
+          <span>The deploying user or service principal must have Contributor (or higher) permissions on the target resource group.</span>
+        </div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div>
+          <strong>SpyCloud API Key</strong>
+          <span>A valid API key from your SpyCloud portal. Contact <a href="https://spycloud.com" style="color: var(--accent);">spycloud.com</a> to obtain enterprise API access.</span>
+        </div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div>
+          <strong>Microsoft Sentinel Contributor Role</strong>
+          <span>Required for deploying analytic rules, workbooks, and automation rules into the Sentinel workspace.</span>
+        </div>
+      </li>
+      <li>
+        <span class="check">&#10003;</span>
+        <div>
+          <strong>Logic App Contributor (for Playbooks)</strong>
+          <span>Required if deploying automated response playbooks. The Logic App managed identity will need appropriate Graph API permissions.</span>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="icon">&#9633;</span> Architecture</h2>
     <div class="architecture">
-      <div class="arch-flow">
-        <div class="arch-box highlight">
-          <h4>SpyCloud APIs</h4>
-          <p>9 REST API endpoints</p>
-        </div>
-        <span class="arch-arrow">&rarr;</span>
-        <div class="arch-box">
-          <h4>Data Collection</h4>
-          <p>DCE + DCR Pipeline</p>
-        </div>
-        <span class="arch-arrow">&rarr;</span>
-        <div class="arch-box">
-          <h4>Log Analytics</h4>
-          <p>14 Custom Tables</p>
-        </div>
-        <span class="arch-arrow">&rarr;</span>
-        <div class="arch-box highlight">
-          <h4>Microsoft Sentinel</h4>
-          <p>Detection & Response</p>
-        </div>
-        <span class="arch-arrow">&rarr;</span>
-        <div class="arch-box">
-          <h4>Automated Response</h4>
-          <p>Playbooks & ITSM</p>
-        </div>
-      </div>
+      <div class="arch-diagram"><span class="hl">SpyCloud Darknet Intelligence</span>
+<span class="dm">|</span>
+<span class="dm">|  9 REST API Endpoints</span>
+<span class="dm">|  (Breach, Compass, SIP, IDLink, Investigations, Exposure, CAP, Catalog, Partnership)</span>
+<span class="dm">|</span>
+<span class="dm">v</span>
+<span class="hl">Data Collection Endpoint (DCE)</span> -------> <span class="hl">Data Collection Rule (DCR)</span>
+<span class="dm">|                                                |</span>
+<span class="dm">|  HTTPS ingestion endpoint                      |  Schema transformation</span>
+<span class="dm">|                                                |  &amp; routing rules</span>
+<span class="dm">v                                                v</span>
+<span class="hl">Log Analytics Workspace</span>
+<span class="dm">|  14 Custom Tables (SpyCloud*_CL)</span>
+<span class="dm">|</span>
+<span class="dm">+------+-----------+------------+----------+</span>
+<span class="dm">|      |           |            |          |</span>
+<span class="dm">v      v           v            v          v</span>
+<span class="hl">Analytics</span>  <span class="hl">Workbooks</span>   <span class="hl">Playbooks</span>   <span class="hl">Hunting</span>   <span class="hl">Copilot</span>
+<span class="dm">60+ rules  14 dashb.   14 Logic    28 KQL    125+ skills</span>
+<span class="dm">templates  &amp; views    Apps        queries   &amp; agents</span>
+<span class="dm">|          |           |</span>
+<span class="dm">v          v           v</span>
+<span class="hl">Microsoft Sentinel Incidents &amp; Automation</span>
+<span class="dm">|</span>
+<span class="dm">+-----------+-----------+-----------+</span>
+<span class="dm">|           |           |           |</span>
+<span class="dm">v           v           v           v</span>
+<span class="dm">Entra ID    Intune      ServiceNow  Teams/Email</span>
+<span class="dm">Password    Device      Ticket      Notification</span>
+<span class="dm">Reset       Isolation   Creation    Alerts</span></div>
     </div>
   </section>
 
-  <!-- Prerequisites -->
-  <section class="section">
-    <h2 class="section-title">Prerequisites</h2>
-    <p class="section-subtitle">Ensure you have the following before deploying.</p>
-    <div class="prereqs">
-      <ul class="prereq-list">
-        <li>
-          <span class="prereq-check">&#10003;</span>
-          <div><strong>SpyCloud Enterprise API Key</strong> - Obtain from <a href="https://portal.spycloud.com" target="_blank" style="color:var(--spycloud-green)">portal.spycloud.com</a>. Enterprise tier required; Enterprise+ unlocks Compass, IDLink, and Investigations APIs.</div>
-        </li>
-        <li>
-          <span class="prereq-check">&#10003;</span>
-          <div><strong>Azure Subscription</strong> - With a Log Analytics workspace and Microsoft Sentinel enabled (or the template can create both for you).</div>
-        </li>
-        <li>
-          <span class="prereq-check">&#10003;</span>
-          <div><strong>RBAC Permissions</strong> - Microsoft Sentinel Contributor, Log Analytics Contributor, and Logic App Contributor roles on the target resource group.</div>
-        </li>
-        <li>
-          <span class="prereq-check">&#10003;</span>
-          <div><strong>Network Access</strong> - Outbound HTTPS (443) to api.spycloud.io from the Azure data collection infrastructure.</div>
-        </li>
-        <li>
-          <span class="prereq-check">&#10003;</span>
-          <div><strong>Post-Deployment</strong> - Run the provided permissions script to grant managed identity API permissions to each playbook.</div>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Quick Start -->
-  <section class="section">
-    <h2 class="section-title">Quick Start Guide</h2>
-    <p class="section-subtitle">Get up and running in four steps.</p>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-number">1</div>
-        <h4>Deploy the Solution</h4>
-        <p>Click "Deploy to Azure" and follow the guided wizard. Select your workspace, configure API settings, and choose which components to deploy.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-number">2</div>
-        <h4>Configure Permissions</h4>
-        <p>After deployment, run scripts/grant-permissions.sh in Azure Cloud Shell to grant each playbook's managed identity the required API permissions.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-number">3</div>
-        <h4>Enable Analytics Rules</h4>
-        <p>Navigate to Sentinel &gt; Analytics &gt; Rule Templates. Review SpyCloud rule templates and enable the ones appropriate for your environment.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-number">4</div>
-        <h4>Verify Data Flow</h4>
-        <p>Open the SpyCloud Connector Health workbook to verify data ingestion. Initial data should appear within 15 minutes of deployment.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Deploy CTA -->
-  <section class="section" style="text-align:center; padding: 48px 0;">
-    <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" class="deploy-btn" target="_blank" rel="noopener" style="background: var(--spycloud-gradient); color: #FFF;">
-      Deploy to Azure
-    </a>
+  <section>
+    <h2><span class="icon">&#9889;</span> Quick Start</h2>
+    <ol class="steps">
+      <li>
+        <div>
+          <strong>Click "Deploy to Azure"</strong>
+          <p>Use the button above to open the Azure Portal with the SpyCloud ARM template pre-loaded. The deployment wizard will guide you through configuration.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Select Your Workspace</strong>
+          <p>Choose the resource group and Log Analytics workspace where Microsoft Sentinel is enabled. The template will create all required custom tables and data collection resources.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Configure the SpyCloud API Key</strong>
+          <p>Enter your SpyCloud API key when prompted. This key authenticates the data connector's REST API calls to SpyCloud endpoints. Store it in <code>spyCloudApiKey</code> parameter or Azure Key Vault.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Review and Deploy</strong>
+          <p>Review the selected components (connectors, analytics, playbooks, workbooks) and click Create. Deployment typically completes in 5-10 minutes.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Verify Data Ingestion</strong>
+          <p>After deployment, navigate to Sentinel &gt; Data Connectors and verify the SpyCloud connector shows as Connected. Run <code>SpyCloudBreachWatchlist_CL | take 10</code> to confirm data flow.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Enable Analytic Rules</strong>
+          <p>Go to Sentinel &gt; Analytics &gt; Rule Templates, filter by "SpyCloud", and enable the rules relevant to your organization. Rules are deployed as templates so you control which are active.</p>
+        </div>
+      </li>
+    </ol>
   </section>
 
 </main>
 
-<footer class="footer">
-  <p>SpyCloud for Microsoft Sentinel v10.0 | <a href="https://spycloud.com">spycloud.com</a> | <a href="https://github.com/iammrherb/SPYCLOUD-SENTINEL">GitHub Repository</a></p>
+<footer>
+  <div class="container">
+    <div class="footer-links">
+      <a href="https://spycloud.com">spycloud.com</a>
+      <a href="https://spycloud.com/docs">Documentation</a>
+      <a href="https://spycloud.com/support">Support</a>
+      <a href="https://github.com/iammrherb/SPYCLOUD-SENTINEL">GitHub</a>
+    </div>
+    <p>SpyCloud Identity Threat Protection for Microsoft Sentinel v10.0.0</p>
+    <p>Copyright 2024-2026 SpyCloud, Inc. All rights reserved.</p>
+  </div>
 </footer>
 
 </body>
