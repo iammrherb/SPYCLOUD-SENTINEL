@@ -38,7 +38,8 @@
     },
     "workspace": {
       "type": "string",
-      "defaultValue": "",
+      "defaultValue": "spycloud-sentinel-workspace",
+      "minLength": 1,
       "metadata": {
         "description": "REQUIRED \u2014 Name of the Log Analytics workspace for Microsoft Sentinel. If createNewWorkspace is TRUE: enter your desired name (e.g., 'spycloud-supreme-sentinel'). If createNewWorkspace is FALSE: enter the exact name of your existing workspace. To find existing workspaces: Azure Portal \u2192 Log Analytics workspaces, or CLI: az monitor log-analytics workspace list --query '[].name' -o tsv"
       }
