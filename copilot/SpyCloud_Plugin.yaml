@@ -2,7 +2,6 @@ Descriptor:
   Name: SpyCloudKQLPlugin
   DisplayName: SpyCloud Sentinel KQL Plugin
   Description: "KQL plugin querying 14 SpyCloud Sentinel tables for credential exposure, breach catalog, device forensics, identity correlation, and remediation audit."
-  Publisher: SpyCloud
   Category: Other
   DescriptionDisplay: default
   Version: 9.0.0

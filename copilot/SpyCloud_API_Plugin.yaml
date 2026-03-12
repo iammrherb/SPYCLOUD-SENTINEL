@@ -2,7 +2,6 @@ Descriptor:
   Name: SpyCloudAPIPlugin
   DisplayName: SpyCloud API Plugin
   Description: "REST API access to 9 SpyCloud APIs for real-time darknet intelligence: Enterprise, Compass, Identity, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP."
-  Publisher: SpyCloud
   DescriptionDisplay: default
   Category: Other
   Version: 9.0.0
