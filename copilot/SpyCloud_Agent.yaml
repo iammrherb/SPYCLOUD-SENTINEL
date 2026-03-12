@@ -4414,7 +4414,7 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: 'SpyCloud_ConditionalAccessLogs_CL
 
-        | project TimeGenerated, IncidentId, Username, UserEmail, ForcedPasswordResetOnNextSignIn, UserSessionsRevoked, CAgroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
+        | project TimeGenerated, IncidentId, UserPrincipalName, Email, PasswordReset, SessionsRevoked, AddedToCAGroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
 
         | top 25 by TimeGenerated desc'
   - Name: GetConditionalAccessForUser
@@ -4432,9 +4432,9 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: 'SpyCloud_ConditionalAccessLogs_CL
 
-        | where UserEmail =~ "{{userEmail}}" or Username =~ "{{userEmail}}"
+        | where Email =~ "{{userEmail}}" or UserPrincipalName =~ "{{userEmail}}"
 
-        | project TimeGenerated, IncidentId, Username, UserEmail, ForcedPasswordResetOnNextSignIn, UserSessionsRevoked, CAgroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
+        | project TimeGenerated, IncidentId, UserPrincipalName, Email, PasswordReset, SessionsRevoked, AddedToCAGroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
 
         | top 20 by TimeGenerated desc'
   - Name: GetConditionalAccessStats
@@ -4448,8 +4448,8 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: 'SpyCloud_ConditionalAccessLogs_CL
 
-        | summarize TotalActions = count(), PasswordResets = countif(ForcedPasswordResetOnNextSignIn == true), SessionsRevoked = countif(UserSessionsRevoked == true), AddedToCAGroup = countif(CAgroup ==
-        true), AccountsDisabled = countif(UserDisabled == true), UniqueUsers = dcount(UserEmail), UniqueIncidents = dcount(IncidentId)'
+        | summarize TotalActions = count(), PasswordResets = countif(PasswordReset == true), SessionsRevoked = countif(SessionsRevoked == true), AddedToCAGroup = countif(AddedToCAGroup ==
+        true), AccountsDisabled = countif(UserDisabled == true), UniqueUsers = dcount(Email), UniqueIncidents = dcount(IncidentId)'
   - Name: GetFullUserInvestigation
     DisplayName: '[Data] Full cross-table investigation for a user'
     Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Checks a user across watchlist, MDE, and CA tables in a single query for complete picture.
@@ -4465,8 +4465,8 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: "union\n  (SpyCloudBreachWatchlist_CL\n  | where email =~ \"{{investigateEmail}}\"\n  | summarize ExposureCount = count(), LatestExposure = max(TimeGenerated), MaxSeverity = max(severity),\
         \ UniqueTargets = dcount(target_domain), UniqueMachines = dcount(infected_machine_id), PlaintextPasswords = countif(isnotempty(password_plaintext)), HasSSN = countif(isnotempty(social_security_number)\
-        \ or isnotempty(ssn_last_four))\n  | extend DataSource = \"Watchlist Exposures\"),\n  (SpyCloud_ConditionalAccessLogs_CL\n  | where UserEmail =~ \"{{investigateEmail}}\" or Username =~ \"{{investigateEmail}}\"\
-        \n  | summarize CAActions = count(), PasswordResets = countif(ForcedPasswordResetOnNextSignIn == true), SessionRevocations = countif(UserSessionsRevoked == true), AccountDisablements = countif(UserDisabled\
+        \ or isnotempty(ssn_last_four))\n  | extend DataSource = \"Watchlist Exposures\"),\n  (SpyCloud_ConditionalAccessLogs_CL\n  | where Email =~ \"{{investigateEmail}}\" or UserPrincipalName =~ \"{{investigateEmail}}\"\
+        \n  | summarize CAActions = count(), PasswordResets = countif(PasswordReset == true), SessionRevocations = countif(SessionsRevoked == true), AccountDisablements = countif(UserDisabled\
         \ == true)\n  | extend DataSource = \"Conditional Access\")"
   - Name: GetGeographicAnalysis
     DisplayName: '[Data] Analyze geographic distribution of infections'
@@ -4515,10 +4515,10 @@ SkillGroups:
       ResourceGroupName: '{{ResourceGroupName}}'
       WorkspaceName: '{{WorkspaceName}}'
       Template: "let user = \"{{UserEmail}}\";\nlet exposures = SpyCloudBreachWatchlist_CL | where email =~ user and TimeGenerated > ago(90d);\nlet signins = SigninLogs | where UserPrincipalName =~\
-        \ user and TimeGenerated > ago(30d);\nlet remediated = SpyCloud_ConditionalAccessLogs_CL | where UserEmail =~ user and TimeGenerated > ago(30d);\nunion isfuzzy=true\n(exposures | summarize Exposures=count(),\
+        \ user and TimeGenerated > ago(30d);\nlet remediated = SpyCloud_ConditionalAccessLogs_CL | where Email =~ user and TimeGenerated > ago(30d);\nunion isfuzzy=true\n(exposures | summarize Exposures=count(),\
         \ MaxSev=max(severity), Breaches=dcount(source_id), PlaintextPWs=countif(isnotempty(password_plaintext)), Devices=dcount(infected_machine_id) | extend Phase=\"1-Exposure\"),\n(signins | where\
         \ ResultType == 0 | summarize SuccessSignIns=count(), UniqueIPs=dcount(IPAddress), Countries=dcount(tostring(LocationDetails.countryOrRegion)) | extend Phase=\"2-SignInActivity\"),\n(remediated\
-        \ | summarize Resets=countif(ForcedPasswordResetOnNextSignIn == true), Revokes=countif(UserSessionsRevoked == true) | extend Phase=\"3-Remediation\")"
+        \ | summarize Resets=countif(PasswordReset == true), Revokes=countif(SessionsRevoked == true) | extend Phase=\"3-Remediation\")"
   - Name: GenerateIncidentSummary
     DisplayName: '[Data] Generate incident summary report'
     Description: Internal data retrieval skill. Creates a structured incident summary for SpyCloud exposure events including affected users, severity assessment, remediation status, and unremediated
@@ -4539,7 +4539,7 @@ SkillGroups:
         ),\n(new_exposures | where severity == 25 | summarize v=count() | extend Category=\"Critical (Sev 25)\"),\n(new_exposures | where severity == 20 | summarize v=count() | extend Category=\"High\
         \ (Sev 20)\"),\n(new_exposures | summarize v=dcount(email) | extend Category=\"Unique Users Affected\"),\n(new_exposures | where isnotempty(infected_machine_id) | summarize v=dcount(infected_machine_id)\
         \ | extend Category=\"Infected Devices\"),\n(mde_actions | summarize v=count() | extend Category=\"MDE Isolations Performed\"),\n(ca_actions | summarize v=count() | extend Category=\"CA Resets\
-        \ Performed\"),\n(new_exposures | where severity >= 20 and email !in~ (ca_actions | distinct UserEmail) | summarize v=dcount(email) | extend Category=\"Unremediated High-Sev\")\n| project Category,\
+        \ Performed\"),\n(new_exposures | where severity >= 20 and email !in~ (ca_actions | distinct Email) | summarize v=dcount(email) | extend Category=\"Unremediated High-Sev\")\n| project Category,\
         \ Value=v"
   - Name: DetectPermissionGaps
     DisplayName: '[Data] Detect missing permissions for playbooks'
@@ -4552,9 +4552,9 @@ SkillGroups:
       ResourceGroupName: '{{ResourceGroupName}}'
       WorkspaceName: '{{WorkspaceName}}'
       Template: "let exposed_sev20 = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;\nlet mde_acted = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d)\
-        \ | distinct HostName;\nlet ca_acted = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct UserEmail;\nunion isfuzzy=true\n(exposed_sev20 | where email !in~ (ca_acted)\
+        \ | distinct HostName;\nlet ca_acted = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;\nunion isfuzzy=true\n(exposed_sev20 | where email !in~ (ca_acted)\
         \ | summarize Unremediated=count() | extend Check=\"Users sev20+ without CA reset\", Status=iff(Unremediated > 0, \"GAP\", \"OK\")),\n(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | extend _IsolationStatus = column_ifexists(\"IsolationStatus\", false) | where _IsolationStatus == false | summarize Failures=count() | extend Check=\"MDE isolation failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\")),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
-        \ > ago(7d) and ForcedPasswordResetOnNextSignIn == false | summarize Failures=count() | extend Check=\"CA reset failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\"))\n| project Check, Status"
+        \ > ago(7d) and PasswordReset == false | summarize Failures=count() | extend Check=\"CA reset failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\"))\n| project Check, Status"
   - Name: GetConnectorHealthAssessment
     DisplayName: '[Data] Assess connector and data source health'
     Description: Internal data retrieval skill. Evaluates the health and ingestion status of all SpyCloud and Microsoft data sources by checking recent record counts, last ingestion times, and identifying
@@ -4609,9 +4609,9 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: "let sev20_users = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email;\nlet sev20_devices = SpyCloudBreachWatchlist_CL | where TimeGenerated\
         \ > ago(14d) and severity >= 20 and isnotempty(infected_machine_id) | distinct infected_machine_id;\nlet ca_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(14d) | distinct\
-        \ UserEmail;\nlet mde_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | distinct HostName;\nlet ca_total = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated >\
+        \ Email;\nlet mde_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | distinct HostName;\nlet ca_total = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated >\
         \ ago(14d) | count);\nlet mde_total = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | count);\nlet ca_failures = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
-        \ > ago(14d) and ForcedPasswordResetOnNextSignIn == false | count);\nlet mde_failures = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | extend _IsolationStatus = column_ifexists(\"\
+        \ > ago(14d) and PasswordReset == false | count);\nlet mde_failures = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | extend _IsolationStatus = column_ifexists(\"\
         IsolationStatus\", false) | where _IsolationStatus == false | count);\nunion isfuzzy=true\n(print Check=\"Identity remediation (CA/password reset) coverage\", Metric=strcat(toscalar(sev20_users\
         \ | where email in~ (ca_users) | count), \" of \", toscalar(sev20_users | count), \" sev20+ users remediated\"), Status=iff(toscalar(sev20_users | where email !in~ (ca_users) | count) > 0, \"\
         GAP\", \"OK\")),\n(print Check=\"MDE device isolation coverage\", Metric=strcat(toscalar(sev20_devices | where infected_machine_id in~ (mde_devices) | count), \" of \", toscalar(sev20_devices\

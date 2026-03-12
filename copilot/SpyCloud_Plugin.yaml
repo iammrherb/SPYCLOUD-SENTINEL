@@ -2,6 +2,7 @@ Descriptor:
   Name: SpyCloudKQLPlugin
   DisplayName: SpyCloud Sentinel KQL Plugin
   Description: "KQL plugin querying 14 SpyCloud Sentinel tables for credential exposure, breach catalog, device forensics, identity correlation, and remediation audit."
+  Publisher: SpyCloud
   Category: Other
   DescriptionDisplay: default
   Version: 9.0.0
@@ -608,7 +609,7 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloud_ConditionalAccessLogs_CL
-            | project TimeGenerated, IncidentId, Username, UserEmail, ForcedPasswordResetOnNextSignIn, UserSessionsRevoked, CAgroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId, DocumentId
+            | project TimeGenerated, IncidentId, UserPrincipalName, Email, PasswordReset, SessionsRevoked, AddedToCAGroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId, DocumentId
             | top 25 by TimeGenerated desc
 
       - Name: GetConditionalAccessForUser
@@ -633,8 +634,8 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloud_ConditionalAccessLogs_CL
-            | where UserEmail =~ "{{userEmail}}" or Username =~ "{{userEmail}}"
-            | project TimeGenerated, IncidentId, Username, UserEmail, ForcedPasswordResetOnNextSignIn, UserSessionsRevoked, CAgroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
+            | where Email =~ "{{userEmail}}" or UserPrincipalName =~ "{{userEmail}}"
+            | project TimeGenerated, IncidentId, UserPrincipalName, Email, PasswordReset, SessionsRevoked, AddedToCAGroup, UserDisabled, PlaybookName, BreachTitle, InfectedMachineId
             | top 20 by TimeGenerated desc
 
       - Name: GetConditionalAccessStats
@@ -654,7 +655,7 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             SpyCloud_ConditionalAccessLogs_CL
-            | summarize TotalActions = count(), PasswordResets = countif(ForcedPasswordResetOnNextSignIn == true), SessionsRevoked = countif(UserSessionsRevoked == true), AddedToCAGroup = countif(CAgroup == true), AccountsDisabled = countif(UserDisabled == true), UniqueUsers = dcount(UserEmail), UniqueIncidents = dcount(IncidentId)
+            | summarize TotalActions = count(), PasswordResets = countif(PasswordReset == true), SessionsRevoked = countif(SessionsRevoked == true), AddedToCAGroup = countif(AddedToCAGroup == true), AccountsDisabled = countif(UserDisabled == true), UniqueUsers = dcount(Email), UniqueIncidents = dcount(IncidentId)
 
       # =====================================================================
       # 9. CROSS-TABLE INVESTIGATION AND CORRELATION
@@ -692,8 +693,8 @@ SkillGroups:
               | summarize MDEActions = count(), Isolations = countif(_IsolationRequested == true), IsolationSuccesses = countif(_IsolationStatus == true)
               | extend DataSource = "MDE Remediation"),
               (SpyCloud_ConditionalAccessLogs_CL
-              | where UserEmail =~ "{{investigateEmail}}" or Username =~ "{{investigateEmail}}"
-              | summarize CAActions = count(), PasswordResets = countif(ForcedPasswordResetOnNextSignIn == true), SessionRevocations = countif(UserSessionsRevoked == true), AccountDisablements = countif(UserDisabled == true)
+              | where Email =~ "{{investigateEmail}}" or UserPrincipalName =~ "{{investigateEmail}}"
+              | summarize CAActions = count(), PasswordResets = countif(PasswordReset == true), SessionRevocations = countif(SessionsRevoked == true), AccountDisablements = countif(UserDisabled == true)
               | extend DataSource = "Conditional Access")
 
       - Name: GetGeographicAnalysis
@@ -1022,7 +1023,7 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d);
-            let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct UserEmail;
+            let remediated_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;
             let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | distinct DeviceName;
             union isfuzzy=true
             (exposed | where severity == 25 and email !in~ (remediated_users) | summarize Users=dcount(email) | extend Priority="CRITICAL", Action="Sev 25 users NOT yet remediated — immediate password reset + device isolation needed"),
@@ -1354,7 +1355,7 @@ SkillGroups:
           ResourceGroupName: '{{ResourceGroupName}}'
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
-            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | summarize Remediations=dcount(UserEmail); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
+            let exposures = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize TotalExposures=count(), UniqueUsers=dcount(email), InfostealerExposures=countif(severity>=20), CriticalExposures=countif(severity>=25), PlaintextPasswords=countif(isnotempty(password_plaintext)), InfectedDevices=dcount(infected_machine_id); let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | summarize Remediations=dcount(Email); let incidents = SecurityIncident | where TimeGenerated > ago(30d) | where Title has "SpyCloud" | summarize Incidents=count(), HighSeverity=countif(Severity=="High"), Closed=countif(Status=="Closed"); exposures | extend Remediations=toscalar(remediated | project Remediations) | extend Incidents=toscalar(incidents | project Incidents), HighSeverityIncidents=toscalar(incidents | project HighSeverity), ClosedIncidents=toscalar(incidents | project Closed)
 
       # =====================================================================
       # 24. CAMPAIGN AND THREAT ACTOR INTELLIGENCE
@@ -1661,12 +1662,12 @@ SkillGroups:
           Template: |-
             union
               (SpyCloud_ConditionalAccessLogs_CL
-              | where UserEmail =~ "{{targetEmail}}" or Username =~ "{{targetEmail}}"
+              | where Email =~ "{{targetEmail}}" or UserPrincipalName =~ "{{targetEmail}}"
               | project TimeGenerated, ActionType = "CA Remediation",
                   Detail = strcat(
-                      iff(ForcedPasswordResetOnNextSignIn == true, "PasswordReset ", ""),
-                      iff(UserSessionsRevoked == true, "SessionRevoked ", ""),
-                      iff(CAgroup == true, "CAGroupAdded ", ""),
+                      iff(PasswordReset == true, "PasswordReset ", ""),
+                      iff(SessionsRevoked == true, "SessionRevoked ", ""),
+                      iff(AddedToCAGroup == true, "CAGroupAdded ", ""),
                       iff(UserDisabled == true, "AccountDisabled ", "")),
                   Source = PlaybookName, IncidentId, BreachTitle),
               (Spycloud_MDE_Logs_CL
@@ -1716,7 +1717,7 @@ SkillGroups:
                 BreachSources = dcount(source_id),
                 DaysSinceLatest = datetime_diff('day', now(), max(TimeGenerated));
             let remediated = SpyCloud_ConditionalAccessLogs_CL
-            | where UserEmail =~ "{{targetEmail}}" or Username =~ "{{targetEmail}}"
+            | where Email =~ "{{targetEmail}}" or UserPrincipalName =~ "{{targetEmail}}"
             | summarize WasRemediated = count();
             let signins = SigninLogs
             | where TimeGenerated > ago(7d) and UserPrincipalName =~ "{{targetEmail}}" and ResultType == 0
@@ -1887,9 +1888,9 @@ SkillGroups:
             (exposures | where isnotempty(bank_number) or isnotempty(taxid) | summarize v = dcount(email) | extend Metric = "Users with Financial Data Exposed (PCI)", Category = "PII Notification"),
             (exposures | where isnotempty(health_insurance_id) | summarize v = dcount(email) | extend Metric = "Users with Health Data Exposed (HIPAA)", Category = "PII Notification"),
             (exposures | where isnotempty(dob) or isnotempty(phone) or isnotempty(address_1) | summarize v = dcount(email) | extend Metric = "Users with PII Exposed (General)", Category = "PII Notification"),
-            (remediations | summarize v = dcount(UserEmail) | extend Metric = "Users Remediated", Category = "Remediation"),
-            (remediations | where ForcedPasswordResetOnNextSignIn == true | summarize v = count() | extend Metric = "Password Resets Forced", Category = "Remediation"),
-            (remediations | where UserSessionsRevoked == true | summarize v = count() | extend Metric = "Sessions Revoked", Category = "Remediation")
+            (remediations | summarize v = dcount(Email) | extend Metric = "Users Remediated", Category = "Remediation"),
+            (remediations | where PasswordReset == true | summarize v = count() | extend Metric = "Password Resets Forced", Category = "Remediation"),
+            (remediations | where SessionsRevoked == true | summarize v = count() | extend Metric = "Sessions Revoked", Category = "Remediation")
             | project Category, Metric, Value = v
 
       - Name: GetRemediationSLAReport
@@ -1912,9 +1913,9 @@ SkillGroups:
             | summarize ExposureTime = min(TimeGenerated) by email, source_id;
             let remediations = SpyCloud_ConditionalAccessLogs_CL
             | where TimeGenerated > ago(30d)
-            | summarize RemediationTime = min(TimeGenerated) by UserEmail;
+            | summarize RemediationTime = min(TimeGenerated) by Email;
             exposures
-            | join kind=leftouter remediations on $left.email == $right.UserEmail
+            | join kind=leftouter remediations on $left.email == $right.Email
             | extend TimeToRemediate_Hours = iff(isnotempty(RemediationTime), datetime_diff('hour', RemediationTime, ExposureTime), -1)
             | summarize
                 TotalExposures = count(),
@@ -1985,7 +1986,7 @@ SkillGroups:
               (SpyCloudBreachWatchlist_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = dcount(email), UniqueSourceIds = dcount(source_id) | extend TableName = "SpyCloudBreachWatchlist_CL"),
               (SpyCloudBreachCatalog_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = long(0), UniqueSourceIds = dcount(source_id) | extend TableName = "SpyCloudBreachCatalog_CL"),
               (Spycloud_MDE_Logs_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = long(0), UniqueSourceIds = long(0) | extend TableName = "Spycloud_MDE_Logs_CL"),
-              (SpyCloud_ConditionalAccessLogs_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = dcount(UserEmail), UniqueSourceIds = long(0) | extend TableName = "SpyCloud_ConditionalAccessLogs_CL")
+              (SpyCloud_ConditionalAccessLogs_CL | summarize Records = count(), OldestRecord = min(TimeGenerated), NewestRecord = max(TimeGenerated), UniqueEmails = dcount(Email), UniqueSourceIds = long(0) | extend TableName = "SpyCloud_ConditionalAccessLogs_CL")
             | project TableName, Records, OldestRecord, NewestRecord, RetentionDays = datetime_diff('day', NewestRecord, OldestRecord), UniqueEmails, UniqueSourceIds
 
       # =====================================================================
@@ -2017,7 +2018,7 @@ SkillGroups:
             | extend Entities = parse_json(tostring(AdditionalData))
             | project Owner, Title;
             let mde_data = Spycloud_MDE_Logs_CL | where IncidentId == "{{incidentId}}" | extend _IsolationRequested = column_ifexists("IsolationRequested", false) | summarize MDEActions = count(), Isolations = countif(_IsolationRequested == true) by HostName, DeviceId;
-            let ca_data = SpyCloud_ConditionalAccessLogs_CL | where IncidentId == "{{incidentId}}" | summarize CAActions = count(), Resets = countif(ForcedPasswordResetOnNextSignIn == true), Revocations = countif(UserSessionsRevoked == true) by UserEmail;
+            let ca_data = SpyCloud_ConditionalAccessLogs_CL | where IncidentId == "{{incidentId}}" | summarize CAActions = count(), Resets = countif(PasswordReset == true), Revocations = countif(SessionsRevoked == true) by Email;
             union
               (mde_data | extend DataSource = "MDE Remediation"),
               (ca_data | extend DataSource = "Conditional Access")
@@ -2113,7 +2114,7 @@ SkillGroups:
             | where Title has "SpyCloud"
             | join kind=leftouter (
                 SpyCloud_ConditionalAccessLogs_CL
-                | summarize CAResets = countif(ForcedPasswordResetOnNextSignIn == true), CARevocations = countif(UserSessionsRevoked == true), CADisabled = countif(UserDisabled == true) by IncidentId
+                | summarize CAResets = countif(PasswordReset == true), CARevocations = countif(SessionsRevoked == true), CADisabled = countif(UserDisabled == true) by IncidentId
             ) on $left.IncidentNumber == $right.IncidentId
             | join kind=leftouter (
                 Spycloud_MDE_Logs_CL
@@ -2168,8 +2169,8 @@ SkillGroups:
           Template: |-
             let remediated = SpyCloud_ConditionalAccessLogs_CL
             | where TimeGenerated > ago(30d)
-            | where ForcedPasswordResetOnNextSignIn == true or UserSessionsRevoked == true
-            | distinct UserEmail;
+            | where PasswordReset == true or SessionsRevoked == true
+            | distinct Email;
             let active = SigninLogs
             | where TimeGenerated > ago(7d) and ResultType == 0
             | summarize RecentSignIns = count(), LastSignIn = max(TimeGenerated), Apps = dcount(AppDisplayName) by UserPrincipalName;
@@ -2198,13 +2199,13 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             let remediated = SpyCloud_ConditionalAccessLogs_CL
-            | where ForcedPasswordResetOnNextSignIn == true
-            | summarize LastReset = max(TimeGenerated) by UserEmail;
+            | where PasswordReset == true
+            | summarize LastReset = max(TimeGenerated) by Email;
             SpyCloudBreachWatchlist_CL
             | where TimeGenerated < ago(30d)
             | where isnotempty(password) or isnotempty(password_plaintext)
             | summarize ExposureCount = count(), EarliestExposure = min(TimeGenerated), LatestExposure = max(TimeGenerated), MaxSeverity = max(severity), PlaintextCount = countif(isnotempty(password_plaintext)), Targets = make_set(target_domain, 10) by email
-            | join kind=leftouter remediated on $left.email == $right.UserEmail
+            | join kind=leftouter remediated on $left.email == $right.Email
             | where isnull(LastReset) or LastReset < EarliestExposure
             | extend DaysExposed = datetime_diff('day', now(), EarliestExposure)
             | project email, DaysExposed, ExposureCount, MaxSeverity, PlaintextCount, Targets, EarliestExposure, LatestExposure, LastReset
@@ -2421,7 +2422,7 @@ SkillGroups:
             let infostealers = toscalar(w | where severity >= 20 | count);
             let plaintexts = toscalar(w | where isnotempty(password_plaintext) | count);
             let devices = toscalar(w | where isnotempty(infected_machine_id) | summarize dcount(infected_machine_id));
-            let remediated_users = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | summarize dcount(UserEmail));
+            let remediated_users = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | summarize dcount(Email));
             let active_exposed = toscalar(
                 SigninLogs | where TimeGenerated > ago(7d) and ResultType == 0
                 | where UserPrincipalName in~ ((w | distinct email))
@@ -2480,7 +2481,7 @@ SkillGroups:
           ResourceGroupName: '{{ResourceGroupName}}'
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
-            let remediated_emails = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | where ForcedPasswordResetOnNextSignIn == true | distinct UserEmail;
+            let remediated_emails = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(30d) | where PasswordReset == true | distinct Email;
             let remediated_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(30d) | extend _IsolationRequested = column_ifexists("IsolationRequested", false) | where _IsolationRequested == true | distinct HostName;
             union isfuzzy=true
             (SpyCloudBreachWatchlist_CL
@@ -2659,7 +2660,7 @@ SkillGroups:
             (SpyCloudCompassData_CL | summarize Records=count(), UniqueUsers=dcount(email), MaxSev=max(severity), Latest=max(TimeGenerated) | extend Component="Compass Data (Enterprise+)", Type="Data Table", Status=iff(Records>0,"Active","Not Available")),
             (SpyCloudCompassDevices_CL | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="Compass Devices (Enterprise+)", Type="Data Table", Status=iff(Records>0,"Active","Not Available")),
             (Spycloud_MDE_Logs_CL | summarize Records=count(), UniqueUsers=dcount(DeviceId), MaxSev=0, Latest=max(TimeGenerated) | extend Component="MDE Remediation Log", Type="Automation", Status=iff(Records>0,"Active","Pending")),
-            (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), UniqueUsers=dcount(UserEmail), MaxSev=0, Latest=max(TimeGenerated) | extend Component="CA Remediation Log", Type="Automation", Status=iff(Records>0,"Active","Pending")),
+            (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), UniqueUsers=dcount(Email), MaxSev=0, Latest=max(TimeGenerated) | extend Component="CA Remediation Log", Type="Automation", Status=iff(Records>0,"Active","Pending")),
             (SecurityIncident | where Title has "SpyCloud" | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="SpyCloud Incidents", Type="Detection", Status=iff(Records>0,"Active","No Incidents")),
             (SentinelHealth | where SentinelResourceName has "SpyCloud" | summarize Records=count(), UniqueUsers=0, MaxSev=0, Latest=max(TimeGenerated) | extend Component="Automation Health", Type="Health", Status=iff(Records>0,"Active","Not Monitored"))
             | project Component, Type, Status, Records, Latest

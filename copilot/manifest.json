@@ -13,6 +13,7 @@
     "is_user_authenticated": false
   },
   "logo_url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+  "publisher": "SpyCloud",
   "contact_email": "support@spycloud.com",
   "legal_info_url": "https://spycloud.com/terms",
   "privacy_policy_url": "https://spycloud.com/privacy",
