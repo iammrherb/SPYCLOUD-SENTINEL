@@ -13,6 +13,7 @@
     "is_user_authenticated": false
   },
   "logo_url": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+  "publisher": "SpyCloud",
   "contact_email": "support@spycloud.com",
   "legal_info_url": "https://spycloud.com/terms",
   "privacy_policy_url": "https://spycloud.com/privacy",
@@ -100,6 +101,26 @@
             "name": "Credential Automated Protection (CAP)",
             "table": "SpyCloudCAP_CL",
             "skills": ["GetCAPActionsByEmail", "GetCAPActionsByPolicy", "GetCAPPendingActions", "GetCAPCompletedActions", "GetCAPFailedActions", "GetCAPComplianceStatus", "GetCAPActionTimeline", "GetCAPSummaryDashboard"]
+          },
+          {
+            "name": "Compass Application Credentials",
+            "table": "SpyCloudCompassApplications_CL",
+            "skills": ["GetCompassApplications", "GetCompassApplicationsForUser", "GetCompassApplicationStats"]
+          },
+          {
+            "name": "Session Identity Protection (SIP) Cookies",
+            "table": "SpyCloudSipCookies_CL",
+            "skills": ["GetSipStolenCookies", "GetSipCookiesForUser", "GetSipCookieStats", "GetSipHighRiskSessions"]
+          },
+          {
+            "name": "Identity Exposure",
+            "table": "SpyCloudIdentityExposure_CL",
+            "skills": ["GetIdentityExposures", "GetIdentityExposuresForUser", "GetIdentityExposureStats"]
+          },
+          {
+            "name": "Investigations",
+            "table": "SpyCloudInvestigations_CL",
+            "skills": ["GetInvestigationRecords", "GetInvestigationRecordsForUser", "GetInvestigationStats"]
           }
         ]
       },

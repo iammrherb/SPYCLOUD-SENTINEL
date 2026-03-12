@@ -1,27 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- SpyCloud Logo - For Light Backgrounds (Dark text/icon) -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
-  <defs>
-    <linearGradient id="shieldGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00B894;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0077CC;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <!-- Shield Icon -->
-  <path d="M30 6 L50 14 L50 30 C50 42 42 50 30 54 C18 50 10 42 10 30 L10 14 Z"
-        fill="url(#shieldGradLight)" opacity="0.95"/>
-  <!-- Eye/Spy element inside shield -->
-  <ellipse cx="30" cy="28" rx="12" ry="8" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
-  <circle cx="30" cy="28" r="4" fill="#FFFFFF"/>
-  <circle cx="30" cy="28" r="1.5" fill="#0B1929"/>
-  <!-- SpyCloud Text -->
-  <text x="65" y="25" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
-        font-size="22" font-weight="700" fill="#1A2332" letter-spacing="0.5">
-    <tspan fill="#00B894">Spy</tspan><tspan fill="#1A2332">Cloud</tspan>
-  </text>
-  <!-- Tagline -->
-  <text x="65" y="44" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
-        font-size="10" font-weight="400" fill="#556677" letter-spacing="1.5">
-    IDENTITY THREAT PROTECTION
-  </text>
+<!-- SpyCloud Logo - For Light Backgrounds (Dark/Black text) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48" width="280" height="48">
+  <!-- SpyCloud Wordmark - black for light backgrounds -->
+  <text x="0" y="38" font-family="'Nunito Sans', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="40" font-weight="900" letter-spacing="-0.5" fill="#000000">SpyCloud</text>
 </svg>

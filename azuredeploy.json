@@ -1321,6 +1321,26 @@
             {
               "name": "Severity",
               "type": "int"
+            },
+            {
+              "name": "UserDisabled",
+              "type": "boolean"
+            },
+            {
+              "name": "PlaybookName",
+              "type": "string"
+            },
+            {
+              "name": "BreachTitle",
+              "type": "string"
+            },
+            {
+              "name": "DocumentId",
+              "type": "string"
+            },
+            {
+              "name": "InfectedMachineId",
+              "type": "string"
             }
           ]
         },
@@ -4185,6 +4205,26 @@
               {
                 "name": "Severity",
                 "type": "int"
+              },
+              {
+                "name": "UserDisabled",
+                "type": "boolean"
+              },
+              {
+                "name": "PlaybookName",
+                "type": "string"
+              },
+              {
+                "name": "BreachTitle",
+                "type": "string"
+              },
+              {
+                "name": "DocumentId",
+                "type": "string"
+              },
+              {
+                "name": "InfectedMachineId",
+                "type": "string"
               }
             ]
           }
@@ -4235,7 +4275,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now())",
+            "transformKql": "source | extend TimeGenerated = iff(isnotnull(TimeGenerated), todatetime(TimeGenerated), now()) | extend PasswordReset = column_ifexists('PasswordReset', column_ifexists('ForcedPasswordResetOnNextSignIn', false)) | extend SessionsRevoked = column_ifexists('SessionsRevoked', column_ifexists('UserSessionsRevoked', false)) | extend AddedToCAGroup = column_ifexists('AddedToCAGroup', column_ifexists('CAgroup', false)) | extend Email = column_ifexists('Email', column_ifexists('UserEmail', '')) | extend UserPrincipalName = column_ifexists('UserPrincipalName', column_ifexists('Username', '')) | extend UserDisabled = column_ifexists('UserDisabled', false)",
             "outputStream": "Custom-SpyCloud_ConditionalAccessLogs_CL"
           }
         ]
@@ -4326,7 +4366,7 @@
           "id": "SpyCloudCCF",
           "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-Logo-white.png)\n\n## SpyCloud Enterprise Protection for Microsoft Sentinel v10.0\n\n[SpyCloud](https://spycloud.com) transforms recaptured darknet data into automated threat response. This connector ingests compromised credentials, infostealer artifacts, and identity exposures into Sentinel for detection, investigation, and remediation.\n\n### Capabilities\n\n| Feature | Details |\n|---------|--------|\n| **Data Ingestion** | 14 custom tables via 13 REST API pollers (CCF) |\n| **APIs Supported** | Enterprise, Compass, SIP, Investigations, IDLINK, Data Partnership, Exposure, CAP |\n| **Detection** | 38 analytics rule templates \u2014 scheduled, NRT, Fusion |\n| **Response** | 14 playbook templates \u2014 identity, device, network, investigation |\n| **Hunting** | 28 pre-built hunting queries |\n| **Dashboards** | 14 focused workbooks (one per data source) |\n| **Copilot** | 90+ KQL + 35+ API + 17 sub-agent skills + GPT-4o |\n| **Notebooks** | 3 Jupyter notebooks with Investigations API |\n\n### API Key Configuration\n\n| API | Key Type | Notes |\n|-----|----------|-------|\n| **Enterprise + Compass** | Shared key | Same API key for both |\n| **SIP** | Separate key | Session Identity Protection |\n| **Investigations** | Separate key | Full database search |\n| **IDLINK** | Separate key | Identity correlation |\n| **Data Partnership** | Separate key | Partner intelligence |\n| **Exposure** | Separate key | Risk assessment |\n| **CAP** | Separate key | Credential Access Program |\n\n### Settings & Management\n\nUse the **Settings** tab below to:\n- Add or modify API keys for each SpyCloud API\n- Enable/disable individual API pollers\n- Deploy analytics rule templates\n- Deploy playbook templates\n- Configure workbooks\n- Manage table retention\n- Redeploy or reinstall components\n\n### Requirements\n\n- SpyCloud Enterprise API key ([portal.spycloud.com](https://portal.spycloud.com))\n- Additional API keys for IDLINK, Data Partnership, Exposure, CAP (separate entitlements)\n- Microsoft Sentinel Contributor role\n- Monitoring Metrics Publisher role on the DCR",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-connector-logo.svg)\n\n## SpyCloud Enterprise Protection for Microsoft Sentinel v10.0\n\n[SpyCloud](https://spycloud.com) transforms recaptured darknet data into automated threat response. This connector ingests compromised credentials, infostealer artifacts, and identity exposures into Sentinel for detection, investigation, and remediation.\n\n### Capabilities\n\n| Feature | Details |\n|---------|--------|\n| **Data Ingestion** | 14 custom tables via 13 REST API pollers (CCF) |\n| **APIs Supported** | Enterprise, Compass, SIP, Investigations, IDLINK, Data Partnership, Exposure, CAP |\n| **Detection** | 38 analytics rule templates \u2014 scheduled, NRT, Fusion |\n| **Response** | 14 playbook templates \u2014 identity, device, network, investigation |\n| **Hunting** | 28 pre-built hunting queries |\n| **Dashboards** | 14 focused workbooks (one per data source) |\n| **Copilot** | 90+ KQL + 35+ API + 17 sub-agent skills + GPT-4o |\n| **Notebooks** | 3 Jupyter notebooks with Investigations API |\n\n### API Key Configuration\n\n| API | Key Type | Notes |\n|-----|----------|-------|\n| **Enterprise + Compass** | Shared key | Same API key for both |\n| **SIP** | Separate key | Session Identity Protection |\n| **Investigations** | Separate key | Full database search |\n| **IDLINK** | Separate key | Identity correlation |\n| **Data Partnership** | Separate key | Partner intelligence |\n| **Exposure** | Separate key | Risk assessment |\n| **CAP** | Separate key | Credential Access Program |\n\n### Settings & Management\n\nUse the **Settings** tab below to:\n- Add or modify API keys for each SpyCloud API\n- Enable/disable individual API pollers\n- Deploy analytics rule templates\n- Deploy playbook templates\n- Configure workbooks\n- Manage table retention\n- Redeploy or reinstall components\n\n### Requirements\n\n- SpyCloud Enterprise API key ([portal.spycloud.com](https://portal.spycloud.com))\n- Additional API keys for IDLINK, Data Partnership, Exposure, CAP (separate entitlements)\n- Microsoft Sentinel Contributor role\n- Monitoring Metrics Publisher role on the DCR",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -6677,15 +6717,13 @@
                             "TimeGenerated": "@{utcNow()}",
                             "IncidentId": "@{triggerBody()?['object']?['properties']?['incidentNumber']}",
                             "DocumentId": "",
-                            "SpyCloudPublishDate": "@{utcNow()}",
-                            "InfectedTime": "",
                             "BreachTitle": "@{triggerBody()?['object']?['properties']?['title']}",
                             "InfectedMachineId": "",
-                            "Username": "@{body('Get_user_from_Graph')?['value'][0]?['displayName']}",
-                            "UserEmail": "@{body('Get_user_from_Graph')?['value'][0]?['mail']}",
-                            "ForcedPasswordResetOnNextSignIn": "@{equals(outputs('Force_password_reset')['statusCode'], 204)}",
-                            "UserSessionsRevoked": "@{equals(outputs('Revoke_sessions')['statusCode'], 200)}",
-                            "CAgroup": "@{and(not(empty(parameters('caSecurityGroupId'))), equals(outputs('Add_to_CA_group')?['statusCode'], 204))}",
+                            "UserPrincipalName": "@{body('Get_user_from_Graph')?['value'][0]?['displayName']}",
+                            "Email": "@{body('Get_user_from_Graph')?['value'][0]?['mail']}",
+                            "PasswordReset": "@{equals(outputs('Force_password_reset')['statusCode'], 204)}",
+                            "SessionsRevoked": "@{equals(outputs('Revoke_sessions')['statusCode'], 200)}",
+                            "AddedToCAGroup": "@{and(not(empty(parameters('caSecurityGroupId'))), equals(outputs('Add_to_CA_group')?['statusCode'], 204))}",
                             "UserDisabled": false,
                             "PlaybookName": "[variables('caPlaybookName')]"
                           }
@@ -7440,7 +7478,7 @@
                 "displayName": "SpyCloud \u2014 Device Re-Infection Detected",
                 "description": "Detects when the same infected_machine_id appears in new SpyCloud exposure records after a previous remediation was logged in the MDE table. Indicates the device was re-compromised after initial remediation, suggesting incomplete cleanup or persistent malware.",
                 "severity": "High",
-                "query": "let remediated_devices = Spycloud_MDE_Logs_CL | where IsolationStatus == true | distinct InfectedMachineId;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where infected_machine_id in (remediated_devices)\n| summarize NewExposures = count(), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, email\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = email",
+                "query": "let remediated_devices = Spycloud_MDE_Logs_CL | extend _IsolationStatus = column_ifexists(\"IsolationStatus\", ActionStatus) | where _IsolationStatus == true or ActionStatus == \"Succeeded\" | distinct InfectedMachineId;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where infected_machine_id in (remediated_devices)\n| summarize NewExposures = count(), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, email\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
                 "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
@@ -7762,7 +7800,7 @@
                 "displayName": "SpyCloud \u2014 High-Severity Exposure Without Automated Remediation",
                 "description": "Detects severity 20+ infostealer exposures that have been in the watchlist for over 2 hours but have NO corresponding entry in the Conditional Access remediation logs. This means the automated password reset playbook did not trigger, leaving the compromised credential active.",
                 "severity": "High",
-                "query": "let remediated_users = SpyCloud_ConditionalAccessLogs_CL | distinct UserEmail;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(2h)\n| where email !in (remediated_users)\n| summarize ExposureCount = count(), MaxSeverity = max(severity), TargetDomains = make_set(target_domain, 10) by email, infected_machine_id\n| extend AccountCustomEntity = email",
+                "query": "let remediated_users = SpyCloud_ConditionalAccessLogs_CL | distinct Email;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(2h)\n| where email !in (remediated_users)\n| summarize ExposureCount = count(), MaxSeverity = max(severity), TargetDomains = make_set(target_domain, 10) by email, infected_machine_id\n| extend AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
                 "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",
@@ -9621,7 +9659,7 @@
                 "displayName": "SpyCloud \u2014 Exposure Older Than 7 Days Without Remediation",
                 "description": "Detects high-severity (20+) exposures that have been in the watchlist for more than 7 days but have no corresponding entry in either the MDE or CA remediation logs. This is a compliance and SLA alert \u2014 these exposures should have been remediated within your organization's defined response window.",
                 "severity": "Medium",
-                "query": "let mde_remediated = Spycloud_MDE_Logs_CL | distinct InfectedMachineId;\nlet ca_remediated = SpyCloud_ConditionalAccessLogs_CL | distinct UserEmail;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(7d)\n| where infected_machine_id !in (mde_remediated)\n| where email !in (ca_remediated)\n| summarize DaysExposed = datetime_diff('day', now(), min(TimeGenerated)), ExposureCount = count() by email, infected_machine_id\n| extend AccountCustomEntity = email",
+                "query": "let mde_remediated = Spycloud_MDE_Logs_CL | distinct InfectedMachineId;\nlet ca_remediated = SpyCloud_ConditionalAccessLogs_CL | distinct Email;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated < ago(7d)\n| where infected_machine_id !in (mde_remediated)\n| where email !in (ca_remediated)\n| summarize DaysExposed = datetime_diff('day', now(), min(TimeGenerated)), ExposureCount = count() by email, infected_machine_id\n| extend AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
                 "queryPeriod": "P8D",
                 "triggerOperator": "GreaterThan",

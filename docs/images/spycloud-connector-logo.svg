@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SpyCloud Wordmark Logo - Adaptive for Light and Dark mode -->
+<!-- Matches official SpyCloud branding: bold rounded sans-serif wordmark -->
+<!-- Uses prefers-color-scheme to auto-switch between black and white -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48" width="280" height="48">
+  <style>
+    .sc-wordmark { fill: #000000; }
+    @media (prefers-color-scheme: dark) {
+      .sc-wordmark { fill: #FFFFFF; }
+    }
+  </style>
+  <!-- SpyCloud Wordmark - bold rounded sans-serif to match official branding -->
+  <text x="0" y="38" font-family="'Nunito Sans', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="40" font-weight="900" letter-spacing="-0.5" class="sc-wordmark">SpyCloud</text>
+</svg>

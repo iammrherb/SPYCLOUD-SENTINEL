@@ -108,7 +108,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let total = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | where severity >= 20 | summarize dcount(email));\nlet remediated = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize dcount(user_principal_name_s));\nlet mdeActioned = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize dcount(device_name_s));\ndatatable(Metric:string, Value:long)[\"High-Sev Users Identified\", total, \"Users Remediated (CA)\", remediated, \"Devices Actioned (MDE)\", mdeActioned, \"Remediation Rate %\", iff(total > 0, (remediated * 100) / total, 0)])",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(let total = toscalar(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | where severity >= 20 | summarize dcount(email));\nlet remediated = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize dcount(UserPrincipalName));\nlet mdeActioned = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize dcount(DeviceName));\ndatatable(Metric:string, Value:long)[\"High-Sev Users Identified\", total, \"Users Remediated (CA)\", remediated, \"Devices Actioned (MDE)\", mdeActioned, \"Remediation Rate %\", iff(total > 0, (remediated * 100) / total, 0)])",
         "size": 4,
         "title": "Remediation Effectiveness",
         "queryType": 0,

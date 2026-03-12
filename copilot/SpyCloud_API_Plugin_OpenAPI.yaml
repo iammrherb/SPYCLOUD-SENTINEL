@@ -85,7 +85,7 @@ paths:
   # ENTERPRISE API
   # ===========================================================================
 
-  /breach/data/emails/{email}:
+  /enterprise-v2/breach/data/emails/{email}:
     get:
       operationId: getBreachDataByEmail
       summary: Get breach records for an email address
@@ -122,7 +122,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /breach/data/domains/{domain}:
+  /enterprise-v2/breach/data/domains/{domain}:
     get:
       operationId: getBreachDataByDomain
       summary: Get breach records for a domain
@@ -159,7 +159,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /breach/data/ips/{ip}:
+  /enterprise-v2/breach/data/ips/{ip}:
     get:
       operationId: getBreachDataByIp
       summary: Get breach records for an IP address
@@ -195,7 +195,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /breach/data/passwords/{password}:
+  /enterprise-v2/breach/data/passwords/{password}:
     get:
       operationId: checkPasswordExposure
       summary: Check if a password appears in known breaches
@@ -228,7 +228,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /breach/data/usernames/{username}:
+  /enterprise-v2/breach/data/usernames/{username}:
     get:
       operationId: getBreachDataByUsername
       summary: Get breach records for a username
@@ -265,7 +265,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /breach/catalog:
+  /enterprise-v2/breach/catalog:
     get:
       operationId: listBreachCatalog
       summary: List all breaches in the SpyCloud catalog
@@ -312,7 +312,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /breach/catalog/{id}:
+  /enterprise-v2/breach/catalog/{id}:
     get:
       operationId: getBreachCatalogEntry
       summary: Get details for a specific breach
@@ -459,7 +459,7 @@ paths:
   # IDENTITY API
   # ===========================================================================
 
-  /identity/data/emails/{email}:
+  /enterprise-v2/breach/data/identities/{email}:
     get:
       operationId: getIdentityExposure
       summary: Get identity exposure records for an email
@@ -493,7 +493,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /identity/watchlist:
+  /enterprise-v2/breach/data/watchlist:
     get:
       operationId: getIdentityWatchlist
       summary: List monitored identities on the watchlist
@@ -542,7 +542,7 @@ paths:
   # SIP API (SESSION IDENTITY PROTECTION)
   # ===========================================================================
 
-  /sip-v1/breach/data/cookie-domains/{cookie_domain}:
+  /sip/breach/data/cookie-domains/{cookie_domain}:
     get:
       operationId: sipGetCookiesByDomain
       summary: Get stolen cookies for a domain
@@ -603,7 +603,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /sip-v1/breach/catalog:
+  /sip/breach/catalog:
     get:
       operationId: sipListBreachCatalog
       summary: List SIP breach catalog entries
@@ -631,7 +631,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /sip-v1/breach/catalog/{id}:
+  /sip/breach/catalog/{id}:
     get:
       operationId: sipGetBreachCatalogEntry
       summary: Get SIP breach catalog entry by ID
@@ -668,7 +668,7 @@ paths:
   # INVESTIGATIONS API
   # ===========================================================================
 
-  /investigations/data/emails/{email}:
+  /investigations-v2/data/emails/{email}:
     get:
       operationId: investigateByEmail
       summary: Investigate an email across all SpyCloud data
@@ -703,7 +703,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /investigations/data/domains/{domain}:
+  /investigations-v2/data/domains/{domain}:
     get:
       operationId: investigateByDomain
       summary: Investigate a domain across all SpyCloud data
@@ -738,7 +738,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /investigations/data/ips/{ip}:
+  /investigations-v2/data/ips/{ip}:
     get:
       operationId: investigateByIp
       summary: Investigate an IP across all SpyCloud data
@@ -773,7 +773,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /investigations/data/usernames/{username}:
+  /investigations-v2/data/usernames/{username}:
     get:
       operationId: investigateByUsername
       summary: Investigate a username across all SpyCloud data
@@ -808,7 +808,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /investigations/data/passwords/{password}:
+  /investigations-v2/data/passwords/{password}:
     get:
       operationId: investigateByPassword
       summary: Investigate a password across all SpyCloud data
