@@ -978,6 +978,13 @@
         "description": "Include recommended remediation actions in email notifications based on the exposure type and severity (e.g., password reset, session revocation, MFA enforcement, device scan)."
       }
     },
+    "monitoredDomain": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "REQUIRED — Your primary corporate domain to monitor across all SpyCloud APIs (e.g., 'example.com'). Used by Investigations, IDLINK, Data Partnership, Exposure, and CAP connectors to query domain-scoped data. Also used by SIP if sipCookieDomain is not set separately."
+      }
+    },
     "apiKey": {
       "type": "securestring",
       "defaultValue": "",
@@ -4975,7 +4982,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/records",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
@@ -5128,7 +5135,7 @@
                   "ApiKey": "[[if(not(empty(parameters('sipApiKey'))), parameters('sipApiKey'), parameters('apiKey'))]"
                 },
                 "request": {
-                  "apiEndpoint": "[[concat('https://api.spycloud.io/sip-v1/breach/data/cookie-domains/', parameters('sipCookieDomain'))]",
+                  "apiEndpoint": "[[concat('https://api.spycloud.io/enterprise-v2/sip/cookies/domains/', if(not(empty(parameters('sipCookieDomain'))), parameters('sipCookieDomain'), parameters('monitoredDomain')))]",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
@@ -5178,7 +5185,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/breach/data/identities",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/watchlist/identifiers",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
@@ -5229,7 +5236,7 @@
                   "ApiKey": "[[if(not(empty(parameters('investigationsApiKey'))), parameters('investigationsApiKey'), parameters('apiKey'))]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/investigations-v2/data/emails",
+                  "apiEndpoint": "[[concat('https://api.spycloud.io/investigations-v2/records/domains/', parameters('monitoredDomain'))]",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
@@ -5280,7 +5287,7 @@
                   "ApiKey": "[[parameters('idlinkApiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/idlink-v1/identity/links",
+                  "apiEndpoint": "[[concat('https://api.spycloud.io/idlink/records/emails/', parameters('monitoredDomain'))]",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
@@ -5331,7 +5338,7 @@
                   "ApiKey": "[[parameters('dataPartnershipApiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/data-partnership-v1/breach/data",
+                  "apiEndpoint": "[[concat('https://api.spycloud.io/data-partnership/records/domains/', parameters('monitoredDomain'))]",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
@@ -5382,7 +5389,7 @@
                   "ApiKey": "[[parameters('exposureApiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/exposure-v1/exposure/data",
+                  "apiEndpoint": "[[concat('https://api.spycloud.io/exposure/stats/domains/', parameters('monitoredDomain'))]",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
@@ -5433,7 +5440,7 @@
                   "ApiKey": "[[parameters('capApiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/cap-v1/credentials/actions",
+                  "apiEndpoint": "[[concat('https://api.spycloud.io/cap/records/domains/', parameters('monitoredDomain'))]",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
