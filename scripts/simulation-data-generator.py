@@ -644,7 +644,7 @@ def gen_exposure(count: int, **kwargs) -> List[Dict[str, Any]]:
                 k=random.randint(2, 5),
             ),
             "breach_sources": [f"SYNTH Breach #{random.randint(1000,9999)}" for _ in range(random.randint(1, 5))],
-            "timeline": [
+            "exposure_timeline": [
                 {"date": synth_date(days_ago_max=365), "event": random.choice(["exposure", "remediation", "re-exposure"])}
                 for _ in range(random.randint(1, 4))
             ],
