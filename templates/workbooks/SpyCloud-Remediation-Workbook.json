@@ -43,7 +43,7 @@
             "multiSelect": true,
             "quote": "'",
             "delimiter": ",",
-            "query": "union\n(Spycloud_MDE_Logs_CL | distinct status_s),\n(SpyCloud_ConditionalAccessLogs_CL | distinct status_s)\n| distinct status_s\n| order by status_s asc",
+            "query": "union\n(Spycloud_MDE_Logs_CL | distinct ActionStatus),\n(SpyCloud_ConditionalAccessLogs_CL | distinct ActionStatus)\n| distinct ActionStatus\n| order by ActionStatus asc",
             "typeSettings": {
               "additionalResourceOptions": ["value::all"]
             },
@@ -58,7 +58,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union isfuzzy=true\n(datatable(Label:string, Value:long, Order:int)[\"MDE Isolations\", 0, 1, \"CA Actions\", 0, 2, \"MDE Success Rate %\", 0, 3, \"CA Success Rate %\", 0, 4, \"Unique Devices Acted On\", 0, 5]),\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"MDE Isolations\", Order=1 | project Label, Value=v, Order),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"CA Actions\", Order=2 | project Label, Value=v, Order),\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize total=count(), success=countif(status_s in (\"Succeeded\", \"Success\", \"Completed\")) | extend Label=\"MDE Success Rate %\", Order=3, Value=iff(total > 0, (success * 100) / total, 0) | project Label, Value=toint(Value), Order),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize total=count(), success=countif(status_s in (\"Succeeded\", \"Success\", \"Completed\")) | extend Label=\"CA Success Rate %\", Order=4, Value=iff(total > 0, (success * 100) / total, 0) | project Label, Value=toint(Value), Order),\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize v=dcount(device_name_s) | extend Label=\"Unique Devices Acted On\", Order=5 | project Label, Value=v, Order)\n| summarize Value=max(Value) by Label, Order\n| order by Order asc",
+        "query": "union isfuzzy=true\n(datatable(Label:string, Value:long, Order:int)[\"MDE Isolations\", 0, 1, \"CA Actions\", 0, 2, \"MDE Success Rate %\", 0, 3, \"CA Success Rate %\", 0, 4, \"Unique Devices Acted On\", 0, 5]),\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"MDE Isolations\", Order=1 | project Label, Value=v, Order),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\"CA Actions\", Order=2 | project Label, Value=v, Order),\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize total=count(), success=countif(ActionStatus in (\"Succeeded\", \"Success\", \"Completed\")) | extend Label=\"MDE Success Rate %\", Order=3, Value=iff(total > 0, (success * 100) / total, 0) | project Label, Value=toint(Value), Order),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize total=count(), success=countif(ActionStatus in (\"Succeeded\", \"Success\", \"Completed\")) | extend Label=\"CA Success Rate %\", Order=4, Value=iff(total > 0, (success * 100) / total, 0) | project Label, Value=toint(Value), Order),\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize v=dcount(DeviceName) | extend Label=\"Unique Devices Acted On\", Order=5 | project Label, Value=v, Order)\n| summarize Value=max(Value) by Label, Order\n| order by Order asc",
         "size": 4,
         "title": "Remediation Summary",
         "queryType": 0,
@@ -92,7 +92,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(union\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | project TimeGenerated, Playbook=\"MDE-Isolation\", Target=device_name_s, Action=action_type_s, Status=status_s),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | project TimeGenerated, Playbook=\"CA-Remediation\", Target=user_principal_name_s, Action=action_s, Status=status_s)\n| extend StatusIndicator = case(Status in (\"Succeeded\", \"Success\", \"Completed\"), \"SUCCESS\", Status in (\"Failed\", \"Error\"), \"FAILED\", \"PENDING\")\n| order by TimeGenerated desc\n| take 100\n| project TimeGenerated, Playbook, Target, Action, StatusIndicator)",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(union\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | project TimeGenerated, Playbook=\"MDE-Isolation\", Target=DeviceName, Action=Action, Status=ActionStatus),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | project TimeGenerated, Playbook=\"CA-Remediation\", Target=UserPrincipalName, Action=Action, Status=ActionStatus)\n| extend StatusIndicator = case(Status in (\"Succeeded\", \"Success\", \"Completed\"), \"SUCCESS\", Status in (\"Failed\", \"Error\"), \"FAILED\", \"PENDING\")\n| order by TimeGenerated desc\n| take 100\n| project TimeGenerated, Playbook, Target, Action, StatusIndicator)",
         "size": 0,
         "title": "Recent Remediation Actions",
         "queryType": 0,
@@ -104,7 +104,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(union\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | extend StatusCategory = case(status_s in (\"Succeeded\", \"Success\", \"Completed\"), \"Success\", status_s in (\"Failed\", \"Error\"), \"Failed\", \"Pending\") | summarize Count=count() by StatusCategory | extend Source=\"MDE\"),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | extend StatusCategory = case(status_s in (\"Succeeded\", \"Success\", \"Completed\"), \"Success\", status_s in (\"Failed\", \"Error\"), \"Failed\", \"Pending\") | summarize Count=count() by StatusCategory | extend Source=\"CA\")\n| project Source, StatusCategory, Count)",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(union\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | extend StatusCategory = case(ActionStatus in (\"Succeeded\", \"Success\", \"Completed\"), \"Success\", ActionStatus in (\"Failed\", \"Error\"), \"Failed\", \"Pending\") | summarize Count=count() by StatusCategory | extend Source=\"MDE\"),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | extend StatusCategory = case(ActionStatus in (\"Succeeded\", \"Success\", \"Completed\"), \"Success\", ActionStatus in (\"Failed\", \"Error\"), \"Failed\", \"Pending\") | summarize Count=count() by StatusCategory | extend Source=\"CA\")\n| project Source, StatusCategory, Count)",
         "size": 1,
         "title": "Remediation Outcome by Source",
         "queryType": 0,
@@ -116,7 +116,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(Spycloud_MDE_Logs_CL\n| where TimeGenerated {TimeRange} and status_s in (\"Failed\", \"Error\")\n| project TimeGenerated, Playbook=\"MDE-Isolation\", Target=device_name_s, Action=action_type_s, Status=status_s, ErrorDetails=error_message_s\n| union (\n    SpyCloud_ConditionalAccessLogs_CL\n    | where TimeGenerated {TimeRange} and status_s in (\"Failed\", \"Error\")\n    | project TimeGenerated, Playbook=\"CA-Remediation\", Target=user_principal_name_s, Action=action_s, Status=status_s, ErrorDetails=error_message_s\n)\n| order by TimeGenerated desc\n| take 50)",
+        "query": "union isfuzzy=true\n(datatable(d:string)[]),\n(Spycloud_MDE_Logs_CL\n| where TimeGenerated {TimeRange} and ActionStatus in (\"Failed\", \"Error\")\n| project TimeGenerated, Playbook=\"MDE-Isolation\", Target=DeviceName, Action=Action, Status=ActionStatus, ErrorDetails=column_ifexists('error_message', '')\n| union (\n    SpyCloud_ConditionalAccessLogs_CL\n    | where TimeGenerated {TimeRange} and ActionStatus in (\"Failed\", \"Error\")\n    | project TimeGenerated, Playbook=\"CA-Remediation\", Target=UserPrincipalName, Action=Action, Status=ActionStatus, ErrorDetails=column_ifexists('error_message', '')\n)\n| order by TimeGenerated desc\n| take 50)",
         "size": 0,
         "title": "Failed Remediation Actions (Requires Attention)",
         "queryType": 0,

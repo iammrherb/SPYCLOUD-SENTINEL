@@ -101,6 +101,26 @@
             "name": "Credential Automated Protection (CAP)",
             "table": "SpyCloudCAP_CL",
             "skills": ["GetCAPActionsByEmail", "GetCAPActionsByPolicy", "GetCAPPendingActions", "GetCAPCompletedActions", "GetCAPFailedActions", "GetCAPComplianceStatus", "GetCAPActionTimeline", "GetCAPSummaryDashboard"]
+          },
+          {
+            "name": "Compass Application Credentials",
+            "table": "SpyCloudCompassApplications_CL",
+            "skills": ["GetCompassApplications", "GetCompassApplicationsForUser", "GetCompassApplicationStats"]
+          },
+          {
+            "name": "Session Identity Protection (SIP) Cookies",
+            "table": "SpyCloudSipCookies_CL",
+            "skills": ["GetSipStolenCookies", "GetSipCookiesForUser", "GetSipCookieStats", "GetSipHighRiskSessions"]
+          },
+          {
+            "name": "Identity Exposure",
+            "table": "SpyCloudIdentityExposure_CL",
+            "skills": ["GetIdentityExposures", "GetIdentityExposuresForUser", "GetIdentityExposureStats"]
+          },
+          {
+            "name": "Investigations",
+            "table": "SpyCloudInvestigations_CL",
+            "skills": ["GetInvestigationRecords", "GetInvestigationRecordsForUser", "GetInvestigationStats"]
           }
         ]
       },

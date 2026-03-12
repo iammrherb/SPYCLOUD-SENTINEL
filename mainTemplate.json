@@ -1341,7 +1341,7 @@
                 "displayName": "SpyCloud \u2014 Device Re-Infection Detected",
                 "description": "Detects when the same infected_machine_id appears in new SpyCloud exposure records after a previous remediation was logged in the MDE table. Indicates the device was re-compromised after initial remediation, suggesting incomplete cleanup or persistent malware.",
                 "severity": "High",
-                "query": "let remediated_devices = Spycloud_MDE_Logs_CL | where IsolationStatus == true | distinct InfectedMachineId;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where infected_machine_id in (remediated_devices)\n| summarize NewExposures = count(), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, email\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = email",
+                "query": "let remediated_devices = Spycloud_MDE_Logs_CL | extend _IsolationStatus = column_ifexists(\"IsolationStatus\", ActionStatus) | where _IsolationStatus == true or ActionStatus == \"Succeeded\" | distinct InfectedMachineId;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where infected_machine_id in (remediated_devices)\n| summarize NewExposures = count(), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, email\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
                 "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",

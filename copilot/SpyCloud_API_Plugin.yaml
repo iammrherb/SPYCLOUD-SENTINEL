@@ -20,13 +20,38 @@ Descriptor:
       SettingType: string
       Required: false
       DefaultValue: https://api.spycloud.io
+    - Name: SpyCloudApiKey
+      Description: "Primary API key for SpyCloud Enterprise and Compass API endpoints."
+      HintText: "Enter your SpyCloud Enterprise/Compass API key"
+      SettingType: string
+      Required: true
+    - Name: IdLinkApiKey
+      Description: "API key for SpyCloud IDLINK endpoints. Leave blank to use the primary SpyCloudApiKey."
+      HintText: "Enter your IDLINK API key (optional)"
+      SettingType: string
+      Required: false
+    - Name: DataPartnershipApiKey
+      Description: "API key for SpyCloud Data Partnership endpoints. Leave blank to use the primary SpyCloudApiKey."
+      HintText: "Enter your Data Partnership API key (optional)"
+      SettingType: string
+      Required: false
+    - Name: ExposureApiKey
+      Description: "API key for SpyCloud Exposure endpoints. Leave blank to use the primary SpyCloudApiKey."
+      HintText: "Enter your Exposure API key (optional)"
+      SettingType: string
+      Required: false
+    - Name: CAPApiKey
+      Description: "API key for SpyCloud CAP (Compromised Account Protection) endpoints. Leave blank to use the primary SpyCloudApiKey."
+      HintText: "Enter your CAP API key (optional)"
+      SettingType: string
+      Required: false
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
 
 SkillGroups:
   - Format: API
     Settings:
       OpenApiSpecUrl: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/SpyCloud_API_Plugin_OpenAPI.yaml
-      BaseUrl: https://api.spycloud.io
+      BaseUrl: "{{ApiBaseUrl}}"
     Skills:
 
       # =====================================================================

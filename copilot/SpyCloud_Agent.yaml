@@ -1,7 +1,8 @@
 Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
   DisplayName: SpyCloud Investigation Agent
-  Description: "Autonomous agent with 23 sub-agents investigating threats across 9 SpyCloud APIs, 14 Sentinel tables, Defender XDR, Intune, and Entra ID."
+  Description: "Autonomous agent with 22 sub-agents investigating threats across 9 SpyCloud APIs, 14 Sentinel tables, Defender XDR, Intune, and Entra ID."
+  Publisher: SpyCloud
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
@@ -886,7 +887,7 @@ SkillGroups:
 
         # Data Sources
 
-        6 SpyCloud tables in Sentinel (156 columns total):
+        14 SpyCloud custom tables in Sentinel:
 
         - SpyCloudBreachWatchlist_CL (73 cols): credentials, PII, device forensics, passwords, infostealer artifacts, financial data, social media
 
@@ -896,9 +897,9 @@ SkillGroups:
 
         - SpyCloudCompassDevices_CL (8 cols): infected device fingerprints and malware artifacts (Enterprise+ only)
 
-        - Spycloud_MDE_Logs_CL (19 cols): MDE device isolation, tagging, IOC audit trail
+        - Spycloud_MDE_Logs_CL (13 cols): MDE device isolation, tagging, IOC audit trail
 
-        - SpyCloud_ConditionalAccessLogs_CL (14 cols): password resets, session revocations, CA group, account disable audit
+        - SpyCloud_ConditionalAccessLogs_CL (17 cols): password resets, session revocations, CA group, account disable audit
 
 
         Additional Sentinel tables you can query:
@@ -1132,7 +1133,7 @@ SkillGroups:
         # Multi-Agent Orchestration
 
 
-        You orchestrate 23 specialized sub-agents (including IDLINK correlation, Data Partnership intelligence, Exposure risk assessment, CAP response monitoring, OpenAI advanced analysis, and Cross-API investigation). Use them strategically:
+        You orchestrate 22 specialized sub-agents (including IDLINK correlation, Data Partnership intelligence, Exposure risk assessment, CAP response monitoring, OpenAI advanced analysis, and Cross-API investigation). Use them strategically:
 
         1. **Always start with data**: Query the relevant KQL skills FIRST to get raw data
         2. **Enrich with sub-agents**: Delegate to specialized sub-agents for deep analysis
@@ -1207,7 +1208,7 @@ SkillGroups:
           2. Drop occasional puns about passwords and security (tastefully)
           3. Celebrate wins: "That user was remediated 2 hours after exposure. Your automation is COOKING. 🔥"
           4. Be real about bad news: "I''m not going to sugarcoat this — 47 plaintext passwords is a five-alarm fire."
-          5. When someone asks what you can do, be confident: "I''ve got 100+ skills, 17 sub-agents, and 600 billion darknet records. I''m basically the Avengers of threat intelligence, except I actually show up on time."'
+          5. When someone asks what you can do, be confident: "I''ve got 100+ skills, 22 sub-agents, and 600 billion darknet records. I''m basically the Avengers of threat intelligence, except I actually show up on time."'
     ChildSkills:
     - GetUserExposures
     - GetUserFullPIIProfile
@@ -4344,8 +4345,7 @@ SkillGroups:
       SubscriptionId: '{{SubscriptionId}}'
       ResourceGroupName: '{{ResourceGroupName}}'
       WorkspaceName: '{{WorkspaceName}}'
-      Template: "SpyCloudBreachWatchlist_CL\n| join kind=leftouter (\n    SpyCloudBreachCatalog_CL\n    | summarize arg_max(TimeGenerated, *) by source_id\n    | project source_id, breach_title, status\n\
-        ) on source_id\n| project TimeGenerated, email, severity, target_domain, password_type, breach_title, status, user_hostname, infected_machine_id\n| top 25 by TimeGenerated desc"
+      Template: "SpyCloudBreachWatchlist_CL\n| project TimeGenerated, email, severity, target_domain, password_type, breach_title, breach_category, user_hostname, infected_machine_id, source_id\n| top 25 by TimeGenerated desc"
   - Name: GetMDERemediationActions
     DisplayName: '[Data] Show MDE remediation actions'
     Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Returns all MDE device isolation, tagging, and IOC submission actions from SpyCloud playbooks.
@@ -4357,10 +4357,9 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: 'Spycloud_MDE_Logs_CL
 
-        | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), MachineTagName = column_ifexists("MachineTagName", "")
+        | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus_ext = column_ifexists("IsolationStatus", ""), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), PlaybookName = column_ifexists("PlaybookName", ""), BreachTitle = column_ifexists("BreachTitle", "")
 
-        | project TimeGenerated, IncidentId, HostName, NormalizedHostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender,
-        PlaybookName, BreachTitle, InfectedMachineId
+        | project TimeGenerated, IncidentId, DeviceName, DeviceId, MachineId, Action, IsolationType, Tag, ActionStatus, Email, Severity, InfectedMachineId, UserHostname, IsolationRequested, IsolationStatus_ext, MachineTagAdded, AddedIOCsToDefender, PlaybookName, BreachTitle
 
         | top 25 by TimeGenerated desc'
   - Name: GetMDERemediationForDevice
@@ -4378,12 +4377,11 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: 'Spycloud_MDE_Logs_CL
 
-        | where HostName contains "{{hostName}}" or NormalizedHostName contains "{{hostName}}"
+        | where DeviceName contains "{{hostName}}" or UserHostname contains "{{hostName}}" or InfectedMachineId contains "{{hostName}}"
 
-        | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus = column_ifexists("IsolationStatus", false), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), MachineTagName = column_ifexists("MachineTagName", "")
+        | extend IsolationRequested = column_ifexists("IsolationRequested", false), IsolationStatus_ext = column_ifexists("IsolationStatus", ""), MachineTagAdded = column_ifexists("MachineTagAdded", false), AddedIOCsToDefender = column_ifexists("AddedIOCsToDefender", false), PlaybookName = column_ifexists("PlaybookName", ""), BreachTitle = column_ifexists("BreachTitle", "")
 
-        | project TimeGenerated, IncidentId, HostName, DeviceId, OSPlatform, RiskScore, ExposureLevel, IsolationRequested, IsolationStatus, MachineTagAdded, MachineTagName, AddedIOCsToDefender, PlaybookName,
-        BreachTitle, InfectedMachineId
+        | project TimeGenerated, IncidentId, DeviceName, DeviceId, MachineId, Action, IsolationType, Tag, ActionStatus, Email, Severity, InfectedMachineId, UserHostname, IsolationRequested, IsolationStatus_ext, MachineTagAdded, AddedIOCsToDefender, PlaybookName, BreachTitle
 
         | top 20 by TimeGenerated desc'
   - Name: GetMDERemediationStats
@@ -4552,7 +4550,7 @@ SkillGroups:
       ResourceGroupName: '{{ResourceGroupName}}'
       WorkspaceName: '{{WorkspaceName}}'
       Template: "let exposed_sev20 = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 20 | distinct email;\nlet mde_acted = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d)\
-        \ | distinct HostName;\nlet ca_acted = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;\nunion isfuzzy=true\n(exposed_sev20 | where email !in~ (ca_acted)\
+        \ | distinct DeviceName;\nlet ca_acted = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(7d) | distinct Email;\nunion isfuzzy=true\n(exposed_sev20 | where email !in~ (ca_acted)\
         \ | summarize Unremediated=count() | extend Check=\"Users sev20+ without CA reset\", Status=iff(Unremediated > 0, \"GAP\", \"OK\")),\n(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(7d) | extend _IsolationStatus = column_ifexists(\"IsolationStatus\", false) | where _IsolationStatus == false | summarize Failures=count() | extend Check=\"MDE isolation failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\")),\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
         \ > ago(7d) and PasswordReset == false | summarize Failures=count() | extend Check=\"CA reset failures\", Status=iff(Failures > 0, \"CHECK\", \"OK\"))\n| project Check, Status"
   - Name: GetConnectorHealthAssessment
@@ -4609,7 +4607,7 @@ SkillGroups:
       WorkspaceName: '{{WorkspaceName}}'
       Template: "let sev20_users = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email;\nlet sev20_devices = SpyCloudBreachWatchlist_CL | where TimeGenerated\
         \ > ago(14d) and severity >= 20 and isnotempty(infected_machine_id) | distinct infected_machine_id;\nlet ca_users = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(14d) | distinct\
-        \ Email;\nlet mde_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | distinct HostName;\nlet ca_total = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated >\
+        \ Email;\nlet mde_devices = Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | distinct DeviceName;\nlet ca_total = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated >\
         \ ago(14d) | count);\nlet mde_total = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | count);\nlet ca_failures = toscalar(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated\
         \ > ago(14d) and PasswordReset == false | count);\nlet mde_failures = toscalar(Spycloud_MDE_Logs_CL | where TimeGenerated > ago(14d) | extend _IsolationStatus = column_ifexists(\"\
         IsolationStatus\", false) | where _IsolationStatus == false | count);\nunion isfuzzy=true\n(print Check=\"Identity remediation (CA/password reset) coverage\", Metric=strcat(toscalar(sev20_users\
