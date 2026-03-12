@@ -1,7 +1,7 @@
 Descriptor:
   Name: SpyCloudAPIPlugin
   DisplayName: SpyCloud API Plugin
-  Description: "Comprehensive REST API access to all SpyCloud product APIs for real-time darknet intelligence: Enterprise (breach and infostealer lookups by email, domain, IP, username, password), Compass (deep underground investigations), Identity (exposure profiles and watchlists), SIP (stolen session cookies), Investigations (full-database cybercrime searches), IDLINK (identity resolution and relationship graphs), Data Partnership (partner data catalog and lookups), Exposure (risk-scored exposure assessments), and CAP (credential automated policies and resets). Note: Enterprise and Compass share the same API key."
+  Description: "REST API access to 9 SpyCloud APIs for real-time darknet intelligence: Enterprise, Compass, Identity, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP."
   DescriptionDisplay: default
   Category: Other
   Version: 9.0.0

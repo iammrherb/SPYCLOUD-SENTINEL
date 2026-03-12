@@ -1,7 +1,7 @@
 Descriptor:
   Name: SpyCloudKQLPlugin
   DisplayName: SpyCloud Sentinel KQL Plugin
-  Description: "KQL plugin querying 14 SpyCloud tables in Sentinel: BreachWatchlist, BreachCatalog, CompassData, CompassDevices, MDE Logs, ConditionalAccessLogs, MonitoredDomains, EntraIdWatchlist, PasswordPolicy, RemediationAudit, IdLink, DataPartnership, Exposure, and CAP — for credential exposure, infostealer infections, device forensics, breach catalog, identity graphing, partner data, exposure profiling, compliance automation, and remediation audit."
+  Description: "KQL plugin querying 14 SpyCloud Sentinel tables for credential exposure, breach catalog, device forensics, identity correlation, and remediation audit."
   Category: Other
   DescriptionDisplay: default
   Version: 9.0.0
