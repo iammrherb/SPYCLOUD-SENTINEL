@@ -236,7 +236,7 @@
     },
     "enableNotifications": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
         "description": "Create an Azure Monitor Action Group for email/webhook notifications when SpyCloud incidents are created or data ingestion stops."
       }
@@ -1111,8 +1111,8 @@
     "_solutionVersion": "9.0.0",
     "_solutionAuthor": "SpyCloud",
     "_solutionId": "azuresentinel.azure-sentinel-solution-spycloud-threatintel",
-    "dataConnectorVersionConnectorDefinition": "1.1.0",
-    "dataConnectorVersionConnections": "1.1.0",
+    "dataConnectorVersionConnectorDefinition": "1.2.0",
+    "dataConnectorVersionConnections": "1.2.0",
     "_solutionTier": "Community",
     "_solutionEmail": "support@spycloud.com",
     "_solutionLink": "https://portal.spycloud.com",
@@ -2218,7 +2218,7 @@
             { "name": "remediation_actions", "type": "dynamic" },
             { "name": "data_classes_exposed", "type": "dynamic" },
             { "name": "breach_sources", "type": "dynamic" },
-            { "name": "timeline", "type": "dynamic" },
+            { "name": "exposure_timeline", "type": "dynamic" },
             { "name": "log_id", "type": "string" }
           ]
         },
@@ -3684,7 +3684,7 @@
               { "name": "remediation_actions", "type": "dynamic" },
               { "name": "data_classes_exposed", "type": "dynamic" },
               { "name": "breach_sources", "type": "dynamic" },
-              { "name": "timeline", "type": "dynamic" },
+              { "name": "exposure_timeline", "type": "dynamic" },
               { "name": "log_id", "type": "string" }
             ]
           },
@@ -3754,7 +3754,7 @@
           {
             "streams": [ "Custom-SpyCloudExposure_CL" ],
             "destinations": [ "scWorkspace" ],
-            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend risk_score = toint(risk_score) | extend total_breaches = toint(total_breaches) | extend total_infostealers = toint(total_infostealers) | extend total_credentials = toint(total_credentials) | extend plaintext_passwords = toint(plaintext_passwords) | extend hashed_passwords = toint(hashed_passwords) | extend stolen_cookies = toint(stolen_cookies) | extend infected_devices = toint(infected_devices) | extend remediation_actions = iff(gettype(remediation_actions) == 'string', parse_json(remediation_actions), remediation_actions) | extend data_classes_exposed = iff(gettype(data_classes_exposed) == 'string', parse_json(data_classes_exposed), data_classes_exposed) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend timeline = iff(gettype(timeline) == 'string', parse_json(timeline), timeline)",
+            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend risk_score = toint(risk_score) | extend total_breaches = toint(total_breaches) | extend total_infostealers = toint(total_infostealers) | extend total_credentials = toint(total_credentials) | extend plaintext_passwords = toint(plaintext_passwords) | extend hashed_passwords = toint(hashed_passwords) | extend stolen_cookies = toint(stolen_cookies) | extend infected_devices = toint(infected_devices) | extend remediation_actions = iff(gettype(remediation_actions) == 'string', parse_json(remediation_actions), remediation_actions) | extend data_classes_exposed = iff(gettype(data_classes_exposed) == 'string', parse_json(data_classes_exposed), data_classes_exposed) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend exposure_timeline = iff(gettype(exposure_timeline) == 'string', parse_json(exposure_timeline), exposure_timeline)",
             "outputStream": "Custom-SpyCloudExposure_CL"
           },
           {
@@ -4643,6 +4643,13 @@
               "type": "securestring",
               "metadata": {
                 "description": "Dedicated API key for SpyCloud CAP (Credential Access Program) service."
+              }
+            },
+            "openAIApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "Optional OpenAI API key for GPT-4o analysis skills in Security Copilot integration."
               }
             },
             "enableCompass": {
@@ -6531,7 +6538,7 @@
       "location": "[parameters('deploymentRegion')]"
     },
     {
-      "condition": "[parameters('enableNotifications')]",
+      "condition": "[and(parameters('enableNotifications'), not(empty(parameters('notificationEmail'))))]",
       "type": "Microsoft.Insights/actionGroups",
       "apiVersion": "2023-01-01",
       "name": "[variables('actionGroupName')]",
@@ -6552,7 +6559,7 @@
       "dependsOn": []
     },
     {
-      "condition": "[parameters('enableNotifications')]",
+      "condition": "[and(parameters('enableNotifications'), not(empty(parameters('notificationEmail'))))]",
       "type": "Microsoft.Insights/scheduledQueryRules",
       "apiVersion": "2023-03-15-preview",
       "name": "[variables('healthAlertName')]",
@@ -10041,6 +10048,7 @@
       "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-VIP-Watchlist')]",
       "location": "[parameters('deploymentRegion')]",
+      "etag": "*",
       "condition": "[parameters('enableAnalyticsRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -10521,6 +10529,7 @@
       "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-IOC-Blocklist')]",
       "location": "[parameters('deploymentRegion')]",
+      "etag": "*",
       "condition": "[parameters('enableAnalyticsRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -10541,6 +10550,7 @@
       "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-Approved-Domains')]",
       "location": "[parameters('deploymentRegion')]",
+      "etag": "*",
       "condition": "[parameters('enableAnalyticsRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -10561,6 +10571,7 @@
       "apiVersion": "2023-02-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-HighValue-Assets')]",
       "location": "[parameters('deploymentRegion')]",
+      "etag": "*",
       "condition": "[parameters('enableAnalyticsRule')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
