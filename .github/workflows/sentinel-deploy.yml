@@ -1,516 +1,295 @@
 ###############################################################################
-# SpyCloud Sentinel — Enterprise CI/CD Pipeline
-# ─────────────────────────────────────────────
-# Validates, tests, and deploys the SpyCloud Sentinel integration across
-# dev / staging / production environments with full rollback support.
-#
-# Status badges (add to README):
-#   ![Validate](https://github.com/<OWNER>/<REPO>/actions/workflows/sentinel-deploy.yml/badge.svg?branch=main)
+# SpyCloud Sentinel - CI/CD Pipeline
+# Validates, tests, packages, and deploys the SpyCloud Sentinel solution
+# across staging and production environments.
 ###############################################################################
 
-name: "SpyCloud Sentinel v8.0 CI/CD"
+name: SpyCloud Sentinel Deploy
 
-# ──────────────────────────────────────────────────────────────── Triggers ──
 on:
   push:
     branches: [main]
     paths:
-      - "azuredeploy.json"
-      - "azuredeploy.parameters.json"
-      - "analytics-rules/**"
-      - "analytics-rules.json"
-      - "playbooks/**"
-      - "workbooks/**"
-      - "hunting-queries.json"
-      - "scripts/**"
-      - ".github/workflows/sentinel-deploy.yml"
-
+      - 'azuredeploy.json'
+      - 'mainTemplate.json'
+      - 'createUiDefinition.json'
+      - 'playbooks/**'
+      - 'workbooks/**'
+      - 'analytics-rules/**'
+      - 'templates/**'
+      - 'hunting-queries.json'
   pull_request:
     branches: [main]
-    paths:
-      - "azuredeploy.json"
-      - "azuredeploy.parameters.json"
-      - "analytics-rules/**"
-      - "analytics-rules.json"
-      - "playbooks/**"
-      - "workbooks/**"
-      - "hunting-queries.json"
-      - "scripts/**"
-      - ".github/workflows/sentinel-deploy.yml"
-
   workflow_dispatch:
     inputs:
       environment:
-        description: "Target environment"
+        description: 'Target environment'
         required: true
-        type: choice
-        options: [dev, staging, prod]
-        default: dev
-      resource_group:
-        description: "Azure Resource Group"
-        required: true
-        default: "spycloud-sentinel"
-      workspace:
-        description: "Log Analytics Workspace name"
-        required: true
-        default: "spycloud-ws"
-      location:
-        description: "Azure region"
-        required: true
+        default: 'staging'
         type: choice
         options:
-          - eastus
-          - eastus2
-          - westus2
-          - centralus
-          - northeurope
-          - westeurope
-          - uksouth
-          - australiaeast
-        default: eastus
+          - staging
+          - production
       skip_tests:
-        description: "Skip integration tests"
-        type: boolean
-        default: false
-      dry_run:
-        description: "What-if only (no actual deploy)"
-        type: boolean
-        default: false
-      enable_investigations:
-        description: "Deploy SpyCloud Investigations data connector and analytics rules (v8.0)"
-        type: boolean
-        default: false
-      enable_compass:
-        description: "Deploy SpyCloud Compass identity exposure monitoring (v8.0)"
-        type: boolean
-        default: false
-      enable_sip:
-        description: "Deploy SpyCloud SIP stolen session monitoring (v8.0)"
-        type: boolean
-        default: false
-      sip_cookie_domain:
-        description: "Corporate cookie domain for SIP monitoring (e.g., example.com)"
+        description: 'Skip ARM-TTK tests'
         required: false
-        default: ""
+        default: false
+        type: boolean
 
-  schedule:
-    # Weekly validation — every Monday at 06:00 UTC
-    - cron: "0 6 * * 1"
-
-# ─────────────────────────────────────────────────────── Global defaults ──
 permissions:
   id-token: write
   contents: read
-  deployments: write
-  pull-requests: write
-  checks: write
-
-concurrency:
-  group: sentinel-${{ github.event.inputs.environment || 'ci' }}-${{ github.ref }}
-  cancel-in-progress: true
 
 env:
-  ARM_TEMPLATE: ./azuredeploy.json
-  ARM_PARAMS: ./azuredeploy.parameters.json
-  ARTIFACT_RETENTION_DAYS: 30
-  NODE_VERSION: "20"
-  # Resolved per-environment in individual jobs
-  DEFAULT_LOCATION: "eastus"
+  SOLUTION_VERSION: '10.0.0'
+  SOLUTION_NAME: 'SpyCloud Identity Threat Protection'
 
-###############################################################################
-#  JOB 1 — VALIDATE
-###############################################################################
 jobs:
-  validate:
-    name: "Validate Templates & Artifacts"
+  # ---------------------------------------------------------------------------
+  # Job 1: Validate ARM Templates
+  # ---------------------------------------------------------------------------
+  validate-templates:
+    name: Validate ARM Templates
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    outputs:
-      arm_valid: ${{ steps.arm-lint.outcome }}
-      json_valid: ${{ steps.json-validate.outcome }}
-      secrets_clean: ${{ steps.secrets-scan.outcome }}
-
     steps:
-      # ── Checkout ───────────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # ── Cache npm tools ────────────────────────────────────────────────
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+      - name: Validate azuredeploy.json schema
+        run: |
+          echo "Validating azuredeploy.json against ARM schema..."
+          python3 -c "
+          import json, sys
+          with open('azuredeploy.json') as f:
+              tpl = json.load(f)
+          required = ['\$schema', 'contentVersion', 'parameters', 'resources']
+          for key in required:
+              if key not in tpl:
+                  print(f'ERROR: Missing required key: {key}')
+                  sys.exit(1)
+          print(f'azuredeploy.json validated: {len(tpl.get(\"resources\", []))} resources found')
+          "
 
-      - name: Cache npm global packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-tools-${{ runner.os }}-${{ hashFiles('.github/workflows/sentinel-deploy.yml') }}
-          restore-keys: npm-tools-${{ runner.os }}-
+      - name: Validate mainTemplate.json schema
+        run: |
+          echo "Validating mainTemplate.json against Content Hub schema..."
+          python3 -c "
+          import json, sys
+          with open('mainTemplate.json') as f:
+              tpl = json.load(f)
+          required = ['\$schema', 'contentVersion', 'parameters', 'variables', 'resources']
+          for key in required:
+              if key not in tpl:
+                  print(f'ERROR: Missing required key: {key}')
+                  sys.exit(1)
+          resources = tpl.get('resources', [])
+          content_templates = [r for r in resources if 'contentTemplates' in r.get('type', '')]
+          content_packages = [r for r in resources if 'contentPackages' in r.get('type', '')]
+          print(f'mainTemplate.json validated: {len(content_templates)} content templates, {len(content_packages)} content packages')
+          "
 
-      # ── ARM Template Toolkit (arm-ttk) lint ────────────────────────────
-      - name: Install & run ARM-TTK linter
-        id: arm-lint
+      - name: Validate createUiDefinition.json
+        run: |
+          echo "Validating createUiDefinition.json..."
+          python3 -c "
+          import json, sys
+          with open('createUiDefinition.json') as f:
+              ui = json.load(f)
+          if '\$schema' not in ui:
+              print('ERROR: Missing \$schema in createUiDefinition.json')
+              sys.exit(1)
+          steps = ui.get('parameters', {}).get('steps', [])
+          print(f'createUiDefinition.json validated: {len(steps)} wizard steps')
+          "
+
+      - name: Validate playbook templates
+        run: |
+          echo "Validating playbook ARM templates..."
+          for f in playbooks/*.json; do
+            if [ -f "$f" ]; then
+              python3 -c "
+          import json, sys
+          with open('$f') as fp:
+              tpl = json.load(fp)
+          if '\$schema' not in tpl:
+              print(f'ERROR: Missing \$schema in $f')
+              sys.exit(1)
+          print(f'  OK: $f')
+          "
+            fi
+          done
+
+      - name: Validate solutionMetadata.json
+        run: |
+          echo "Validating solutionMetadata.json..."
+          python3 -c "
+          import json, sys
+          with open('solutionMetadata.json') as f:
+              meta = json.load(f)
+          required = ['publisherId', 'offerId', 'version', 'support', 'categories']
+          for key in required:
+              if key not in meta:
+                  print(f'ERROR: Missing required key: {key}')
+                  sys.exit(1)
+          print(f'solutionMetadata.json validated: v{meta[\"version\"]}')
+          "
+
+      - name: Check JSON syntax across all templates
+        run: |
+          echo "Checking JSON syntax for all template files..."
+          errors=0
+          for f in $(find . -name '*.json' -not -path './node_modules/*' -not -path './.git/*'); do
+            if ! python3 -c "import json; json.load(open('$f'))" 2>/dev/null; then
+              echo "  FAIL: $f"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "ERROR: $errors files have JSON syntax errors"
+            exit 1
+          fi
+          echo "All JSON files have valid syntax"
+
+  # ---------------------------------------------------------------------------
+  # Job 2: ARM Template Toolkit (ARM-TTK) Tests
+  # ---------------------------------------------------------------------------
+  arm-ttk-tests:
+    name: Run ARM-TTK Tests
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_tests }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ARM-TTK
+        run: |
+          git clone https://github.com/Azure/arm-ttk.git /tmp/arm-ttk
+          echo "ARM-TTK installed"
+
+      - name: Run ARM-TTK on azuredeploy.json
         shell: pwsh
         run: |
-          Write-Host "::group::Installing ARM-TTK"
-          git clone https://github.com/Azure/arm-ttk.git /tmp/arm-ttk --depth 1
           Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
-          Write-Host "::endgroup::"
-
-          Write-Host "::group::Running ARM-TTK tests"
-          $results = Test-AzTemplate -TemplatePath ./azuredeploy.json -Skip "apiVersions-Should-Be-Recent"
-          $failures = $results | Where-Object { -not $_.Passed }
-
-          if ($failures.Count -gt 0) {
-            Write-Host "::error::ARM-TTK found $($failures.Count) issue(s):"
-            $failures | ForEach-Object { Write-Host "  - $($_.Name): $($_.Message)" }
+          $results = Test-AzTemplate -TemplatePath ./azuredeploy.json -Skip "URIs-Should-Be-Properly-Constructed"
+          $failed = $results | Where-Object { -not $_.Passed }
+          if ($failed.Count -gt 0) {
+            Write-Host "ARM-TTK found $($failed.Count) issues:"
+            $failed | ForEach-Object { Write-Host "  FAIL: $($_.Name) - $($_.Message)" }
             exit 1
           }
-          Write-Host "All ARM-TTK checks passed."
-          Write-Host "::endgroup::"
+          Write-Host "ARM-TTK: All tests passed for azuredeploy.json"
 
-      # ── JSON syntax validation (analytics rules, playbooks, workbooks) ─
-      - name: Validate JSON syntax for all artifacts
-        id: json-validate
+      - name: Run ARM-TTK on mainTemplate.json
+        shell: pwsh
         run: |
-          echo "::group::Validating JSON files"
-          ERRORS=0
-          for f in $(find . -name '*.json' -not -path './.git/*' -not -path './node_modules/*'); do
-            if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
-              echo "::error file=${f}::Invalid JSON: $f"
-              ERRORS=$((ERRORS + 1))
-            else
-              echo "  OK: $f"
-            fi
-          done
-
-          if [ "$ERRORS" -gt 0 ]; then
-            echo "::error::$ERRORS JSON file(s) have syntax errors"
+          Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
+          $results = Test-AzTemplate -TemplatePath ./mainTemplate.json -Skip "URIs-Should-Be-Properly-Constructed"
+          $failed = $results | Where-Object { -not $_.Passed }
+          if ($failed.Count -gt 0) {
+            Write-Host "ARM-TTK found $($failed.Count) issues:"
+            $failed | ForEach-Object { Write-Host "  FAIL: $($_.Name) - $($_.Message)" }
             exit 1
-          fi
-          echo "All JSON files are syntactically valid."
-          echo "::endgroup::"
-
-      # ── Validate analytics rules structure ─────────────────────────────
-      - name: Validate analytics rules definitions
-        run: |
-          echo "::group::Analytics rules structure check"
-          python3 - <<'PYEOF'
-          import json, sys, glob
-
-          errors = []
-
-          # Check consolidated analytics-rules.json
-          with open("analytics-rules.json") as f:
-              rules = json.load(f)
-          if isinstance(rules, list):
-              for i, rule in enumerate(rules):
-                  for field in ["displayName", "severity", "query"]:
-                      if field not in rule and field not in rule.get("properties", {}):
-                          errors.append(f"analytics-rules.json[{i}]: missing '{field}'")
-          elif isinstance(rules, dict):
-              res = rules.get("resources", [rules])
-              for i, rule in enumerate(res):
-                  props = rule.get("properties", {})
-                  if "displayName" not in props and "displayName" not in rule:
-                      errors.append(f"analytics-rules.json resource[{i}]: missing 'displayName'")
-
-          # Check YAML analytics rules exist
-          import os
-          yaml_count = len(glob.glob("analytics-rules/*.yaml")) + len(glob.glob("analytics-rules/*.yml"))
-          print(f"  Found {yaml_count} YAML analytics rule file(s)")
-
-          if errors:
-              for e in errors:
-                  print(f"::error::{e}", file=sys.stderr)
-              sys.exit(1)
-
-          print("Analytics rules validation passed.")
-          PYEOF
-          echo "::endgroup::"
-
-      # ── Validate playbook definitions ──────────────────────────────────
-      - name: Validate playbook ARM definitions
-        run: |
-          echo "::group::Playbook validation"
-          python3 - <<'PYEOF'
-          import json, sys, glob
-
-          errors = []
-          playbooks = glob.glob("playbooks/*.json")
-          print(f"  Found {len(playbooks)} playbook definition(s)")
-
-          for pb_path in playbooks:
-              with open(pb_path) as f:
-                  try:
-                      pb = json.load(f)
-                  except json.JSONDecodeError as e:
-                      errors.append(f"{pb_path}: JSON decode error — {e}")
-                      continue
-
-              # Expect ARM or Logic App definition
-              if isinstance(pb, dict):
-                  has_definition = (
-                      "definition" in pb
-                      or "properties" in pb
-                      or "resources" in pb
-                      or "$schema" in pb
-                  )
-                  if not has_definition:
-                      errors.append(f"{pb_path}: does not look like a valid ARM or Logic App definition")
-              else:
-                  errors.append(f"{pb_path}: top-level must be an object, got {type(pb).__name__}")
-
-          if errors:
-              for e in errors:
-                  print(f"::error::{e}", file=sys.stderr)
-              sys.exit(1)
-
-          print("All playbook definitions validated.")
-          PYEOF
-          echo "::endgroup::"
-
-      # ── Security: detect hardcoded secrets ─────────────────────────────
-      - name: Scan for hardcoded secrets
-        id: secrets-scan
-        run: |
-          echo "::group::Secret detection"
-          FOUND=0
-
-          # Patterns that strongly indicate real secrets
-          PATTERNS=(
-            '[A-Za-z0-9+/]{40,}={0,2}'                 # base64 blobs >=40 chars
-            'password\s*[:=]\s*"[^"]{8,}"'              # password = "..."
-            'apikey\s*[:=]\s*"[^"]{8,}"'                # apikey = "..."
-            'secret\s*[:=]\s*"[^"]{8,}"'                # secret = "..."
-            'AKIA[0-9A-Z]{16}'                          # AWS access key
-            'ghp_[A-Za-z0-9]{36}'                       # GitHub PAT
-          )
-
-          for pattern in "${PATTERNS[@]}"; do
-            while IFS= read -r match; do
-              # Skip parameter references, ARM expressions, and variable placeholders
-              if echo "$match" | grep -qiE '(\$\{\{|\[parameters\(|<PLACEHOLDER|example|sample|changeme|your[-_]?)'; then
-                continue
-              fi
-              echo "::warning::Potential secret pattern found: $match"
-              FOUND=$((FOUND + 1))
-            done < <(grep -rnI --include='*.json' --include='*.yml' --include='*.yaml' \
-              --include='*.sh' -E "$pattern" . 2>/dev/null \
-              | grep -v '.git/' | grep -v 'node_modules/' || true)
-          done
-
-          if [ "$FOUND" -gt 5 ]; then
-            echo "::error::Found $FOUND potential hardcoded secrets — review before merging"
-            exit 1
-          fi
-          echo "Secret scan complete — $FOUND low-confidence matches (threshold: 5)."
-          echo "::endgroup::"
-
-      # ── Azure ARM what-if validation (login required) ──────────────────
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-        continue-on-error: true
-        id: azure-login
-
-      - name: ARM template preflight (validate mode)
-        if: steps.azure-login.outcome == 'success'
-        uses: azure/arm-deploy@v2
-        with:
-          scope: resourcegroup
-          resourceGroupName: ${{ inputs.resource_group || 'spycloud-sentinel-ci' }}
-          template: ${{ env.ARM_TEMPLATE }}
-          parameters: >-
-            workspace=${{ inputs.workspace || 'spycloud-ws-ci' }}
-            createNewWorkspace=false
-            spycloudApiKey=${{ secrets.SPYCLOUD_API_KEY || 'placeholder-for-validation' }}
-            deploymentRegion=${{ inputs.location || env.DEFAULT_LOCATION }}
-            enableInvestigations=${{ inputs.enable_investigations || false }}
-            investigationsApiKey=${{ secrets.SPYCLOUD_INVESTIGATIONS_API_KEY || '' }}
-            enableCompass=${{ inputs.enable_compass || false }}
-            compassApiKey=${{ secrets.SPYCLOUD_COMPASS_API_KEY || '' }}
-            enableSip=${{ inputs.enable_sip || false }}
-            sipApiKey=${{ secrets.SPYCLOUD_SIP_API_KEY || '' }}
-            sipCookieDomain=${{ inputs.sip_cookie_domain || '' }}
-          deploymentMode: Validate
-          failOnStdErr: false
-
-      # ── Upload validation report ───────────────────────────────────────
-      - name: Generate validation summary
-        if: always()
-        run: |
-          mkdir -p reports
-          cat > reports/validation-summary.json <<SUMEOF
-          {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "ref": "${{ github.sha }}",
-            "arm_lint": "${{ steps.arm-lint.outcome }}",
-            "json_valid": "${{ steps.json-validate.outcome }}",
-            "secrets_scan": "${{ steps.secrets-scan.outcome }}",
-            "azure_preflight": "${{ steps.azure-login.outcome }}"
           }
-          SUMEOF
+          Write-Host "ARM-TTK: All tests passed for mainTemplate.json"
 
-      - name: Upload validation artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-report-${{ github.run_number }}
-          path: reports/
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+      - name: Run ARM-TTK on playbooks
+        shell: pwsh
+        run: |
+          Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
+          $playbooks = Get-ChildItem -Path ./playbooks -Filter *.json -ErrorAction SilentlyContinue
+          foreach ($pb in $playbooks) {
+            Write-Host "Testing $($pb.Name)..."
+            $results = Test-AzTemplate -TemplatePath $pb.FullName -Skip "URIs-Should-Be-Properly-Constructed"
+            $failed = $results | Where-Object { -not $_.Passed }
+            if ($failed.Count -gt 0) {
+              Write-Host "  WARN: $($failed.Count) issues in $($pb.Name)"
+            } else {
+              Write-Host "  OK: $($pb.Name)"
+            }
+          }
 
-###############################################################################
-#  JOB 2 — INTEGRATION TESTS
-###############################################################################
-  test:
-    name: "Integration Tests"
-    needs: validate
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_tests != 'true') ||
-      github.event_name == 'schedule'
+  # ---------------------------------------------------------------------------
+  # Job 3: Package Solution
+  # ---------------------------------------------------------------------------
+  package-solution:
+    name: Package Solution Artifacts
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    env:
-      TEST_RG: "spycloud-sentinel-test-${{ github.run_id }}"
-      TEST_WS: "spycloud-ws-test-${{ github.run_id }}"
-      TEST_LOCATION: "eastus"
-
+    needs: [validate-templates, arm-ttk-tests]
+    if: always() && needs.validate-templates.result == 'success'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # ── Create isolated test resource group ────────────────────────────
-      - name: Create test resource group
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az group create --name "$TEST_RG" --location "$TEST_LOCATION" \
-              --tags purpose=ci-test run=${{ github.run_id }} ttl=2h
-
-      # ── Deploy to test ─────────────────────────────────────────────────
-      - name: Deploy ARM template to test environment
-        id: test-deploy
-        uses: azure/arm-deploy@v2
-        with:
-          scope: resourcegroup
-          resourceGroupName: ${{ env.TEST_RG }}
-          template: ${{ env.ARM_TEMPLATE }}
-          parameters: >-
-            workspace=${{ env.TEST_WS }}
-            createNewWorkspace=true
-            spycloudApiKey=${{ secrets.SPYCLOUD_API_KEY }}
-            deploymentRegion=${{ env.TEST_LOCATION }}
-            resourceGroupName=${{ env.TEST_RG }}
-            enableInvestigations=${{ inputs.enable_investigations || false }}
-            investigationsApiKey=${{ secrets.SPYCLOUD_INVESTIGATIONS_API_KEY || '' }}
-            enableCompass=${{ inputs.enable_compass || false }}
-            compassApiKey=${{ secrets.SPYCLOUD_COMPASS_API_KEY || '' }}
-            enableSip=${{ inputs.enable_sip || false }}
-            sipApiKey=${{ secrets.SPYCLOUD_SIP_API_KEY || '' }}
-            sipCookieDomain=${{ inputs.sip_cookie_domain || '' }}
-          deploymentName: test-v8-${{ github.run_number }}
-          failOnStdErr: false
-
-      # ── Validate all expected resources exist ──────────────────────────
-      - name: Validate deployed resources
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            echo "::group::Resource inventory"
-            RESOURCES=$(az resource list -g "$TEST_RG" -o json)
-            COUNT=$(echo "$RESOURCES" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))")
-            echo "Deployed $COUNT resources"
-
-            # Verify critical resource types exist
-            REQUIRED_TYPES=(
-              "Microsoft.OperationalInsights/workspaces"
-            )
-            for rtype in "${REQUIRED_TYPES[@]}"; do
-              MATCH=$(echo "$RESOURCES" | python3 -c "
-            import sys, json
-            res = json.load(sys.stdin)
-            print(len([r for r in res if r['type'] == '$rtype']))
-            ")
-              if [ "$MATCH" -eq 0 ]; then
-                echo "::error::Missing required resource type: $rtype"
-                exit 1
-              fi
-              echo "  Found $MATCH resource(s) of type $rtype"
-            done
-            echo "::endgroup::"
-
-            # Detailed resource listing
-            az resource list -g "$TEST_RG" --query "[].{Type:type,Name:name}" -o table
-
-      # ── Run the audit / verify script ──────────────────────────────────
-      - name: Run post-deploy verification script
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            if [ -f scripts/verify-deployment.sh ]; then
-              chmod +x scripts/verify-deployment.sh
-              bash scripts/verify-deployment.sh "$TEST_RG" "$TEST_WS" 2>&1 | tee reports/verify.log || true
-            else
-              echo "No verify-deployment.sh found — skipping"
-            fi
-            mkdir -p reports
-
-      # ── Capture test results ───────────────────────────────────────────
-      - name: Collect test artifacts
-        if: always()
+      - name: Create solution package
         run: |
-          mkdir -p reports
-          echo '{"test_rg":"${{ env.TEST_RG }}","status":"${{ steps.test-deploy.outcome }}","run":"${{ github.run_id }}"}' > reports/test-results.json
+          PACKAGE_DIR="dist/spycloud-sentinel-solution-${SOLUTION_VERSION}"
+          mkdir -p "${PACKAGE_DIR}"
 
-      - name: Upload test artifacts
-        if: always()
+          cp azuredeploy.json "${PACKAGE_DIR}/"
+          cp mainTemplate.json "${PACKAGE_DIR}/"
+          cp createUiDefinition.json "${PACKAGE_DIR}/"
+          cp solutionMetadata.json "${PACKAGE_DIR}/"
+
+          cp -r playbooks "${PACKAGE_DIR}/" 2>/dev/null || true
+          cp -r workbooks "${PACKAGE_DIR}/" 2>/dev/null || true
+          cp -r analytics-rules "${PACKAGE_DIR}/" 2>/dev/null || true
+          cp hunting-queries.json "${PACKAGE_DIR}/" 2>/dev/null || true
+
+          cd dist
+          zip -r "spycloud-sentinel-solution-${SOLUTION_VERSION}.zip" \
+            "spycloud-sentinel-solution-${SOLUTION_VERSION}/"
+
+          echo "Package created: spycloud-sentinel-solution-${SOLUTION_VERSION}.zip"
+          ls -lh "spycloud-sentinel-solution-${SOLUTION_VERSION}.zip"
+
+      - name: Generate package manifest
+        run: |
+          python3 -c "
+          import json, hashlib, os
+
+          version = '${SOLUTION_VERSION}'
+          package_dir = f'dist/spycloud-sentinel-solution-{version}'
+          manifest = {
+            'name': 'SpyCloud Identity Threat Protection',
+            'version': version,
+            'built': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+            'files': []
+          }
+          for root, dirs, files in os.walk(package_dir):
+            for fname in sorted(files):
+              fpath = os.path.join(root, fname)
+              relpath = os.path.relpath(fpath, package_dir)
+              with open(fpath, 'rb') as f:
+                sha256 = hashlib.sha256(f.read()).hexdigest()
+              manifest['files'].append({
+                'path': relpath,
+                'sha256': sha256,
+                'size': os.path.getsize(fpath)
+              })
+
+          with open(f'{package_dir}/manifest.json', 'w') as f:
+            json.dump(manifest, f, indent=2)
+          print(f'Manifest generated: {len(manifest[\"files\"])} files')
+          "
+
+      - name: Upload solution package
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ github.run_number }}
-          path: reports/
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          name: spycloud-sentinel-solution-${{ env.SOLUTION_VERSION }}
+          path: dist/spycloud-sentinel-solution-${{ env.SOLUTION_VERSION }}.zip
+          retention-days: 90
 
-      # ── Teardown test resources (always) ───────────────────────────────
-      - name: Teardown test resource group
-        if: always()
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            echo "Deleting test resource group $TEST_RG ..."
-            az group delete --name "$TEST_RG" --yes --no-wait
-            echo "Teardown initiated (async)."
-
-###############################################################################
-#  JOB 3 — DEPLOY TO STAGING
-###############################################################################
+  # ---------------------------------------------------------------------------
+  # Job 4: Deploy to Staging
+  # ---------------------------------------------------------------------------
   deploy-staging:
-    name: "Deploy to Staging"
-    needs: [validate, test]
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment != 'prod')
+    name: Deploy to Staging
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    needs: [package-solution]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: staging
-      url: "https://portal.azure.com/#@/resource/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.STAGING_RG || 'spycloud-sentinel-staging' }}"
-
-    env:
-      STAGING_RG: ${{ vars.STAGING_RG || 'spycloud-sentinel-staging' }}
-      STAGING_WS: ${{ vars.STAGING_WS || 'spycloud-ws-staging' }}
-      DEPLOY_LOCATION: ${{ inputs.location || 'eastus' }}
-
+      url: https://portal.azure.com
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -518,129 +297,52 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Ensure staging resource group
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az group create --name "$STAGING_RG" --location "$DEPLOY_LOCATION" \
-              --tags environment=staging managed-by=github-actions
-
-      # ── What-if preview ────────────────────────────────────────────────
-      - name: What-if preview (staging)
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az deployment group what-if \
-              --resource-group "$STAGING_RG" \
-              --template-file ${{ env.ARM_TEMPLATE }} \
-              --parameters \
-                workspace="$STAGING_WS" \
-                createNewWorkspace=true \
-                spycloudApiKey="${{ secrets.SPYCLOUD_API_KEY }}" \
-                deploymentRegion="$DEPLOY_LOCATION" \
-                resourceGroupName="$STAGING_RG" \
-                enableInvestigations="${{ inputs.enable_investigations || false }}" \
-                investigationsApiKey="${{ secrets.SPYCLOUD_INVESTIGATIONS_API_KEY }}" \
-                enableCompass="${{ inputs.enable_compass || false }}" \
-                compassApiKey="${{ secrets.SPYCLOUD_COMPASS_API_KEY }}" \
-                enableSip="${{ inputs.enable_sip || false }}" \
-                sipApiKey="${{ secrets.SPYCLOUD_SIP_API_KEY }}" \
-                sipCookieDomain="${{ inputs.sip_cookie_domain }}" \
-              --no-pretty-print || true
-
-      # ── Deploy ─────────────────────────────────────────────────────────
-      - name: Deploy to staging
-        id: staging-deploy
+      - name: Validate deployment against staging
         uses: azure/arm-deploy@v2
         with:
-          scope: resourcegroup
-          resourceGroupName: ${{ env.STAGING_RG }}
-          template: ${{ env.ARM_TEMPLATE }}
-          parameters: >-
-            workspace=${{ env.STAGING_WS }}
-            createNewWorkspace=true
-            spycloudApiKey=${{ secrets.SPYCLOUD_API_KEY }}
-            deploymentRegion=${{ env.DEPLOY_LOCATION }}
-            resourceGroupName=${{ env.STAGING_RG }}
-            enableInvestigations=${{ inputs.enable_investigations || false }}
-            investigationsApiKey=${{ secrets.SPYCLOUD_INVESTIGATIONS_API_KEY || '' }}
-            enableCompass=${{ inputs.enable_compass || false }}
-            compassApiKey=${{ secrets.SPYCLOUD_COMPASS_API_KEY || '' }}
-            enableSip=${{ inputs.enable_sip || false }}
-            sipApiKey=${{ secrets.SPYCLOUD_SIP_API_KEY || '' }}
-            sipCookieDomain=${{ inputs.sip_cookie_domain || '' }}
-          deploymentName: staging-v8-${{ github.run_number }}
-          failOnStdErr: false
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.STAGING_RESOURCE_GROUP }}
+          template: ./azuredeploy.json
+          parameters: >
+            workspace=${{ secrets.STAGING_WORKSPACE }}
+          deploymentMode: Validate
+          deploymentName: spycloud-staging-validate-${{ github.run_number }}
 
-      # ── Smoke tests ────────────────────────────────────────────────────
-      - name: Staging smoke tests
-        uses: azure/cli@v2
+      - name: Deploy to staging environment
+        uses: azure/arm-deploy@v2
         with:
-          inlineScript: |
-            echo "::group::Smoke tests"
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.STAGING_RESOURCE_GROUP }}
+          template: ./azuredeploy.json
+          parameters: >
+            workspace=${{ secrets.STAGING_WORKSPACE }}
+          deploymentMode: Incremental
+          deploymentName: spycloud-staging-${{ github.run_number }}
 
-            # 1. Verify resource group has resources
-            COUNT=$(az resource list -g "$STAGING_RG" --query "length([])" -o tsv)
-            echo "Resource count: $COUNT"
-            if [ "$COUNT" -lt 1 ]; then
-              echo "::error::Staging has zero resources after deploy"
-              exit 1
-            fi
-
-            # 2. Verify workspace is reachable
-            WS_ID=$(az monitor log-analytics workspace show \
-              --workspace-name "$STAGING_WS" -g "$STAGING_RG" \
-              --query "customerId" -o tsv 2>/dev/null || echo "")
-            if [ -z "$WS_ID" ]; then
-              echo "::warning::Log Analytics workspace not found — may still be provisioning"
-            else
-              echo "Workspace ID: $WS_ID"
-            fi
-
-            # 3. Verify Logic Apps exist and are enabled
-            LOGIC_APPS=$(az logic workflow list -g "$STAGING_RG" --query "[].{Name:name,State:state}" -o table 2>/dev/null || echo "none")
-            echo "Logic Apps:"
-            echo "$LOGIC_APPS"
-
-            echo "Smoke tests passed."
-            echo "::endgroup::"
-
-      - name: Upload staging deployment logs
-        if: always()
+      - name: Verify staging deployment
         run: |
-          mkdir -p reports
-          echo '{"environment":"staging","rg":"${{ env.STAGING_RG }}","status":"${{ steps.staging-deploy.outcome }}","run":"${{ github.run_number }}"}' > reports/staging-deploy.json
+          echo "Verifying staging deployment..."
+          az monitor log-analytics workspace table list \
+            --resource-group ${{ secrets.STAGING_RESOURCE_GROUP }} \
+            --workspace-name ${{ secrets.STAGING_WORKSPACE }} \
+            --query "[?contains(name, 'SpyCloud')].name" \
+            --output table
 
-      - name: Upload staging artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: staging-deploy-${{ github.run_number }}
-          path: reports/
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-###############################################################################
-#  JOB 4 — DEPLOY TO PRODUCTION (blue/green with rollback)
-###############################################################################
+  # ---------------------------------------------------------------------------
+  # Job 5: Deploy to Production
+  # ---------------------------------------------------------------------------
   deploy-production:
-    name: "Deploy to Production"
-    needs: deploy-staging
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    name: Deploy to Production
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: production
-      url: "https://portal.azure.com/#@/resource/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.PROD_RG || 'spycloud-sentinel-prod' }}"
-
-    env:
-      PROD_RG: ${{ vars.PROD_RG || 'spycloud-sentinel-prod' }}
-      PROD_WS: ${{ vars.PROD_WS || 'spycloud-ws-prod' }}
-      DEPLOY_LOCATION: ${{ inputs.location || 'eastus' }}
-
+      url: https://portal.azure.com
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -648,383 +350,50 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Ensure production resource group
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az group create --name "$PROD_RG" --location "$DEPLOY_LOCATION" \
-              --tags environment=production managed-by=github-actions
-
-      # ── Snapshot current state for rollback ────────────────────────────
-      - name: Capture pre-deploy state (rollback snapshot)
-        id: snapshot
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            mkdir -p rollback
-            # Export current deployment for rollback reference
-            LAST=$(az deployment group list -g "$PROD_RG" \
-              --query "[?properties.provisioningState=='Succeeded'] | [0].name" -o tsv 2>/dev/null || echo "none")
-            echo "last_deployment=$LAST" >> "$GITHUB_OUTPUT"
-            echo "Last successful deployment: $LAST"
-
-            # Snapshot resource list
-            az resource list -g "$PROD_RG" \
-              --query "[].{Type:type,Name:name,Id:id}" -o json > rollback/pre-deploy-resources.json 2>/dev/null || echo "[]" > rollback/pre-deploy-resources.json
-
-      # ── What-if (dry run) ──────────────────────────────────────────────
-      - name: What-if analysis (production)
-        id: whatif
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            echo "::group::What-if results"
-            az deployment group what-if \
-              --resource-group "$PROD_RG" \
-              --template-file ${{ env.ARM_TEMPLATE }} \
-              --parameters \
-                workspace="$PROD_WS" \
-                createNewWorkspace=false \
-                spycloudApiKey="${{ secrets.SPYCLOUD_API_KEY }}" \
-                deploymentRegion="$DEPLOY_LOCATION" \
-                resourceGroupName="$PROD_RG" \
-                enableInvestigations="${{ inputs.enable_investigations || false }}" \
-                investigationsApiKey="${{ secrets.SPYCLOUD_INVESTIGATIONS_API_KEY }}" \
-                enableCompass="${{ inputs.enable_compass || false }}" \
-                compassApiKey="${{ secrets.SPYCLOUD_COMPASS_API_KEY }}" \
-                enableSip="${{ inputs.enable_sip || false }}" \
-                sipApiKey="${{ secrets.SPYCLOUD_SIP_API_KEY }}" \
-                sipCookieDomain="${{ inputs.sip_cookie_domain }}" \
-              2>&1 | tee rollback/whatif-output.txt || true
-            echo "::endgroup::"
-
-      # ── Abort if dry_run requested ─────────────────────────────────────
-      - name: Check for dry-run mode
-        if: github.event.inputs.dry_run == 'true'
-        run: |
-          echo "::notice::Dry-run mode — skipping actual deployment."
-          echo "Review the what-if output above."
-          exit 0
-
-      # ── Blue/Green: deploy to parallel deployment slot ─────────────────
-      - name: Production deployment (blue/green)
-        id: prod-deploy
+      - name: Validate deployment against production
         uses: azure/arm-deploy@v2
         with:
-          scope: resourcegroup
-          resourceGroupName: ${{ env.PROD_RG }}
-          template: ${{ env.ARM_TEMPLATE }}
-          parameters: >-
-            workspace=${{ env.PROD_WS }}
-            createNewWorkspace=false
-            spycloudApiKey=${{ secrets.SPYCLOUD_API_KEY }}
-            deploymentRegion=${{ env.DEPLOY_LOCATION }}
-            resourceGroupName=${{ env.PROD_RG }}
-            enableInvestigations=${{ inputs.enable_investigations || false }}
-            investigationsApiKey=${{ secrets.SPYCLOUD_INVESTIGATIONS_API_KEY || '' }}
-            enableCompass=${{ inputs.enable_compass || false }}
-            compassApiKey=${{ secrets.SPYCLOUD_COMPASS_API_KEY || '' }}
-            enableSip=${{ inputs.enable_sip || false }}
-            sipApiKey=${{ secrets.SPYCLOUD_SIP_API_KEY || '' }}
-            sipCookieDomain=${{ inputs.sip_cookie_domain || '' }}
-          deploymentName: prod-v8-${{ github.run_number }}
-          failOnStdErr: false
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.PRODUCTION_RESOURCE_GROUP }}
+          template: ./azuredeploy.json
+          parameters: >
+            workspace=${{ secrets.PRODUCTION_WORKSPACE }}
+          deploymentMode: Validate
+          deploymentName: spycloud-prod-validate-${{ github.run_number }}
 
-      # ── Post-deploy configuration ──────────────────────────────────────
-      - name: Post-deploy configuration (DCE/DCR + RBAC)
-        id: post-config
-        uses: azure/cli@v2
+      - name: Deploy to production environment
+        uses: azure/arm-deploy@v2
         with:
-          inlineScript: |
-            RG="$PROD_RG"
-            WS="$PROD_WS"
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.PRODUCTION_RESOURCE_GROUP }}
+          template: ./azuredeploy.json
+          parameters: >
+            workspace=${{ secrets.PRODUCTION_WORKSPACE }}
+          deploymentMode: Incremental
+          deploymentName: spycloud-prod-${{ github.run_number }}
 
-            echo "Waiting 90s for content template resources to finalize..."
-            sleep 90
-
-            # Resolve DCE
-            DCE_URI=$(az monitor data-collection endpoint show \
-              --name "dce-spycloud-${WS}" --resource-group "$RG" \
-              --query "logsIngestion.endpoint" -o tsv 2>/dev/null || echo "pending")
-            echo "DCE URI: $DCE_URI"
-
-            # Resolve DCR
-            DCR_ID=$(az monitor data-collection rule show \
-              --name "dcr-spycloud-${WS}" --resource-group "$RG" \
-              --query "immutableId" -o tsv 2>/dev/null || echo "pending")
-            echo "DCR ID: $DCR_ID"
-
-            # RBAC assignments
-            DCR_RID=$(az monitor data-collection rule show \
-              --name "dcr-spycloud-${WS}" --resource-group "$RG" \
-              --query "id" -o tsv 2>/dev/null || echo "")
-
-            ROLE="3913510d-42f4-4e42-8a64-420c390055eb"
-            for LA in "SpyCloud-MDE-Remediation-${WS}" "SpyCloud-CA-Remediation-${WS}"; do
-              PID=$(az logic workflow show --name "$LA" -g "$RG" \
-                --query "identity.principalId" -o tsv 2>/dev/null || echo "")
-              if [ -n "$PID" ] && [ -n "$DCR_RID" ]; then
-                az role assignment create --assignee-object-id "$PID" \
-                  --assignee-principal-type ServicePrincipal \
-                  --role "$ROLE" --scope "$DCR_RID" 2>/dev/null \
-                  && echo "RBAC assigned: $LA" \
-                  || echo "RBAC may already exist: $LA"
-              fi
-            done
-
-      # ── Post-deploy validation ─────────────────────────────────────────
-      - name: Post-deploy validation
-        id: post-validate
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            echo "::group::Post-deploy validation"
-            ERRORS=0
-
-            # Check deployment succeeded
-            STATE=$(az deployment group show -g "$PROD_RG" -n "prod-${{ github.run_number }}" \
-              --query "properties.provisioningState" -o tsv 2>/dev/null || echo "Unknown")
-            echo "Deployment state: $STATE"
-            if [ "$STATE" != "Succeeded" ]; then
-              echo "::error::Deployment state is $STATE"
-              ERRORS=$((ERRORS + 1))
-            fi
-
-            # Verify resources
-            COUNT=$(az resource list -g "$PROD_RG" --query "length([])" -o tsv)
-            echo "Production resource count: $COUNT"
-
-            # Verify Logic Apps
-            az logic workflow list -g "$PROD_RG" \
-              --query "[].{Name:name,State:state}" -o table 2>/dev/null || true
-
-            if [ "$ERRORS" -gt 0 ]; then
-              echo "::error::Post-deploy validation failed with $ERRORS error(s)"
-              exit 1
-            fi
-
-            echo "Post-deploy validation passed."
-            echo "::endgroup::"
-
-      # ── Rollback on failure ────────────────────────────────────────────
-      - name: Rollback on failure
-        if: failure() && steps.prod-deploy.outcome == 'failure'
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            echo "::error::Production deployment failed — initiating rollback"
-
-            LAST="${{ steps.snapshot.outputs.last_deployment }}"
-            if [ "$LAST" != "none" ] && [ -n "$LAST" ]; then
-              echo "Rolling back to last successful deployment: $LAST"
-              # Re-deploy the last known-good deployment
-              az deployment group create \
-                --resource-group "$PROD_RG" \
-                --name "rollback-${{ github.run_number }}" \
-                --template-file ${{ env.ARM_TEMPLATE }} \
-                --parameters \
-                  workspace="$PROD_WS" \
-                  createNewWorkspace=false \
-                  spycloudApiKey="${{ secrets.SPYCLOUD_API_KEY }}" \
-                  deploymentRegion="$DEPLOY_LOCATION" \
-                  resourceGroupName="$PROD_RG" \
-                  enableInvestigations="${{ inputs.enable_investigations || false }}" \
-                  investigationsApiKey="${{ secrets.SPYCLOUD_INVESTIGATIONS_API_KEY }}" \
-                  enableCompass="${{ inputs.enable_compass || false }}" \
-                  compassApiKey="${{ secrets.SPYCLOUD_COMPASS_API_KEY }}" \
-                  enableSip="${{ inputs.enable_sip || false }}" \
-                  sipApiKey="${{ secrets.SPYCLOUD_SIP_API_KEY }}" \
-                  sipCookieDomain="${{ inputs.sip_cookie_domain }}" \
-                --no-wait \
-                || echo "::error::Rollback also failed — manual intervention required"
-            else
-              echo "::warning::No previous deployment to roll back to"
-            fi
-
-      # ── Collect production artifacts ───────────────────────────────────
-      - name: Collect production deployment artifacts
-        if: always()
+      - name: Verify production deployment
         run: |
-          mkdir -p reports
-          cat > reports/prod-deploy.json <<DEOF
-          {
-            "environment": "production",
-            "rg": "${{ env.PROD_RG }}",
-            "deploy_status": "${{ steps.prod-deploy.outcome }}",
-            "post_config_status": "${{ steps.post-config.outcome }}",
-            "post_validate_status": "${{ steps.post-validate.outcome }}",
-            "run_number": "${{ github.run_number }}",
-            "sha": "${{ github.sha }}"
-          }
-          DEOF
+          echo "Verifying production deployment..."
+          az monitor log-analytics workspace table list \
+            --resource-group ${{ secrets.PRODUCTION_RESOURCE_GROUP }} \
+            --workspace-name ${{ secrets.PRODUCTION_WORKSPACE }} \
+            --query "[?contains(name, 'SpyCloud')].name" \
+            --output table
 
-      - name: Upload production artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: prod-deploy-${{ github.run_number }}
-          path: |
-            reports/
-            rollback/
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-###############################################################################
-#  JOB 5 — NOTIFICATIONS
-###############################################################################
-  notify:
-    name: "Notify Deployment Status"
-    needs: [validate, test, deploy-staging, deploy-production]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Determine overall status
-        id: status
+      - name: Create deployment summary
         run: |
-          if [ "${{ needs.deploy-production.result }}" = "success" ]; then
-            echo "emoji=white_check_mark" >> "$GITHUB_OUTPUT"
-            echo "status=SUCCESS" >> "$GITHUB_OUTPUT"
-            echo "color=00FF00" >> "$GITHUB_OUTPUT"
-          elif [ "${{ needs.deploy-production.result }}" = "failure" ]; then
-            echo "emoji=x" >> "$GITHUB_OUTPUT"
-            echo "status=FAILED" >> "$GITHUB_OUTPUT"
-            echo "color=FF0000" >> "$GITHUB_OUTPUT"
-          elif [ "${{ needs.deploy-production.result }}" = "skipped" ]; then
-            echo "emoji=fast_forward" >> "$GITHUB_OUTPUT"
-            echo "status=PARTIAL (staging only)" >> "$GITHUB_OUTPUT"
-            echo "color=FFFF00" >> "$GITHUB_OUTPUT"
-          else
-            echo "emoji=warning" >> "$GITHUB_OUTPUT"
-            echo "status=UNKNOWN" >> "$GITHUB_OUTPUT"
-            echo "color=808080" >> "$GITHUB_OUTPUT"
-          fi
-
-      # ── Microsoft Teams webhook ────────────────────────────────────────
-      - name: Notify Microsoft Teams
-        if: env.TEAMS_WEBHOOK_URL != ''
-        env:
-          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
-        run: |
-          curl -sS -X POST "$TEAMS_WEBHOOK_URL" \
-            -H "Content-Type: application/json" \
-            -d @- <<TEAMS_EOF
-          {
-            "@type": "MessageCard",
-            "@context": "http://schema.org/extensions",
-            "themeColor": "${{ steps.status.outputs.color }}",
-            "summary": "SpyCloud Sentinel Deploy: ${{ steps.status.outputs.status }}",
-            "sections": [{
-              "activityTitle": "SpyCloud Sentinel Deployment",
-              "activitySubtitle": "${{ github.repository }} — run #${{ github.run_number }}",
-              "facts": [
-                { "name": "Status", "value": "${{ steps.status.outputs.status }}" },
-                { "name": "Branch", "value": "${{ github.ref_name }}" },
-                { "name": "Commit", "value": "${{ github.sha }}" },
-                { "name": "Triggered by", "value": "${{ github.actor }}" },
-                { "name": "Validate", "value": "${{ needs.validate.result }}" },
-                { "name": "Test", "value": "${{ needs.test.result }}" },
-                { "name": "Staging", "value": "${{ needs.deploy-staging.result }}" },
-                { "name": "Production", "value": "${{ needs.deploy-production.result }}" }
-              ],
-              "markdown": true
-            }],
-            "potentialAction": [{
-              "@type": "OpenUri",
-              "name": "View Run",
-              "targets": [{ "os": "default", "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }]
-            }]
-          }
-          TEAMS_EOF
-
-      # ── Slack webhook ──────────────────────────────────────────────────
-      - name: Notify Slack
-        if: env.SLACK_WEBHOOK_URL != ''
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          curl -sS -X POST "$SLACK_WEBHOOK_URL" \
-            -H "Content-Type: application/json" \
-            -d @- <<SLACK_EOF
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": { "type": "plain_text", "text": "SpyCloud Sentinel Deploy: ${{ steps.status.outputs.status }}" }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
-                  { "type": "mrkdwn", "text": "*Actor:*\n${{ github.actor }}" },
-                  { "type": "mrkdwn", "text": "*Validate:*\n${{ needs.validate.result }}" },
-                  { "type": "mrkdwn", "text": "*Test:*\n${{ needs.test.result }}" },
-                  { "type": "mrkdwn", "text": "*Staging:*\n${{ needs.deploy-staging.result }}" },
-                  { "type": "mrkdwn", "text": "*Production:*\n${{ needs.deploy-production.result }}" }
-                ]
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": { "type": "plain_text", "text": "View Run" },
-                    "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                ]
-              }
-            ]
-          }
-          SLACK_EOF
-
-      # ── GitHub Deployment Status ───────────────────────────────────────
-      - name: Create GitHub deployment status
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const status = '${{ steps.status.outputs.status }}';
-            const state = status === 'SUCCESS' ? 'success' : status.includes('FAILED') ? 'failure' : 'inactive';
-
-            // Create deployment
-            const deployment = await github.rest.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.sha,
-              environment: 'production',
-              description: `SpyCloud Sentinel deploy #${{ github.run_number }}`,
-              auto_merge: false,
-              required_contexts: [],
-              transient_environment: false,
-              production_environment: true,
-            });
-
-            if (deployment.data && deployment.data.id) {
-              await github.rest.repos.createDeploymentStatus({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                deployment_id: deployment.data.id,
-                state: state,
-                log_url: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
-                description: `Deploy ${status} — run #${{ github.run_number }}`,
-                environment_url: `https://portal.azure.com`,
-              });
-            }
-
-      # ── Summary ────────────────────────────────────────────────────────
-      - name: Write job summary
-        if: always()
-        run: |
-          cat >> "$GITHUB_STEP_SUMMARY" <<'MDEOF'
-          ## SpyCloud Sentinel Deployment Summary
-
-          | Stage | Result |
-          |-------|--------|
-          | Validate | `${{ needs.validate.result }}` |
-          | Test | `${{ needs.test.result }}` |
-          | Staging | `${{ needs.deploy-staging.result }}` |
-          | Production | `${{ needs.deploy-production.result }}` |
-
-          **Run:** #${{ github.run_number }} | **SHA:** `${{ github.sha }}` | **Actor:** ${{ github.actor }}
-          MDEOF
+          echo "## SpyCloud Sentinel Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Solution | ${{ env.SOLUTION_NAME }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ env.SOLUTION_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | Production |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run | #${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deployed by | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY

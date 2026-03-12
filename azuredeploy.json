@@ -6575,7 +6575,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -6618,7 +6618,7 @@
       "tags": "[variables('allTags')]",
       "properties": {
         "groupShortName": "SpyCloudAG",
-        "enabled": true,
+        "enabled": false,
         "emailReceivers": [
           {
             "name": "SpyCloud-SOC-Email",
@@ -6645,7 +6645,7 @@
         "displayName": "SpyCloud \u2014 Data Ingestion Health Alert",
         "description": "Fires when no SpyCloud data has been received for more than 2 hours, indicating a potential connector failure or API key issue.",
         "severity": 2,
-        "enabled": true,
+        "enabled": false,
         "evaluationFrequency": "PT1H",
         "scopes": [
           "[variables('workspaceResourceId')]"
@@ -6697,7 +6697,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -6761,7 +6761,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -6816,7 +6816,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -6873,7 +6873,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -6940,7 +6940,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7005,7 +7005,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7061,7 +7061,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7116,7 +7116,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7172,7 +7172,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7227,7 +7227,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AnyAlert"
@@ -7288,7 +7288,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AnyAlert"
@@ -7325,7 +7325,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AnyAlert"
@@ -7367,7 +7367,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7432,7 +7432,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7497,7 +7497,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -7562,7 +7562,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -8542,7 +8542,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -8597,7 +8597,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -8652,7 +8652,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -8708,7 +8708,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -8763,7 +8763,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities",
@@ -8845,7 +8845,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -8908,7 +8908,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -8980,7 +8980,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9043,7 +9043,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9097,7 +9097,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9149,7 +9149,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9203,7 +9203,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9255,7 +9255,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9307,7 +9307,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9368,7 +9368,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9420,7 +9420,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9472,7 +9472,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9525,7 +9525,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9586,7 +9586,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9638,7 +9638,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9699,7 +9699,7 @@
         "incidentConfiguration": {
           "createIncident": true,
           "groupingConfiguration": {
-            "enabled": true,
+            "enabled": false,
             "reopenClosedIncident": false,
             "lookbackDuration": "PT5H",
             "matchingMethod": "AllEntities"
@@ -9741,15 +9741,15 @@
       ],
       "properties": {
         "alertRuleTemplateName": "f71aba3d-28fb-450b-b192-4e76a83015c8",
-        "enabled": true,
+        "enabled": false,
         "sourceSettings": [
           {
-            "enabled": true,
+            "enabled": false,
             "sourceName": "Anomalies",
             "sourceSubTypes": []
           },
           {
-            "enabled": true,
+            "enabled": false,
             "sourceName": "Alert providers",
             "sourceSubTypes": [
               {
@@ -9759,19 +9759,19 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               },
               {
                 "sourceSubTypeName": "Azure Defender",
@@ -9780,19 +9780,19 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               },
               {
                 "sourceSubTypeName": "Microsoft Defender for Endpoint",
@@ -9801,23 +9801,23 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Informational",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               },
               {
                 "sourceSubTypeName": "Microsoft Defender for Identity",
@@ -9826,23 +9826,23 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Informational",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               },
               {
                 "sourceSubTypeName": "Microsoft Defender for Office 365",
@@ -9851,19 +9851,19 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               },
               {
                 "sourceSubTypeName": "Azure Sentinel scheduled analytics rules",
@@ -9872,23 +9872,23 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Informational",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               },
               {
                 "sourceSubTypeName": "Azure Active Directory Identity Protection",
@@ -9897,19 +9897,19 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               },
               {
                 "sourceSubTypeName": "Microsoft 365 Defender",
@@ -9918,28 +9918,28 @@
                   "filters": [
                     {
                       "severity": "High",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Medium",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Low",
-                      "enabled": true
+                      "enabled": false
                     },
                     {
                       "severity": "Informational",
-                      "enabled": true
+                      "enabled": false
                     }
                   ]
                 },
-                "enabled": true
+                "enabled": false
               }
             ]
           },
           {
-            "enabled": true,
+            "enabled": false,
             "sourceName": "Raw logs from other sources",
             "sourceSubTypes": [
               {
@@ -9948,7 +9948,7 @@
                   "isDefaultFilteringDisabled": false,
                   "filters": []
                 },
-                "enabled": true
+                "enabled": false
               }
             ]
           }
@@ -9969,7 +9969,7 @@
       "properties": {
         "displayName": "Create incidents from Entra ID Protection alerts",
         "description": "Auto-creates Sentinel incidents when Entra ID Protection detects risky users or risky sign-ins. Correlate with SpyCloud data to determine if the risky user was flagged due to darknet credential exposure.",
-        "enabled": true,
+        "enabled": false,
         "productFilter": "Azure Active Directory Identity Protection",
         "severitiesFilter": [
           "High",
@@ -9993,7 +9993,7 @@
       "properties": {
         "displayName": "Create incidents from Defender for Cloud alerts",
         "description": "Auto-creates Sentinel incidents from Microsoft Defender for Cloud (Azure Defender) alerts covering VMs, SQL, Storage, Key Vault, App Service, Kubernetes, and more. Cross-correlate with SpyCloud to detect compromised credentials accessing cloud resources.",
-        "enabled": true,
+        "enabled": false,
         "productFilter": "Azure Security Center",
         "severitiesFilter": [
           "High",
@@ -10017,7 +10017,7 @@
       "properties": {
         "displayName": "Create incidents from Microsoft Cloud App Security alerts",
         "description": "Auto-creates Sentinel incidents from Microsoft Defender for Cloud Apps (MCAS) alerts. Detects impossible travel, suspicious inbox rules, OAuth app abuse, and mass file downloads \u2014 correlate with SpyCloud to verify if compromised credentials were used.",
-        "enabled": true,
+        "enabled": false,
         "productFilter": "Microsoft Cloud App Security",
         "severitiesFilter": [
           "High",
@@ -10041,7 +10041,7 @@
       "properties": {
         "displayName": "Create incidents from Defender for Identity alerts",
         "description": "Auto-creates Sentinel incidents from Microsoft Defender for Identity alerts (on-premises Active Directory). Detects pass-the-hash, golden ticket, DCSync, and reconnaissance activities \u2014 critical to correlate with SpyCloud credential exposures that may enable these attacks.",
-        "enabled": true,
+        "enabled": false,
         "productFilter": "Azure Advanced Threat Protection",
         "severitiesFilter": [
           "High",

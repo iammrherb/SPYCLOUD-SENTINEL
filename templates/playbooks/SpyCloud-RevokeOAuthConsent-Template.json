@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "title": "SpyCloud - Revoke OAuth Consent",
+    "description": "Revokes all delegated OAuth permission grants for compromised users, removing third-party application access to their mailbox, files, and other M365 resources. Also revokes sign-in sessions to invalidate cached tokens. Critical for incidents where attackers may have granted malicious app consent.",
+    "prerequisites": [
+      "Managed Identity requires DelegatedPermissionGrant.ReadWrite.All and User.ReadWrite.All",
+      "AppRoleAssignment.ReadWrite.All for app role assignment audit"
+    ],
+    "postDeployment": [
+      "Grant the Logic App managed identity required Graph API permissions",
+      "Review revoked consent list for legitimate applications that need re-consent",
+      "Test with a non-production account first"
+    ],
+    "lastUpdateTime": "2026-03-12T00:00:00.000Z",
+    "support": {
+      "tier": "Community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": ["Security - Automation (SOAR)"]
+    },
+    "tags": ["Remediation", "OAuth", "AppConsent", "SpyCloud"]
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-RevokeOAuthConsent"
+    }
+  },
+  "resources": []
+}

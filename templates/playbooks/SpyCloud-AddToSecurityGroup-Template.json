@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "title": "SpyCloud - Add to Security Group",
+    "description": "Automatically adds compromised users to tiered Azure AD security groups based on SpyCloud severity. Severity 25+ maps to High Risk, 20+ to Medium Risk, and all exposures to a Compromised Users group. These groups can be targeted by Conditional Access policies for graduated access restrictions.",
+    "prerequisites": [
+      "Three Azure AD security groups must exist: CompromisedUsers, HighRisk, MediumRisk",
+      "Managed Identity requires Group.ReadWrite.All and User.Read.All permissions in Microsoft Graph",
+      "Conditional Access policies should target these security groups"
+    ],
+    "postDeployment": [
+      "Grant the Logic App managed identity Group.ReadWrite.All and User.Read.All permissions",
+      "Configure Conditional Access policies to target the security groups",
+      "Test with a known compromised test account"
+    ],
+    "lastUpdateTime": "2026-03-12T00:00:00.000Z",
+    "support": {
+      "tier": "Community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": ["Security - Automation (SOAR)"]
+    },
+    "tags": ["Remediation", "ConditionalAccess", "SecurityGroups", "SpyCloud"]
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-AddToSecurityGroup"
+    },
+    "CompromisedUsersGroupId": {
+      "type": "string",
+      "metadata": { "description": "Azure AD security group ID for all compromised users" }
+    },
+    "HighRiskGroupId": {
+      "type": "string",
+      "metadata": { "description": "Azure AD security group ID for high-risk users (severity >= 25)" }
+    },
+    "MediumRiskGroupId": {
+      "type": "string",
+      "metadata": { "description": "Azure AD security group ID for medium-risk users (severity >= 20)" }
+    }
+  },
+  "resources": []
+}

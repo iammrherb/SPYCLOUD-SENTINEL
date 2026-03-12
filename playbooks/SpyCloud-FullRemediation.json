@@ -1,423 +1,635 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "PlaybookName": {
-      "type": "string",
-      "defaultValue": "SpyCloud-FullRemediation",
-      "metadata": { "description": "Name of the orchestrator Logic App playbook" }
-    },
-    "subscriptionId": {
-      "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
-    },
-    "resourceGroupName": {
-      "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
-    },
-    "workspaceName": {
-      "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
-    },
-    "ForcePasswordResetPlaybookId": {
-      "type": "string",
-      "metadata": { "description": "Resource ID of the SpyCloud-ForcePasswordReset Logic App" }
-    },
-    "RevokeSessionsPlaybookId": {
-      "type": "string",
-      "metadata": { "description": "Resource ID of the SpyCloud-RevokeSessions Logic App" }
-    },
-    "EnforceMFAPlaybookId": {
-      "type": "string",
-      "metadata": { "description": "Resource ID of the SpyCloud-EnforceMFA Logic App" }
-    },
-    "BlockConditionalAccessPlaybookId": {
-      "type": "string",
-      "metadata": { "description": "Resource ID of the SpyCloud-BlockConditionalAccess Logic App" }
-    },
-    "IsolateDevicePlaybookId": {
-      "type": "string",
-      "metadata": { "description": "Resource ID of the SpyCloud-IsolateDevice Logic App" }
-    },
-    "NotifySOCPlaybookId": {
-      "type": "string",
-      "metadata": { "description": "Resource ID of the SpyCloud-NotifySOC Logic App" }
-    }
-  },
-  "variables": {
-    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
-    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Web/connections",
-      "apiVersion": "2016-06-01",
-      "name": "[variables('azureSentinelConnectionName')]",
-      "location": "[resourceGroup().location]",
-      "kind": "V1",
-      "properties": {
-        "displayName": "[variables('azureSentinelConnectionName')]",
-        "api": {
-          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "PlaybookName": {
+            "type": "string",
+            "defaultValue": "SpyCloud-FullRemediation",
+            "metadata": {
+                "description": "Name of the Logic App playbook"
+            }
         },
-        "parameterValueType": "Alternative"
-      }
-    },
-    {
-      "type": "Microsoft.Logic/workflows",
-      "apiVersion": "2019-05-01",
-      "name": "[parameters('PlaybookName')]",
-      "location": "[resourceGroup().location]",
-      "identity": {
-        "type": "SystemAssigned"
-      },
-      "dependsOn": [
-        "[variables('sentinelConnectionId')]"
-      ],
-      "properties": {
-        "state": "Enabled",
-        "definition": {
-          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-          "contentVersion": "1.0.0.0",
-          "triggers": {
-            "Microsoft_Sentinel_incident": {
-              "type": "ApiConnectionWebhook",
-              "inputs": {
-                "host": {
-                  "connection": {
-                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                  }
-                },
-                "body": {
-                  "callback_url": "@listCallbackUrl()"
-                },
-                "path": "/incident-creation"
-              }
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources"
             }
-          },
-          "actions": {
-            "Initialize_Orchestration_Status": {
-              "type": "InitializeVariable",
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "OrchestrationStatus",
-                    "type": "object",
-                    "value": {
-                      "passwordReset": "Pending",
-                      "sessionRevocation": "Pending",
-                      "mfaReset": "Pending",
-                      "caGroupAssignment": "Pending",
-                      "deviceIsolation": "Pending",
-                      "socNotification": "Pending"
-                    }
-                  }
-                ]
-              },
-              "runAfter": {}
-            },
-            "Add_Start_Comment": {
-              "type": "ApiConnection",
-              "inputs": {
-                "host": {
-                  "connection": {
-                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                  }
-                },
-                "method": "post",
-                "path": "/incident-comments",
-                "body": {
-                  "incidentArmId": "@triggerBody()?['object']?['id']",
-                  "message": "<p><strong>SpyCloud-FullRemediation:</strong> Orchestrated remediation started for incident @{triggerBody()?['object']?['properties']?['incidentNumber']}.</p>"
-                }
-              },
-              "runAfter": {
-                "Initialize_Orchestration_Status": ["Succeeded"]
-              }
-            },
-            "Phase_1_Immediate_Containment": {
-              "type": "Parallel",
-              "actions": {
-                "Branch_Password_Reset": {
-                  "type": "Scope",
-                  "actions": {
-                    "Call_ForcePasswordReset": {
-                      "type": "Workflow",
-                      "inputs": {
-                        "host": {
-                          "triggerName": "Microsoft_Sentinel_incident",
-                          "workflow": {
-                            "id": "@parameters('ForcePasswordResetPlaybookId')"
-                          }
-                        },
-                        "body": "@triggerBody()"
-                      },
-                      "runAfter": {}
-                    }
-                  }
-                },
-                "Branch_Revoke_Sessions": {
-                  "type": "Scope",
-                  "actions": {
-                    "Call_RevokeSessions": {
-                      "type": "Workflow",
-                      "inputs": {
-                        "host": {
-                          "triggerName": "Microsoft_Sentinel_incident",
-                          "workflow": {
-                            "id": "@parameters('RevokeSessionsPlaybookId')"
-                          }
-                        },
-                        "body": "@triggerBody()"
-                      },
-                      "runAfter": {}
-                    }
-                  }
-                },
-                "Branch_Device_Isolation": {
-                  "type": "Scope",
-                  "actions": {
-                    "Call_IsolateDevice": {
-                      "type": "Workflow",
-                      "inputs": {
-                        "host": {
-                          "triggerName": "Microsoft_Sentinel_incident",
-                          "workflow": {
-                            "id": "@parameters('IsolateDevicePlaybookId')"
-                          }
-                        },
-                        "body": "@triggerBody()"
-                      },
-                      "runAfter": {}
-                    }
-                  }
-                }
-              },
-              "runAfter": {
-                "Add_Start_Comment": ["Succeeded"]
-              }
-            },
-            "Catch_Phase_1_Errors": {
-              "type": "Scope",
-              "actions": {
-                "Comment_Phase_1_Partial_Failure": {
-                  "type": "ApiConnection",
-                  "inputs": {
-                    "host": {
-                      "connection": {
-                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                      }
-                    },
-                    "method": "post",
-                    "path": "/incident-comments",
-                    "body": {
-                      "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud-FullRemediation:</strong> Phase 1 (Immediate Containment) had partial failures. Continuing to Phase 2. Review sub-playbook comments for details.</p>"
-                    }
-                  },
-                  "runAfter": {}
-                }
-              },
-              "runAfter": {
-                "Phase_1_Immediate_Containment": ["Failed", "TimedOut"]
-              }
-            },
-            "Phase_2_Access_Hardening": {
-              "type": "Parallel",
-              "actions": {
-                "Branch_Enforce_MFA": {
-                  "type": "Scope",
-                  "actions": {
-                    "Call_EnforceMFA": {
-                      "type": "Workflow",
-                      "inputs": {
-                        "host": {
-                          "triggerName": "Microsoft_Sentinel_incident",
-                          "workflow": {
-                            "id": "@parameters('EnforceMFAPlaybookId')"
-                          }
-                        },
-                        "body": "@triggerBody()"
-                      },
-                      "runAfter": {}
-                    }
-                  }
-                },
-                "Branch_CA_Group_Assignment": {
-                  "type": "Scope",
-                  "actions": {
-                    "Call_BlockConditionalAccess": {
-                      "type": "Workflow",
-                      "inputs": {
-                        "host": {
-                          "triggerName": "Microsoft_Sentinel_incident",
-                          "workflow": {
-                            "id": "@parameters('BlockConditionalAccessPlaybookId')"
-                          }
-                        },
-                        "body": "@triggerBody()"
-                      },
-                      "runAfter": {}
-                    }
-                  }
-                }
-              },
-              "runAfter": {
-                "Phase_1_Immediate_Containment": ["Succeeded", "Failed"],
-                "Catch_Phase_1_Errors": ["Succeeded", "Skipped"]
-              }
-            },
-            "Catch_Phase_2_Errors": {
-              "type": "Scope",
-              "actions": {
-                "Comment_Phase_2_Partial_Failure": {
-                  "type": "ApiConnection",
-                  "inputs": {
-                    "host": {
-                      "connection": {
-                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                      }
-                    },
-                    "method": "post",
-                    "path": "/incident-comments",
-                    "body": {
-                      "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud-FullRemediation:</strong> Phase 2 (Access Hardening) had partial failures. Continuing to notification. Review sub-playbook comments for details.</p>"
-                    }
-                  },
-                  "runAfter": {}
-                }
-              },
-              "runAfter": {
-                "Phase_2_Access_Hardening": ["Failed", "TimedOut"]
-              }
-            },
-            "Phase_3_Notify_SOC": {
-              "type": "Scope",
-              "actions": {
-                "Call_NotifySOC": {
-                  "type": "Workflow",
-                  "inputs": {
-                    "host": {
-                      "triggerName": "Microsoft_Sentinel_incident",
-                      "workflow": {
-                        "id": "@parameters('NotifySOCPlaybookId')"
-                      }
-                    },
-                    "body": "@triggerBody()"
-                  },
-                  "runAfter": {}
-                }
-              },
-              "runAfter": {
-                "Phase_2_Access_Hardening": ["Succeeded", "Failed"],
-                "Catch_Phase_2_Errors": ["Succeeded", "Skipped"]
-              }
-            },
-            "Catch_Phase_3_Errors": {
-              "type": "Scope",
-              "actions": {
-                "Comment_SOC_Notify_Failed": {
-                  "type": "ApiConnection",
-                  "inputs": {
-                    "host": {
-                      "connection": {
-                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                      }
-                    },
-                    "method": "post",
-                    "path": "/incident-comments",
-                    "body": {
-                      "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud-FullRemediation:</strong> SOC notification failed. Manual notification required.</p>"
-                    }
-                  },
-                  "runAfter": {}
-                }
-              },
-              "runAfter": {
-                "Phase_3_Notify_SOC": ["Failed", "TimedOut"]
-              }
-            },
-            "Add_Completion_Comment": {
-              "type": "ApiConnection",
-              "inputs": {
-                "host": {
-                  "connection": {
-                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                  }
-                },
-                "method": "post",
-                "path": "/incident-comments",
-                "body": {
-                  "incidentArmId": "@triggerBody()?['object']?['id']",
-                  "message": "<p><strong>SpyCloud-FullRemediation:</strong> Orchestrated remediation completed for incident @{triggerBody()?['object']?['properties']?['incidentNumber']}.<br/><strong>Phase 1 (Containment):</strong> Password Reset, Session Revocation, Device Isolation<br/><strong>Phase 2 (Hardening):</strong> MFA Re-registration, Conditional Access Group<br/><strong>Phase 3 (Notification):</strong> SOC Teams Alert<br/>Review individual playbook comments for detailed results.</p>"
-                }
-              },
-              "runAfter": {
-                "Phase_3_Notify_SOC": ["Succeeded", "Failed"],
-                "Catch_Phase_3_Errors": ["Succeeded", "Skipped"]
-              }
-            }
-          },
-          "parameters": {
-            "$connections": {
-              "type": "Object",
-              "defaultValue": {}
-            },
-            "ForcePasswordResetPlaybookId": {
-              "type": "String",
-              "defaultValue": "[parameters('ForcePasswordResetPlaybookId')]"
-            },
-            "RevokeSessionsPlaybookId": {
-              "type": "String",
-              "defaultValue": "[parameters('RevokeSessionsPlaybookId')]"
-            },
-            "EnforceMFAPlaybookId": {
-              "type": "String",
-              "defaultValue": "[parameters('EnforceMFAPlaybookId')]"
-            },
-            "BlockConditionalAccessPlaybookId": {
-              "type": "String",
-              "defaultValue": "[parameters('BlockConditionalAccessPlaybookId')]"
-            },
-            "IsolateDevicePlaybookId": {
-              "type": "String",
-              "defaultValue": "[parameters('IsolateDevicePlaybookId')]"
-            },
-            "NotifySOCPlaybookId": {
-              "type": "String",
-              "defaultValue": "[parameters('NotifySOCPlaybookId')]"
-            }
-          }
         },
-        "parameters": {
-          "$connections": {
-            "value": {
-              "azuresentinel": {
-                "connectionId": "[variables('sentinelConnectionId')]",
-                "connectionName": "[variables('azureSentinelConnectionName')]",
-                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
-                "connectionProperties": {
-                  "authentication": {
-                    "type": "ManagedServiceIdentity"
-                  }
-                }
-              }
+        "workspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Microsoft Sentinel workspace name"
             }
-          }
+        },
+        "blockedGroupId": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure AD group ID for blocked users (Conditional Access)"
+            }
+        },
+        "restrictedGroupId": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure AD group ID for restricted users (Conditional Access)"
+            }
         }
-      }
-    }
-  ],
-  "outputs": {
-    "logicAppResourceId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
     },
-    "logicAppPrincipalId": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    "variables": {
+        "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('azureSentinelConnectionName')]",
+            "location": "[parameters('location')]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "[variables('azureSentinelConnectionName')]",
+                "parameterValueType": "Alternative",
+                "api": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/azuresentinel')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2019-05-01",
+            "name": "[parameters('PlaybookName')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "type": "Object"
+                        },
+                        "blockedGroupId": {
+                            "type": "String"
+                        },
+                        "restrictedGroupId": {
+                            "type": "String"
+                        }
+                    },
+                    "triggers": {
+                        "Microsoft_Sentinel_incident": {
+                            "type": "ApiConnectionNotification",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "body": {
+                                    "callback_url": "@{listCallbackUrl()}"
+                                },
+                                "path": "/incident-creation"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Extract_Entities": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/entities/get",
+                                "body": {
+                                    "incidentArmId": "@triggerBody()?['object']?['id']"
+                                }
+                            },
+                            "runAfter": {}
+                        },
+                        "Filter_Account_Entities": {
+                            "type": "Query",
+                            "inputs": {
+                                "from": "@body('Extract_Entities')?['entities']",
+                                "where": "@equals(item()?['kind'], 'Account')"
+                            },
+                            "runAfter": {
+                                "Extract_Entities": [
+                                    "Succeeded"
+                                ]
+                            }
+                        },
+                        "Filter_Host_Entities": {
+                            "type": "Query",
+                            "inputs": {
+                                "from": "@body('Extract_Entities')?['entities']",
+                                "where": "@equals(item()?['kind'], 'Host')"
+                            },
+                            "runAfter": {
+                                "Extract_Entities": [
+                                    "Succeeded"
+                                ]
+                            }
+                        },
+                        "Get_Incident_Severity": {
+                            "type": "Compose",
+                            "inputs": "@triggerBody()?['object']?['properties']?['severity']",
+                            "runAfter": {
+                                "Filter_Account_Entities": [
+                                    "Succeeded"
+                                ],
+                                "Filter_Host_Entities": [
+                                    "Succeeded"
+                                ]
+                            }
+                        },
+                        "Initialize_Remediation_Log": {
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "remediationLog",
+                                        "type": "array",
+                                        "value": []
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Get_Incident_Severity": [
+                                    "Succeeded"
+                                ]
+                            }
+                        },
+                        "Scope_Password_Reset": {
+                            "type": "Scope",
+                            "actions": {
+                                "For_Each_Account_Password_Reset": {
+                                    "type": "Foreach",
+                                    "foreach": "@body('Filter_Account_Entities')",
+                                    "actions": {
+                                        "Get_User_Id_For_Reset": {
+                                            "type": "Http",
+                                            "inputs": {
+                                                "method": "GET",
+                                                "uri": "https://graph.microsoft.com/v1.0/users/@{coalesce(items('For_Each_Account_Password_Reset')?['properties']?['userPrincipalName'], concat(items('For_Each_Account_Password_Reset')?['properties']?['accountName'], '@', items('For_Each_Account_Password_Reset')?['properties']?['upnSuffix']))}",
+                                                "headers": {
+                                                    "Content-Type": "application/json"
+                                                },
+                                                "authentication": {
+                                                    "type": "ManagedServiceIdentity",
+                                                    "audience": "https://graph.microsoft.com"
+                                                }
+                                            },
+                                            "runAfter": {}
+                                        },
+                                        "Force_Password_Change": {
+                                            "type": "Http",
+                                            "inputs": {
+                                                "method": "PATCH",
+                                                "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_User_Id_For_Reset')?['id']}",
+                                                "headers": {
+                                                    "Content-Type": "application/json"
+                                                },
+                                                "body": {
+                                                    "passwordProfile": {
+                                                        "forceChangePasswordNextSignIn": true,
+                                                        "forceChangePasswordNextSignInWithMfa": true
+                                                    }
+                                                },
+                                                "authentication": {
+                                                    "type": "ManagedServiceIdentity",
+                                                    "audience": "https://graph.microsoft.com"
+                                                }
+                                            },
+                                            "runAfter": {
+                                                "Get_User_Id_For_Reset": [
+                                                    "Succeeded"
+                                                ]
+                                            }
+                                        },
+                                        "Log_Password_Reset": {
+                                            "type": "AppendToArrayVariable",
+                                            "inputs": {
+                                                "name": "remediationLog",
+                                                "value": "Password reset forced for @{body('Get_User_Id_For_Reset')?['userPrincipalName']}"
+                                            },
+                                            "runAfter": {
+                                                "Force_Password_Change": [
+                                                    "Succeeded"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {}
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_Remediation_Log": [
+                                    "Succeeded"
+                                ]
+                            }
+                        },
+                        "Scope_Password_Reset_Catch": {
+                            "type": "Scope",
+                            "actions": {
+                                "Log_Password_Reset_Failure": {
+                                    "type": "AppendToArrayVariable",
+                                    "inputs": {
+                                        "name": "remediationLog",
+                                        "value": "ERROR: Password reset failed for one or more accounts"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Password_Reset": [
+                                    "Failed",
+                                    "TimedOut"
+                                ]
+                            }
+                        },
+                        "Scope_Revoke_Sessions": {
+                            "type": "Scope",
+                            "actions": {
+                                "For_Each_Account_Revoke": {
+                                    "type": "Foreach",
+                                    "foreach": "@body('Filter_Account_Entities')",
+                                    "actions": {
+                                        "Revoke_User_Sessions": {
+                                            "type": "Http",
+                                            "inputs": {
+                                                "method": "POST",
+                                                "uri": "https://graph.microsoft.com/v1.0/users/@{coalesce(items('For_Each_Account_Revoke')?['properties']?['userPrincipalName'], concat(items('For_Each_Account_Revoke')?['properties']?['accountName'], '@', items('For_Each_Account_Revoke')?['properties']?['upnSuffix']))}/revokeSignInSessions",
+                                                "headers": {
+                                                    "Content-Type": "application/json"
+                                                },
+                                                "authentication": {
+                                                    "type": "ManagedServiceIdentity",
+                                                    "audience": "https://graph.microsoft.com"
+                                                }
+                                            },
+                                            "runAfter": {}
+                                        },
+                                        "Log_Session_Revocation": {
+                                            "type": "AppendToArrayVariable",
+                                            "inputs": {
+                                                "name": "remediationLog",
+                                                "value": "Sessions revoked for @{coalesce(items('For_Each_Account_Revoke')?['properties']?['userPrincipalName'], concat(items('For_Each_Account_Revoke')?['properties']?['accountName'], '@', items('For_Each_Account_Revoke')?['properties']?['upnSuffix']))}"
+                                            },
+                                            "runAfter": {
+                                                "Revoke_User_Sessions": [
+                                                    "Succeeded"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {}
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Password_Reset": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ],
+                                "Scope_Password_Reset_Catch": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ]
+                            }
+                        },
+                        "Scope_Revoke_Sessions_Catch": {
+                            "type": "Scope",
+                            "actions": {
+                                "Log_Session_Revoke_Failure": {
+                                    "type": "AppendToArrayVariable",
+                                    "inputs": {
+                                        "name": "remediationLog",
+                                        "value": "ERROR: Session revocation failed for one or more accounts"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Revoke_Sessions": [
+                                    "Failed",
+                                    "TimedOut"
+                                ]
+                            }
+                        },
+                        "Scope_Conditional_Access": {
+                            "type": "Scope",
+                            "actions": {
+                                "Check_Severity_For_CA": {
+                                    "type": "If",
+                                    "expression": {
+                                        "or": [
+                                            {
+                                                "equals": [
+                                                    "@outputs('Get_Incident_Severity')",
+                                                    "High"
+                                                ]
+                                            },
+                                            {
+                                                "equals": [
+                                                    "@outputs('Get_Incident_Severity')",
+                                                    "Medium"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "actions": {
+                                        "For_Each_Account_CA": {
+                                            "type": "Foreach",
+                                            "foreach": "@body('Filter_Account_Entities')",
+                                            "actions": {
+                                                "Determine_CA_Group": {
+                                                    "type": "Compose",
+                                                    "inputs": "@if(equals(outputs('Get_Incident_Severity'), 'High'), parameters('blockedGroupId'), parameters('restrictedGroupId'))",
+                                                    "runAfter": {}
+                                                },
+                                                "Get_User_Id_For_CA": {
+                                                    "type": "Http",
+                                                    "inputs": {
+                                                        "method": "GET",
+                                                        "uri": "https://graph.microsoft.com/v1.0/users/@{coalesce(items('For_Each_Account_CA')?['properties']?['userPrincipalName'], concat(items('For_Each_Account_CA')?['properties']?['accountName'], '@', items('For_Each_Account_CA')?['properties']?['upnSuffix']))}?$select=id",
+                                                        "headers": {
+                                                            "Content-Type": "application/json"
+                                                        },
+                                                        "authentication": {
+                                                            "type": "ManagedServiceIdentity",
+                                                            "audience": "https://graph.microsoft.com"
+                                                        }
+                                                    },
+                                                    "runAfter": {
+                                                        "Determine_CA_Group": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                },
+                                                "Add_To_CA_Group": {
+                                                    "type": "Http",
+                                                    "inputs": {
+                                                        "method": "POST",
+                                                        "uri": "https://graph.microsoft.com/v1.0/groups/@{outputs('Determine_CA_Group')}/members/$ref",
+                                                        "headers": {
+                                                            "Content-Type": "application/json"
+                                                        },
+                                                        "body": {
+                                                            "@@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/@{body('Get_User_Id_For_CA')?['id']}"
+                                                        },
+                                                        "authentication": {
+                                                            "type": "ManagedServiceIdentity",
+                                                            "audience": "https://graph.microsoft.com"
+                                                        }
+                                                    },
+                                                    "runAfter": {
+                                                        "Get_User_Id_For_CA": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                },
+                                                "Log_CA_Action": {
+                                                    "type": "AppendToArrayVariable",
+                                                    "inputs": {
+                                                        "name": "remediationLog",
+                                                        "value": "Added @{body('Get_User_Id_For_CA')?['userPrincipalName']} to @{if(equals(outputs('Get_Incident_Severity'), 'High'), 'blocked', 'restricted')} CA group"
+                                                    },
+                                                    "runAfter": {
+                                                        "Add_To_CA_Group": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "runAfter": {}
+                                        }
+                                    },
+                                    "else": {
+                                        "actions": {
+                                            "Log_CA_Skipped": {
+                                                "type": "AppendToArrayVariable",
+                                                "inputs": {
+                                                    "name": "remediationLog",
+                                                    "value": "Conditional Access group assignment skipped (severity: Low)"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {}
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Revoke_Sessions": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ],
+                                "Scope_Revoke_Sessions_Catch": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ]
+                            }
+                        },
+                        "Scope_Conditional_Access_Catch": {
+                            "type": "Scope",
+                            "actions": {
+                                "Log_CA_Failure": {
+                                    "type": "AppendToArrayVariable",
+                                    "inputs": {
+                                        "name": "remediationLog",
+                                        "value": "ERROR: Conditional Access group assignment failed"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Conditional_Access": [
+                                    "Failed",
+                                    "TimedOut"
+                                ]
+                            }
+                        },
+                        "Scope_Device_Isolation": {
+                            "type": "Scope",
+                            "actions": {
+                                "Check_Severity_For_Isolation": {
+                                    "type": "If",
+                                    "expression": {
+                                        "and": [
+                                            {
+                                                "equals": [
+                                                    "@outputs('Get_Incident_Severity')",
+                                                    "High"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "actions": {
+                                        "For_Each_Host_Isolate": {
+                                            "type": "Foreach",
+                                            "foreach": "@body('Filter_Host_Entities')",
+                                            "actions": {
+                                                "Get_MDE_Machine_Id": {
+                                                    "type": "Http",
+                                                    "inputs": {
+                                                        "method": "GET",
+                                                        "uri": "https://api.securitycenter.microsoft.com/api/machines?$filter=computerDnsName eq '@{items('For_Each_Host_Isolate')?['properties']?['hostName']}'",
+                                                        "headers": {
+                                                            "Content-Type": "application/json"
+                                                        },
+                                                        "authentication": {
+                                                            "type": "ManagedServiceIdentity",
+                                                            "audience": "https://api.securitycenter.microsoft.com"
+                                                        }
+                                                    },
+                                                    "runAfter": {}
+                                                },
+                                                "Isolate_Device": {
+                                                    "type": "Http",
+                                                    "inputs": {
+                                                        "method": "POST",
+                                                        "uri": "https://api.securitycenter.microsoft.com/api/machines/@{body('Get_MDE_Machine_Id')?['value']?[0]?['id']}/isolate",
+                                                        "headers": {
+                                                            "Content-Type": "application/json"
+                                                        },
+                                                        "body": {
+                                                            "Comment": "Isolated by SpyCloud FullRemediation playbook - Sentinel Incident #@{triggerBody()?['object']?['properties']?['incidentNumber']}",
+                                                            "IsolationType": "Selective"
+                                                        },
+                                                        "authentication": {
+                                                            "type": "ManagedServiceIdentity",
+                                                            "audience": "https://api.securitycenter.microsoft.com"
+                                                        }
+                                                    },
+                                                    "runAfter": {
+                                                        "Get_MDE_Machine_Id": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                },
+                                                "Log_Device_Isolation": {
+                                                    "type": "AppendToArrayVariable",
+                                                    "inputs": {
+                                                        "name": "remediationLog",
+                                                        "value": "Device isolated: @{items('For_Each_Host_Isolate')?['properties']?['hostName']}"
+                                                    },
+                                                    "runAfter": {
+                                                        "Isolate_Device": [
+                                                            "Succeeded"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "runAfter": {}
+                                        }
+                                    },
+                                    "else": {
+                                        "actions": {
+                                            "Log_Isolation_Skipped": {
+                                                "type": "AppendToArrayVariable",
+                                                "inputs": {
+                                                    "name": "remediationLog",
+                                                    "value": "Device isolation skipped (severity not High)"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {}
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Conditional_Access": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ],
+                                "Scope_Conditional_Access_Catch": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ]
+                            }
+                        },
+                        "Scope_Device_Isolation_Catch": {
+                            "type": "Scope",
+                            "actions": {
+                                "Log_Isolation_Failure": {
+                                    "type": "AppendToArrayVariable",
+                                    "inputs": {
+                                        "name": "remediationLog",
+                                        "value": "ERROR: Device isolation failed for one or more devices"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Device_Isolation": [
+                                    "Failed",
+                                    "TimedOut"
+                                ]
+                            }
+                        },
+                        "Add_Remediation_Summary_Comment": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/Incidents/Comment",
+                                "body": {
+                                    "incidentArmId": "@triggerBody()?['object']?['id']",
+                                    "message": "<p><strong>SpyCloud Full Remediation Summary</strong></p><p><strong>Incident Severity:</strong> @{outputs('Get_Incident_Severity')}</p><p><strong>Actions Taken:</strong></p><ul>@{join(variables('remediationLog'), '</li><li>')}</ul><p><em>Remediation orchestrated by SpyCloud FullRemediation playbook</em></p>"
+                                }
+                            },
+                            "runAfter": {
+                                "Scope_Device_Isolation": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ],
+                                "Scope_Device_Isolation_Catch": [
+                                    "Succeeded",
+                                    "Skipped"
+                                ]
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azuresentinel": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]",
+                                "connectionName": "[variables('azureSentinelConnectionName')]",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/azuresentinel')]",
+                                "connectionProperties": {
+                                    "authentication": {
+                                        "type": "ManagedServiceIdentity"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "blockedGroupId": {
+                        "value": "[parameters('blockedGroupId')]"
+                    },
+                    "restrictedGroupId": {
+                        "value": "[parameters('restrictedGroupId')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "logicAppResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+        },
+        "logicAppPrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+        }
     }
-  }
 }

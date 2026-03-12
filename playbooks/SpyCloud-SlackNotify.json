@@ -1,0 +1,229 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "title": "SpyCloud - Slack SOC Notification",
+    "description": "Sends formatted Slack notifications to a designated security operations channel when SpyCloud identity threat incidents are created in Microsoft Sentinel.",
+    "version": "10.0.0",
+    "author": "SpyCloud, Inc."
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-SlackNotify",
+      "metadata": { "description": "Name of the Logic App playbook" }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "slackWebhookUrl": {
+      "type": "securestring",
+      "metadata": { "description": "Slack Incoming Webhook URL for SOC notifications" }
+    },
+    "slackChannel": {
+      "type": "string",
+      "defaultValue": "#security-alerts",
+      "metadata": { "description": "Slack channel for notifications" }
+    },
+    "slackBotName": {
+      "type": "string",
+      "defaultValue": "SpyCloud Sentinel",
+      "metadata": { "description": "Display name for the Slack bot" }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "solution": "SpyCloud-Sentinel",
+        "component": "notification-slack",
+        "version": "10.0.0"
+      },
+      "identity": { "type": "SystemAssigned" },
+      "dependsOn": ["[variables('sentinelConnectionId')]"],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                "body": { "callback_url": "@listCallbackUrl()" },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Extract_Entities": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                "method": "post",
+                "path": "/entities/account",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Build_User_List": {
+              "type": "Select",
+              "inputs": {
+                "from": "@body('Extract_Entities')?['Accounts']",
+                "select": "@concat(item()?['Name'], if(not(empty(item()?['UPNSuffix'])), concat('@', item()?['UPNSuffix']), ''))"
+              },
+              "runAfter": { "Extract_Entities": ["Succeeded"] }
+            },
+            "Map_Severity_Indicator": {
+              "type": "Compose",
+              "inputs": "@if(equals(triggerBody()?['object']?['properties']?['severity'], 'High'), ':red_circle: HIGH', if(equals(triggerBody()?['object']?['properties']?['severity'], 'Medium'), ':large_orange_circle: MEDIUM', ':large_blue_circle: LOW'))",
+              "runAfter": {}
+            },
+            "Post_To_Slack": {
+              "type": "Scope",
+              "actions": {
+                "Send_Slack_Message": {
+                  "type": "Http",
+                  "inputs": {
+                    "method": "POST",
+                    "uri": "@parameters('SlackWebhookUrl')",
+                    "headers": { "Content-Type": "application/json" },
+                    "body": {
+                      "channel": "@parameters('SlackChannel')",
+                      "username": "@parameters('SlackBotName')",
+                      "icon_emoji": ":shield:",
+                      "blocks": [
+                        {
+                          "type": "header",
+                          "text": { "type": "plain_text", "text": "SpyCloud Identity Threat Alert" }
+                        },
+                        {
+                          "type": "section",
+                          "fields": [
+                            { "type": "mrkdwn", "text": "*Severity:*\n@{outputs('Map_Severity_Indicator')}" },
+                            { "type": "mrkdwn", "text": "*Incident #:*\n@{triggerBody()?['object']?['properties']?['incidentNumber']}" },
+                            { "type": "mrkdwn", "text": "*Title:*\n@{triggerBody()?['object']?['properties']?['title']}" },
+                            { "type": "mrkdwn", "text": "*Affected Users:*\n@{join(body('Build_User_List'), ', ')}" }
+                          ]
+                        },
+                        {
+                          "type": "section",
+                          "text": { "type": "mrkdwn", "text": "*Description:*\n@{take(triggerBody()?['object']?['properties']?['description'], 500)}" }
+                        },
+                        {
+                          "type": "actions",
+                          "elements": [
+                            {
+                              "type": "button",
+                              "text": { "type": "plain_text", "text": "View in Sentinel" },
+                              "url": "@{triggerBody()?['object']?['properties']?['incidentUrl']}",
+                              "style": "primary"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "context",
+                          "elements": [
+                            { "type": "mrkdwn", "text": "SpyCloud for Microsoft Sentinel | @{utcNow()}" }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Comment_Slack_Success": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "method": "post",
+                    "path": "/incident-comments",
+                    "body": {
+                      "incidentArmId": "@triggerBody()?['object']?['id']",
+                      "message": "<p><strong>SpyCloud-SlackNotify:</strong> Notification sent to Slack channel @{parameters('SlackChannel')}.</p>"
+                    }
+                  },
+                  "runAfter": { "Send_Slack_Message": ["Succeeded"] }
+                }
+              },
+              "runAfter": {
+                "Build_User_List": ["Succeeded"],
+                "Map_Severity_Indicator": ["Succeeded"]
+              }
+            },
+            "Handle_Slack_Error": {
+              "type": "Scope",
+              "actions": {
+                "Comment_Slack_Failed": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "method": "post",
+                    "path": "/incident-comments",
+                    "body": {
+                      "incidentArmId": "@triggerBody()?['object']?['id']",
+                      "message": "<p><strong>SpyCloud-SlackNotify:</strong> Failed to send Slack notification. Please verify webhook URL configuration.</p>"
+                    }
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": { "Post_To_Slack": ["Failed", "TimedOut"] }
+            }
+          },
+          "parameters": {
+            "$connections": { "type": "Object", "defaultValue": {} },
+            "SlackWebhookUrl": { "type": "SecureString", "defaultValue": "[parameters('slackWebhookUrl')]" },
+            "SlackChannel": { "type": "String", "defaultValue": "[parameters('slackChannel')]" },
+            "SlackBotName": { "type": "String", "defaultValue": "[parameters('slackBotName')]" }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": { "authentication": { "type": "ManagedServiceIdentity" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  }
+}

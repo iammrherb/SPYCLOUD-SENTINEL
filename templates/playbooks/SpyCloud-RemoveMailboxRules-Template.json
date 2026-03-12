@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "title": "SpyCloud - Remove Mailbox Rules",
+    "description": "Audits and disables suspicious mailbox rules (forwarding, redirect, delete) for compromised users. Attackers commonly create hidden forwarding rules to exfiltrate email. This playbook identifies rules with forwarding, redirect, deletion, or folder-move actions and disables them, preserving the rules for forensic review.",
+    "prerequisites": [
+      "Managed Identity requires MailboxSettings.ReadWrite and Mail.ReadWrite permissions",
+      "Exchange Online connection for Exchange-specific rule management"
+    ],
+    "postDeployment": [
+      "Grant the Logic App managed identity MailboxSettings.ReadWrite",
+      "Review disabled rules list for false positives",
+      "Consider permanently deleting confirmed malicious rules after review"
+    ],
+    "lastUpdateTime": "2026-03-12T00:00:00.000Z",
+    "support": {
+      "tier": "Community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": ["Security - Automation (SOAR)"]
+    },
+    "tags": ["Remediation", "Exchange", "MailboxRules", "BEC", "SpyCloud"]
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-RemoveMailboxRules"
+    }
+  },
+  "resources": []
+}
