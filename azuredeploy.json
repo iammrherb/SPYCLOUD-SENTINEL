@@ -971,18 +971,25 @@
         "description": "Include recommended remediation actions in email notifications based on the exposure type and severity (e.g., password reset, session revocation, MFA enforcement, device scan)."
       }
     },
+    "apiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "SpyCloud Enterprise/Compass API Key — used for Breach Watchlist, Breach Catalog, Identity Exposure, and Compass endpoints. Only required if you are deploying Enterprise/Compass data sources. Leave blank if you are only deploying standalone products (Investigations, IDLink, etc.) with their own dedicated keys. Enterprise and Compass share this single key. Obtain from portal.spycloud.com > Settings > API Keys."
+      }
+    },
     "enableCompass": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "OPTIONAL: Enable SpyCloud Compass connectors (deep infostealer investigation data, device fingerprints, stolen applications). Requires Enterprise+ API subscription. WARNING: Enabling this with an Enterprise-only API key will cause deployment failure with 403 Forbidden errors. Verify your API tier at portal.spycloud.com before enabling."
+        "description": "OPTIONAL: Enable SpyCloud Compass connectors (deep infostealer investigation data, device fingerprints, stolen applications). Requires Enterprise+ API subscription and the Enterprise/Compass API key."
       }
     },
     "compassApiKey": {
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "DEPRECATED: Compass uses the same API key as Enterprise. This parameter is kept for backward compatibility. Leave blank - the main SpyCloud API key is automatically used for Compass endpoints."
+        "description": "DEPRECATED: Compass uses the same API key as Enterprise. Leave blank — the Enterprise/Compass apiKey parameter is automatically used for all Compass endpoints."
       }
     },
     "enableSip": {
@@ -996,7 +1003,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "OPTIONAL: Separate API key for SpyCloud SIP (Session Identity Protection) endpoints. If blank, the main SpyCloud API key is used. Only needed if your SIP subscription uses a different API key."
+        "description": "API key for SpyCloud SIP (Session Identity Protection) endpoints. Required if deploying SIP as a standalone product. If you have Enterprise/Compass enabled and leave this blank, the Enterprise API key is used as fallback."
       }
     },
     "sipCookieDomain": {
@@ -1017,7 +1024,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "OPTIONAL: Separate API key for SpyCloud Investigations endpoints. If blank, the main SpyCloud API key is used. Only needed if your Investigations subscription uses a different API key."
+        "description": "API key for SpyCloud Investigations endpoints. Required if deploying Investigations as a standalone product. If you have Enterprise/Compass enabled and leave this blank, the Enterprise API key is used as fallback."
       }
     },
     "enableIdLink": {
@@ -4272,37 +4279,43 @@
                 "description": "Monitoring Metrics Publisher role is required on the Data Collection Rule (DCR) to allow data ingestion via the Data Collection Endpoint (DCE)."
               },
               {
-                "name": "SpyCloud Enterprise API Subscription",
-                "description": "A valid SpyCloud Enterprise or Enterprise+ API subscription is required. Contact SpyCloud at support@spycloud.com or visit https://portal.spycloud.com to obtain your API key."
+                "name": "SpyCloud API Subscription",
+                "description": "At least one SpyCloud product subscription is required (Enterprise/Compass, Investigations, IDLink, SIP, Exposure, CAP, or Data Partnership). Each product uses its own dedicated API key. Contact SpyCloud at support@spycloud.com or visit https://portal.spycloud.com to obtain your API keys."
               }
             ]
           },
           "instructionSteps": [
             {
               "title": "Step 1 \u2014 API Keys",
-              "description": "Enter your SpyCloud API keys. Enterprise and Compass share the same key. Other APIs require separate keys from their respective entitlements. Get keys from [portal.spycloud.com](https://portal.spycloud.com) > Account Settings > API Keys.",
+              "description": "Enter your SpyCloud API keys for each licensed product. **Enterprise/Compass** share a single key and enable all data source pollers. **Investigations, SIP, IDLink, Data Partnership, Exposure, and CAP** each have their own dedicated keys and can be deployed standalone or alongside Enterprise. Only provide keys for products you are licensed for. Get keys from [portal.spycloud.com](https://portal.spycloud.com) > Account Settings > API Keys.",
               "instructions": [
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
+                    "text": "PRODUCT KEY GUIDE: Enterprise/Compass = shared key (enables breach watchlist, catalog, identity exposure, compass). All other products = separate dedicated keys. You can deploy any combination of products."
+                  }
+                },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "SpyCloud Enterprise/Compass API Key (required)",
+                    "label": "Enterprise/Compass API Key (required for Enterprise/Compass data sources)",
                     "name": "apiKey",
-                    "placeholder": "Enter your SpyCloud API key (used for Enterprise + Compass)",
+                    "placeholder": "Enter your Enterprise/Compass API key (leave blank if not using Enterprise)",
                     "type": "password"
                   }
                 },
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "Enterprise and Compass APIs use the SAME key. If you have Compass entitlement (Enterprise+ tier), it will automatically work with this key."
+                    "text": "Enterprise and Compass APIs use the SAME key. If you only use Investigations, IDLink, or other standalone products, leave the Enterprise key blank."
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "SIP API Key (optional \u2014 separate entitlement)",
+                    "label": "SIP API Key (dedicated key for Session Identity Protection)",
                     "name": "sipApiKey",
-                    "placeholder": "Leave blank to use Enterprise key, or enter dedicated SIP key",
+                    "placeholder": "Enter your dedicated SIP key (falls back to Enterprise key if blank)",
                     "type": "password"
                   }
                 },
@@ -4317,25 +4330,25 @@
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "Investigations API Key (optional \u2014 separate entitlement)",
+                    "label": "Investigations API Key (dedicated key for Investigations)",
                     "name": "investigationsApiKey",
-                    "placeholder": "Leave blank to use Enterprise key, or enter dedicated key",
+                    "placeholder": "Enter your dedicated Investigations key (falls back to Enterprise key if blank)",
                     "type": "password"
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "IDLINK API Key (separate entitlement required)",
+                    "label": "IDLink API Key (dedicated key required)",
                     "name": "idlinkApiKey",
-                    "placeholder": "Enter your IDLINK API key (requires IDLINK entitlement)",
+                    "placeholder": "Enter your IDLink API key (always requires its own key)",
                     "type": "password"
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "Data Partnership API Key (separate entitlement required)",
+                    "label": "Data Partnership API Key (dedicated key required)",
                     "name": "dataPartnershipApiKey",
                     "placeholder": "Enter your Data Partnership API key",
                     "type": "password"
@@ -4344,7 +4357,7 @@
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "Exposure API Key (separate entitlement required)",
+                    "label": "Exposure API Key (dedicated key required)",
                     "name": "exposureApiKey",
                     "placeholder": "Enter your Exposure API key",
                     "type": "password"
@@ -4353,7 +4366,7 @@
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "label": "CAP API Key (separate entitlement required)",
+                    "label": "CAP API Key (dedicated key required)",
                     "name": "capApiKey",
                     "placeholder": "Enter your CAP (Credential Access Program) API key",
                     "type": "password"
@@ -4738,21 +4751,21 @@
               "defaultValue": "",
               "type": "securestring",
               "metadata": {
-                "description": "SpyCloud Enterprise API Key \u2014 sent as 'X-Api-Key: <key>' on every API request. Obtain from portal.spycloud.com \u2192 Settings \u2192 API Keys. Stored securely as a SecureString, never exposed in logs or outputs."
+                "description": "SpyCloud Enterprise/Compass API Key — used for Enterprise breach data, Compass infostealer data, and identity exposure endpoints. Only required when deploying Enterprise/Compass products. Leave blank if only using standalone products (Investigations, IDLink, etc.)."
               }
             },
             "compassApiKey": {
               "defaultValue": "",
               "type": "securestring",
               "metadata": {
-                "description": "OPTIONAL: Separate API key for SpyCloud Compass endpoints. Leave blank to use the main Enterprise API key."
+                "description": "DEPRECATED: Compass shares the Enterprise API key. Leave blank."
               }
             },
             "sipApiKey": {
               "defaultValue": "",
               "type": "securestring",
               "metadata": {
-                "description": "OPTIONAL: Separate API key for SpyCloud SIP (Session Identity Protection) endpoints. Leave blank to use the main Enterprise API key."
+                "description": "API key for SpyCloud SIP endpoints. Required for standalone SIP deployments. Falls back to Enterprise key if blank."
               }
             },
             "sipCookieDomain": {
@@ -4761,6 +4774,69 @@
               "metadata": {
                 "description": "Cookie domain to monitor for stolen session cookies (e.g., 'example.com'). Required when SIP is enabled."
               }
+            },
+            "investigationsApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "API key for SpyCloud Investigations endpoints. Required for standalone Investigations deployments. Falls back to Enterprise key if blank."
+              }
+            },
+            "idlinkApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "Dedicated API key for SpyCloud IDLink service. Required — IDLink always needs its own key."
+              }
+            },
+            "dataPartnershipApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "Dedicated API key for SpyCloud Data Partnership service."
+              }
+            },
+            "exposureApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "Dedicated API key for SpyCloud Exposure service."
+              }
+            },
+            "capApiKey": {
+              "defaultValue": "",
+              "type": "securestring",
+              "metadata": {
+                "description": "Dedicated API key for SpyCloud CAP (Credential Access Program) service."
+              }
+            },
+            "enableCompass": {
+              "defaultValue": false,
+              "type": "bool"
+            },
+            "enableSip": {
+              "defaultValue": false,
+              "type": "bool"
+            },
+            "enableInvestigations": {
+              "defaultValue": false,
+              "type": "bool"
+            },
+            "enableIdLink": {
+              "defaultValue": false,
+              "type": "bool"
+            },
+            "enableDataPartnership": {
+              "defaultValue": false,
+              "type": "bool"
+            },
+            "enableExposure": {
+              "defaultValue": false,
+              "type": "bool"
+            },
+            "enableCAP": {
+              "defaultValue": false,
+              "type": "bool"
             },
             "severity": {
               "defaultValue": [
@@ -5047,7 +5123,7 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[if(empty(parameters('compassApiKey')), parameters('apiKey'), parameters('compassApiKey'))]"
+                  "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
@@ -5098,7 +5174,7 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[if(empty(parameters('compassApiKey')), parameters('apiKey'), parameters('compassApiKey'))]"
+                  "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/devices",
@@ -5149,7 +5225,7 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[if(empty(parameters('compassApiKey')), parameters('apiKey'), parameters('compassApiKey'))]"
+                  "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/applications",
@@ -5200,7 +5276,7 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[if(empty(parameters('sipApiKey')), parameters('apiKey'), parameters('sipApiKey'))]"
+                  "ApiKey": "[[if(not(empty(parameters('sipApiKey'))), parameters('sipApiKey'), parameters('apiKey'))]"
                 },
                 "request": {
                   "apiEndpoint": "[[concat('https://api.spycloud.io/sip-v1/breach/data/cookie-domains/', parameters('sipCookieDomain'))]",
@@ -5301,7 +5377,7 @@
                 "auth": {
                   "type": "APIKey",
                   "ApiKeyName": "X-Api-Key",
-                  "ApiKey": "[[if(empty(parameters('investigationsApiKey')), parameters('apiKey'), parameters('investigationsApiKey'))]"
+                  "ApiKey": "[[if(not(empty(parameters('investigationsApiKey'))), parameters('investigationsApiKey'), parameters('apiKey'))]"
                 },
                 "request": {
                   "apiEndpoint": "https://api.spycloud.io/investigations-v2/data/emails",

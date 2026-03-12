@@ -222,7 +222,7 @@
           {
             "name": "sectionApiConfig",
             "type": "Microsoft.Common.Section",
-            "label": "SpyCloud API Configuration",
+            "label": "SpyCloud Product & API Configuration",
             "elements": [
               {
                 "name": "apiConfigInfo",
@@ -230,17 +230,33 @@
                 "visible": true,
                 "options": {
                   "icon": "Info",
-                  "text": "Provide your SpyCloud API credentials. Your API key is available from the SpyCloud portal at portal.spycloud.com under Settings > API Keys. The API tier determines which data sources and endpoints are available for your subscription."
+                  "text": "Select the SpyCloud products you are licensed for and provide the corresponding API key for each. Each product uses its own API key from portal.spycloud.com > Settings > API Keys. Enterprise/Compass share a single key. All other products require their own dedicated key. If you select Enterprise/Compass, all data source options will be available."
                 }
               },
               {
-                "name": "spycloudApiKey",
+                "name": "productSelectionInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Warning",
+                  "text": "You must enable at least one product below. Only enable products you are licensed for — using an invalid or unauthorized key will cause 403 Forbidden errors during data ingestion."
+                }
+              },
+              {
+                "name": "enableEnterprise",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enterprise / Compass — Breach watchlist monitoring, breach catalog, identity exposure, and Compass infostealer intelligence. Selecting this product enables ALL data source pollers below.",
+                "toolTip": "Enable if you have a SpyCloud Enterprise or Enterprise+ subscription. Enterprise and Compass share the same API key.",
+                "defaultValue": true
+              },
+              {
+                "name": "enterpriseApiKey",
                 "type": "Microsoft.Common.PasswordBox",
                 "label": {
-                  "password": "SpyCloud API Key *",
-                  "confirmPassword": "Confirm API Key *"
+                  "password": "Enterprise / Compass API Key *",
+                  "confirmPassword": "Confirm Enterprise / Compass API Key *"
                 },
-                "toolTip": "Your SpyCloud API key from portal.spycloud.com.",
+                "toolTip": "Your SpyCloud Enterprise/Compass API key from portal.spycloud.com. This single key covers Enterprise breach data, Compass infostealer data, and identity exposure endpoints.",
                 "constraints": {
                   "required": true,
                   "regex": "^.{8,}$",
@@ -249,32 +265,216 @@
                 "options": {
                   "hideConfirmation": false
                 },
-                "visible": true
+                "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]"
               },
               {
-                "name": "apiTier",
-                "type": "Microsoft.Common.DropDown",
-                "label": "API Tier *",
-                "toolTip": "Select the SpyCloud API tier associated with your subscription. This determines available data sources.",
-                "defaultValue": "Enterprise",
-                "constraints": {
-                  "allowedValues": [
-                    {
-                      "label": "Enterprise",
-                      "value": "Enterprise"
-                    },
-                    {
-                      "label": "Enterprise+",
-                      "value": "EnterprisePlus"
-                    },
-                    {
-                      "label": "Enterprise+ with Investigations",
-                      "value": "EnterprisePlusInvestigations"
-                    }
-                  ],
-                  "required": true
+                "name": "enterpriseAllAccessInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]",
+                "options": {
+                  "icon": "Info",
+                  "text": "With Enterprise/Compass enabled, all data source pollers (Breach Watchlist, Breach Catalog, Compass, SIP, Investigations, IDLink, Exposure, CAP, Data Partnership) can be individually enabled below. The Enterprise key is used as the default for any poller that does not have a dedicated product key."
+                }
+              },
+              {
+                "name": "separatorLine1",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "None",
+                  "text": "── Standalone Products (each requires its own dedicated API key) ──"
+                }
+              },
+              {
+                "name": "enableSipProduct",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Session Identity Protection (SIP) — Stolen session cookies and tokens for your monitored domains.",
+                "toolTip": "Enable if you have a standalone SIP subscription or SIP entitlement with a dedicated key.",
+                "defaultValue": false
+              },
+              {
+                "name": "sipProductApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "SIP API Key *",
+                  "confirmPassword": "Confirm SIP API Key *"
                 },
-                "visible": true
+                "toolTip": "Your dedicated SIP API key from portal.spycloud.com.",
+                "constraints": {
+                  "required": true,
+                  "regex": "^.{8,}$",
+                  "validationMessage": "API key must be at least 8 characters."
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[and(steps('dataConnector').sectionApiConfig.enableSipProduct, not(steps('dataConnector').sectionApiConfig.enableEnterprise))]"
+              },
+              {
+                "name": "sipProductApiKeyOptional",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "SIP API Key (optional — leave blank to use Enterprise key)",
+                  "confirmPassword": "Confirm SIP API Key"
+                },
+                "toolTip": "Optional dedicated SIP API key. Leave blank to use your Enterprise/Compass key for SIP endpoints.",
+                "constraints": {
+                  "required": false
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[and(steps('dataConnector').sectionApiConfig.enableSipProduct, steps('dataConnector').sectionApiConfig.enableEnterprise)]"
+              },
+              {
+                "name": "enableInvestigationsProduct",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Investigations — Deep-dive investigative data for threat hunting and incident response across the full SpyCloud dataset.",
+                "toolTip": "Enable if you have a standalone Investigations subscription or Investigations entitlement with a dedicated key.",
+                "defaultValue": false
+              },
+              {
+                "name": "investigationsProductApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Investigations API Key *",
+                  "confirmPassword": "Confirm Investigations API Key *"
+                },
+                "toolTip": "Your dedicated Investigations API key from portal.spycloud.com.",
+                "constraints": {
+                  "required": true,
+                  "regex": "^.{8,}$",
+                  "validationMessage": "API key must be at least 8 characters."
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[and(steps('dataConnector').sectionApiConfig.enableInvestigationsProduct, not(steps('dataConnector').sectionApiConfig.enableEnterprise))]"
+              },
+              {
+                "name": "investigationsProductApiKeyOptional",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Investigations API Key (optional — leave blank to use Enterprise key)",
+                  "confirmPassword": "Confirm Investigations API Key"
+                },
+                "toolTip": "Optional dedicated Investigations API key. Leave blank to use your Enterprise/Compass key.",
+                "constraints": {
+                  "required": false
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[and(steps('dataConnector').sectionApiConfig.enableInvestigationsProduct, steps('dataConnector').sectionApiConfig.enableEnterprise)]"
+              },
+              {
+                "name": "enableIdLinkProduct",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "IDLink — Identity correlation and graph analysis mapping relationships between compromised identities.",
+                "toolTip": "Enable if you have a standalone IDLink subscription with a dedicated API key.",
+                "defaultValue": false
+              },
+              {
+                "name": "idlinkProductApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "IDLink API Key *",
+                  "confirmPassword": "Confirm IDLink API Key *"
+                },
+                "toolTip": "Your dedicated IDLink API key from portal.spycloud.com.",
+                "constraints": {
+                  "required": true,
+                  "regex": "^.{8,}$",
+                  "validationMessage": "API key must be at least 8 characters."
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[steps('dataConnector').sectionApiConfig.enableIdLinkProduct]"
+              },
+              {
+                "name": "enableDataPartnershipProduct",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Data Partnership — Partner-sourced intelligence feeds for expanded compromised credential coverage.",
+                "toolTip": "Enable if you have a Data Partnership subscription with a dedicated API key.",
+                "defaultValue": false
+              },
+              {
+                "name": "dataPartnershipProductApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Data Partnership API Key *",
+                  "confirmPassword": "Confirm Data Partnership API Key *"
+                },
+                "toolTip": "Your dedicated Data Partnership API key from portal.spycloud.com.",
+                "constraints": {
+                  "required": true,
+                  "regex": "^.{8,}$",
+                  "validationMessage": "API key must be at least 8 characters."
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct]"
+              },
+              {
+                "name": "enableExposureProduct",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Exposure — Aggregated exposure metrics and risk scores for monitored assets.",
+                "toolTip": "Enable if you have an Exposure subscription with a dedicated API key.",
+                "defaultValue": false
+              },
+              {
+                "name": "exposureProductApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Exposure API Key *",
+                  "confirmPassword": "Confirm Exposure API Key *"
+                },
+                "toolTip": "Your dedicated Exposure API key from portal.spycloud.com.",
+                "constraints": {
+                  "required": true,
+                  "regex": "^.{8,}$",
+                  "validationMessage": "API key must be at least 8 characters."
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[steps('dataConnector').sectionApiConfig.enableExposureProduct]"
+              },
+              {
+                "name": "enableCapProduct",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "CAP (Credential Access Program) — Automated credential protection policies and lifecycle management.",
+                "toolTip": "Enable if you have a CAP subscription with a dedicated API key.",
+                "defaultValue": false
+              },
+              {
+                "name": "capProductApiKey",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "CAP API Key *",
+                  "confirmPassword": "Confirm CAP API Key *"
+                },
+                "toolTip": "Your dedicated CAP API key from portal.spycloud.com.",
+                "constraints": {
+                  "required": true,
+                  "regex": "^.{8,}$",
+                  "validationMessage": "API key must be at least 8 characters."
+                },
+                "options": {
+                  "hideConfirmation": false
+                },
+                "visible": "[steps('dataConnector').sectionApiConfig.enableCapProduct]"
+              },
+              {
+                "name": "separatorLine2",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "None",
+                  "text": "── Polling Configuration ──"
+                }
               },
               {
                 "name": "pollingInterval",
@@ -363,67 +563,98 @@
                 }
               },
               {
+                "name": "noProductWarning",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": "[not(or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableSipProduct, steps('dataConnector').sectionApiConfig.enableInvestigationsProduct, steps('dataConnector').sectionApiConfig.enableIdLinkProduct, steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct, steps('dataConnector').sectionApiConfig.enableExposureProduct, steps('dataConnector').sectionApiConfig.enableCapProduct))]",
+                "options": {
+                  "icon": "Warning",
+                  "text": "No SpyCloud products are enabled. You must enable at least one product in the API Configuration section above to deploy data pollers."
+                }
+              },
+              {
                 "name": "enableBreachWatchlist",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Breach Watchlist -- Monitors your organization's domains and email addresses against SpyCloud's breach database for compromised credentials and PII.",
-                "toolTip": "Enables the Breach Watchlist data poller.",
-                "defaultValue": true
+                "label": "Breach Watchlist — Monitors your organization's domains and email addresses against SpyCloud's breach database for compromised credentials and PII. (Requires Enterprise/Compass)",
+                "toolTip": "Enables the Breach Watchlist data poller. Requires Enterprise/Compass product.",
+                "defaultValue": true,
+                "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]"
               },
               {
                 "name": "enableBreachCatalog",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Breach Catalog -- Provides metadata about breaches in SpyCloud's database including source, severity, acquisition date, and affected record counts.",
-                "toolTip": "Enables the Breach Catalog data poller.",
-                "defaultValue": true
+                "label": "Breach Catalog — Provides metadata about breaches in SpyCloud's database including source, severity, acquisition date, and affected record counts. (Requires Enterprise/Compass)",
+                "toolTip": "Enables the Breach Catalog data poller. Requires Enterprise/Compass product.",
+                "defaultValue": true,
+                "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]"
               },
               {
                 "name": "enableCompass",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Compass -- Delivers infostealer malware intelligence including infected device details, stolen credentials, and session cookies.",
-                "toolTip": "Enables the Compass data poller.",
-                "defaultValue": true
+                "label": "Compass — Delivers infostealer malware intelligence including infected device details, stolen credentials, and session cookies. (Requires Enterprise/Compass)",
+                "toolTip": "Enables the Compass data poller. Requires Enterprise/Compass product.",
+                "defaultValue": true,
+                "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]"
               },
               {
                 "name": "enableSIP",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Stolen Identity Protection (SIP) -- Detects compromised identity documents, financial instruments, and personal records on the darknet.",
+                "label": "Session Identity Protection (SIP) — Detects stolen session cookies and tokens for your monitored domains.",
                 "toolTip": "Enables the SIP data poller.",
-                "defaultValue": false
+                "defaultValue": false,
+                "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableSipProduct)]"
+              },
+              {
+                "name": "sipCookieDomain",
+                "type": "Microsoft.Common.TextBox",
+                "label": "SIP Cookie Domain *",
+                "toolTip": "The cookie domain to monitor for stolen session cookies (e.g., 'example.com').",
+                "placeholder": "example.com",
+                "constraints": {
+                  "required": true,
+                  "regex": "^[a-zA-Z0-9][a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                  "validationMessage": "Enter a valid domain (e.g., example.com)."
+                },
+                "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableSipProduct)]"
               },
               {
                 "name": "enableInvestigations",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Investigations -- Provides deep-dive investigative data for threat hunting and incident response across the SpyCloud dataset.",
-                "toolTip": "Enables the Investigations data poller. Requires Enterprise+ with Investigations tier.",
-                "defaultValue": false
+                "label": "Investigations — Deep-dive investigative data for threat hunting and incident response across the full SpyCloud dataset.",
+                "toolTip": "Enables the Investigations data poller.",
+                "defaultValue": false,
+                "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableInvestigationsProduct)]"
               },
               {
                 "name": "enableIDLink",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "IDLink -- Maps relationships between compromised identities, devices, and credentials to reveal identity linkage patterns.",
+                "label": "IDLink — Maps relationships between compromised identities, devices, and credentials to reveal identity linkage patterns.",
                 "toolTip": "Enables the IDLink data poller.",
-                "defaultValue": false
+                "defaultValue": false,
+                "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableIdLinkProduct)]"
               },
               {
                 "name": "enableExposure",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Exposure -- Aggregates exposure metrics and risk scores for monitored assets based on historical and ongoing breach data.",
+                "label": "Exposure — Aggregates exposure metrics and risk scores for monitored assets based on historical and ongoing breach data.",
                 "toolTip": "Enables the Exposure data poller.",
-                "defaultValue": false
+                "defaultValue": false,
+                "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableExposureProduct)]"
               },
               {
                 "name": "enableCAP",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Compromised Application Protection (CAP) -- Identifies compromised consumer accounts and application credentials in real time.",
+                "label": "Compromised Application Protection (CAP) — Identifies compromised consumer accounts and application credentials in real time.",
                 "toolTip": "Enables the CAP data poller.",
-                "defaultValue": false
+                "defaultValue": false,
+                "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableCapProduct)]"
               },
               {
                 "name": "enableDataPartnership",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Data Partnership -- Ingests partner-sourced intelligence feeds for expanded coverage of compromised credential sources.",
+                "label": "Data Partnership — Ingests partner-sourced intelligence feeds for expanded coverage of compromised credential sources.",
                 "toolTip": "Enables the Data Partnership data poller.",
-                "defaultValue": false
+                "defaultValue": false,
+                "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct)]"
               }
             ],
             "visible": true
@@ -1394,26 +1625,30 @@
     "outputs": {
       "location": "[location()]",
       "deploymentMode": "[steps('workspaceConfig').sectionDeployMode.deploymentMode]",
-      "workspaceMode": "[steps('workspaceConfig').sectionWorkspace.workspaceMode]",
-      "newWorkspaceName": "[if(equals(steps('workspaceConfig').sectionWorkspace.workspaceMode, 'new'), steps('workspaceConfig').sectionWorkspace.newWorkspaceName, '')]",
-      "existingWorkspaceName": "[if(equals(steps('workspaceConfig').sectionWorkspace.workspaceMode, 'existing'), steps('workspaceConfig').sectionWorkspace.existingWorkspaceSelector, '')]",
-      "workspaceSku": "[steps('workspaceConfig').sectionWorkspace.workspaceSku]",
-      "dataRetention": "[steps('workspaceConfig').sectionWorkspace.dataRetention]",
+      "createNewWorkspace": "[equals(steps('workspaceConfig').sectionWorkspace.workspaceMode, 'new')]",
+      "workspace": "[if(equals(steps('workspaceConfig').sectionWorkspace.workspaceMode, 'new'), steps('workspaceConfig').sectionWorkspace.newWorkspaceName, steps('workspaceConfig').sectionWorkspace.existingWorkspaceSelector)]",
+      "workspacePricingTier": "[steps('workspaceConfig').sectionWorkspace.workspaceSku]",
+      "retentionInDays": "[steps('workspaceConfig').sectionWorkspace.dataRetention]",
 
-      "spycloudApiKey": "[steps('dataConnector').sectionApiConfig.spycloudApiKey]",
-      "apiTier": "[steps('dataConnector').sectionApiConfig.apiTier]",
+      "apiKey": "[if(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enterpriseApiKey, '')]",
+      "sipApiKey": "[if(steps('dataConnector').sectionApiConfig.enableSipProduct, steps('dataConnector').sectionApiConfig.sipProductApiKey, '')]",
+      "investigationsApiKey": "[if(steps('dataConnector').sectionApiConfig.enableInvestigationsProduct, steps('dataConnector').sectionApiConfig.investigationsProductApiKey, '')]",
+      "idlinkApiKey": "[if(steps('dataConnector').sectionApiConfig.enableIdLinkProduct, steps('dataConnector').sectionApiConfig.idlinkProductApiKey, '')]",
+      "dataPartnershipApiKey": "[if(steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct, steps('dataConnector').sectionApiConfig.dataPartnershipProductApiKey, '')]",
+      "exposureApiKey": "[if(steps('dataConnector').sectionApiConfig.enableExposureProduct, steps('dataConnector').sectionApiConfig.exposureProductApiKey, '')]",
+      "capApiKey": "[if(steps('dataConnector').sectionApiConfig.enableCapProduct, steps('dataConnector').sectionApiConfig.capProductApiKey, '')]",
       "pollingInterval": "[steps('dataConnector').sectionApiConfig.pollingInterval]",
-      "dceName": "[steps('dataConnector').sectionDataCollection.dceName]",
-      "dcrName": "[steps('dataConnector').sectionDataCollection.dcrName]",
-      "enableBreachWatchlist": "[steps('dataConnector').sectionPollers.enableBreachWatchlist]",
-      "enableBreachCatalog": "[steps('dataConnector').sectionPollers.enableBreachCatalog]",
-      "enableCompass": "[steps('dataConnector').sectionPollers.enableCompass]",
-      "enableSIP": "[steps('dataConnector').sectionPollers.enableSIP]",
-      "enableInvestigations": "[steps('dataConnector').sectionPollers.enableInvestigations]",
-      "enableIDLink": "[steps('dataConnector').sectionPollers.enableIDLink]",
-      "enableExposure": "[steps('dataConnector').sectionPollers.enableExposure]",
-      "enableCAP": "[steps('dataConnector').sectionPollers.enableCAP]",
-      "enableDataPartnership": "[steps('dataConnector').sectionPollers.enableDataPartnership]",
+      "dataCollectionEndpointName": "[steps('dataConnector').sectionDataCollection.dceName]",
+      "dataCollectionRuleName": "[steps('dataConnector').sectionDataCollection.dcrName]",
+      "enableBreachWatchlist": "[if(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionPollers.enableBreachWatchlist, false)]",
+      "enableBreachCatalog": "[if(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionPollers.enableBreachCatalog, false)]",
+      "enableCompass": "[if(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionPollers.enableCompass, false)]",
+      "enableSip": "[if(or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableSipProduct), steps('dataConnector').sectionPollers.enableSIP, false)]",
+      "enableInvestigations": "[if(or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableInvestigationsProduct), steps('dataConnector').sectionPollers.enableInvestigations, false)]",
+      "enableIdLink": "[if(or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableIdLinkProduct), steps('dataConnector').sectionPollers.enableIDLink, false)]",
+      "enableExposure": "[if(or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableExposureProduct), steps('dataConnector').sectionPollers.enableExposure, false)]",
+      "enableCAP": "[if(or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableCapProduct), steps('dataConnector').sectionPollers.enableCAP, false)]",
+      "enableDataPartnership": "[if(or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct), steps('dataConnector').sectionPollers.enableDataPartnership, false)]",
 
       "enableCoreDetectionRules": "[steps('analyticsRules').sectionCoreDetection.enableCoreDetectionRules]",
       "enableO365EntraRules": "[steps('analyticsRules').sectionO365Entra.enableO365EntraRules]",
