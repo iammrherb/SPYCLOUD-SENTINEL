@@ -380,6 +380,30 @@
         },
         "investigationsApiKey": {
             "value": ""
+        },
+        "enableIdLink": {
+            "value": false
+        },
+        "idlinkApiKey": {
+            "value": ""
+        },
+        "enableDataPartnership": {
+            "value": false
+        },
+        "dataPartnershipApiKey": {
+            "value": ""
+        },
+        "enableExposure": {
+            "value": false
+        },
+        "exposureApiKey": {
+            "value": ""
+        },
+        "enableCAP": {
+            "value": false
+        },
+        "capApiKey": {
+            "value": ""
         }
     }
 }
