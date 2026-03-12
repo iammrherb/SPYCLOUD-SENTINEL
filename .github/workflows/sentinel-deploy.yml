@@ -7,19 +7,6 @@
 name: SpyCloud Sentinel Deploy
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'azuredeploy.json'
-      - 'mainTemplate.json'
-      - 'createUiDefinition.json'
-      - 'playbooks/**'
-      - 'workbooks/**'
-      - 'analytics-rules/**'
-      - 'templates/**'
-      - 'hunting-queries.json'
-  pull_request:
-    branches: [main]
   workflow_dispatch:
     inputs:
       environment:

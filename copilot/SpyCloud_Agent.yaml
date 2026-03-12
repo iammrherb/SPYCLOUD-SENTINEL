@@ -1,7 +1,7 @@
 Descriptor:
   Name: SpyCloud.ThreatIntelligence.SentinelAgent
   DisplayName: SpyCloud Investigation Agent
-  Description: "Autonomous agent orchestrating 23 sub-agents across 9 SpyCloud APIs (Enterprise, Compass, SIP, Identity, Investigations, IDLINK, Data Partnership, Exposure, CAP) to investigate credential exposure, infostealers, identity threats, identity correlations, partner intelligence, exposure risk, and credential automated protection across 14 Sentinel tables, Defender XDR, Intune, and Entra ID."
+  Description: "Autonomous agent with 23 sub-agents investigating threats across 9 SpyCloud APIs, 14 Sentinel tables, Defender XDR, Intune, and Entra ID."
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
