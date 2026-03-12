@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "title": "SpyCloud - Disable Account",
+    "description": "Immediately disables Entra ID user accounts confirmed as compromised by SpyCloud infostealer data. Performs account disable, session revocation, and OAuth permission audit. Use for high-severity incidents where immediate containment is required. Accounts must be manually re-enabled after investigation.",
+    "prerequisites": [
+      "Managed Identity requires User.ReadWrite.All and Directory.ReadWrite.All permissions",
+      "Approval workflow recommended before automated disable for non-critical accounts"
+    ],
+    "postDeployment": [
+      "Grant the Logic App managed identity User.ReadWrite.All and Directory.ReadWrite.All",
+      "Configure incident tag 'RequiresReEnablement' watchlist for tracking",
+      "Set up notification for disabled accounts requiring re-enablement"
+    ],
+    "lastUpdateTime": "2026-03-12T00:00:00.000Z",
+    "support": {
+      "tier": "Community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": ["Security - Automation (SOAR)"]
+    },
+    "tags": ["Remediation", "AccountDisable", "Containment", "SpyCloud"]
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-DisableAccount"
+    }
+  },
+  "resources": []
+}
