@@ -31,32 +31,42 @@ Descriptor:
   - Name: SpyCloudApiKey
     Description: "OPTIONAL — Your SpyCloud Enterprise/Compass API key value (e.g., 'abc123def456...'). Enables API-backed skills that call SpyCloud REST APIs directly for real-time data. Find it at portal.spycloud.com > Account Settings > API Keys. Enter ONLY the key value — NOT the header name 'X-API-Key'. If omitted, the Agent still works using KQL skills against your Sentinel data."
     HintText: "Paste your SpyCloud API key value here (just the key, not 'X-API-Key')"
-    SettingType: string
+    SettingType: SecretString
+    Required: false
+  - Name: InvestigationsApiKey
+    Description: "OPTIONAL — SEPARATE API key for SpyCloud Investigations API (/investigations-v2/). Provides the BROADEST dataset including phishing-sourced credentials, paste site exposures, combo lists, and dark web forum dumps — data that Enterprise/Compass do NOT have. Requires a dedicated key from SpyCloud. If blank, Investigations API skills will not be available."
+    HintText: "Paste your SpyCloud Investigations API key here (separate from Enterprise key)"
+    SettingType: SecretString
+    Required: false
+  - Name: SipApiKey
+    Description: "OPTIONAL — Separate API key for SpyCloud Session Identity Protection (SIP) API. Required for stolen session cookie lookups and MFA bypass detection. Only needed if you have a SIP entitlement. If blank, SIP skills will not be available."
+    HintText: "Paste your SpyCloud SIP API key here"
+    SettingType: SecretString
     Required: false
   - Name: IdLinkApiKey
     Description: "OPTIONAL — Separate IDLINK API key value for identity correlation lookups. Only needed if you have a dedicated IDLINK key from SpyCloud. Enter the key value only. If blank, the primary SpyCloudApiKey is used for IDLINK calls."
     HintText: "Paste IDLINK API key value, or leave blank"
-    SettingType: string
+    SettingType: SecretString
     Required: false
   - Name: DataPartnershipApiKey
     Description: "OPTIONAL — Separate Data Partnership API key value. Only needed if you have a dedicated Data Partnership key from SpyCloud. Enter the key value only."
     HintText: "Paste Data Partnership API key value, or leave blank"
-    SettingType: string
+    SettingType: SecretString
     Required: false
   - Name: ExposureApiKey
     Description: "OPTIONAL — Separate Exposure API key value for risk assessments. Only needed if you have a dedicated Exposure key from SpyCloud. Enter the key value only."
     HintText: "Paste Exposure API key value, or leave blank"
-    SettingType: string
+    SettingType: SecretString
     Required: false
   - Name: CAPApiKey
     Description: "OPTIONAL — Separate CAP API key value for credential automated protection. Only needed if you have a dedicated CAP key from SpyCloud. Enter the key value only."
     HintText: "Paste CAP API key value, or leave blank"
-    SettingType: string
+    SettingType: SecretString
     Required: false
   - Name: OpenAIApiKey
     Description: "OPTIONAL — OpenAI API key (from platform.openai.com, NOT Azure OpenAI). This is a standard OpenAI API key starting with 'sk-...'. Enables 12 advanced AI analysis skills including executive reports, board presentations, predictive analytics, and threat narratives using GPT-4o. This is NOT related to Microsoft Azure OpenAI Service — it is a direct OpenAI subscription. If omitted, the Agent works fully without AI-generated analysis."
     HintText: "Paste your OpenAI API key (starts with 'sk-...') from platform.openai.com"
-    SettingType: string
+    SettingType: SecretString
     Required: false
   SupportedAuthTypes:
   - None
@@ -6148,7 +6158,7 @@ SkillGroups:
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence across 9 SpyCloud APIs (Enterprise, Compass, SIP, Identity, Investigations, IDLINK, Data Partnership, Exposure, CAP) and 14 Sentinel tables. Orchestrates 26 specialized sub-agents including Investigations API deep-dive (broadest dataset: phishing + paste sites + combo lists + forum dumps), Enhanced Threat Research (CVE/TLP/IOC/dark web analysis), Communication Templates (user/customer/regulatory notifications), plus UEBA, Fusion, TI Enrichment, Session Cookie/MFA Bypass, Lateral Movement, Data Exfiltration, Executive Summary, Watchlist Management, Ransomware Assessment, Identity Risk Scoring, Supply Chain Exposure, Dark Web Monitoring, Defender XDR, Intune Compliance, CASB Cloud App, Compass Deep Investigation, IDLINK Correlation, Data Partnership Intelligence, Exposure Risk, CAP Response, OpenAI Advanced Analysis, and Cross-API Investigation. Features 18 GPT-4o AI skills (including threat research, communication drafting, CVE analysis, TLP classification), Jupyter notebook integration guidance, and super-enriched cross-source investigations. Compatible with SpyCloud KQL Plugin (120+ skills) and SpyCloud API Plugin (38+ skills)."
+  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence across 9 SpyCloud APIs and 14 Sentinel tables with 26 specialized sub-agents and 18 GPT-4o AI analysis skills."
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other
@@ -6159,67 +6169,6 @@ AgentDefinitions:
   AgentSingleInstanceConstraint: None
   SupportedAuthTypes:
   - None
-  Settings:
-  - Name: TenantId
-    Label: Azure Tenant ID (GUID)
-    Description: Azure Tenant ID in GUID format (e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Must be a valid GUID — do NOT enter a domain name or URL.
-    HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
-    SettingType: string
-    Required: true
-  - Name: SubscriptionId
-    Label: Azure Subscription ID
-    Description: Your Azure Subscription ID
-    HintText: Enter your Azure Subscription ID
-    SettingType: string
-    Required: true
-  - Name: ResourceGroupName
-    Label: Resource Group Name
-    Description: Resource Group containing your Sentinel workspace
-    HintText: Enter Resource Group name
-    SettingType: string
-    Required: true
-  - Name: WorkspaceName
-    Label: Sentinel Workspace Name
-    Description: Name of the Log Analytics workspace with SpyCloud data
-    HintText: Enter workspace name
-    SettingType: string
-    Required: true
-  - Name: SpyCloudApiKey
-    Label: SpyCloud API Key
-    Description: SpyCloud API key for direct API access via companion API Plugin (optional)
-    HintText: Enter SpyCloud API key for API Plugin integration
-    SettingType: string
-    Required: false
-  - Name: IdLinkApiKey
-    Label: SpyCloud IDLINK API Key
-    Description: SpyCloud IDLINK API key for identity correlation lookups (optional)
-    HintText: Enter your SpyCloud IDLINK API key
-    SettingType: string
-    Required: false
-  - Name: DataPartnershipApiKey
-    Label: SpyCloud Data Partnership API Key
-    Description: SpyCloud Data Partnership API key (optional)
-    HintText: Enter your SpyCloud Data Partnership API key
-    SettingType: string
-    Required: false
-  - Name: ExposureApiKey
-    Label: SpyCloud Exposure API Key
-    Description: SpyCloud Exposure API key for risk assessments (optional)
-    HintText: Enter your SpyCloud Exposure API key
-    SettingType: string
-    Required: false
-  - Name: CAPApiKey
-    Label: SpyCloud CAP API Key
-    Description: SpyCloud CAP API key for credential automated protection (optional)
-    HintText: Enter your SpyCloud CAP API key
-    SettingType: string
-    Required: false
-  - Name: OpenAIApiKey
-    Label: OpenAI API Key
-    Description: OpenAI API key for advanced AI analysis and executive report generation (optional)
-    HintText: Enter your OpenAI API key
-    SettingType: string
-    Required: false
   Triggers:
   - Name: Default
     DefaultPollPeriodSeconds: 0
