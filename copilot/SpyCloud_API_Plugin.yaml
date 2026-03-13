@@ -22,27 +22,37 @@ Descriptor:
     - Name: SpyCloudApiKey
       Description: "REQUIRED — Your SpyCloud Enterprise/Compass API key. This is the actual API key string (e.g., 'abc123def456...'). Find it at portal.spycloud.com > Account Settings > API Keys. This same key is also sent as the X-API-Key header automatically — you do NOT need to enter 'X-API-Key' here, just the key value itself. This key also covers Compass and Identity Exposure APIs (shared key)."
       HintText: "Paste your SpyCloud API key value here (NOT 'X-API-Key', just the key itself)"
-      SettingType: string
+      SettingType: SecretString
       Required: true
+    - Name: InvestigationsApiKey
+      Description: "OPTIONAL — SEPARATE API key for SpyCloud Investigations API (/investigations-v2/). This API provides the BROADEST dataset including phishing-sourced credentials, paste site exposures, combo lists, and dark web forum dumps — data that Enterprise/Compass do NOT have. Requires a dedicated Investigations API key from SpyCloud, distinct from your Enterprise key. If blank, Investigations API skills will not be available."
+      HintText: "Paste your SpyCloud Investigations API key here (separate from Enterprise key)"
+      SettingType: SecretString
+      Required: false
+    - Name: SipApiKey
+      Description: "OPTIONAL — Separate API key for SpyCloud Session Identity Protection (SIP) API. Required for stolen session cookie lookups and MFA bypass detection. Only needed if you have a SIP entitlement from SpyCloud. If blank, SIP skills will not be available."
+      HintText: "Paste your SpyCloud SIP API key here"
+      SettingType: SecretString
+      Required: false
     - Name: IdLinkApiKey
       Description: "OPTIONAL — Separate API key for SpyCloud IDLINK identity correlation endpoints. Only needed if you have a dedicated IDLINK key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value (e.g., 'xyz789...'), NOT the header name."
       HintText: "Paste IDLINK API key value here, or leave blank to use primary key"
-      SettingType: string
+      SettingType: SecretString
       Required: false
     - Name: DataPartnershipApiKey
       Description: "OPTIONAL — Separate API key for SpyCloud Data Partnership endpoints. Only needed if you have a dedicated Data Partnership key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value."
       HintText: "Paste Data Partnership API key value here, or leave blank to use primary key"
-      SettingType: string
+      SettingType: SecretString
       Required: false
     - Name: ExposureApiKey
       Description: "OPTIONAL — Separate API key for SpyCloud Exposure risk assessment endpoints. Only needed if you have a dedicated Exposure key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value."
       HintText: "Paste Exposure API key value here, or leave blank to use primary key"
-      SettingType: string
+      SettingType: SecretString
       Required: false
     - Name: CAPApiKey
       Description: "OPTIONAL — Separate API key for SpyCloud CAP (Credential Automated Protection) endpoints. Only needed if you have a dedicated CAP key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value."
       HintText: "Paste CAP API key value here, or leave blank to use primary key"
-      SettingType: string
+      SettingType: SecretString
       Required: false
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
 
