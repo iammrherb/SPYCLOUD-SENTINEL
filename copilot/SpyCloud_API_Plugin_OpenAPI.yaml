@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: SpyCloud Darknet & Identity Threat Exposure Intelligence API
-  version: 9.0.0
-  description: "SpyCloud API for Microsoft Security Copilot providing REST access to recaptured darknet data including compromised credentials, infostealer infections, stolen session cookies, identity exposures, identity correlation, partner breach data, exposure risk assessments, and credential access program actions via the Enterprise Breach, Compass, Identity, Session Identity Protection (SIP), Investigations, IDLINK, Data Partnership, Exposure, and CAP APIs."
+  version: 10.0.0
+  description: "SpyCloud API for Microsoft Security Copilot providing REST access to recaptured darknet data including compromised credentials, infostealer infections, stolen session cookies, identity exposures, identity correlation, partner breach data, exposure risk assessments, and credential access program actions via ALL 9 SpyCloud APIs: Enterprise Breach, Compass Investigation, Identity Exposure, Session Identity Protection (SIP), Investigations (broadest dataset — phishing/paste sites/combo lists/forum dumps, requires SEPARATE API key), IDLINK (identity correlation, separate key), Data Partnership (partner intelligence, separate key), Exposure (risk assessment, separate key), and CAP (credential automated protection, separate key). Enterprise and Compass share a single API key. Each other API may require its own dedicated key based on your SpyCloud entitlements."
   contact:
     name: SpyCloud Support
     url: https://spycloud.com/support
