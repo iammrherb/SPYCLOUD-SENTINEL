@@ -1,10 +1,10 @@
 Descriptor:
   Name: SpyCloudAPIPlugin
   DisplayName: SpyCloud API Plugin
-  Description: "REST API access to 9 SpyCloud APIs for real-time darknet intelligence: Enterprise, Compass, Identity, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP."
+  Description: "REST API access to 9 SpyCloud APIs for real-time darknet intelligence: Enterprise, Compass, Identity, SIP, Investigations (broadest dataset — phishing/paste sites/combo lists), IDLINK, Data Partnership, Exposure, and CAP. Investigations API is DISTINCT from Enterprise/Compass and requires a separate API key."
   DescriptionDisplay: default
   Category: Other
-  Version: 9.0.0
+  Version: 10.0.0
   SupportedAuthTypes:
     - APIKey
   Authorization:
@@ -483,12 +483,15 @@ SkillGroups:
           OpenApiOperationId: sipGetBreachCatalogEntry
 
       # =====================================================================
-      # INVESTIGATIONS API - CYBERCRIME INVESTIGATIONS
+      # INVESTIGATIONS API - BROADEST DATASET (DISTINCT from Enterprise/Compass)
+      # The Investigations API (/investigations-v2/*) covers ALL source types:
+      # breaches + infostealers + phishing + paste sites + combo lists + forum dumps
+      # It requires a SEPARATE API key from Enterprise/Compass.
       # =====================================================================
 
       - Name: InvestigateByEmail
-        DisplayName: Investigate email across full SpyCloud database
-        Description: "Queries the SpyCloud Investigations API for all records associated with an email address across the entire SpyCloud database including breaches, infostealers, phishing, paste sites, and combo lists. Provides the broadest dataset for cybercrime investigators performing link analysis and identity attribution. Requires Investigations API entitlement."
+        DisplayName: "[Investigations API] Investigate email across FULL SpyCloud database"
+        Description: "DISTINCT FROM ENTERPRISE/COMPASS — Queries the SpyCloud Investigations API (/investigations-v2/data/emails/) for ALL records across the BROADEST dataset: standard breaches, infostealers, phishing-sourced credentials, paste site exposures, combo lists, and dark web forum dumps. Returns data that Enterprise and Compass do NOT have (phishing, paste sites, combo lists). Requires a SEPARATE Investigations API key — NOT the Enterprise/Compass key."
         ExamplePrompts:
           - Investigate this email across all SpyCloud data
           - Run a full SpyCloud investigation on this email
@@ -515,8 +518,8 @@ SkillGroups:
           OpenApiOperationId: investigateByEmail
 
       - Name: InvestigateByDomain
-        DisplayName: Investigate domain across full SpyCloud database
-        Description: "Queries the SpyCloud Investigations API for all records under a domain across the full database. Returns breaches, infostealer infections, phishing captures, and paste data for all identities at the domain."
+        DisplayName: "[Investigations API] Investigate domain across FULL SpyCloud database"
+        Description: "DISTINCT FROM ENTERPRISE/COMPASS — Queries the SpyCloud Investigations API (/investigations-v2/data/domains/) for ALL records under a domain across the broadest dataset. Returns breaches, infostealer infections, phishing captures, paste site data, combo lists, and forum dumps. Provides coverage that Enterprise domain lookups miss. Requires SEPARATE Investigations API key."
         ExamplePrompts:
           - Investigate this domain across all SpyCloud data
           - Run a full investigation on this domain
@@ -542,8 +545,8 @@ SkillGroups:
           OpenApiOperationId: investigateByDomain
 
       - Name: InvestigateByIp
-        DisplayName: Investigate IP across full SpyCloud database
-        Description: "Queries the SpyCloud Investigations API for all records linked to an IP address. Returns breach, infostealer, and botnet data tied to the IP including all associated identities."
+        DisplayName: "[Investigations API] Investigate IP across FULL SpyCloud database"
+        Description: "DISTINCT FROM ENTERPRISE/COMPASS — Queries the SpyCloud Investigations API (/investigations-v2/data/ips/) for ALL records linked to an IP address across the broadest dataset. Returns breach, infostealer, phishing, paste site, and botnet data tied to the IP. Requires SEPARATE Investigations API key."
         ExamplePrompts:
           - Investigate this IP across all SpyCloud data
           - Run a full investigation on this IP address
@@ -569,8 +572,8 @@ SkillGroups:
           OpenApiOperationId: investigateByIp
 
       - Name: InvestigateByUsername
-        DisplayName: Investigate username across full SpyCloud database
-        Description: "Queries the SpyCloud Investigations API for all records linked to a username. Useful for investigating forum handles, service accounts, or non-email identifiers tied to cybercrime activity."
+        DisplayName: "[Investigations API] Investigate username across FULL SpyCloud database"
+        Description: "DISTINCT FROM ENTERPRISE/COMPASS — Queries the SpyCloud Investigations API (/investigations-v2/data/usernames/) for ALL records linked to a username across the broadest dataset. Useful for investigating forum handles, service accounts, or non-email identifiers tied to cybercrime activity. Requires SEPARATE Investigations API key."
         ExamplePrompts:
           - Investigate this username across all SpyCloud data
           - Search SpyCloud Investigations for this username
@@ -596,8 +599,8 @@ SkillGroups:
           OpenApiOperationId: investigateByUsername
 
       - Name: InvestigateByPassword
-        DisplayName: Investigate password across full SpyCloud database
-        Description: "Queries the SpyCloud Investigations API for all records containing a specific password. Returns all accounts and identities that used this password, enabling credential reuse analysis and link analysis across threat actor personas."
+        DisplayName: "[Investigations API] Investigate password across FULL SpyCloud database"
+        Description: "DISTINCT FROM ENTERPRISE/COMPASS — Queries the SpyCloud Investigations API (/investigations-v2/data/passwords/) for ALL records containing a specific password across the broadest dataset. Enables credential reuse analysis and link analysis across threat actor personas. Requires SEPARATE Investigations API key."
         ExamplePrompts:
           - Search SpyCloud Investigations for this password
           - What accounts use this password according to SpyCloud
