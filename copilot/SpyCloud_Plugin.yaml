@@ -1,10 +1,10 @@
 Descriptor:
   Name: SpyCloudKQLPlugin
   DisplayName: SpyCloud Sentinel KQL Plugin
-  Description: "KQL plugin querying 14 SpyCloud Sentinel tables for credential exposure, breach catalog, device forensics, identity correlation, and remediation audit."
+  Description: "KQL plugin querying 14 SpyCloud Sentinel tables for credential exposure, breach catalog, device forensics, identity correlation, remediation audit, and Investigations API deep-dive with breach category analysis."
   Category: Other
   DescriptionDisplay: default
-  Version: 9.0.0
+  Version: 10.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId
@@ -3706,3 +3706,119 @@ SkillGroups:
             SpyCloudInvestigations_CL
             | where TimeGenerated > ago(30d)
             | summarize TotalRecords = count(), UniqueEmails = dcount(email), UniqueDomains = dcount(email_domain), UniqueUsernames = dcount(username), UniqueTargetDomains = dcount(target_domain), UniqueDevices = dcount(infected_machine_id), UniqueMalware = dcount(malware_family), MaxSeverity = max(severity), AvgSeverity = round(avg(severity), 1), UniqueBreachCategories = dcount(breach_category)
+
+      # === Investigations API Enriched Queries (DISTINCT from Enterprise/Compass) ===
+
+      - Name: GetInvestigationsBreachCategoryBreakdown
+        DisplayName: Investigations API data by breach category
+        Description: "Breaks down SpyCloud Investigations API data by breach category showing the UNIQUE source types (phishing, paste sites, combo lists, forum dumps) that are NOT available in standard Enterprise data. Highlights the additional coverage Investigations provides."
+        ExamplePrompts:
+          - Show investigation data by breach category
+          - What source types does the Investigations API cover
+          - Break down investigations by phishing, paste sites, combo lists
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudInvestigations_CL
+            | where TimeGenerated > ago(30d)
+            | summarize Records = count(), UniqueEmails = dcount(email), MaxSeverity = max(severity), PlaintextPwds = countif(password_type == "plaintext"), UniqueTargets = dcount(target_domain), LatestRecord = max(TimeGenerated) by breach_category
+            | extend IsInvestigationsOnly = iff(breach_category in ("phishing", "paste_site", "combo_list", "forum_dump"), "UNIQUE to Investigations API", "Also in Enterprise")
+            | order by Records desc
+
+      - Name: GetInvestigationsVsEnterpriseComparison
+        DisplayName: Compare Investigations vs Enterprise coverage
+        Description: "Side-by-side comparison of Investigations API vs Enterprise data for the organization, showing total records, unique categories, and the coverage gap — what percentage of total exposure is ONLY visible through the Investigations API."
+        ExamplePrompts:
+          - Compare Investigations API vs Enterprise data
+          - What does Investigations find that Enterprise misses
+          - Show the coverage gap between Investigations and Enterprise
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let inv = SpyCloudInvestigations_CL | where TimeGenerated > ago(30d) | summarize Inv_Records = count(), Inv_Emails = dcount(email), Inv_MaxSev = max(severity), Inv_Categories = dcount(breach_category), Inv_Malware = dcount(malware_family);
+            let ent = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize Ent_Records = count(), Ent_Emails = dcount(email_s), Ent_MaxSev = max(severity_d), Ent_Malware = dcount(malware_family_s);
+            inv | join kind=fullouter ent on $left.Inv_Records == $right.Ent_Records
+            | project-away Inv_Records1
+            | extend InvestigationsOnlyRecords = Inv_Records - Ent_Records, CoverageGapPct = iff(Inv_Records > 0, round(100.0 * (Inv_Records - Ent_Records) / Inv_Records, 1), 0.0), Summary = "Investigations API provides the broadest SpyCloud dataset including phishing, paste sites, combo lists, and forum dumps NOT in Enterprise"
+
+      - Name: GetInvestigationsPhishingExposures
+        DisplayName: Find phishing-sourced credential exposures (Investigations only)
+        Description: "Finds credentials harvested from phishing kits and credential harvesting sites — a source type UNIQUE to the SpyCloud Investigations API not available in Enterprise or Compass."
+        ExamplePrompts:
+          - Show phishing-sourced credential exposures
+          - Find credentials stolen via phishing
+          - What phishing exposures do we have
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudInvestigations_CL
+            | where TimeGenerated > ago(90d)
+            | where breach_category =~ "phishing"
+            | summarize Records = count(), UniqueEmails = dcount(email), PlaintextPwds = countif(password_type == "plaintext"), UniqueTargets = dcount(target_domain), UniqueSources = dcount(source_id), LatestExposure = max(TimeGenerated) by email_domain
+            | extend Note = "Phishing-sourced credentials are UNIQUE to the Investigations API"
+            | order by Records desc
+            | take 50
+
+      - Name: GetInvestigationsComboListExposures
+        DisplayName: Find combo list credential exposures (Investigations only)
+        Description: "Finds credentials from aggregated combo lists traded on dark web forums — a source type UNIQUE to the SpyCloud Investigations API not available in Enterprise or Compass."
+        ExamplePrompts:
+          - Show combo list exposures
+          - Find credentials in combo lists
+          - What combo list data do we have
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            SpyCloudInvestigations_CL
+            | where TimeGenerated > ago(90d)
+            | where breach_category =~ "combo_list"
+            | summarize Records = count(), UniqueEmails = dcount(email), PlaintextPwds = countif(password_type == "plaintext"), UniqueSources = dcount(source_id), Sightings = sum(sighting), LatestExposure = max(TimeGenerated) by email_domain
+            | extend Note = "Combo list exposures are UNIQUE to the Investigations API"
+            | order by Records desc
+            | take 50
+
+      - Name: GetInvestigationsSuperEnriched
+        DisplayName: Super-enriched investigation combining all tables
+        Description: "Creates a super-enriched investigation view by combining Investigations API data with Enterprise breach data, Compass forensics, IDLINK correlations, and remediation logs for a specific user. This is the most comprehensive single query across all SpyCloud data sources."
+        Inputs:
+          - Name: UserEmail
+            Description: Email address to investigate across ALL SpyCloud data sources
+            Required: true
+        ExamplePrompts:
+          - Run a super-enriched investigation on this user
+          - Combine all SpyCloud data sources for this email
+          - Full cross-table investigation using Investigations API
+        Settings:
+          Target: Sentinel
+          TenantId: '{{TenantId}}'
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroupName: '{{ResourceGroupName}}'
+          WorkspaceName: '{{WorkspaceName}}'
+          Template: |-
+            let target = "{{UserEmail}}";
+            let inv = SpyCloudInvestigations_CL | where TimeGenerated > ago(90d) and email =~ target | summarize Inv_Records = count(), Inv_Categories = make_set(breach_category), Inv_MaxSev = max(severity), Inv_Malware = make_set(malware_family), Inv_Targets = make_set(target_domain, 10);
+            let ent = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(90d) and email_s =~ target | summarize Ent_Records = count(), Ent_MaxSev = max(severity_d), Ent_Malware = make_set(malware_family_s);
+            let compass = SpyCloudCompassData_CL | where TimeGenerated > ago(90d) and email_s =~ target | summarize Compass_Records = count(), Compass_MaxSev = max(severity_d);
+            let idlink = SpyCloudIdLink_CL | where TimeGenerated > ago(90d) and email_s =~ target | summarize IdLink_Records = count(), LinkedIdentities = dcount(linked_email_s);
+            let remediation = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(90d) and email_s =~ target | summarize Remediation_Actions = count(), PwdResets = countif(action_s =~ "password_reset"), SessionRevokes = countif(action_s =~ "session_revoke");
+            inv | join kind=fullouter ent on $left.Inv_Records == $right.Ent_Records
+            | join kind=fullouter compass on $left.Inv_Records == $right.Compass_Records
+            | join kind=fullouter idlink on $left.Inv_Records == $right.IdLink_Records
+            | join kind=fullouter remediation on $left.Inv_Records == $right.Remediation_Actions
+            | project Investigations_Records = Inv_Records, Investigations_Categories = Inv_Categories, Enterprise_Records = Ent_Records, Compass_Records, IdLink_Records, LinkedIdentities, Remediation_Actions, PwdResets, SessionRevokes, MaxSeverity = max_of(Inv_MaxSev, Ent_MaxSev, Compass_MaxSev), MalwareFamilies = Inv_Malware, TopTargets = Inv_Targets

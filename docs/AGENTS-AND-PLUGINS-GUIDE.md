@@ -7,7 +7,7 @@
 
 **From Helpdesk Hero to CISO Sensei — This Guide Has You Covered**
 
-![Version](https://img.shields.io/badge/version-9.0.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
+![Version](https://img.shields.io/badge/version-10.0.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
 ![Copilot](https://img.shields.io/badge/Security_Copilot-Enabled-6366F1?style=flat-square&logo=githubcopilot&logoColor=white)
 
 </div>
@@ -25,12 +25,16 @@
 7. [API Keys & The "Value" Field — Demystified](#api-keys-demystified)
 8. [OpenAI API — What It Is and What It Isn't](#openai-clarification)
 9. [Health Check & Testing — Validate Everything Works](#health-check-testing)
-10. [Connector Ecosystem & Recommendations](#connector-ecosystem)
-11. [Your 14 Custom Tables](#custom-tables)
-12. [Use Cases by Role](#use-cases-by-role)
-13. [Optimization Tips & Best Practices](#optimization)
-14. [Troubleshooting Guide](#troubleshooting)
-15. [Admin Recommendations Checklist](#admin-checklist)
+10. [Investigations API — The Broadest Dataset (DISTINCT from Enterprise/Compass)](#investigations-api)
+11. [Enhanced Threat Research — CVE, TLP, IOC, Dark Web](#enhanced-threat-research)
+12. [Communication Templates — Notifying Users, Customers, Regulators](#communication-templates)
+13. [Jupyter Notebook Integration](#notebook-integration)
+14. [Connector Ecosystem & Recommendations](#connector-ecosystem)
+15. [Your 14 Custom Tables](#custom-tables)
+16. [Use Cases by Role](#use-cases-by-role)
+17. [Optimization Tips & Best Practices](#optimization)
+18. [Troubleshooting Guide](#troubleshooting)
+19. [Admin Recommendations Checklist](#admin-checklist)
 
 ---
 
@@ -41,11 +45,11 @@
 
 | Component | Type | What It Does | Skills |
 |-----------|------|-------------|--------|
-| **SpyCloud Investigation Agent** | Agent | Interactive conversational analyst that orchestrates **23 sub-agents** with **12 GPT-4o AI analysis skills** and **65+ KQL data skills** | 100+ |
-| **SpyCloud KQL Plugin** | Plugin (KQL) | Pre-built Kusto queries against **14 Sentinel custom tables** | 120+ |
+| **SpyCloud Investigation Agent** | Agent | Interactive conversational analyst that orchestrates **26 sub-agents** with **18 GPT-4o AI analysis skills** and **68+ KQL data skills** | 115+ |
+| **SpyCloud KQL Plugin** | Plugin (KQL) | Pre-built Kusto queries against **14 Sentinel custom tables** including Investigations API enriched queries | 128+ |
 | **SpyCloud API Plugin** | Plugin (API) | Direct REST API access to **all 9 SpyCloud APIs** with health check validation | 38+ |
 
-**Together they give you:** 250+ skills, 23 sub-agents, 14 custom Sentinel tables, coverage across 9 SpyCloud APIs and 11 Microsoft security products.
+**Together they give you:** 280+ skills, 26 sub-agents, 14 custom Sentinel tables, coverage across 9 SpyCloud APIs and 11 Microsoft security products, plus enhanced threat research (CVE/TLP/IOC/dark web), communication templates, and Jupyter notebook integration.
 
 ---
 
@@ -62,7 +66,7 @@ You do NOT need to publish multiple agents. You do NOT need to set up separate a
 |---------------|-----------|-------------------|
 | `SpyCloud_Plugin.yaml` | KQL Plugin (120+ skills) | YES — queries Sentinel data, no API key needed |
 | `SpyCloud_API_Plugin.yaml` | API Plugin (38+ skills) | YES — calls SpyCloud REST APIs directly |
-| `SpyCloud_Agent.yaml` | Investigation Agent (23 sub-agents) | YES — but works BEST when KQL Plugin is also uploaded |
+| `SpyCloud_Agent.yaml` | Investigation Agent (26 sub-agents) | YES — but works BEST when KQL Plugin is also uploaded |
 
 ### How the 3 files relate:
 
@@ -75,7 +79,7 @@ You do NOT need to publish multiple agents. You do NOT need to set up separate a
                     |   | (SpyCloud_Agent.yaml)            |  |
                     |   |                                  |  |
                     |   | The "brain" - orchestrates       |  |
-                    |   | 23 sub-agents, remembers         |  |
+                    |   | 26 sub-agents, remembers         |  |
                     |   | context, chains skills,          |  |
                     |   | provides analysis & advice       |  |
                     |   |                                  |  |
@@ -138,7 +142,7 @@ An **Agent** is a **conversational AI personality** that can:
 - **Make recommendations** ("Based on what I found, here's what I'd do...")
 - **Adapt its communication style** (brief for quick checks, thorough for deep dives)
 - **Interpret vague requests** ("show me stuff" → runs an org-wide exposure assessment)
-- **Orchestrate 23 sub-agents** for specialized investigations
+- **Orchestrate 26 sub-agents** for specialized investigations
 
 **Agents are proactive.** They don't just answer — they investigate, correlate, and advise.
 
@@ -206,7 +210,7 @@ You *can* use parts individually. But the car is a lot more fun.
 
 ### 3. SpyCloud Investigation Agent (`SpyCloud_Agent.yaml`)
 
-**What it does:** An interactive, conversational AI analyst named **SENTINEL** that orchestrates **23 specialized sub-agents** with **12 GPT-4o AI analysis skills** and **65+ KQL data retrieval skills**.
+**What it does:** An interactive, conversational AI analyst named **SENTINEL** that orchestrates **26 specialized sub-agents** with **18 GPT-4o AI analysis skills** and **68+ KQL data retrieval skills**. Includes dedicated Investigations API deep-dive, enhanced threat research (CVE/TLP/IOC/dark web), communication templates, and Jupyter notebook integration.
 
 **Authentication:** None for base functionality (uses Sentinel workspace). Optional API keys for enhanced capabilities.
 
@@ -238,7 +242,7 @@ You *can* use parts individually. But the car is a lot more fun.
 | 22 | OpenAIAdvancedAnalysisAgent | Executive reports, board presentations, predictive analytics |
 | 23 | CrossAPIInvestigationAgent | Multi-API super-orchestrator |
 
-**12 GPT-4o AI Analysis Skills:**
+**18 GPT-4o AI Analysis Skills:**
 
 | Skill | What It Produces |
 |-------|-----------------|
@@ -254,6 +258,24 @@ You *can* use parts individually. But the car is a lot more fun.
 | BuildAttackSimulation | Attack simulation scenarios |
 | GenerateRiskHeatmap | Risk heatmaps by business unit/geography |
 | ComposeIncidentNarrative | Professional incident narratives for post-mortem |
+| **ResearchCVEsAndVulnerabilities** | **CVE analysis for malware families with CVSS/CISA KEV** |
+| **ClassifyTLPLevel** | **TLP v2.0 classification with handling instructions** |
+| **ResearchThreatIntelBlogs** | **Vendor threat intel synthesis (CrowdStrike, Mandiant, etc.)** |
+| **EnrichIOCsWithContext** | **Full IOC enrichment with adversary context** |
+| **ResearchDarkWebCampaigns** | **Dark web ecosystem & campaign analysis** |
+| **DraftUserNotification** | **User notification emails (clear, non-alarming)** |
+| **DraftCustomerCommunication** | **External customer/partner communications** |
+| **DraftStakeholderBriefing** | **Management briefings with KPIs & decisions** |
+| **DraftRegulatoryNotification** | **GDPR/CCPA/HIPAA notification letters** |
+| **DraftSOCHandoff** | **SOC shift handoff documents** |
+
+**3 New Sub-Agents (v10.0.0):**
+
+| Sub-Agent | What It Does |
+|-----------|-------------|
+| **InvestigationsAPIAgent** | Uses SpyCloud's Investigations API (BROADEST dataset: phishing + paste sites + combo lists + forum dumps). DISTINCT from Enterprise/Compass. Creates super-enriched investigations. |
+| **EnhancedThreatResearchAgent** | CVE analysis, TLP classification, blog/whitepaper research, IOC enrichment, dark web campaign & threat actor research |
+| **CommunicationTemplateAgent** | Drafts professional communications for users, customers, stakeholders, regulators, and SOC teams |
 
 ---
 
@@ -478,7 +500,7 @@ curl -s -o /dev/null -w "%{http_code}" \
 | System | What It Is | How It's Used | Do You Need a Key? |
 |--------|-----------|--------------|-------------------|
 | **Microsoft Security Copilot** | Microsoft's security AI product (powered by Azure OpenAI internally) | Processes your prompts, orchestrates plugins, interprets results | NO — it's part of your Security Copilot license |
-| **OpenAI API (optional)** | OpenAI's direct API (platform.openai.com) | Powers 12 advanced AI analysis skills in the Investigation Agent | OPTIONAL — only if you want advanced AI features |
+| **OpenAI API (optional)** | OpenAI's direct API (platform.openai.com) | Powers 18 advanced AI analysis skills including threat research, communication templates | OPTIONAL — only if you want advanced AI features |
 
 ### What Security Copilot Provides (No Extra Key Needed)
 
@@ -491,7 +513,7 @@ Security Copilot already uses Azure OpenAI internally. When you:
 
 ### What the Optional OpenAI Key Adds (12 Extra Skills)
 
-If you provide a standard OpenAI API key (`sk-...` from platform.openai.com), the Investigation Agent gains 12 advanced analysis skills:
+If you provide a standard OpenAI API key (`sk-...` from platform.openai.com), the Investigation Agent gains 18 advanced analysis skills:
 
 - Executive report generation
 - Board presentation materials
@@ -598,7 +620,7 @@ After deploying the solution and uploading plugins, you MUST verify that:
 "What can you help me investigate?"
 ```
 
-**Expected:** SENTINEL responds with its full capability menu including all 23 sub-agents.
+**Expected:** SENTINEL responds with its full capability menu including all 26 sub-agents (with Investigations API, Threat Research, and Communication Templates).
 
 ```
 "Show me an overview of our dark web exposure"
@@ -618,6 +640,151 @@ After deploying the solution and uploading plugins, you MUST verify that:
 | API health check times out | Network/firewall issue | Ensure outbound HTTPS to api.spycloud.io is allowed |
 | Agent doesn't respond | YAML upload failed | Re-upload SpyCloud_Agent.yaml, check for format errors |
 | Agent works but no API data | API Plugin not uploaded or not configured | Upload SpyCloud_API_Plugin.yaml separately |
+
+---
+
+<a name="investigations-api"></a>
+## Investigations API — The Broadest Dataset (DISTINCT from Enterprise/Compass)
+
+### Why This Matters
+
+The SpyCloud Investigations API (`/investigations-v2/*`) is a **completely separate capability** from the Enterprise and Compass APIs. It requires its **own separate API key** — it does **NOT** share the Enterprise/Compass key.
+
+### What Makes Investigations Different
+
+| API | Scope | Key | Best For |
+|-----|-------|-----|----------|
+| **Enterprise** | Standard breach records, credential dumps | Enterprise/Compass shared key | Day-to-day breach monitoring |
+| **Compass** | Deep infostealer forensics (cookies, browser data, C2) | Enterprise/Compass shared key | Infostealer incident response |
+| **Investigations** | **ALL sources**: breaches + infostealers + **phishing** + **paste sites** + **combo lists** + **forum dumps** | **SEPARATE Investigations key** | Comprehensive threat investigations |
+
+### Investigations-Only Source Types
+
+These source types are **UNIQUE** to the Investigations API — Enterprise and Compass do NOT have them:
+
+- **Phishing-sourced credentials**: Credentials harvested from phishing kits and credential harvesting sites
+- **Paste site exposures**: Credentials dumped to Pastebin, Ghostbin, and similar paste sites
+- **Combo lists**: Aggregated credential lists traded on dark web forums
+- **Dark web forum dumps**: Credentials posted directly in dark web forum threads
+
+### How to Use It
+
+**In the Agent**: Ask for an "Investigations API deep dive" or "super-enriched investigation" — the InvestigationsAPIAgent will combine Investigations data with IDLINK + all other APIs + Defender + Sentinel.
+
+**In the KQL Plugin**: Use the new enriched queries:
+- `GetInvestigationsBreachCategoryBreakdown` — See all source types with records counts
+- `GetInvestigationsVsEnterpriseComparison` — Side-by-side coverage gap analysis
+- `GetInvestigationsPhishingExposures` — Phishing-only findings
+- `GetInvestigationsComboListExposures` — Combo list-only findings
+- `GetInvestigationsSuperEnriched` — All SpyCloud tables combined for one user
+
+**In the API Plugin**: The 5 Investigations skills now clearly labeled as `[Investigations API]` — search by email, domain, IP, username, or password.
+
+### Super-Enriched Investigation Workflow
+
+The crown jewel — combines ALL data sources:
+1. **Investigations API**: Broadest dataset (phishing, paste sites, combo lists)
+2. **Enterprise**: Standard breach records with full metadata
+3. **Compass**: Deep infostealer forensics
+4. **IDLINK**: Identity correlations and linked accounts
+5. **Data Partnership**: Partner intelligence
+6. **Exposure**: Risk profiles
+7. **CAP**: Automated protection actions
+8. **Defender XDR**: Endpoint and identity alerts
+9. **Sentinel**: UEBA, Fusion, analytics rules
+
+---
+
+<a name="enhanced-threat-research"></a>
+## Enhanced Threat Research — CVE, TLP, IOC, Dark Web
+
+### New AI-Powered Research Skills (GPT-4o)
+
+The **EnhancedThreatResearchAgent** provides 5 new research capabilities:
+
+| Skill | What It Does |
+|-------|-------------|
+| **ResearchCVEsAndVulnerabilities** | Maps malware families to known CVEs with CVSS scores, CISA KEV status, and patching priorities |
+| **ClassifyTLPLevel** | Classifies threat intel handling per FIRST TLP v2.0 (RED/AMBER+STRICT/AMBER/GREEN/CLEAR) |
+| **ResearchThreatIntelBlogs** | Synthesizes vendor publications (CrowdStrike, Mandiant, etc.) about malware families and threat actors |
+| **EnrichIOCsWithContext** | Full IOC enrichment: malware family, campaign, threat actor, geographic attribution, confidence levels |
+| **ResearchDarkWebCampaigns** | Dark web ecosystem analysis: credential trading patterns, marketplace dynamics, threat actor profiling |
+
+### Example Prompts
+
+- "Research CVEs associated with the malware families targeting our organization"
+- "Classify the TLP level for this threat intelligence finding"
+- "Research recent threat intelligence blogs about LummaC2"
+- "Enrich these IOCs with full context — malware family, campaigns, threat actors"
+- "What dark web forums or marketplaces are selling our credentials?"
+
+---
+
+<a name="communication-templates"></a>
+## Communication Templates — Notifying Users, Customers, Regulators
+
+### New Communication Drafting Skills (GPT-4o)
+
+The **CommunicationTemplateAgent** generates ready-to-use communications for every audience:
+
+| Skill | Audience | Tone |
+|-------|----------|------|
+| **DraftUserNotification** | Affected end users | Supportive, clear, non-alarming |
+| **DraftCustomerCommunication** | External customers/partners | Professional, transparent, reassuring |
+| **DraftStakeholderBriefing** | Management/board | Strategic, data-driven, decision-oriented |
+| **DraftRegulatoryNotification** | Data protection authorities | Precise, legally-compliant (GDPR/CCPA/HIPAA) |
+| **DraftSOCHandoff** | SOC next shift | Technical, thorough, actionable |
+
+### Example Prompts
+
+- "Draft a user notification email for this credential exposure"
+- "Create a customer communication about this data exposure event"
+- "Draft a stakeholder briefing on our current threat posture"
+- "Generate a regulatory notification letter for this PII exposure"
+- "Create a SOC handoff document for the next shift"
+
+> **Note**: Regulatory notifications should always be reviewed by legal counsel before submission.
+
+---
+
+<a name="notebook-integration"></a>
+## Jupyter Notebook Integration
+
+### Three Sentinel Notebooks Available
+
+| Notebook | Best For | Key Feature |
+|----------|----------|------------|
+| **SpyCloud-Incident-Triage** | SOC analysts investigating specific incidents | Guided workflow: enter entity → auto-queries → timeline → triage report |
+| **SpyCloud-ThreatHunting** | Proactive threat hunting | 8 structured hunt scenarios (password reuse, lateral movement, C2 mapping, etc.) |
+| **SpyCloud-Threat-Landscape** | Org-wide exposure analysis | Severity trends, domain risk scoring, geographic heatmaps |
+
+### How to Use with the Agent
+
+The Agent guides you on notebook integration:
+
+1. **Agent → Notebook**: Take IOCs from Agent findings → feed into Threat Hunting notebook for deeper analysis
+2. **Notebook → Agent**: Run Threat Landscape notebook → bring top-risk domains back to Agent for real-time enrichment
+3. **Parallel Workflow**: Agent investigates in real-time while notebook generates full evidence package
+4. **Evidence Packages**: Agent compliance assessment + notebook statistical analysis = audit-ready evidence
+
+### When to Use Notebooks vs the Agent
+
+| Use Agent When... | Use Notebooks When... |
+|---------------------|------------------------|
+| Quick conversational answers | Statistical trend analysis (pandas, scipy) |
+| Real-time API lookups | Custom visualizations (network graphs, heatmaps) |
+| Multi-source correlation | Bulk data processing (thousands of records) |
+| Communication drafting | Reproducible analysis (re-run with different params) |
+| Executive reports | Evidence preservation (notebooks save outputs) |
+
+### Setup
+
+1. Open Microsoft Sentinel → Notebooks
+2. Select the SpyCloud notebook you need
+3. Attach an Azure ML compute instance
+4. Install required packages: `msticpy`, `azure-identity`
+5. Configure workspace connection in the first cell
+6. Run All
 
 ---
 
@@ -882,6 +1049,6 @@ Upload the three YAML plugins, run the health checks, and let the dark web intel
 
 **Built by the SpyCloud Sentinel team**
 
-*v9.0.0 — 250+ skills, 23 sub-agents, 14 tables, 9 APIs*
+*v10.0.0 — 280+ skills, 26 sub-agents, 18 AI skills, 14 tables, 9 APIs, Investigations API deep-dive, threat research, communication templates, notebook integration*
 
 </div>
