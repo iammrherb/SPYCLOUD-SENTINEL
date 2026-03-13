@@ -20,28 +20,28 @@ Descriptor:
       Required: false
       DefaultValue: https://api.spycloud.io
     - Name: SpyCloudApiKey
-      Description: "Primary API key for SpyCloud Enterprise and Compass API endpoints."
-      HintText: "Enter your SpyCloud Enterprise/Compass API key"
+      Description: "REQUIRED — Your SpyCloud Enterprise/Compass API key. This is the actual API key string (e.g., 'abc123def456...'). Find it at portal.spycloud.com > Account Settings > API Keys. This same key is also sent as the X-API-Key header automatically — you do NOT need to enter 'X-API-Key' here, just the key value itself. This key also covers Compass and Identity Exposure APIs (shared key)."
+      HintText: "Paste your SpyCloud API key value here (NOT 'X-API-Key', just the key itself)"
       SettingType: string
       Required: true
     - Name: IdLinkApiKey
-      Description: "API key for SpyCloud IDLINK endpoints. Leave blank to use the primary SpyCloudApiKey."
-      HintText: "Enter your IDLINK API key (optional)"
+      Description: "OPTIONAL — Separate API key for SpyCloud IDLINK identity correlation endpoints. Only needed if you have a dedicated IDLINK key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value (e.g., 'xyz789...'), NOT the header name."
+      HintText: "Paste IDLINK API key value here, or leave blank to use primary key"
       SettingType: string
       Required: false
     - Name: DataPartnershipApiKey
-      Description: "API key for SpyCloud Data Partnership endpoints. Leave blank to use the primary SpyCloudApiKey."
-      HintText: "Enter your Data Partnership API key (optional)"
+      Description: "OPTIONAL — Separate API key for SpyCloud Data Partnership endpoints. Only needed if you have a dedicated Data Partnership key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value."
+      HintText: "Paste Data Partnership API key value here, or leave blank to use primary key"
       SettingType: string
       Required: false
     - Name: ExposureApiKey
-      Description: "API key for SpyCloud Exposure endpoints. Leave blank to use the primary SpyCloudApiKey."
-      HintText: "Enter your Exposure API key (optional)"
+      Description: "OPTIONAL — Separate API key for SpyCloud Exposure risk assessment endpoints. Only needed if you have a dedicated Exposure key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value."
+      HintText: "Paste Exposure API key value here, or leave blank to use primary key"
       SettingType: string
       Required: false
     - Name: CAPApiKey
-      Description: "API key for SpyCloud CAP (Compromised Account Protection) endpoints. Leave blank to use the primary SpyCloudApiKey."
-      HintText: "Enter your CAP API key (optional)"
+      Description: "OPTIONAL — Separate API key for SpyCloud CAP (Credential Automated Protection) endpoints. Only needed if you have a dedicated CAP key. If left blank, the primary SpyCloudApiKey is used. Enter only the key value."
+      HintText: "Paste CAP API key value here, or leave blank to use primary key"
       SettingType: string
       Required: false
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
@@ -1048,3 +1048,67 @@ SkillGroups:
             Required: false
         Settings:
           OpenApiOperationId: capTriggerReset
+
+      # =====================================================================
+      # HEALTH CHECK & API CONNECTIVITY VALIDATION
+      # =====================================================================
+
+      - Name: HealthCheckEnterprise
+        DisplayName: Test SpyCloud Enterprise API connectivity
+        Description: "Validates that the SpyCloud Enterprise/Compass API key is working by fetching the first page of the breach catalog with a limit of 1. A successful response confirms the API key is valid, the network path is open, and the Enterprise API is reachable. Use this to diagnose authentication failures, expired keys, or network issues before running other Enterprise or Compass skills."
+        ExamplePrompts:
+          - Test my SpyCloud Enterprise API key
+          - Is my SpyCloud API key working
+          - Validate SpyCloud API connectivity
+          - Check if SpyCloud Enterprise API is reachable
+          - Test SpyCloud API authentication
+          - Verify my SpyCloud API credentials
+          - Health check the SpyCloud Enterprise API
+          - Debug SpyCloud API connection issues
+        Inputs:
+          - Name: limit
+            Description: "Number of records to fetch (use 1 for health check)."
+            Required: false
+            DefaultValue: "1"
+        Settings:
+          OpenApiOperationId: listBreachCatalog
+
+      - Name: HealthCheckSIP
+        DisplayName: Test SpyCloud SIP API connectivity
+        Description: "Validates that the SpyCloud SIP API key and entitlement are working by fetching the SIP breach catalog with a limit of 1. A successful response confirms SIP access. A 401/403 error means the API key lacks SIP entitlement — contact SpyCloud support. Use this before running SIP cookie lookup skills."
+        ExamplePrompts:
+          - Test my SpyCloud SIP API access
+          - Can I access the SIP API
+          - Check SIP API connectivity
+          - Validate SIP entitlement
+          - Is SIP enabled for my API key
+          - Health check the SIP API
+        Inputs:
+          - Name: limit
+            Description: "Number of records to fetch (use 1 for health check)."
+            Required: false
+            DefaultValue: "1"
+        Settings:
+          OpenApiOperationId: sipListBreachCatalog
+
+      - Name: HealthCheckAllAPIs
+        DisplayName: Run full SpyCloud API health check across all 9 APIs
+        Description: "Comprehensive connectivity and authentication validation across all 9 SpyCloud API endpoints. Tests Enterprise (breach catalog), Compass (domain lookup), SIP (catalog), Investigations (domain lookup), IDLINK (domain lookup), Data Partnership (catalog), Exposure (summary), and CAP (policies). For each API, reports whether the endpoint is reachable, the API key is valid, and the entitlement is active. This is the primary diagnostic skill — run this FIRST when troubleshooting any API issues. Results show which APIs are accessible with your current key(s) and which require additional entitlements or separate API keys."
+        ExamplePrompts:
+          - Run a full SpyCloud API health check
+          - Test all SpyCloud API connections
+          - Which SpyCloud APIs can I access
+          - Validate all my SpyCloud API keys
+          - Check connectivity to all 9 SpyCloud APIs
+          - Diagnose SpyCloud API authentication across all endpoints
+          - Are all SpyCloud APIs working
+          - Full API connectivity test
+          - Test all API keys and entitlements
+          - Which APIs are enabled for my subscription
+        Inputs:
+          - Name: test_domain
+            Description: "A domain to use for API tests that require a search parameter (e.g., 'example.com'). Use a domain you know exists in your SpyCloud data for best results."
+            Required: false
+            DefaultValue: "example.com"
+        Settings:
+          OpenApiOperationId: listBreachCatalog

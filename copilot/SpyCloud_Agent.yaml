@@ -9,8 +9,8 @@ Descriptor:
   Version: 9.0.0
   Settings:
   - Name: TenantId
-    Description: Azure Tenant ID where the Sentinel workspace is located.
-    HintText: Enter your Azure Tenant ID
+    Description: Azure Tenant ID (GUID format only, e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Do NOT enter a domain name or URL — only the GUID.
+    HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
     SettingType: string
     Required: true
   - Name: SubscriptionId
@@ -29,33 +29,33 @@ Descriptor:
     SettingType: string
     Required: true
   - Name: SpyCloudApiKey
-    Description: SpyCloud API key for direct API access via the companion API Plugin. Required only for API-backed skills.
-    HintText: Enter your SpyCloud API key (optional - for API Plugin integration)
+    Description: "OPTIONAL — Your SpyCloud Enterprise/Compass API key value (e.g., 'abc123def456...'). Enables API-backed skills that call SpyCloud REST APIs directly for real-time data. Find it at portal.spycloud.com > Account Settings > API Keys. Enter ONLY the key value — NOT the header name 'X-API-Key'. If omitted, the Agent still works using KQL skills against your Sentinel data."
+    HintText: "Paste your SpyCloud API key value here (just the key, not 'X-API-Key')"
     SettingType: string
     Required: false
   - Name: IdLinkApiKey
-    Description: SpyCloud IDLINK API key for identity correlation lookups. Required only for IDLINK API-backed skills.
-    HintText: Enter your SpyCloud IDLINK API key (optional)
+    Description: "OPTIONAL — Separate IDLINK API key value for identity correlation lookups. Only needed if you have a dedicated IDLINK key from SpyCloud. Enter the key value only. If blank, the primary SpyCloudApiKey is used for IDLINK calls."
+    HintText: "Paste IDLINK API key value, or leave blank"
     SettingType: string
     Required: false
   - Name: DataPartnershipApiKey
-    Description: SpyCloud Data Partnership API key. Required only for Data Partnership API-backed skills.
-    HintText: Enter your SpyCloud Data Partnership API key (optional)
+    Description: "OPTIONAL — Separate Data Partnership API key value. Only needed if you have a dedicated Data Partnership key from SpyCloud. Enter the key value only."
+    HintText: "Paste Data Partnership API key value, or leave blank"
     SettingType: string
     Required: false
   - Name: ExposureApiKey
-    Description: SpyCloud Exposure API key for risk assessments. Required only for Exposure API-backed skills.
-    HintText: Enter your SpyCloud Exposure API key (optional)
+    Description: "OPTIONAL — Separate Exposure API key value for risk assessments. Only needed if you have a dedicated Exposure key from SpyCloud. Enter the key value only."
+    HintText: "Paste Exposure API key value, or leave blank"
     SettingType: string
     Required: false
   - Name: CAPApiKey
-    Description: SpyCloud CAP API key for credential automated protection. Required only for CAP API-backed skills.
-    HintText: Enter your SpyCloud CAP API key (optional)
+    Description: "OPTIONAL — Separate CAP API key value for credential automated protection. Only needed if you have a dedicated CAP key from SpyCloud. Enter the key value only."
+    HintText: "Paste CAP API key value, or leave blank"
     SettingType: string
     Required: false
   - Name: OpenAIApiKey
-    Description: OpenAI API key for advanced AI analysis, executive report generation, and threat narrative construction.
-    HintText: Enter your OpenAI API key (optional)
+    Description: "OPTIONAL — OpenAI API key (from platform.openai.com, NOT Azure OpenAI). This is a standard OpenAI API key starting with 'sk-...'. Enables 12 advanced AI analysis skills including executive reports, board presentations, predictive analytics, and threat narratives using GPT-4o. This is NOT related to Microsoft Azure OpenAI Service — it is a direct OpenAI subscription. If omitted, the Agent works fully without AI-generated analysis."
+    HintText: "Paste your OpenAI API key (starts with 'sk-...') from platform.openai.com"
     SettingType: string
     Required: false
   SupportedAuthTypes:
@@ -1048,6 +1048,19 @@ SkillGroups:
         3. Show what Compass WOULD provide: "With Compass access, I could also show: stolen session cookies by target app, browser autofill data, cryptocurrency wallets, installed software inventory, and malware C2 infrastructure details."
 
         4. Suggest: "Contact SpyCloud sales to upgrade to Enterprise+ for full Compass deep investigation capabilities."
+
+
+        ## Authentication & Credential Errors
+
+        If the agent fails with "OnBehalfOfCredential authentication failed" or "authority must be in a well-formed URI format":
+
+        1. This means the TenantId setting is not configured correctly. The TenantId MUST be a GUID in the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
+
+        2. Tell the user: "The TenantId setting needs to be a pure GUID (e.g., ''12345678-abcd-1234-ef56-123456789abc''). You can find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Do NOT enter a domain name like ''contoso.onmicrosoft.com'' or a URL — only the GUID."
+
+        3. Guide them to fix it: "In Security Copilot, go to Sources > Manage plugins > find SpyCloud Investigation Agent > Settings > update the TenantId field with the correct GUID."
+
+        4. Similarly, SubscriptionId must be a GUID, ResourceGroupName and WorkspaceName must be exact names (case-sensitive).
 
 
         ## Permission Errors
@@ -4485,19 +4498,33 @@ SkillGroups:
 
         | sort by ExposureCount desc'
   - Name: GetSpyCloudHealthStatus
-    DisplayName: '[Data] Check SpyCloud data ingestion health'
-    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Health check across all four SpyCloud tables showing record counts and last update times.
+    DisplayName: '[Data] Check SpyCloud data ingestion health (all 14 tables)'
+    Description: Internal data retrieval skill used by the SpyCloud Investigation Agent. Comprehensive health check across ALL 14 SpyCloud custom tables showing record counts, last update times, hours since update, ingestion status, and required tier. Flags empty or stale tables. Use this to diagnose connector, playbook, or API data flow issues.
     Settings:
       Target: Sentinel
       TenantId: '{{TenantId}}'
       SubscriptionId: '{{SubscriptionId}}'
       ResourceGroupName: '{{ResourceGroupName}}'
       WorkspaceName: '{{WorkspaceName}}'
-      Template: "union isfuzzy=true\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated)\
-        \ | extend Table='Breach Catalog'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize\
-        \ Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n\
-        \  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')\n| project Table, Records, Latest, HoursSinceUpdate = datetime_diff('hour', now(),\
-        \ Latest)"
+      Template: "union isfuzzy=true\n\
+        \  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='1. Breach Watchlist', Tier='Base'),\n\
+        \  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='2. Breach Catalog', Tier='Base'),\n\
+        \  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='3. Compass Data', Tier='Enterprise+'),\n\
+        \  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='4. Compass Devices', Tier='Enterprise+'),\n\
+        \  (SpyCloudCompassApplications_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='5. Compass Apps', Tier='Enterprise+'),\n\
+        \  (SpyCloudSipCookies_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='6. SIP Cookies', Tier='SIP'),\n\
+        \  (SpyCloudIdentityExposure_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='7. Identity Exposure', Tier='Base'),\n\
+        \  (SpyCloudInvestigations_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='8. Investigations', Tier='Investigations'),\n\
+        \  (SpyCloudIdLink_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='9. IDLINK', Tier='Separate Key'),\n\
+        \  (SpyCloudDataPartnership_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='10. Data Partnership', Tier='Separate Key'),\n\
+        \  (SpyCloudExposure_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='11. Exposure', Tier='Separate Key'),\n\
+        \  (SpyCloudCAP_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='12. CAP', Tier='Separate Key'),\n\
+        \  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='13. MDE Remediation', Tier='Playbook'),\n\
+        \  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='14. Conditional Access', Tier='Playbook')\n\
+        | extend HoursSinceUpdate = datetime_diff('hour', now(), Latest)\n\
+        | extend Status = case(Records == 0, 'Empty', HoursSinceUpdate > 48, 'Stale', 'Healthy')\n\
+        | project Table, Status, Records, Latest, HoursSinceUpdate, Tier\n\
+        | order by Table asc"
   - Name: InvestigateFullExposureChain
     DisplayName: '[Data] Full exposure investigation chain'
     Description: Internal data retrieval skill. Performs a comprehensive multi-table investigation for a user across SpyCloud exposures, sign-in activity, and remediation history with a complete timeline
@@ -5315,9 +5342,9 @@ AgentDefinitions:
   - None
   Settings:
   - Name: TenantId
-    Label: Azure Tenant ID
-    Description: Your Azure Tenant ID
-    HintText: Enter your Azure Tenant ID
+    Label: Azure Tenant ID (GUID)
+    Description: Azure Tenant ID in GUID format (e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Must be a valid GUID — do NOT enter a domain name or URL.
+    HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
     SettingType: string
     Required: true
   - Name: SubscriptionId

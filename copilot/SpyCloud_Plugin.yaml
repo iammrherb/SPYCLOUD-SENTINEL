@@ -8,8 +8,8 @@ Descriptor:
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId
-      Description: Your Azure Tenant ID where the Sentinel workspace is located.
-      HintText: Enter your Azure Tenant ID
+      Description: Azure Tenant ID in GUID format (e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Must be a valid GUID — do NOT enter a domain name or URL.
+      HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
       SettingType: string
       Required: true
     - Name: SubscriptionId
@@ -718,15 +718,20 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetSpyCloudHealthStatus
-        DisplayName: Check SpyCloud data ingestion health
+        DisplayName: Check SpyCloud data ingestion health (all 14 tables)
         Description: |
-          Runs a health check across all four SpyCloud custom tables in Sentinel to verify data is flowing, shows record counts, latest ingestion timestamps, and hours since last update. Use this to confirm the CCF connector, MDE playbook, and CA playbook are all operational.
+          Comprehensive health check across ALL 14 SpyCloud custom tables in Sentinel. Verifies data ingestion is flowing for every table, shows record counts, latest ingestion timestamps, hours since last update, and ingestion status (Healthy/Stale/Empty/Not Deployed). Use this to confirm the CCF connector pollers, MDE playbook, CA playbook, and all optional API data sources are operational. Tables with zero records or no data in 48+ hours are flagged. This is the primary diagnostic skill for troubleshooting data flow issues.
         ExamplePrompts:
           - Check SpyCloud connector health
           - Is SpyCloud data flowing into Sentinel
           - Run a SpyCloud health check
           - Show SpyCloud table ingestion status
           - Are the SpyCloud playbooks working
+          - Which SpyCloud tables have data and which are empty
+          - Check all 14 SpyCloud tables for ingestion issues
+          - Is the CCF connector working properly
+          - Are all SpyCloud data sources operational
+          - Diagnose SpyCloud data flow problems
         Settings:
           Target: Sentinel
           TenantId: '{{TenantId}}'
@@ -735,13 +740,24 @@ SkillGroups:
           WorkspaceName: '{{WorkspaceName}}'
           Template: |-
             union isfuzzy=true
-              (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist Exposures'),
-              (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Breach Catalog'),
-              (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Remediation'),
-              (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Conditional Access'),
-              (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),
-              (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices')
-            | project Table, Records, Latest, HoursSinceUpdate = datetime_diff('hour', now(), Latest)
+              (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='1. Breach Watchlist (Enterprise API)', RequiredTier='Base'),
+              (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='2. Breach Catalog (Enterprise API)', RequiredTier='Base'),
+              (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='3. Compass Data (Compass API)', RequiredTier='Enterprise+'),
+              (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='4. Compass Devices (Compass API)', RequiredTier='Enterprise+'),
+              (SpyCloudCompassApplications_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='5. Compass Applications (Compass API)', RequiredTier='Enterprise+'),
+              (SpyCloudSipCookies_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='6. SIP Cookies (SIP API)', RequiredTier='SIP Entitlement'),
+              (SpyCloudIdentityExposure_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='7. Identity Exposure (Enterprise API)', RequiredTier='Base'),
+              (SpyCloudInvestigations_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='8. Investigations (Investigations API)', RequiredTier='Investigations Tier'),
+              (SpyCloudIdLink_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='9. IDLINK (IDLINK API)', RequiredTier='Separate Key'),
+              (SpyCloudDataPartnership_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='10. Data Partnership (Partnership API)', RequiredTier='Separate Key'),
+              (SpyCloudExposure_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='11. Exposure (Exposure API)', RequiredTier='Separate Key'),
+              (SpyCloudCAP_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='12. CAP (CAP API)', RequiredTier='Separate Key'),
+              (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='13. MDE Remediation (Playbook)', RequiredTier='Playbook'),
+              (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='14. Conditional Access (Playbook)', RequiredTier='Playbook')
+            | extend HoursSinceUpdate = datetime_diff('hour', now(), Latest)
+            | extend Status = case(Records == 0, '⚠️ Empty/Not Deployed', HoursSinceUpdate > 48, '🟡 Stale (48h+)', HoursSinceUpdate > 24, '🟢 OK (24h+)', '🟢 Healthy')
+            | project Table, Status, Records, Latest, HoursSinceUpdate, RequiredTier
+            | order by Table asc
 
       # =====================================================================
       # 10. COMPASS CONSUMER IDENTITY INVESTIGATION
