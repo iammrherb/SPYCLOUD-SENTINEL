@@ -1,0 +1,236 @@
+[
+  {
+    "TimeGenerated": "2026-03-06T12:53:23Z",
+    "source_id": 110579,
+    "log_id": "414a45b0dcae8f843ab599fc5c795a374f181f6745d3f113b0",
+    "user_hostname": "WS-CEO-01",
+    "user_os": "Windows 11 Enterprise",
+    "ip_addresses": [
+      "204.250.197.190"
+    ],
+    "infected_time": "2026-03-14T09:53:23Z",
+    "application_count": 8,
+    "spycloud_publish_date": "2026-03-17T06:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-12T14:53:23Z",
+    "source_id": 136281,
+    "log_id": "15a133005df9e1ebe6b593c97ab473a8cd4a9680c2d3d05c56",
+    "user_hostname": "WS-CEO-01",
+    "user_os": "Windows 11 Enterprise",
+    "ip_addresses": [
+      "119.17.24.183"
+    ],
+    "infected_time": "2026-03-16T16:53:23Z",
+    "application_count": 22,
+    "spycloud_publish_date": "2026-03-15T18:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-10T10:53:23Z",
+    "source_id": 190194,
+    "log_id": "2da428dc9e741de35e5a5332dafc1b1051e0e62b56da88fa9e",
+    "user_hostname": "WS-ADMIN-01",
+    "user_os": "Windows 10 Pro",
+    "ip_addresses": [
+      "55.207.227.23"
+    ],
+    "infected_time": "2026-03-17T20:53:23Z",
+    "application_count": 7,
+    "spycloud_publish_date": "2026-03-17T10:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-16T10:53:23Z",
+    "source_id": 137136,
+    "log_id": "e8f6aec10c862df83bd8bda06361bf2f8a215a1a7c66f0f3db",
+    "user_hostname": "WS-ADMIN-01",
+    "user_os": "Windows 10 Pro",
+    "ip_addresses": [
+      "144.204.56.92"
+    ],
+    "infected_time": "2026-03-16T10:53:23Z",
+    "application_count": 3,
+    "spycloud_publish_date": "2026-03-16T21:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-11T03:53:23Z",
+    "source_id": 114956,
+    "log_id": "34d6b57957af42449421c9bc749ee3c40ccac446a139ef86cb",
+    "user_hostname": "SRV-DC-01",
+    "user_os": "Windows Server 2019",
+    "ip_addresses": [
+      "183.157.41.15"
+    ],
+    "infected_time": "2026-03-14T03:53:23Z",
+    "application_count": 5,
+    "spycloud_publish_date": "2026-03-16T12:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-14T17:53:23Z",
+    "source_id": 108542,
+    "log_id": "077e282c54da5bae155bf8a8545cedbf12bb8716fc3bbeb5a9",
+    "user_hostname": "SRV-DC-01",
+    "user_os": "Windows Server 2019",
+    "ip_addresses": [
+      "121.179.117.100"
+    ],
+    "infected_time": "2026-03-16T19:53:23Z",
+    "application_count": 17,
+    "spycloud_publish_date": "2026-03-15T05:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-15T22:53:23Z",
+    "source_id": 122959,
+    "log_id": "17ea78d43d3831f72fb7e7266c3aa7d625b14e5e2e5bbebc05",
+    "user_hostname": "SRV-DC-01",
+    "user_os": "Windows Server 2019",
+    "ip_addresses": [
+      "105.18.132.174"
+    ],
+    "infected_time": "2026-03-13T22:53:23Z",
+    "application_count": 22,
+    "spycloud_publish_date": "2026-03-15T08:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-15T02:53:23Z",
+    "source_id": 173660,
+    "log_id": "c4d8b99ad26133ea68887856450e57cd6e7f66428251dad453",
+    "user_hostname": "WS-DEV-01",
+    "user_os": "Windows 11 Enterprise",
+    "ip_addresses": [
+      "85.3.92.160"
+    ],
+    "infected_time": "2026-03-11T06:53:23Z",
+    "application_count": 20,
+    "spycloud_publish_date": "2026-03-17T09:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-09T16:53:23Z",
+    "source_id": 140911,
+    "log_id": "2c430243d045dddd21e44b6d31e71cb2736153d9f580aecda5",
+    "user_hostname": "WS-DEV-01",
+    "user_os": "Windows 11 Enterprise",
+    "ip_addresses": [
+      "163.167.218.16"
+    ],
+    "infected_time": "2026-03-12T19:53:23Z",
+    "application_count": 19,
+    "spycloud_publish_date": "2026-03-16T06:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-15T19:53:23Z",
+    "source_id": 170923,
+    "log_id": "341ce9882b6698cf7dfa2256e2b546c7d0f692cfac974eec2a",
+    "user_hostname": "WS-DEV-01",
+    "user_os": "Windows 11 Enterprise",
+    "ip_addresses": [
+      "115.220.150.111"
+    ],
+    "infected_time": "2026-03-14T00:53:23Z",
+    "application_count": 6,
+    "spycloud_publish_date": "2026-03-16T08:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-11T11:53:23Z",
+    "source_id": 149511,
+    "log_id": "7371347a00b39d5b581c1e1afb194ee1c5227c6a6abd79179e",
+    "user_hostname": "WS-SALES-01",
+    "user_os": "Windows 10 Pro",
+    "ip_addresses": [
+      "140.4.143.10"
+    ],
+    "infected_time": "2026-03-16T12:53:23Z",
+    "application_count": 14,
+    "spycloud_publish_date": "2026-03-16T04:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-16T22:53:23Z",
+    "source_id": 197731,
+    "log_id": "35982583f252db4c8cd48908305c9e985afa13f21fd112fa7c",
+    "user_hostname": "WS-HR-01",
+    "user_os": "Windows 10 Pro",
+    "ip_addresses": [
+      "217.171.114.206"
+    ],
+    "infected_time": "2026-03-17T23:53:23Z",
+    "application_count": 22,
+    "spycloud_publish_date": "2026-03-17T09:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-17T15:53:23Z",
+    "source_id": 198780,
+    "log_id": "0deff70a997e7a3e3f37cd11c930f01a0a19ab7ec7170e199f",
+    "user_hostname": "WS-HR-01",
+    "user_os": "Windows 10 Pro",
+    "ip_addresses": [
+      "78.58.80.61"
+    ],
+    "infected_time": "2026-03-13T19:53:23Z",
+    "application_count": 22,
+    "spycloud_publish_date": "2026-03-17T12:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-08T07:53:23Z",
+    "source_id": 153477,
+    "log_id": "f0d3ffe105abebde4b459f74073403e7f22e58b865784c5d28",
+    "user_hostname": "WS-HR-01",
+    "user_os": "Windows 10 Pro",
+    "ip_addresses": [
+      "154.97.20.242"
+    ],
+    "infected_time": "2026-03-11T04:53:23Z",
+    "application_count": 21,
+    "spycloud_publish_date": "2026-03-17T20:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-07T16:53:23Z",
+    "source_id": 136991,
+    "log_id": "1f66c1d20fb4e6f9bcde73cdcf48ff5b1ab3b6fda5cef415d1",
+    "user_hostname": "LAPTOP-REMOTE-01",
+    "user_os": "Windows 11 Home",
+    "ip_addresses": [
+      "91.208.140.91"
+    ],
+    "infected_time": "2026-03-14T23:53:23Z",
+    "application_count": 10,
+    "spycloud_publish_date": "2026-03-17T01:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-13T00:53:23Z",
+    "source_id": 174301,
+    "log_id": "81575ede09d6181b45bd51ebbb8eff7eb44328f7896de52256",
+    "user_hostname": "LAPTOP-REMOTE-01",
+    "user_os": "Windows 11 Home",
+    "ip_addresses": [
+      "4.185.247.236"
+    ],
+    "infected_time": "2026-03-13T10:53:23Z",
+    "application_count": 22,
+    "spycloud_publish_date": "2026-03-16T02:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-05T06:53:23Z",
+    "source_id": 192057,
+    "log_id": "1595d20daaba112b11be906c70dc4d28ba80348a3b4fc3f335",
+    "user_hostname": "LAPTOP-REMOTE-01",
+    "user_os": "Windows 11 Home",
+    "ip_addresses": [
+      "198.68.207.138"
+    ],
+    "infected_time": "2026-03-15T00:53:23Z",
+    "application_count": 11,
+    "spycloud_publish_date": "2026-03-15T12:53:23Z"
+  },
+  {
+    "TimeGenerated": "2026-03-13T22:53:23Z",
+    "source_id": 112098,
+    "log_id": "a40e74ec4116cfcb3e26296daebf7fbcdc8bc37c4b59d3c0a8",
+    "user_hostname": "WS-FINANCE-01",
+    "user_os": "Windows 10 Pro",
+    "ip_addresses": [
+      "211.56.68.170"
+    ],
+    "infected_time": "2026-03-12T16:53:23Z",
+    "application_count": 16,
+    "spycloud_publish_date": "2026-03-16T23:53:23Z"
+  }
+]

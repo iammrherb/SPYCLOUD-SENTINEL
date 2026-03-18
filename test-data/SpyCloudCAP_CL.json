@@ -1,0 +1,501 @@
+[
+  {
+    "TimeGenerated": "2026-03-17T23:53:23Z",
+    "cap_id": "f0a7453a-3801-4a86-ad02-08505ed43483",
+    "email": "cfo@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-425",
+    "policy_name": "Session Revocation",
+    "action_type": "account_disable",
+    "action_status": "pending",
+    "trigger_severity": 5,
+    "trigger_source": "compass",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-17T00:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "dropbox.com",
+      "portal.azure.com",
+      "okta.com"
+    ],
+    "compliance_tags": [
+      "HIPAA"
+    ],
+    "log_id": "f29f1788be286a6d76b0901925f2a0c88fb17334c2774f80c5"
+  },
+  {
+    "TimeGenerated": "2026-03-11T07:53:23Z",
+    "cap_id": "37f5a612-2610-48f8-b449-fa7ab1741167",
+    "email": "ceo@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-844",
+    "policy_name": "Block Compromised Credentials",
+    "action_type": "password_reset",
+    "action_status": "success",
+    "trigger_severity": 5,
+    "trigger_source": "compass",
+    "credential_type": "personal",
+    "reset_timestamp": "2026-03-17T05:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "salesforce.com",
+      "dropbox.com",
+      "outlook.com"
+    ],
+    "compliance_tags": [
+      "PCI-DSS",
+      "GDPR",
+      "SOC2"
+    ],
+    "log_id": "8fe5ee621234f95037f33c89ca20063aedbdcfb82170aa67af"
+  },
+  {
+    "TimeGenerated": "2026-03-12T10:53:23Z",
+    "cap_id": "ef09544f-adc2-4da0-8bb2-8a5ca0ffbe38",
+    "email": "svc-backup@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-226",
+    "policy_name": "Force MFA Reset",
+    "action_type": "account_disable",
+    "action_status": "success",
+    "trigger_severity": 20,
+    "trigger_source": "compass",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-17T16:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "zoom.us",
+      "google.com",
+      "portal.azure.com"
+    ],
+    "compliance_tags": [
+      "PCI-DSS"
+    ],
+    "log_id": "10d273e838eeb567e237472c3fae524813ef1982ceb0721270"
+  },
+  {
+    "TimeGenerated": "2026-03-18T02:53:23Z",
+    "cap_id": "78823e09-3683-4501-87de-ede5aa73e758",
+    "email": "john.doe@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-136",
+    "policy_name": "Force MFA Reset",
+    "action_type": "account_disable",
+    "action_status": "success",
+    "trigger_severity": 5,
+    "trigger_source": "compass",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-15T12:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "zoom.us",
+      "github.com",
+      "okta.com"
+    ],
+    "compliance_tags": [
+      "GDPR"
+    ],
+    "log_id": "7297c57d8ca9fce8c847fd0de8d2de83233bb04fece4794563"
+  },
+  {
+    "TimeGenerated": "2026-03-17T07:53:23Z",
+    "cap_id": "e7c17322-9e18-499a-8d73-edcc1c57ffbe",
+    "email": "jane.smith@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-621",
+    "policy_name": "Require Password Change",
+    "action_type": "session_revoke",
+    "action_status": "success",
+    "trigger_severity": 20,
+    "trigger_source": "identity_exposure",
+    "credential_type": "personal",
+    "reset_timestamp": "2026-03-16T22:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "google.com",
+      "portal.azure.com",
+      "outlook.com"
+    ],
+    "compliance_tags": [
+      "GDPR",
+      "SOC2"
+    ],
+    "log_id": "671bcb54ee8593f0dc661e59a169132a8d76a36d613b766e00"
+  },
+  {
+    "TimeGenerated": "2026-03-17T13:53:23Z",
+    "cap_id": "f5875a33-ba46-4414-9551-4a6f0b5fecce",
+    "email": "svc-backup@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-110",
+    "policy_name": "Require Password Change",
+    "action_type": "password_reset",
+    "action_status": "pending",
+    "trigger_severity": 5,
+    "trigger_source": "identity_exposure",
+    "credential_type": "personal",
+    "reset_timestamp": "2026-03-16T19:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "okta.com",
+      "salesforce.com",
+      "github.com"
+    ],
+    "compliance_tags": [
+      "HIPAA",
+      "GDPR"
+    ],
+    "log_id": "5f3209a5e8189f0a755a009023a925af27d147256ae3bc6a68"
+  },
+  {
+    "TimeGenerated": "2026-03-16T12:53:23Z",
+    "cap_id": "f3d22ead-9458-4f29-b5e0-a3cbb45063fc",
+    "email": "david.lee@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-169",
+    "policy_name": "Block Compromised Credentials",
+    "action_type": "mfa_reset",
+    "action_status": "success",
+    "trigger_severity": 20,
+    "trigger_source": "compass",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-16T18:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "github.com",
+      "portal.azure.com",
+      "salesforce.com"
+    ],
+    "compliance_tags": [
+      "NIST",
+      "PCI-DSS",
+      "GDPR"
+    ],
+    "log_id": "9545175402f88afa6432dc1ac7701770a35103471f8faf8f1d"
+  },
+  {
+    "TimeGenerated": "2026-03-17T13:53:23Z",
+    "cap_id": "abf75819-ce7e-4eeb-a783-0eb9d496908b",
+    "email": "jane.smith@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-396",
+    "policy_name": "Session Revocation",
+    "action_type": "mfa_reset",
+    "action_status": "success",
+    "trigger_severity": 25,
+    "trigger_source": "watchlist",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-15T17:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "portal.azure.com",
+      "outlook.com",
+      "zoom.us"
+    ],
+    "compliance_tags": [
+      "GDPR"
+    ],
+    "log_id": "c3476ef8cde6aff3599cfd538d4a71c539617bb997ff8a5e5b"
+  },
+  {
+    "TimeGenerated": "2026-03-13T15:53:23Z",
+    "cap_id": "42d2143a-ed0f-4b00-90cd-c251671d513f",
+    "email": "mike.brown@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-728",
+    "policy_name": "Session Revocation",
+    "action_type": "mfa_reset",
+    "action_status": "success",
+    "trigger_severity": 20,
+    "trigger_source": "compass",
+    "credential_type": "corporate",
+    "reset_timestamp": "2026-03-17T20:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "salesforce.com",
+      "zoom.us",
+      "portal.azure.com"
+    ],
+    "compliance_tags": [
+      "HIPAA"
+    ],
+    "log_id": "53f1bc274c48dc7c6b16baee4985a1ee5fb4051600daedaad9"
+  },
+  {
+    "TimeGenerated": "2026-03-15T09:53:23Z",
+    "cap_id": "46459628-5454-4898-ba67-baf857622160",
+    "email": "admin@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-792",
+    "policy_name": "Force MFA Reset",
+    "action_type": "session_revoke",
+    "action_status": "pending",
+    "trigger_severity": 5,
+    "trigger_source": "compass",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-16T23:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "okta.com",
+      "portal.azure.com",
+      "google.com"
+    ],
+    "compliance_tags": [
+      "GDPR",
+      "NIST"
+    ],
+    "log_id": "94692af4cf23257013890332aa0e52417e10af64135b0acca3"
+  },
+  {
+    "TimeGenerated": "2026-03-16T11:53:23Z",
+    "cap_id": "e37c6222-d251-499e-aa61-80afbc183099",
+    "email": "lisa.wang@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-750",
+    "policy_name": "Force MFA Reset",
+    "action_type": "password_reset",
+    "action_status": "failed",
+    "trigger_severity": 20,
+    "trigger_source": "compass",
+    "credential_type": "corporate",
+    "reset_timestamp": "2026-03-16T02:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "outlook.com",
+      "aws.amazon.com",
+      "zoom.us"
+    ],
+    "compliance_tags": [
+      "SOC2",
+      "GDPR"
+    ],
+    "log_id": "a5d571578edf9c1a714d120f4f7be14ada3cee53e180638e6b"
+  },
+  {
+    "TimeGenerated": "2026-03-16T11:53:23Z",
+    "cap_id": "20d25851-baab-4228-978e-699f5ad279b5",
+    "email": "mike.brown@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-108",
+    "policy_name": "Require Password Change",
+    "action_type": "mfa_reset",
+    "action_status": "pending",
+    "trigger_severity": 25,
+    "trigger_source": "identity_exposure",
+    "credential_type": "corporate",
+    "reset_timestamp": "2026-03-16T00:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "dropbox.com",
+      "github.com",
+      "zoom.us"
+    ],
+    "compliance_tags": [
+      "PCI-DSS",
+      "HIPAA",
+      "SOC2"
+    ],
+    "log_id": "c8a08c01dd3b6071e0f11b775821a80501932df8d83a9ce4a0"
+  },
+  {
+    "TimeGenerated": "2026-03-18T00:53:23Z",
+    "cap_id": "8198bb76-bc02-4ec5-9c7b-c422e9536a40",
+    "email": "admin@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-553",
+    "policy_name": "Session Revocation",
+    "action_type": "password_reset",
+    "action_status": "failed",
+    "trigger_severity": 25,
+    "trigger_source": "compass",
+    "credential_type": "personal",
+    "reset_timestamp": "2026-03-15T11:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "zoom.us",
+      "slack.com",
+      "dropbox.com"
+    ],
+    "compliance_tags": [
+      "GDPR"
+    ],
+    "log_id": "2f679b9490182324bd37c773a6a4a38c7577f3225a3c7adf10"
+  },
+  {
+    "TimeGenerated": "2026-03-13T00:53:23Z",
+    "cap_id": "11ae3bce-2717-4b15-9a6e-ad6e42fc24c8",
+    "email": "bob.wilson@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-156",
+    "policy_name": "Session Revocation",
+    "action_type": "account_disable",
+    "action_status": "success",
+    "trigger_severity": 5,
+    "trigger_source": "compass",
+    "credential_type": "corporate",
+    "reset_timestamp": "2026-03-17T17:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "portal.azure.com",
+      "zoom.us",
+      "github.com"
+    ],
+    "compliance_tags": [
+      "SOC2",
+      "GDPR",
+      "HIPAA"
+    ],
+    "log_id": "2420c72e9179799d999585c22792afebcc34e5da0e4c838685"
+  },
+  {
+    "TimeGenerated": "2026-03-16T06:53:23Z",
+    "cap_id": "c11c6cd8-42bd-4e6d-b51d-9805974a6842",
+    "email": "david.lee@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-144",
+    "policy_name": "Force MFA Reset",
+    "action_type": "password_reset",
+    "action_status": "pending",
+    "trigger_severity": 5,
+    "trigger_source": "identity_exposure",
+    "credential_type": "personal",
+    "reset_timestamp": "2026-03-17T00:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "google.com",
+      "okta.com",
+      "salesforce.com"
+    ],
+    "compliance_tags": [
+      "HIPAA",
+      "PCI-DSS"
+    ],
+    "log_id": "9ed20e767ac1110c935685f261c636e6a50b890c9348217809"
+  },
+  {
+    "TimeGenerated": "2026-03-12T23:53:23Z",
+    "cap_id": "bdade21f-fc06-4614-8bf4-aa41662eb631",
+    "email": "cfo@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-560",
+    "policy_name": "Require Password Change",
+    "action_type": "mfa_reset",
+    "action_status": "success",
+    "trigger_severity": 20,
+    "trigger_source": "compass",
+    "credential_type": "corporate",
+    "reset_timestamp": "2026-03-15T19:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "outlook.com",
+      "zoom.us",
+      "salesforce.com"
+    ],
+    "compliance_tags": [
+      "HIPAA",
+      "SOC2"
+    ],
+    "log_id": "4a62f6f9a1abc90fd0fdfd53cbe56df28c9e8be11e3efa2ad2"
+  },
+  {
+    "TimeGenerated": "2026-03-18T03:53:23Z",
+    "cap_id": "6623614e-1392-47b5-b666-2d28328845a5",
+    "email": "lisa.wang@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-424",
+    "policy_name": "Require Password Change",
+    "action_type": "account_disable",
+    "action_status": "failed",
+    "trigger_severity": 20,
+    "trigger_source": "watchlist",
+    "credential_type": "corporate",
+    "reset_timestamp": "2026-03-17T13:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "google.com",
+      "aws.amazon.com",
+      "dropbox.com"
+    ],
+    "compliance_tags": [
+      "SOC2"
+    ],
+    "log_id": "455e500d659f0d61c8932f7ec98c28b0eb064a9710c350f431"
+  },
+  {
+    "TimeGenerated": "2026-03-17T03:53:23Z",
+    "cap_id": "ba48c7a9-e45e-4d97-999c-e5224107e41e",
+    "email": "jane.smith@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-645",
+    "policy_name": "Session Revocation",
+    "action_type": "account_disable",
+    "action_status": "failed",
+    "trigger_severity": 5,
+    "trigger_source": "watchlist",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-18T00:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "portal.azure.com",
+      "outlook.com",
+      "salesforce.com"
+    ],
+    "compliance_tags": [
+      "SOC2",
+      "GDPR",
+      "NIST"
+    ],
+    "log_id": "91d7499c36167ef1024f106b1ae76523aab3facff4cfece56f"
+  },
+  {
+    "TimeGenerated": "2026-03-11T15:53:23Z",
+    "cap_id": "f54c56fa-5c11-400e-b4bf-461852dd98e8",
+    "email": "john.doe@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-125",
+    "policy_name": "Force MFA Reset",
+    "action_type": "password_reset",
+    "action_status": "success",
+    "trigger_severity": 20,
+    "trigger_source": "watchlist",
+    "credential_type": "corporate",
+    "reset_timestamp": "2026-03-16T03:53:23Z",
+    "notification_sent": true,
+    "affected_applications": [
+      "dropbox.com",
+      "salesforce.com",
+      "okta.com"
+    ],
+    "compliance_tags": [
+      "GDPR",
+      "HIPAA"
+    ],
+    "log_id": "0fa6695561a21c17589117e095416c6c26cf9e3aa87ebed3d2"
+  },
+  {
+    "TimeGenerated": "2026-03-15T19:53:23Z",
+    "cap_id": "b42b3fc7-5a7f-4c5e-84a6-1f96214d3f93",
+    "email": "cfo@contoso.com",
+    "email_domain": "contoso.com",
+    "policy_id": "POL-181",
+    "policy_name": "Block Compromised Credentials",
+    "action_type": "session_revoke",
+    "action_status": "success",
+    "trigger_severity": 20,
+    "trigger_source": "watchlist",
+    "credential_type": "service_account",
+    "reset_timestamp": "2026-03-17T00:53:23Z",
+    "notification_sent": false,
+    "affected_applications": [
+      "outlook.com",
+      "slack.com",
+      "dropbox.com"
+    ],
+    "compliance_tags": [
+      "SOC2",
+      "HIPAA",
+      "PCI-DSS"
+    ],
+    "log_id": "3f8f21ad81a342d2cf55ef6c7c4604ba7e3f2d59649d3bef08"
+  }
+]
