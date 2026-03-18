@@ -4807,6 +4807,16 @@
                   "parameters": {
                     "text": "Enabling plaintext passwords stores cleartext credentials in your workspace. Ensure you have a data handling policy and configure table-level RBAC on `SpyCloudBreachWatchlist_CL`."
                   }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "name": "monitoredDomain",
+                    "label": "Monitored Domain",
+                    "placeholder": "e.g. contoso.com",
+                    "type": "text",
+                    "toolTip": "Your primary email domain for monitoring. Required for SIP Cookies, Investigations, IdLink, Exposure, CAP, and Data Partnership pollers. Leave empty if you only use Watchlist + Catalog + Compass."
+                  }
                 }
               ]
             },
@@ -5270,6 +5280,13 @@
               "metadata": {
                 "description": "API request timeout in seconds (30-300)."
               }
+            },
+            "monitoredDomain": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Your primary monitored domain (e.g. contoso.com). Used by SIP Cookies, Investigations, IdLink, Exposure, CAP, and Data Partnership pollers."
+              }
             }
           },
           "variables": {
@@ -5478,7 +5495,7 @@
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
-                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/records",
+                  "apiEndpoint": "https://api.spycloud.io/enterprise-v2/compass/data",
                   "httpMethod": "GET",
                   "queryParameters": {},
                   "queryWindowInMin": "[[int(first(parameters('pollingIntervalMin')))]",
