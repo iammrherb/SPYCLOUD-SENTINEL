@@ -1443,6 +1443,10 @@
               "type": "string"
             },
             {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
               "name": "user_hostname",
               "type": "string"
             },
@@ -1489,67 +1493,35 @@
               "type": "datetime"
             },
             {
-              "name": "infected_machine_id",
+              "name": "target_application",
               "type": "string"
             },
             {
-              "name": "target_url",
-              "type": "string"
-            },
-            {
-              "name": "target_domain",
-              "type": "string"
-            },
-            {
-              "name": "target_subdomain",
-              "type": "string"
-            },
-            {
-              "name": "credential_count",
+              "name": "total_records",
               "type": "int"
             },
             {
-              "name": "cookie_count",
+              "name": "email_count",
               "type": "int"
             },
             {
-              "name": "email",
-              "type": "string"
-            },
-            {
-              "name": "email_domain",
-              "type": "string"
-            },
-            {
-              "name": "log_id",
-              "type": "string"
-            },
-            {
-              "name": "source_id",
+              "name": "username_count",
               "type": "int"
             },
             {
-              "name": "severity",
+              "name": "compromised_device_count",
               "type": "int"
             },
             {
-              "name": "infected_time",
+              "name": "on_watchlist",
               "type": "string"
             },
             {
-              "name": "user_hostname",
+              "name": "first_spycloud_publish_date",
               "type": "string"
             },
             {
-              "name": "user_os",
-              "type": "string"
-            },
-            {
-              "name": "malware_family",
-              "type": "string"
-            },
-            {
-              "name": "spycloud_publish_date",
+              "name": "latest_spycloud_publish_date",
               "type": "string"
             }
           ]
@@ -1583,6 +1555,10 @@
               "type": "int"
             },
             {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
               "name": "email",
               "type": "string"
             },
@@ -1596,6 +1572,10 @@
             },
             {
               "name": "domain",
+              "type": "string"
+            },
+            {
+              "name": "username",
               "type": "string"
             },
             {
@@ -1627,15 +1607,15 @@
               "type": "string"
             },
             {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
               "name": "target_domain",
               "type": "string"
             },
             {
               "name": "target_subdomain",
-              "type": "string"
-            },
-            {
-              "name": "target_url",
               "type": "string"
             },
             {
@@ -1687,115 +1667,7 @@
               "type": "string"
             },
             {
-              "name": "log_id",
-              "type": "string"
-            },
-            {
               "name": "spycloud_publish_date",
-              "type": "string"
-            },
-            {
-              "name": "malware_family",
-              "type": "string"
-            },
-            {
-              "name": "username",
-              "type": "string"
-            },
-            {
-              "name": "full_name",
-              "type": "string"
-            },
-            {
-              "name": "phone",
-              "type": "string"
-            },
-            {
-              "name": "company_name",
-              "type": "string"
-            },
-            {
-              "name": "job_title",
-              "type": "string"
-            },
-            {
-              "name": "record_type",
-              "type": "string"
-            },
-            {
-              "name": "account_type",
-              "type": "string"
-            },
-            {
-              "name": "breach_date",
-              "type": "string"
-            },
-            {
-              "name": "breach_description",
-              "type": "string"
-            },
-            {
-              "name": "stolen_cookies",
-              "type": "dynamic"
-            },
-            {
-              "name": "autofill_fields",
-              "type": "dynamic"
-            },
-            {
-              "name": "crypto_wallets",
-              "type": "dynamic"
-            },
-            {
-              "name": "installed_software",
-              "type": "dynamic"
-            },
-            {
-              "name": "browser_history_domains",
-              "type": "dynamic"
-            },
-            {
-              "name": "bot_id",
-              "type": "string"
-            },
-            {
-              "name": "campaign_id",
-              "type": "string"
-            },
-            {
-              "name": "c2_url",
-              "type": "string"
-            },
-            {
-              "name": "infection_build_id",
-              "type": "string"
-            },
-            {
-              "name": "hardware_id",
-              "type": "string"
-            },
-            {
-              "name": "screenshot_available",
-              "type": "boolean"
-            },
-            {
-              "name": "keylog_available",
-              "type": "boolean"
-            },
-            {
-              "name": "file_exfiltration",
-              "type": "boolean"
-            },
-            {
-              "name": "salt",
-              "type": "string"
-            },
-            {
-              "name": "credit_card_number",
-              "type": "string"
-            },
-            {
-              "name": "credit_card_expiration",
               "type": "string"
             }
           ]
@@ -1829,11 +1701,91 @@
               "type": "int"
             },
             {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
               "name": "email",
               "type": "string"
             },
             {
               "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "email_username",
+              "type": "string"
+            },
+            {
+              "name": "username",
+              "type": "string"
+            },
+            {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "severity",
+              "type": "int"
+            },
+            {
+              "name": "sighting",
+              "type": "int"
+            },
+            {
+              "name": "breach_category",
+              "type": "string"
+            },
+            {
+              "name": "breach_title",
+              "type": "string"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "ip_addresses",
+              "type": "dynamic"
+            },
+            {
+              "name": "country_code",
+              "type": "string"
+            },
+            {
+              "name": "malware_family",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "password_plaintext",
+              "type": "string"
+            },
+            {
+              "name": "password_type",
               "type": "string"
             },
             {
@@ -1865,67 +1817,7 @@
               "type": "boolean"
             },
             {
-              "name": "target_url",
-              "type": "string"
-            },
-            {
-              "name": "target_domain",
-              "type": "string"
-            },
-            {
-              "name": "target_subdomain",
-              "type": "string"
-            },
-            {
-              "name": "severity",
-              "type": "int"
-            },
-            {
-              "name": "infected_machine_id",
-              "type": "string"
-            },
-            {
-              "name": "infected_time",
-              "type": "string"
-            },
-            {
-              "name": "user_hostname",
-              "type": "string"
-            },
-            {
-              "name": "user_os",
-              "type": "string"
-            },
-            {
-              "name": "ip_addresses",
-              "type": "dynamic"
-            },
-            {
-              "name": "malware_family",
-              "type": "string"
-            },
-            {
-              "name": "log_id",
-              "type": "string"
-            },
-            {
               "name": "spycloud_publish_date",
-              "type": "string"
-            },
-            {
-              "name": "country_code",
-              "type": "string"
-            },
-            {
-              "name": "username",
-              "type": "string"
-            },
-            {
-              "name": "password",
-              "type": "string"
-            },
-            {
-              "name": "password_type",
               "type": "string"
             }
           ]
@@ -1951,95 +1843,43 @@
               "type": "datetime"
             },
             {
-              "name": "document_id",
+              "name": "identifier_name",
               "type": "string"
             },
             {
-              "name": "source_id",
+              "name": "identifier_type",
+              "type": "string"
+            },
+            {
+              "name": "corporate_record_count",
               "type": "int"
             },
             {
-              "name": "email",
-              "type": "string"
-            },
-            {
-              "name": "email_domain",
-              "type": "string"
-            },
-            {
-              "name": "email_username",
-              "type": "string"
-            },
-            {
-              "name": "domain",
-              "type": "string"
-            },
-            {
-              "name": "password",
-              "type": "string"
-            },
-            {
-              "name": "password_plaintext",
-              "type": "string"
-            },
-            {
-              "name": "password_type",
-              "type": "string"
-            },
-            {
-              "name": "severity",
+              "name": "infected_employee_record_count",
               "type": "int"
             },
             {
-              "name": "sighting",
+              "name": "infected_consumer_record_count",
               "type": "int"
             },
             {
-              "name": "target_url",
+              "name": "infected_user_record_count",
+              "type": "int"
+            },
+            {
+              "name": "last_discovered",
               "type": "string"
             },
             {
-              "name": "target_domain",
+              "name": "identifier_status",
               "type": "string"
             },
             {
-              "name": "target_subdomain",
+              "name": "verified",
               "type": "string"
             },
             {
-              "name": "infected_machine_id",
-              "type": "string"
-            },
-            {
-              "name": "infected_time",
-              "type": "string"
-            },
-            {
-              "name": "malware_family",
-              "type": "string"
-            },
-            {
-              "name": "breach_category",
-              "type": "string"
-            },
-            {
-              "name": "breach_title",
-              "type": "string"
-            },
-            {
-              "name": "country_code",
-              "type": "string"
-            },
-            {
-              "name": "log_id",
-              "type": "string"
-            },
-            {
-              "name": "spycloud_publish_date",
-              "type": "string"
-            },
-            {
-              "name": "record_type",
+              "name": "verification_secret",
               "type": "string"
             }
           ]
@@ -2073,6 +1913,365 @@
               "type": "int"
             },
             {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "email_username",
+              "type": "string"
+            },
+            {
+              "name": "domain",
+              "type": "string"
+            },
+            {
+              "name": "username",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "password_plaintext",
+              "type": "string"
+            },
+            {
+              "name": "password_type",
+              "type": "string"
+            },
+            {
+              "name": "salt",
+              "type": "string"
+            },
+            {
+              "name": "severity",
+              "type": "int"
+            },
+            {
+              "name": "sighting",
+              "type": "int"
+            },
+            {
+              "name": "breach_category",
+              "type": "string"
+            },
+            {
+              "name": "breach_title",
+              "type": "string"
+            },
+            {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "infected_path",
+              "type": "string"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
+              "type": "string"
+            },
+            {
+              "name": "user_sys_registered_owner",
+              "type": "string"
+            },
+            {
+              "name": "user_agent",
+              "type": "string"
+            },
+            {
+              "name": "device_name",
+              "type": "string"
+            },
+            {
+              "name": "ip_addresses",
+              "type": "dynamic"
+            },
+            {
+              "name": "country_code",
+              "type": "string"
+            },
+            {
+              "name": "country",
+              "type": "string"
+            },
+            {
+              "name": "state",
+              "type": "string"
+            },
+            {
+              "name": "city",
+              "type": "string"
+            },
+            {
+              "name": "postal_code",
+              "type": "string"
+            },
+            {
+              "name": "timezone",
+              "type": "string"
+            },
+            {
+              "name": "display_resolution",
+              "type": "string"
+            },
+            {
+              "name": "keyboard_languages",
+              "type": "string"
+            },
+            {
+              "name": "av_softwares",
+              "type": "dynamic"
+            },
+            {
+              "name": "full_name",
+              "type": "string"
+            },
+            {
+              "name": "first_name",
+              "type": "string"
+            },
+            {
+              "name": "last_name",
+              "type": "string"
+            },
+            {
+              "name": "middle_name",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "type": "string"
+            },
+            {
+              "name": "dob",
+              "type": "string"
+            },
+            {
+              "name": "birth_year",
+              "type": "string"
+            },
+            {
+              "name": "age",
+              "type": "string"
+            },
+            {
+              "name": "gender",
+              "type": "string"
+            },
+            {
+              "name": "marital_status",
+              "type": "string"
+            },
+            {
+              "name": "address_1",
+              "type": "string"
+            },
+            {
+              "name": "address_2",
+              "type": "string"
+            },
+            {
+              "name": "county",
+              "type": "string"
+            },
+            {
+              "name": "company_name",
+              "type": "string"
+            },
+            {
+              "name": "company_website",
+              "type": "string"
+            },
+            {
+              "name": "job_title",
+              "type": "string"
+            },
+            {
+              "name": "industry",
+              "type": "string"
+            },
+            {
+              "name": "educational_institution",
+              "type": "string"
+            },
+            {
+              "name": "social_security_number",
+              "type": "string"
+            },
+            {
+              "name": "ssn_last_four",
+              "type": "string"
+            },
+            {
+              "name": "taxid",
+              "type": "string"
+            },
+            {
+              "name": "national_id",
+              "type": "string"
+            },
+            {
+              "name": "bank_number",
+              "type": "string"
+            },
+            {
+              "name": "bank_name",
+              "type": "string"
+            },
+            {
+              "name": "health_insurance_id",
+              "type": "string"
+            },
+            {
+              "name": "mobile_equipment_id",
+              "type": "string"
+            },
+            {
+              "name": "mobile_carrier",
+              "type": "string"
+            },
+            {
+              "name": "student_id",
+              "type": "string"
+            },
+            {
+              "name": "account_type",
+              "type": "string"
+            },
+            {
+              "name": "account_status",
+              "type": "string"
+            },
+            {
+              "name": "account_id",
+              "type": "string"
+            },
+            {
+              "name": "account_image_url",
+              "type": "string"
+            },
+            {
+              "name": "account_caption",
+              "type": "string"
+            },
+            {
+              "name": "account_notes",
+              "type": "string"
+            },
+            {
+              "name": "account_signup_time",
+              "type": "string"
+            },
+            {
+              "name": "account_login_time",
+              "type": "string"
+            },
+            {
+              "name": "account_last_activity_time",
+              "type": "string"
+            },
+            {
+              "name": "account_modification_time",
+              "type": "string"
+            },
+            {
+              "name": "origin_id",
+              "type": "string"
+            },
+            {
+              "name": "homepage",
+              "type": "string"
+            },
+            {
+              "name": "social_linkedin",
+              "type": "string"
+            },
+            {
+              "name": "social_twitter",
+              "type": "string"
+            },
+            {
+              "name": "social_crunchbase",
+              "type": "string"
+            },
+            {
+              "name": "social_other",
+              "type": "string"
+            },
+            {
+              "name": "phished_time",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
+              "type": "string"
+            }
+          ]
+        },
+        "retentionInDays": "[parameters('retentionInDays')]",
+        "plan": "Analytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "tags": "[variables('allTags')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/tables",
+      "apiVersion": "2022-10-01",
+      "condition": "[parameters('enableIdLink')]",
+      "name": "[concat(parameters('workspace'), '/SpyCloudIdLink_CL')]",
+      "properties": {
+        "schema": {
+          "name": "SpyCloudIdLink_CL",
+          "columns": [
+            {
+              "name": "TimeGenerated",
+              "type": "datetime"
+            },
+            {
+              "name": "document_id",
+              "type": "string"
+            },
+            {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
               "name": "email",
               "type": "string"
             },
@@ -2133,15 +2332,11 @@
               "type": "string"
             },
             {
-              "name": "malware_family",
+              "name": "user_hostname",
               "type": "string"
             },
             {
-              "name": "breach_category",
-              "type": "string"
-            },
-            {
-              "name": "breach_title",
+              "name": "user_os",
               "type": "string"
             },
             {
@@ -2153,11 +2348,15 @@
               "type": "string"
             },
             {
-              "name": "log_id",
+              "name": "breach_category",
               "type": "string"
             },
             {
-              "name": "spycloud_publish_date",
+              "name": "breach_title",
+              "type": "string"
+            },
+            {
+              "name": "malware_family",
               "type": "string"
             },
             {
@@ -2169,94 +2368,7 @@
               "type": "string"
             },
             {
-              "name": "record_type",
-              "type": "string"
-            }
-          ]
-        },
-        "retentionInDays": "[parameters('retentionInDays')]",
-        "plan": "Analytics"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
-      ],
-      "tags": "[variables('allTags')]"
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces/tables",
-      "apiVersion": "2022-10-01",
-      "condition": "[parameters('enableIdLink')]",
-      "name": "[concat(parameters('workspace'), '/SpyCloudIdLink_CL')]",
-      "properties": {
-        "schema": {
-          "name": "SpyCloudIdLink_CL",
-          "columns": [
-            {
-              "name": "TimeGenerated",
-              "type": "datetime"
-            },
-            {
-              "name": "identity_id",
-              "type": "string"
-            },
-            {
-              "name": "email",
-              "type": "string"
-            },
-            {
-              "name": "email_domain",
-              "type": "string"
-            },
-            {
-              "name": "linked_emails",
-              "type": "dynamic"
-            },
-            {
-              "name": "linked_usernames",
-              "type": "dynamic"
-            },
-            {
-              "name": "linked_ips",
-              "type": "dynamic"
-            },
-            {
-              "name": "linked_devices",
-              "type": "dynamic"
-            },
-            {
-              "name": "link_strength",
-              "type": "real"
-            },
-            {
-              "name": "link_type",
-              "type": "string"
-            },
-            {
-              "name": "breach_sources",
-              "type": "dynamic"
-            },
-            {
-              "name": "first_seen",
-              "type": "string"
-            },
-            {
-              "name": "last_seen",
-              "type": "string"
-            },
-            {
-              "name": "total_exposures",
-              "type": "int"
-            },
-            {
-              "name": "risk_score",
-              "type": "int"
-            },
-            {
-              "name": "graph_depth",
-              "type": "int"
-            },
-            {
-              "name": "log_id",
+              "name": "spycloud_publish_date",
               "type": "string"
             }
           ]
@@ -2287,11 +2399,11 @@
               "type": "string"
             },
             {
-              "name": "partner_id",
-              "type": "string"
+              "name": "source_id",
+              "type": "int"
             },
             {
-              "name": "partner_name",
+              "name": "log_id",
               "type": "string"
             },
             {
@@ -2300,6 +2412,10 @@
             },
             {
               "name": "email_domain",
+              "type": "string"
+            },
+            {
+              "name": "email_username",
               "type": "string"
             },
             {
@@ -2315,6 +2431,10 @@
               "type": "string"
             },
             {
+              "name": "password_plaintext",
+              "type": "string"
+            },
+            {
               "name": "password_type",
               "type": "string"
             },
@@ -2323,11 +2443,35 @@
               "type": "int"
             },
             {
-              "name": "source_type",
+              "name": "sighting",
+              "type": "int"
+            },
+            {
+              "name": "target_url",
               "type": "string"
             },
             {
-              "name": "source_description",
+              "name": "target_domain",
+              "type": "string"
+            },
+            {
+              "name": "target_subdomain",
+              "type": "string"
+            },
+            {
+              "name": "infected_machine_id",
+              "type": "string"
+            },
+            {
+              "name": "infected_time",
+              "type": "string"
+            },
+            {
+              "name": "user_hostname",
+              "type": "string"
+            },
+            {
+              "name": "user_os",
               "type": "string"
             },
             {
@@ -2339,15 +2483,27 @@
               "type": "string"
             },
             {
-              "name": "data_classes",
-              "type": "dynamic"
-            },
-            {
-              "name": "spycloud_publish_date",
+              "name": "breach_category",
               "type": "string"
             },
             {
-              "name": "log_id",
+              "name": "breach_title",
+              "type": "string"
+            },
+            {
+              "name": "malware_family",
+              "type": "string"
+            },
+            {
+              "name": "full_name",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "type": "string"
+            },
+            {
+              "name": "spycloud_publish_date",
               "type": "string"
             }
           ]
@@ -2563,7 +2719,15 @@
               "type": "string"
             },
             {
+              "name": "source_id",
+              "type": "int"
+            },
+            {
               "name": "short_title",
+              "type": "string"
+            },
+            {
+              "name": "breach_title",
               "type": "string"
             },
             {
@@ -2572,6 +2736,18 @@
             },
             {
               "name": "site_description",
+              "type": "string"
+            },
+            {
+              "name": "breach_description",
+              "type": "string"
+            },
+            {
+              "name": "breach_status",
+              "type": "string"
+            },
+            {
+              "name": "breach_type",
               "type": "string"
             },
             {
@@ -2607,8 +2783,40 @@
               "type": "string"
             },
             {
+              "name": "combo_list_flag",
+              "type": "string"
+            },
+            {
               "name": "tlp",
               "type": "string"
+            },
+            {
+              "name": "breach_date",
+              "type": "string"
+            },
+            {
+              "name": "public_date",
+              "type": "string"
+            },
+            {
+              "name": "targeted_industries",
+              "type": "dynamic"
+            },
+            {
+              "name": "targeted_companies",
+              "type": "dynamic"
+            },
+            {
+              "name": "breached_companies",
+              "type": "dynamic"
+            },
+            {
+              "name": "media_urls",
+              "type": "dynamic"
+            },
+            {
+              "name": "assets",
+              "type": "dynamic"
             },
             {
               "name": "spycloud_publish_date",
@@ -2617,10 +2825,6 @@
             {
               "name": "acquisition_date",
               "type": "string"
-            },
-            {
-              "name": "assets",
-              "type": "dynamic"
             }
           ]
         },
@@ -2653,6 +2857,10 @@
               "type": "int"
             },
             {
+              "name": "log_id",
+              "type": "string"
+            },
+            {
               "name": "email",
               "type": "string"
             },
@@ -2669,6 +2877,10 @@
               "type": "string"
             },
             {
+              "name": "username",
+              "type": "string"
+            },
+            {
               "name": "password",
               "type": "string"
             },
@@ -2678,6 +2890,10 @@
             },
             {
               "name": "password_type",
+              "type": "string"
+            },
+            {
+              "name": "salt",
               "type": "string"
             },
             {
@@ -2697,15 +2913,15 @@
               "type": "string"
             },
             {
+              "name": "target_url",
+              "type": "string"
+            },
+            {
               "name": "target_domain",
               "type": "string"
             },
             {
               "name": "target_subdomain",
-              "type": "string"
-            },
-            {
-              "name": "target_url",
               "type": "string"
             },
             {
@@ -2733,15 +2949,39 @@
               "type": "string"
             },
             {
+              "name": "user_agent",
+              "type": "string"
+            },
+            {
+              "name": "device_name",
+              "type": "string"
+            },
+            {
               "name": "ip_addresses",
               "type": "dynamic"
             },
             {
-              "name": "av_softwares",
-              "type": "dynamic"
+              "name": "country_code",
+              "type": "string"
             },
             {
-              "name": "country_code",
+              "name": "country",
+              "type": "string"
+            },
+            {
+              "name": "state",
+              "type": "string"
+            },
+            {
+              "name": "city",
+              "type": "string"
+            },
+            {
+              "name": "postal_code",
+              "type": "string"
+            },
+            {
+              "name": "timezone",
               "type": "string"
             },
             {
@@ -2753,11 +2993,187 @@
               "type": "string"
             },
             {
-              "name": "timezone",
+              "name": "av_softwares",
+              "type": "dynamic"
+            },
+            {
+              "name": "full_name",
               "type": "string"
             },
             {
-              "name": "log_id",
+              "name": "first_name",
+              "type": "string"
+            },
+            {
+              "name": "last_name",
+              "type": "string"
+            },
+            {
+              "name": "middle_name",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "type": "string"
+            },
+            {
+              "name": "dob",
+              "type": "string"
+            },
+            {
+              "name": "birth_year",
+              "type": "string"
+            },
+            {
+              "name": "age",
+              "type": "string"
+            },
+            {
+              "name": "gender",
+              "type": "string"
+            },
+            {
+              "name": "marital_status",
+              "type": "string"
+            },
+            {
+              "name": "address_1",
+              "type": "string"
+            },
+            {
+              "name": "address_2",
+              "type": "string"
+            },
+            {
+              "name": "county",
+              "type": "string"
+            },
+            {
+              "name": "company_name",
+              "type": "string"
+            },
+            {
+              "name": "company_website",
+              "type": "string"
+            },
+            {
+              "name": "job_title",
+              "type": "string"
+            },
+            {
+              "name": "industry",
+              "type": "string"
+            },
+            {
+              "name": "educational_institution",
+              "type": "string"
+            },
+            {
+              "name": "social_security_number",
+              "type": "string"
+            },
+            {
+              "name": "ssn_last_four",
+              "type": "string"
+            },
+            {
+              "name": "taxid",
+              "type": "string"
+            },
+            {
+              "name": "national_id",
+              "type": "string"
+            },
+            {
+              "name": "bank_number",
+              "type": "string"
+            },
+            {
+              "name": "bank_name",
+              "type": "string"
+            },
+            {
+              "name": "health_insurance_id",
+              "type": "string"
+            },
+            {
+              "name": "mobile_equipment_id",
+              "type": "string"
+            },
+            {
+              "name": "mobile_carrier",
+              "type": "string"
+            },
+            {
+              "name": "student_id",
+              "type": "string"
+            },
+            {
+              "name": "account_type",
+              "type": "string"
+            },
+            {
+              "name": "account_status",
+              "type": "string"
+            },
+            {
+              "name": "account_id",
+              "type": "string"
+            },
+            {
+              "name": "account_image_url",
+              "type": "string"
+            },
+            {
+              "name": "account_caption",
+              "type": "string"
+            },
+            {
+              "name": "account_notes",
+              "type": "string"
+            },
+            {
+              "name": "account_signup_time",
+              "type": "string"
+            },
+            {
+              "name": "account_login_time",
+              "type": "string"
+            },
+            {
+              "name": "account_last_activity_time",
+              "type": "string"
+            },
+            {
+              "name": "account_modification_time",
+              "type": "string"
+            },
+            {
+              "name": "origin_id",
+              "type": "string"
+            },
+            {
+              "name": "homepage",
+              "type": "string"
+            },
+            {
+              "name": "social_linkedin",
+              "type": "string"
+            },
+            {
+              "name": "social_twitter",
+              "type": "string"
+            },
+            {
+              "name": "social_crunchbase",
+              "type": "string"
+            },
+            {
+              "name": "social_other",
+              "type": "string"
+            },
+            {
+              "name": "phished_time",
               "type": "string"
             },
             {
@@ -2797,6 +3213,10 @@
                 "type": "int"
               },
               {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
                 "name": "email",
                 "type": "string"
               },
@@ -2813,6 +3233,10 @@
                 "type": "string"
               },
               {
+                "name": "username",
+                "type": "string"
+              },
+              {
                 "name": "password",
                 "type": "string"
               },
@@ -2822,6 +3246,10 @@
               },
               {
                 "name": "password_type",
+                "type": "string"
+              },
+              {
+                "name": "salt",
                 "type": "string"
               },
               {
@@ -2841,15 +3269,15 @@
                 "type": "string"
               },
               {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
                 "name": "target_domain",
                 "type": "string"
               },
               {
                 "name": "target_subdomain",
-                "type": "string"
-              },
-              {
-                "name": "target_url",
                 "type": "string"
               },
               {
@@ -2877,15 +3305,39 @@
                 "type": "string"
               },
               {
+                "name": "user_agent",
+                "type": "string"
+              },
+              {
+                "name": "device_name",
+                "type": "string"
+              },
+              {
                 "name": "ip_addresses",
                 "type": "dynamic"
               },
               {
-                "name": "av_softwares",
-                "type": "dynamic"
+                "name": "country_code",
+                "type": "string"
               },
               {
-                "name": "country_code",
+                "name": "country",
+                "type": "string"
+              },
+              {
+                "name": "state",
+                "type": "string"
+              },
+              {
+                "name": "city",
+                "type": "string"
+              },
+              {
+                "name": "postal_code",
+                "type": "string"
+              },
+              {
+                "name": "timezone",
                 "type": "string"
               },
               {
@@ -2897,11 +3349,187 @@
                 "type": "string"
               },
               {
-                "name": "timezone",
+                "name": "av_softwares",
+                "type": "dynamic"
+              },
+              {
+                "name": "full_name",
                 "type": "string"
               },
               {
-                "name": "log_id",
+                "name": "first_name",
+                "type": "string"
+              },
+              {
+                "name": "last_name",
+                "type": "string"
+              },
+              {
+                "name": "middle_name",
+                "type": "string"
+              },
+              {
+                "name": "phone",
+                "type": "string"
+              },
+              {
+                "name": "dob",
+                "type": "string"
+              },
+              {
+                "name": "birth_year",
+                "type": "string"
+              },
+              {
+                "name": "age",
+                "type": "string"
+              },
+              {
+                "name": "gender",
+                "type": "string"
+              },
+              {
+                "name": "marital_status",
+                "type": "string"
+              },
+              {
+                "name": "address_1",
+                "type": "string"
+              },
+              {
+                "name": "address_2",
+                "type": "string"
+              },
+              {
+                "name": "county",
+                "type": "string"
+              },
+              {
+                "name": "company_name",
+                "type": "string"
+              },
+              {
+                "name": "company_website",
+                "type": "string"
+              },
+              {
+                "name": "job_title",
+                "type": "string"
+              },
+              {
+                "name": "industry",
+                "type": "string"
+              },
+              {
+                "name": "educational_institution",
+                "type": "string"
+              },
+              {
+                "name": "social_security_number",
+                "type": "string"
+              },
+              {
+                "name": "ssn_last_four",
+                "type": "string"
+              },
+              {
+                "name": "taxid",
+                "type": "string"
+              },
+              {
+                "name": "national_id",
+                "type": "string"
+              },
+              {
+                "name": "bank_number",
+                "type": "string"
+              },
+              {
+                "name": "bank_name",
+                "type": "string"
+              },
+              {
+                "name": "health_insurance_id",
+                "type": "string"
+              },
+              {
+                "name": "mobile_equipment_id",
+                "type": "string"
+              },
+              {
+                "name": "mobile_carrier",
+                "type": "string"
+              },
+              {
+                "name": "student_id",
+                "type": "string"
+              },
+              {
+                "name": "account_type",
+                "type": "string"
+              },
+              {
+                "name": "account_status",
+                "type": "string"
+              },
+              {
+                "name": "account_id",
+                "type": "string"
+              },
+              {
+                "name": "account_image_url",
+                "type": "string"
+              },
+              {
+                "name": "account_caption",
+                "type": "string"
+              },
+              {
+                "name": "account_notes",
+                "type": "string"
+              },
+              {
+                "name": "account_signup_time",
+                "type": "string"
+              },
+              {
+                "name": "account_login_time",
+                "type": "string"
+              },
+              {
+                "name": "account_last_activity_time",
+                "type": "string"
+              },
+              {
+                "name": "account_modification_time",
+                "type": "string"
+              },
+              {
+                "name": "origin_id",
+                "type": "string"
+              },
+              {
+                "name": "homepage",
+                "type": "string"
+              },
+              {
+                "name": "social_linkedin",
+                "type": "string"
+              },
+              {
+                "name": "social_twitter",
+                "type": "string"
+              },
+              {
+                "name": "social_crunchbase",
+                "type": "string"
+              },
+              {
+                "name": "social_other",
+                "type": "string"
+              },
+              {
+                "name": "phished_time",
                 "type": "string"
               },
               {
@@ -2921,7 +3549,15 @@
                 "type": "string"
               },
               {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
                 "name": "short_title",
+                "type": "string"
+              },
+              {
+                "name": "breach_title",
                 "type": "string"
               },
               {
@@ -2930,6 +3566,18 @@
               },
               {
                 "name": "site_description",
+                "type": "string"
+              },
+              {
+                "name": "breach_description",
+                "type": "string"
+              },
+              {
+                "name": "breach_status",
+                "type": "string"
+              },
+              {
+                "name": "breach_type",
                 "type": "string"
               },
               {
@@ -2965,8 +3613,40 @@
                 "type": "string"
               },
               {
+                "name": "combo_list_flag",
+                "type": "string"
+              },
+              {
                 "name": "tlp",
                 "type": "string"
+              },
+              {
+                "name": "breach_date",
+                "type": "string"
+              },
+              {
+                "name": "public_date",
+                "type": "string"
+              },
+              {
+                "name": "targeted_industries",
+                "type": "dynamic"
+              },
+              {
+                "name": "targeted_companies",
+                "type": "dynamic"
+              },
+              {
+                "name": "breached_companies",
+                "type": "dynamic"
+              },
+              {
+                "name": "media_urls",
+                "type": "dynamic"
+              },
+              {
+                "name": "assets",
+                "type": "dynamic"
               },
               {
                 "name": "spycloud_publish_date",
@@ -2975,10 +3655,6 @@
               {
                 "name": "acquisition_date",
                 "type": "string"
-              },
-              {
-                "name": "assets",
-                "type": "dynamic"
               }
             ]
           },
@@ -2997,6 +3673,10 @@
                 "type": "int"
               },
               {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
                 "name": "email",
                 "type": "string"
               },
@@ -3010,6 +3690,10 @@
               },
               {
                 "name": "domain",
+                "type": "string"
+              },
+              {
+                "name": "username",
                 "type": "string"
               },
               {
@@ -3041,15 +3725,15 @@
                 "type": "string"
               },
               {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
                 "name": "target_domain",
                 "type": "string"
               },
               {
                 "name": "target_subdomain",
-                "type": "string"
-              },
-              {
-                "name": "target_url",
                 "type": "string"
               },
               {
@@ -3101,115 +3785,7 @@
                 "type": "string"
               },
               {
-                "name": "log_id",
-                "type": "string"
-              },
-              {
                 "name": "spycloud_publish_date",
-                "type": "string"
-              },
-              {
-                "name": "malware_family",
-                "type": "string"
-              },
-              {
-                "name": "username",
-                "type": "string"
-              },
-              {
-                "name": "full_name",
-                "type": "string"
-              },
-              {
-                "name": "phone",
-                "type": "string"
-              },
-              {
-                "name": "company_name",
-                "type": "string"
-              },
-              {
-                "name": "job_title",
-                "type": "string"
-              },
-              {
-                "name": "record_type",
-                "type": "string"
-              },
-              {
-                "name": "account_type",
-                "type": "string"
-              },
-              {
-                "name": "breach_date",
-                "type": "string"
-              },
-              {
-                "name": "breach_description",
-                "type": "string"
-              },
-              {
-                "name": "stolen_cookies",
-                "type": "dynamic"
-              },
-              {
-                "name": "autofill_fields",
-                "type": "dynamic"
-              },
-              {
-                "name": "crypto_wallets",
-                "type": "dynamic"
-              },
-              {
-                "name": "installed_software",
-                "type": "dynamic"
-              },
-              {
-                "name": "browser_history_domains",
-                "type": "dynamic"
-              },
-              {
-                "name": "bot_id",
-                "type": "string"
-              },
-              {
-                "name": "campaign_id",
-                "type": "string"
-              },
-              {
-                "name": "c2_url",
-                "type": "string"
-              },
-              {
-                "name": "infection_build_id",
-                "type": "string"
-              },
-              {
-                "name": "hardware_id",
-                "type": "string"
-              },
-              {
-                "name": "screenshot_available",
-                "type": "boolean"
-              },
-              {
-                "name": "keylog_available",
-                "type": "boolean"
-              },
-              {
-                "name": "file_exfiltration",
-                "type": "boolean"
-              },
-              {
-                "name": "salt",
-                "type": "string"
-              },
-              {
-                "name": "credit_card_number",
-                "type": "string"
-              },
-              {
-                "name": "credit_card_expiration",
                 "type": "string"
               }
             ]
@@ -3226,6 +3802,10 @@
               },
               {
                 "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_machine_id",
                 "type": "string"
               },
               {
@@ -3261,67 +3841,35 @@
                 "type": "datetime"
               },
               {
-                "name": "infected_machine_id",
+                "name": "target_application",
                 "type": "string"
               },
               {
-                "name": "target_url",
-                "type": "string"
-              },
-              {
-                "name": "target_domain",
-                "type": "string"
-              },
-              {
-                "name": "target_subdomain",
-                "type": "string"
-              },
-              {
-                "name": "credential_count",
+                "name": "total_records",
                 "type": "int"
               },
               {
-                "name": "cookie_count",
+                "name": "email_count",
                 "type": "int"
               },
               {
-                "name": "email",
-                "type": "string"
-              },
-              {
-                "name": "email_domain",
-                "type": "string"
-              },
-              {
-                "name": "log_id",
-                "type": "string"
-              },
-              {
-                "name": "source_id",
+                "name": "username_count",
                 "type": "int"
               },
               {
-                "name": "severity",
+                "name": "compromised_device_count",
                 "type": "int"
               },
               {
-                "name": "infected_time",
+                "name": "on_watchlist",
                 "type": "string"
               },
               {
-                "name": "user_hostname",
+                "name": "first_spycloud_publish_date",
                 "type": "string"
               },
               {
-                "name": "user_os",
-                "type": "string"
-              },
-              {
-                "name": "malware_family",
-                "type": "string"
-              },
-              {
-                "name": "spycloud_publish_date",
+                "name": "latest_spycloud_publish_date",
                 "type": "string"
               }
             ]
@@ -3341,11 +3889,91 @@
                 "type": "int"
               },
               {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
                 "name": "email",
                 "type": "string"
               },
               {
                 "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "email_username",
+                "type": "string"
+              },
+              {
+                "name": "username",
+                "type": "string"
+              },
+              {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "sighting",
+                "type": "int"
+              },
+              {
+                "name": "breach_category",
+                "type": "string"
+              },
+              {
+                "name": "breach_title",
+                "type": "string"
+              },
+              {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "country_code",
+                "type": "string"
+              },
+              {
+                "name": "malware_family",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_plaintext",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
                 "type": "string"
               },
               {
@@ -3377,6 +4005,130 @@
                 "type": "boolean"
               },
               {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudIdentityExposure_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "identifier_name",
+                "type": "string"
+              },
+              {
+                "name": "identifier_type",
+                "type": "string"
+              },
+              {
+                "name": "corporate_record_count",
+                "type": "int"
+              },
+              {
+                "name": "infected_employee_record_count",
+                "type": "int"
+              },
+              {
+                "name": "infected_consumer_record_count",
+                "type": "int"
+              },
+              {
+                "name": "infected_user_record_count",
+                "type": "int"
+              },
+              {
+                "name": "last_discovered",
+                "type": "string"
+              },
+              {
+                "name": "identifier_status",
+                "type": "string"
+              },
+              {
+                "name": "verified",
+                "type": "string"
+              },
+              {
+                "name": "verification_secret",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudInvestigations_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "document_id",
+                "type": "string"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "email_username",
+                "type": "string"
+              },
+              {
+                "name": "domain",
+                "type": "string"
+              },
+              {
+                "name": "username",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_plaintext",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
+                "type": "string"
+              },
+              {
+                "name": "salt",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "type": "int"
+              },
+              {
+                "name": "sighting",
+                "type": "int"
+              },
+              {
+                "name": "breach_category",
+                "type": "string"
+              },
+              {
+                "name": "breach_title",
+                "type": "string"
+              },
+              {
                 "name": "target_url",
                 "type": "string"
               },
@@ -3389,8 +4141,332 @@
                 "type": "string"
               },
               {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_path",
+                "type": "string"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
+                "type": "string"
+              },
+              {
+                "name": "user_sys_registered_owner",
+                "type": "string"
+              },
+              {
+                "name": "user_agent",
+                "type": "string"
+              },
+              {
+                "name": "device_name",
+                "type": "string"
+              },
+              {
+                "name": "ip_addresses",
+                "type": "dynamic"
+              },
+              {
+                "name": "country_code",
+                "type": "string"
+              },
+              {
+                "name": "country",
+                "type": "string"
+              },
+              {
+                "name": "state",
+                "type": "string"
+              },
+              {
+                "name": "city",
+                "type": "string"
+              },
+              {
+                "name": "postal_code",
+                "type": "string"
+              },
+              {
+                "name": "timezone",
+                "type": "string"
+              },
+              {
+                "name": "display_resolution",
+                "type": "string"
+              },
+              {
+                "name": "keyboard_languages",
+                "type": "string"
+              },
+              {
+                "name": "av_softwares",
+                "type": "dynamic"
+              },
+              {
+                "name": "full_name",
+                "type": "string"
+              },
+              {
+                "name": "first_name",
+                "type": "string"
+              },
+              {
+                "name": "last_name",
+                "type": "string"
+              },
+              {
+                "name": "middle_name",
+                "type": "string"
+              },
+              {
+                "name": "phone",
+                "type": "string"
+              },
+              {
+                "name": "dob",
+                "type": "string"
+              },
+              {
+                "name": "birth_year",
+                "type": "string"
+              },
+              {
+                "name": "age",
+                "type": "string"
+              },
+              {
+                "name": "gender",
+                "type": "string"
+              },
+              {
+                "name": "marital_status",
+                "type": "string"
+              },
+              {
+                "name": "address_1",
+                "type": "string"
+              },
+              {
+                "name": "address_2",
+                "type": "string"
+              },
+              {
+                "name": "county",
+                "type": "string"
+              },
+              {
+                "name": "company_name",
+                "type": "string"
+              },
+              {
+                "name": "company_website",
+                "type": "string"
+              },
+              {
+                "name": "job_title",
+                "type": "string"
+              },
+              {
+                "name": "industry",
+                "type": "string"
+              },
+              {
+                "name": "educational_institution",
+                "type": "string"
+              },
+              {
+                "name": "social_security_number",
+                "type": "string"
+              },
+              {
+                "name": "ssn_last_four",
+                "type": "string"
+              },
+              {
+                "name": "taxid",
+                "type": "string"
+              },
+              {
+                "name": "national_id",
+                "type": "string"
+              },
+              {
+                "name": "bank_number",
+                "type": "string"
+              },
+              {
+                "name": "bank_name",
+                "type": "string"
+              },
+              {
+                "name": "health_insurance_id",
+                "type": "string"
+              },
+              {
+                "name": "mobile_equipment_id",
+                "type": "string"
+              },
+              {
+                "name": "mobile_carrier",
+                "type": "string"
+              },
+              {
+                "name": "student_id",
+                "type": "string"
+              },
+              {
+                "name": "account_type",
+                "type": "string"
+              },
+              {
+                "name": "account_status",
+                "type": "string"
+              },
+              {
+                "name": "account_id",
+                "type": "string"
+              },
+              {
+                "name": "account_image_url",
+                "type": "string"
+              },
+              {
+                "name": "account_caption",
+                "type": "string"
+              },
+              {
+                "name": "account_notes",
+                "type": "string"
+              },
+              {
+                "name": "account_signup_time",
+                "type": "string"
+              },
+              {
+                "name": "account_login_time",
+                "type": "string"
+              },
+              {
+                "name": "account_last_activity_time",
+                "type": "string"
+              },
+              {
+                "name": "account_modification_time",
+                "type": "string"
+              },
+              {
+                "name": "origin_id",
+                "type": "string"
+              },
+              {
+                "name": "homepage",
+                "type": "string"
+              },
+              {
+                "name": "social_linkedin",
+                "type": "string"
+              },
+              {
+                "name": "social_twitter",
+                "type": "string"
+              },
+              {
+                "name": "social_crunchbase",
+                "type": "string"
+              },
+              {
+                "name": "social_other",
+                "type": "string"
+              },
+              {
+                "name": "phished_time",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
+                "type": "string"
+              }
+            ]
+          },
+          "Custom-SpyCloudIdLink_CL": {
+            "columns": [
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "document_id",
+                "type": "string"
+              },
+              {
+                "name": "source_id",
+                "type": "int"
+              },
+              {
+                "name": "log_id",
+                "type": "string"
+              },
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "email_username",
+                "type": "string"
+              },
+              {
+                "name": "username",
+                "type": "string"
+              },
+              {
+                "name": "domain",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "password_plaintext",
+                "type": "string"
+              },
+              {
+                "name": "password_type",
+                "type": "string"
+              },
+              {
                 "name": "severity",
                 "type": "int"
+              },
+              {
+                "name": "sighting",
+                "type": "int"
+              },
+              {
+                "name": "target_url",
+                "type": "string"
+              },
+              {
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
               },
               {
                 "name": "infected_machine_id",
@@ -3413,107 +4489,7 @@
                 "type": "dynamic"
               },
               {
-                "name": "malware_family",
-                "type": "string"
-              },
-              {
-                "name": "log_id",
-                "type": "string"
-              },
-              {
-                "name": "spycloud_publish_date",
-                "type": "string"
-              },
-              {
                 "name": "country_code",
-                "type": "string"
-              },
-              {
-                "name": "username",
-                "type": "string"
-              },
-              {
-                "name": "password",
-                "type": "string"
-              },
-              {
-                "name": "password_type",
-                "type": "string"
-              }
-            ]
-          },
-          "Custom-SpyCloudIdentityExposure_CL": {
-            "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "document_id",
-                "type": "string"
-              },
-              {
-                "name": "source_id",
-                "type": "int"
-              },
-              {
-                "name": "email",
-                "type": "string"
-              },
-              {
-                "name": "email_domain",
-                "type": "string"
-              },
-              {
-                "name": "email_username",
-                "type": "string"
-              },
-              {
-                "name": "domain",
-                "type": "string"
-              },
-              {
-                "name": "password",
-                "type": "string"
-              },
-              {
-                "name": "password_plaintext",
-                "type": "string"
-              },
-              {
-                "name": "password_type",
-                "type": "string"
-              },
-              {
-                "name": "severity",
-                "type": "int"
-              },
-              {
-                "name": "sighting",
-                "type": "int"
-              },
-              {
-                "name": "target_url",
-                "type": "string"
-              },
-              {
-                "name": "target_domain",
-                "type": "string"
-              },
-              {
-                "name": "target_subdomain",
-                "type": "string"
-              },
-              {
-                "name": "infected_machine_id",
-                "type": "string"
-              },
-              {
-                "name": "infected_time",
-                "type": "string"
-              },
-              {
-                "name": "malware_family",
                 "type": "string"
               },
               {
@@ -3525,123 +4501,7 @@
                 "type": "string"
               },
               {
-                "name": "country_code",
-                "type": "string"
-              },
-              {
-                "name": "log_id",
-                "type": "string"
-              },
-              {
-                "name": "spycloud_publish_date",
-                "type": "string"
-              },
-              {
-                "name": "record_type",
-                "type": "string"
-              }
-            ]
-          },
-          "Custom-SpyCloudInvestigations_CL": {
-            "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "document_id",
-                "type": "string"
-              },
-              {
-                "name": "source_id",
-                "type": "int"
-              },
-              {
-                "name": "email",
-                "type": "string"
-              },
-              {
-                "name": "email_domain",
-                "type": "string"
-              },
-              {
-                "name": "email_username",
-                "type": "string"
-              },
-              {
-                "name": "username",
-                "type": "string"
-              },
-              {
-                "name": "domain",
-                "type": "string"
-              },
-              {
-                "name": "password",
-                "type": "string"
-              },
-              {
-                "name": "password_plaintext",
-                "type": "string"
-              },
-              {
-                "name": "password_type",
-                "type": "string"
-              },
-              {
-                "name": "severity",
-                "type": "int"
-              },
-              {
-                "name": "sighting",
-                "type": "int"
-              },
-              {
-                "name": "target_url",
-                "type": "string"
-              },
-              {
-                "name": "target_domain",
-                "type": "string"
-              },
-              {
-                "name": "target_subdomain",
-                "type": "string"
-              },
-              {
-                "name": "infected_machine_id",
-                "type": "string"
-              },
-              {
-                "name": "infected_time",
-                "type": "string"
-              },
-              {
                 "name": "malware_family",
-                "type": "string"
-              },
-              {
-                "name": "breach_category",
-                "type": "string"
-              },
-              {
-                "name": "breach_title",
-                "type": "string"
-              },
-              {
-                "name": "ip_addresses",
-                "type": "dynamic"
-              },
-              {
-                "name": "country_code",
-                "type": "string"
-              },
-              {
-                "name": "log_id",
-                "type": "string"
-              },
-              {
-                "name": "spycloud_publish_date",
                 "type": "string"
               },
               {
@@ -3653,79 +4513,7 @@
                 "type": "string"
               },
               {
-                "name": "record_type",
-                "type": "string"
-              }
-            ]
-          },
-          "Custom-SpyCloudIdLink_CL": {
-            "columns": [
-              {
-                "name": "TimeGenerated",
-                "type": "datetime"
-              },
-              {
-                "name": "identity_id",
-                "type": "string"
-              },
-              {
-                "name": "email",
-                "type": "string"
-              },
-              {
-                "name": "email_domain",
-                "type": "string"
-              },
-              {
-                "name": "linked_emails",
-                "type": "dynamic"
-              },
-              {
-                "name": "linked_usernames",
-                "type": "dynamic"
-              },
-              {
-                "name": "linked_ips",
-                "type": "dynamic"
-              },
-              {
-                "name": "linked_devices",
-                "type": "dynamic"
-              },
-              {
-                "name": "link_strength",
-                "type": "real"
-              },
-              {
-                "name": "link_type",
-                "type": "string"
-              },
-              {
-                "name": "breach_sources",
-                "type": "dynamic"
-              },
-              {
-                "name": "first_seen",
-                "type": "string"
-              },
-              {
-                "name": "last_seen",
-                "type": "string"
-              },
-              {
-                "name": "total_exposures",
-                "type": "int"
-              },
-              {
-                "name": "risk_score",
-                "type": "int"
-              },
-              {
-                "name": "graph_depth",
-                "type": "int"
-              },
-              {
-                "name": "log_id",
+                "name": "spycloud_publish_date",
                 "type": "string"
               }
             ]
@@ -3741,11 +4529,11 @@
                 "type": "string"
               },
               {
-                "name": "partner_id",
-                "type": "string"
+                "name": "source_id",
+                "type": "int"
               },
               {
-                "name": "partner_name",
+                "name": "log_id",
                 "type": "string"
               },
               {
@@ -3754,6 +4542,10 @@
               },
               {
                 "name": "email_domain",
+                "type": "string"
+              },
+              {
+                "name": "email_username",
                 "type": "string"
               },
               {
@@ -3769,6 +4561,10 @@
                 "type": "string"
               },
               {
+                "name": "password_plaintext",
+                "type": "string"
+              },
+              {
                 "name": "password_type",
                 "type": "string"
               },
@@ -3777,11 +4573,35 @@
                 "type": "int"
               },
               {
-                "name": "source_type",
+                "name": "sighting",
+                "type": "int"
+              },
+              {
+                "name": "target_url",
                 "type": "string"
               },
               {
-                "name": "source_description",
+                "name": "target_domain",
+                "type": "string"
+              },
+              {
+                "name": "target_subdomain",
+                "type": "string"
+              },
+              {
+                "name": "infected_machine_id",
+                "type": "string"
+              },
+              {
+                "name": "infected_time",
+                "type": "string"
+              },
+              {
+                "name": "user_hostname",
+                "type": "string"
+              },
+              {
+                "name": "user_os",
                 "type": "string"
               },
               {
@@ -3793,15 +4613,27 @@
                 "type": "string"
               },
               {
-                "name": "data_classes",
-                "type": "dynamic"
-              },
-              {
-                "name": "spycloud_publish_date",
+                "name": "breach_category",
                 "type": "string"
               },
               {
-                "name": "log_id",
+                "name": "breach_title",
+                "type": "string"
+              },
+              {
+                "name": "malware_family",
+                "type": "string"
+              },
+              {
+                "name": "full_name",
+                "type": "string"
+              },
+              {
+                "name": "phone",
+                "type": "string"
+              },
+              {
+                "name": "spycloud_publish_date",
                 "type": "string"
               }
             ]
@@ -3823,7 +4655,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend target_domain = tolower(tostring(target_domain))",
+            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id)",
             "outputStream": "Custom-SpyCloudBreachWatchlist_CL"
           },
           {
@@ -3843,7 +4675,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend av_softwares = iff(gettype(av_softwares) == 'string', parse_json(av_softwares), av_softwares) | extend stolen_cookies = iff(gettype(stolen_cookies) == 'string', parse_json(stolen_cookies), stolen_cookies) | extend autofill_fields = iff(gettype(autofill_fields) == 'string', parse_json(autofill_fields), autofill_fields) | extend crypto_wallets = iff(gettype(crypto_wallets) == 'string', parse_json(crypto_wallets), crypto_wallets) | extend installed_software = iff(gettype(installed_software) == 'string', parse_json(installed_software), installed_software) | extend browser_history_domains = iff(gettype(browser_history_domains) == 'string', parse_json(browser_history_domains), browser_history_domains) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain)) | extend screenshot_available = tobool(screenshot_available) | extend keylog_available = tobool(keylog_available) | extend file_exfiltration = tobool(file_exfiltration)",
+            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend source_id = toint(source_id)",
             "outputStream": "Custom-SpyCloudCompassData_CL"
           },
           {
@@ -3853,7 +4685,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend application_count = toint(application_count) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses)",
+            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend application_count = toint(application_count)",
             "outputStream": "Custom-SpyCloudCompassDevices_CL"
           },
           {
@@ -3863,7 +4695,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend severity = toint(severity) | extend credential_count = toint(credential_count) | extend cookie_count = toint(cookie_count) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
+            "transformKql": "source | extend TimeGenerated = now() | extend total_records = toint(total_records) | extend email_count = toint(email_count) | extend username_count = toint(username_count) | extend compromised_device_count = toint(compromised_device_count)",
             "outputStream": "Custom-SpyCloudCompassApplications_CL"
           },
           {
@@ -3883,7 +4715,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend severity = toint(severity) | extend sighting = toint(sighting) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain))",
+            "transformKql": "source | extend TimeGenerated = now() | extend corporate_record_count = toint(corporate_record_count) | extend infected_employee_record_count = toint(infected_employee_record_count) | extend infected_consumer_record_count = toint(infected_consumer_record_count) | extend infected_user_record_count = toint(infected_user_record_count) | extend identifier_status = tostring(status)",
             "outputStream": "Custom-SpyCloudIdentityExposure_CL"
           },
           {
@@ -5419,7 +6251,7 @@
                 "dataType": "[variables('_logAnalyticsTableId1')]",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
@@ -5472,7 +6304,7 @@
                 "dataType": "[variables('_logAnalyticsTableId1')]",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
@@ -5526,7 +6358,7 @@
                 "dataType": "[variables('_logAnalyticsTableId2')]",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
@@ -5581,7 +6413,7 @@
                 "dataType": "SpyCloud CompassData",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
@@ -5632,7 +6464,7 @@
                 "dataType": "SpyCloud CompassDevices",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
@@ -5683,7 +6515,7 @@
                 "dataType": "SpyCloud CompassApplications",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
@@ -5734,7 +6566,7 @@
                 "dataType": "SpyCloud SipCookies",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[if(not(empty(parameters('sipApiKey'))), parameters('sipApiKey'), parameters('apiKey'))]"
                 },
                 "request": {
@@ -5784,7 +6616,7 @@
                 "dataType": "SpyCloud IdentityExposure",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('apiKey')]"
                 },
                 "request": {
@@ -5835,7 +6667,7 @@
                 "dataType": "SpyCloud Investigations",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[if(not(empty(parameters('investigationsApiKey'))), parameters('investigationsApiKey'), parameters('apiKey'))]"
                 },
                 "request": {
@@ -5886,7 +6718,7 @@
                 "dataType": "SpyCloud IdLink",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('idlinkApiKey')]"
                 },
                 "request": {
@@ -5937,7 +6769,7 @@
                 "dataType": "SpyCloud DataPartnership",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('dataPartnershipApiKey')]"
                 },
                 "request": {
@@ -5988,7 +6820,7 @@
                 "dataType": "SpyCloud Exposure",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('exposureApiKey')]"
                 },
                 "request": {
@@ -6039,7 +6871,7 @@
                 "dataType": "SpyCloud CAP",
                 "auth": {
                   "type": "APIKey",
-                  "ApiKeyName": "X-Api-Key",
+                  "ApiKeyName": "X-API-KEY",
                   "ApiKey": "[[parameters('capApiKey')]"
                 },
                 "request": {
@@ -12404,6 +13236,28 @@
             "value": "[parameters('virusTotalApiKey')]"
           }
         }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloud-EnrichedDataParser')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+      ],
+      "properties": {
+        "category": "Microsoft Sentinel Parser",
+        "displayName": "SpyCloud Enriched Data Parser",
+        "functionAlias": "get_Spycloud_enriched_data",
+        "functionParameters": "lookback:timespan=1d",
+        "query": "let _lookback = coalesce(lookback, 1d);\nlet LatestBreachCatalog =\n    SpyCloudBreachCatalog_CL\n    | summarize arg_max(TimeGenerated, short_title, site_description, breach_main_category) by uuid\n    | project\n        uuid,\n        catalog_title = short_title,\n        catalog_description = site_description,\n        catalog_category = breach_main_category;\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated >= ago(_lookback)\n| extend source_uuid = tostring(source_id)\n| join kind=leftouter LatestBreachCatalog on $left.source_uuid == $right.uuid\n| project-away source_uuid, uuid",
+        "version": 2,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Joins SpyCloud Watchlist exposures with Breach Catalog metadata. Use: get_Spycloud_enriched_data(7d)"
+          }
+        ]
       }
     }
   ],
