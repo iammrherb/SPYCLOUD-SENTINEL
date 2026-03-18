@@ -1,0 +1,417 @@
+[
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "fa21ac4a-d1d5-47e2-a6bf-20ac0f6d81f1",
+    "email": "ceo@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "mike.brown@contoso.com",
+      "sarah.johnson@contoso.com"
+    ],
+    "linked_usernames": [
+      "ceo",
+      "ceo123"
+    ],
+    "linked_ips": [
+      "152.95.34.253"
+    ],
+    "linked_devices": [
+      "2a83517b-5453-4fc4-8e54-3a2265d73ca7"
+    ],
+    "link_strength": 0.47,
+    "link_type": "credential_reuse",
+    "breach_sources": [
+      "688e4a9e",
+      "ff46d5fc",
+      "bd512c33"
+    ],
+    "first_seen": "2026-01-25T14:53:23Z",
+    "last_seen": "2026-03-15T02:53:23Z",
+    "total_exposures": 49,
+    "risk_score": 20,
+    "graph_depth": 4,
+    "log_id": "134c89d9ad75619a8ce374f18b45667ded98ed2edbfc1fe1a3"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "8218c28d-0f89-4ace-a37c-8a4c1199f690",
+    "email": "cfo@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "lisa.wang@contoso.com",
+      "jane.smith@contoso.com"
+    ],
+    "linked_usernames": [
+      "cfo",
+      "cfo123"
+    ],
+    "linked_ips": [
+      "78.84.221.140",
+      "65.68.147.155",
+      "11.144.179.215",
+      "39.196.54.34"
+    ],
+    "linked_devices": [
+      "5de3b8c5-7428-4ccd-8e82-eaf221c16bab"
+    ],
+    "link_strength": 0.57,
+    "link_type": "device_correlation",
+    "breach_sources": [
+      "7d6fbc37",
+      "2189dd25",
+      "5ba07fe4"
+    ],
+    "first_seen": "2025-09-01T18:53:23Z",
+    "last_seen": "2026-03-15T04:53:23Z",
+    "total_exposures": 10,
+    "risk_score": 89,
+    "graph_depth": 4,
+    "log_id": "a88b153b7b51beb1b7ab046d6f014de9d2919ed54c4ee436bb"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "b966d5bb-3c00-4647-817e-a84bb7540915",
+    "email": "ciso@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "bob.wilson@contoso.com",
+      "svc-backup@contoso.com"
+    ],
+    "linked_usernames": [
+      "ciso",
+      "ciso123"
+    ],
+    "linked_ips": [
+      "205.0.85.59",
+      "107.57.11.187",
+      "43.62.255.7"
+    ],
+    "linked_devices": [
+      "e9ab64d9-a759-44cc-be9f-6c3d744136a7"
+    ],
+    "link_strength": 0.77,
+    "link_type": "device_correlation",
+    "breach_sources": [
+      "f12e1a39"
+    ],
+    "first_seen": "2026-03-04T08:53:23Z",
+    "last_seen": "2026-03-14T07:53:23Z",
+    "total_exposures": 40,
+    "risk_score": 52,
+    "graph_depth": 1,
+    "log_id": "bdf098379c00447de10c8d082b02a450382d6bbd935e54ff1a"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "2265bd8b-e032-4b1e-bcdf-4cd8c04df620",
+    "email": "admin@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "mike.brown@contoso.com",
+      "svc-backup@contoso.com"
+    ],
+    "linked_usernames": [
+      "admin",
+      "admin123"
+    ],
+    "linked_ips": [
+      "70.187.185.71",
+      "88.34.130.102",
+      "197.80.182.61"
+    ],
+    "linked_devices": [
+      "e9ab64d9-a759-44cc-be9f-6c3d744136a7"
+    ],
+    "link_strength": 0.55,
+    "link_type": "credential_reuse",
+    "breach_sources": [
+      "fe006b9a",
+      "4246628b",
+      "75519cad",
+      "09b6d459",
+      "83e88b8b"
+    ],
+    "first_seen": "2025-10-05T20:53:23Z",
+    "last_seen": "2026-03-16T19:53:23Z",
+    "total_exposures": 2,
+    "risk_score": 13,
+    "graph_depth": 2,
+    "log_id": "ddcb7a83a66e756c3d5bb03b347a231d31e126c045c796f111"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "3cc9c2ca-0b47-4a4a-848e-6496273f53e0",
+    "email": "svc-backup@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "lisa.wang@contoso.com",
+      "bob.wilson@contoso.com"
+    ],
+    "linked_usernames": [
+      "svc-backup",
+      "svc-backup123"
+    ],
+    "linked_ips": [
+      "119.154.244.92",
+      "136.10.251.32",
+      "153.36.42.96"
+    ],
+    "linked_devices": [
+      "78823f24-8850-493f-be94-73beb32d5ac6"
+    ],
+    "link_strength": 0.81,
+    "link_type": "ip_overlap",
+    "breach_sources": [
+      "4377d543"
+    ],
+    "first_seen": "2025-12-14T05:53:23Z",
+    "last_seen": "2026-03-16T03:53:23Z",
+    "total_exposures": 11,
+    "risk_score": 81,
+    "graph_depth": 4,
+    "log_id": "82b210364929dcef767b47186ed3ba4909a6beed8f6b932804"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "195abd9c-e9a0-458f-8236-30decb26560d",
+    "email": "john.doe@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "lisa.wang@contoso.com",
+      "ciso@contoso.com"
+    ],
+    "linked_usernames": [
+      "john.doe",
+      "john.doe123"
+    ],
+    "linked_ips": [
+      "7.195.155.88",
+      "113.99.239.224",
+      "24.174.157.249"
+    ],
+    "linked_devices": [
+      "78823f24-8850-493f-be94-73beb32d5ac6"
+    ],
+    "link_strength": 0.89,
+    "link_type": "device_correlation",
+    "breach_sources": [
+      "57ee2fa7",
+      "d1d07463"
+    ],
+    "first_seen": "2025-05-27T09:53:23Z",
+    "last_seen": "2026-03-13T15:53:23Z",
+    "total_exposures": 26,
+    "risk_score": 21,
+    "graph_depth": 1,
+    "log_id": "a00af947b20289d4ba890323837cffb848bb6e1bf5f2a61d8f"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "0e42dc04-b7bb-4a0e-ad5f-6257c10a4e21",
+    "email": "jane.smith@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "cfo@contoso.com",
+      "svc-backup@contoso.com"
+    ],
+    "linked_usernames": [
+      "jane.smith",
+      "jane.smith123"
+    ],
+    "linked_ips": [
+      "113.229.56.44",
+      "127.40.122.126"
+    ],
+    "linked_devices": [
+      "92112bd1-41dc-4a95-8062-9b63e0d2fca1"
+    ],
+    "link_strength": 0.44,
+    "link_type": "email_correlation",
+    "breach_sources": [
+      "e7d0760c",
+      "681a99af",
+      "d7e7e82f",
+      "eee2f2d1",
+      "b8c1a1be"
+    ],
+    "first_seen": "2025-05-03T15:53:23Z",
+    "last_seen": "2026-03-11T22:53:23Z",
+    "total_exposures": 15,
+    "risk_score": 95,
+    "graph_depth": 2,
+    "log_id": "ce1cf7f0168c329c4c0a9f462137cb414bd083d3eda9552f42"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "414b2767-d776-4847-8323-34c405ca8708",
+    "email": "bob.wilson@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "admin@contoso.com",
+      "john.doe@contoso.com"
+    ],
+    "linked_usernames": [
+      "bob.wilson",
+      "bob.wilson123"
+    ],
+    "linked_ips": [
+      "216.137.194.182",
+      "113.145.107.117",
+      "154.10.125.186"
+    ],
+    "linked_devices": [
+      "3777df61-80fb-4396-a84e-8da9af66dbfe"
+    ],
+    "link_strength": 0.99,
+    "link_type": "credential_reuse",
+    "breach_sources": [
+      "931241e4",
+      "1d4dc619",
+      "d8f68e68",
+      "ffb36413"
+    ],
+    "first_seen": "2025-10-28T01:53:23Z",
+    "last_seen": "2026-03-11T04:53:23Z",
+    "total_exposures": 7,
+    "risk_score": 60,
+    "graph_depth": 3,
+    "log_id": "0302e409740f2e5541f76a9e5c22a5e530e5e48c3b4933b528"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "d291ca39-c29e-451b-900c-c40eebc3786f",
+    "email": "sarah.johnson@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "svc-backup@contoso.com",
+      "david.lee@contoso.com"
+    ],
+    "linked_usernames": [
+      "sarah.johnson",
+      "sarah.johnson123"
+    ],
+    "linked_ips": [
+      "122.230.135.78"
+    ],
+    "linked_devices": [
+      "3777df61-80fb-4396-a84e-8da9af66dbfe"
+    ],
+    "link_strength": 0.4,
+    "link_type": "credential_reuse",
+    "breach_sources": [
+      "ddcb1c2a",
+      "3421102b"
+    ],
+    "first_seen": "2025-11-15T23:53:23Z",
+    "last_seen": "2026-03-11T12:53:23Z",
+    "total_exposures": 5,
+    "risk_score": 51,
+    "graph_depth": 2,
+    "log_id": "af68cb9f242260c0fde53727811959abc3cf718e7c39fb19f7"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "e6e3449f-999d-4a98-9500-9e8198f7ad6a",
+    "email": "david.lee@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "sarah.johnson@contoso.com",
+      "ceo@contoso.com"
+    ],
+    "linked_usernames": [
+      "david.lee",
+      "david.lee123"
+    ],
+    "linked_ips": [
+      "94.234.33.32",
+      "57.111.140.216"
+    ],
+    "linked_devices": [
+      "3777df61-80fb-4396-a84e-8da9af66dbfe"
+    ],
+    "link_strength": 0.65,
+    "link_type": "credential_reuse",
+    "breach_sources": [
+      "cb13f326",
+      "ea60e036",
+      "6a3af567",
+      "5c70b480",
+      "39518c62"
+    ],
+    "first_seen": "2026-02-15T17:53:23Z",
+    "last_seen": "2026-03-12T11:53:23Z",
+    "total_exposures": 50,
+    "risk_score": 20,
+    "graph_depth": 2,
+    "log_id": "a9657b46bcbf4f5582b81bb4cdc6d33d3938e29bf47bd72704"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "fd658adc-8357-4719-aa92-4766b008ffd3",
+    "email": "lisa.wang@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "sarah.johnson@contoso.com",
+      "admin@contoso.com"
+    ],
+    "linked_usernames": [
+      "lisa.wang",
+      "lisa.wang123"
+    ],
+    "linked_ips": [
+      "136.103.25.213",
+      "84.76.242.188",
+      "18.7.126.45"
+    ],
+    "linked_devices": [
+      "bc641e55-afc9-4629-b25b-82b1db713702"
+    ],
+    "link_strength": 0.99,
+    "link_type": "ip_overlap",
+    "breach_sources": [
+      "1f588ac7",
+      "bbc83200"
+    ],
+    "first_seen": "2026-01-11T12:53:23Z",
+    "last_seen": "2026-03-16T13:53:23Z",
+    "total_exposures": 28,
+    "risk_score": 77,
+    "graph_depth": 4,
+    "log_id": "f9c8bbe8a30828e2378c2205b6f3c6092ca3c762d7f4ac9055"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "identity_id": "e7d12f19-df2a-42a6-961f-6c9e3e6543df",
+    "email": "mike.brown@contoso.com",
+    "email_domain": "contoso.com",
+    "linked_emails": [
+      "admin@contoso.com",
+      "ceo@contoso.com"
+    ],
+    "linked_usernames": [
+      "mike.brown",
+      "mike.brown123"
+    ],
+    "linked_ips": [
+      "131.244.119.51",
+      "144.51.77.147",
+      "207.131.145.131"
+    ],
+    "linked_devices": [
+      "92112bd1-41dc-4a95-8062-9b63e0d2fca1"
+    ],
+    "link_strength": 0.93,
+    "link_type": "credential_reuse",
+    "breach_sources": [
+      "7ddf6403",
+      "b6dde13c",
+      "0a71e812"
+    ],
+    "first_seen": "2025-04-16T12:53:23Z",
+    "last_seen": "2026-03-16T04:53:23Z",
+    "total_exposures": 34,
+    "risk_score": 53,
+    "graph_depth": 4,
+    "log_id": "1222ecf4d8d81062d63b9de9542cd36a5b3616084723179052"
+  }
+]

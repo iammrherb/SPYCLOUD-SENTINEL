@@ -1,0 +1,566 @@
+[
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "ceo@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "686e4372-8fd2-43c3-b95d-ae4030ee401c",
+    "risk_score": 28,
+    "risk_level": "LOW",
+    "total_breaches": 16,
+    "total_infostealers": 2,
+    "total_credentials": 25,
+    "plaintext_passwords": 10,
+    "hashed_passwords": 15,
+    "stolen_cookies": 41,
+    "infected_devices": 0,
+    "first_exposure_date": "2025-10-28T11:53:23Z",
+    "latest_exposure_date": "2026-03-11T18:53:23Z",
+    "remediation_status": "in_progress",
+    "remediation_actions": [
+      {
+        "action": "PasswordReset",
+        "timestamp": "2026-03-17T14:53:23Z"
+      }
+    ],
+    "data_classes_exposed": [
+      "password",
+      "credit_card"
+    ],
+    "breach_sources": [
+      "b7949bf4",
+      "2c31ab44"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-10T07:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-02-28T06:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-08T22:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-17T04:53:23Z",
+        "severity": 25
+      }
+    ],
+    "log_id": "1a71ffe0a8f76f7b724ae8f1ec20b89742a00a98a1b88bea31"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "cfo@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "456c86ff-9156-40dc-9396-9a17818f23f3",
+    "risk_score": 91,
+    "risk_level": "LOW",
+    "total_breaches": 7,
+    "total_infostealers": 0,
+    "total_credentials": 23,
+    "plaintext_passwords": 1,
+    "hashed_passwords": 11,
+    "stolen_cookies": 1,
+    "infected_devices": 3,
+    "first_exposure_date": "2026-01-12T16:53:23Z",
+    "latest_exposure_date": "2026-03-12T11:53:23Z",
+    "remediation_status": "completed",
+    "remediation_actions": [
+      {
+        "action": "PasswordReset",
+        "timestamp": "2026-03-17T14:53:23Z"
+      }
+    ],
+    "data_classes_exposed": [
+      "password",
+      "ssn",
+      "phone",
+      "credit_card",
+      "address"
+    ],
+    "breach_sources": [
+      "fb4d56bb",
+      "25deb619",
+      "61ba9494"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-02-21T20:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-13T04:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-02-27T23:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-03-04T16:53:23Z",
+        "severity": 5
+      },
+      {
+        "date": "2026-02-23T07:53:23Z",
+        "severity": 20
+      }
+    ],
+    "log_id": "9534c9259cb474600253e73e5454c9c3b3f1ee1f586d1631e3"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "ciso@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "ba35a300-e0b6-4297-918b-7e1ea61e8705",
+    "risk_score": 42,
+    "risk_level": "MEDIUM",
+    "total_breaches": 11,
+    "total_infostealers": 0,
+    "total_credentials": 18,
+    "plaintext_passwords": 10,
+    "hashed_passwords": 7,
+    "stolen_cookies": 17,
+    "infected_devices": 3,
+    "first_exposure_date": "2025-12-14T21:53:23Z",
+    "latest_exposure_date": "2026-03-12T08:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [
+      {
+        "action": "PasswordReset",
+        "timestamp": "2026-03-16T12:53:23Z"
+      }
+    ],
+    "data_classes_exposed": [
+      "address",
+      "password",
+      "ssn"
+    ],
+    "breach_sources": [
+      "6a14c2b3",
+      "8b5c2736",
+      "2dc02c5b"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-01T19:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-02-24T12:53:23Z",
+        "severity": 5
+      },
+      {
+        "date": "2026-02-21T10:53:23Z",
+        "severity": 5
+      }
+    ],
+    "log_id": "1153d8eb29916577821a39aeed8d21dcf0048cfe683d460edd"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "admin@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "ca65b6fd-79e2-4cec-b1ca-fdaad6e905c0",
+    "risk_score": 49,
+    "risk_level": "HIGH",
+    "total_breaches": 20,
+    "total_infostealers": 2,
+    "total_credentials": 3,
+    "plaintext_passwords": 5,
+    "hashed_passwords": 7,
+    "stolen_cookies": 13,
+    "infected_devices": 1,
+    "first_exposure_date": "2025-08-16T12:53:23Z",
+    "latest_exposure_date": "2026-03-15T11:53:23Z",
+    "remediation_status": "pending",
+    "remediation_actions": [
+      {
+        "action": "PasswordReset",
+        "timestamp": "2026-03-15T10:53:23Z"
+      }
+    ],
+    "data_classes_exposed": [
+      "credit_card",
+      "email",
+      "address"
+    ],
+    "breach_sources": [
+      "f4ee1eb2",
+      "b6964d38",
+      "7146fc25",
+      "68378a77"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-02T11:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-03-06T23:53:23Z",
+        "severity": 5
+      },
+      {
+        "date": "2026-03-06T12:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-02-28T07:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-02-25T08:53:23Z",
+        "severity": 5
+      }
+    ],
+    "log_id": "431710dc11c56d0944e2c7e82e43c7d35d38f89146dac9b1f3"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "svc-backup@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "d3055443-3b40-41a2-8c2a-3cbb6678a628",
+    "risk_score": 96,
+    "risk_level": "MEDIUM",
+    "total_breaches": 1,
+    "total_infostealers": 4,
+    "total_credentials": 21,
+    "plaintext_passwords": 3,
+    "hashed_passwords": 13,
+    "stolen_cookies": 4,
+    "infected_devices": 1,
+    "first_exposure_date": "2025-09-29T23:53:23Z",
+    "latest_exposure_date": "2026-03-16T16:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [],
+    "data_classes_exposed": [
+      "phone",
+      "ssn",
+      "address",
+      "password"
+    ],
+    "breach_sources": [
+      "a6d71aec",
+      "10cb8e9a",
+      "a89ae98a",
+      "b2683d0c"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-02-25T06:53:23Z",
+        "severity": 5
+      }
+    ],
+    "log_id": "fe58ccb51d1a1b1fde11a40ac34410dc8fcff3417613372779"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "john.doe@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "d1fc4671-5a72-4d59-b6bc-41cfad0848ee",
+    "risk_score": 24,
+    "risk_level": "CRITICAL",
+    "total_breaches": 14,
+    "total_infostealers": 6,
+    "total_credentials": 27,
+    "plaintext_passwords": 7,
+    "hashed_passwords": 0,
+    "stolen_cookies": 23,
+    "infected_devices": 2,
+    "first_exposure_date": "2026-01-10T02:53:23Z",
+    "latest_exposure_date": "2026-03-14T04:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [],
+    "data_classes_exposed": [
+      "email",
+      "credit_card"
+    ],
+    "breach_sources": [
+      "bdc99696",
+      "a7e65ae1"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-03T10:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-02-23T16:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-02-28T18:53:23Z",
+        "severity": 5
+      }
+    ],
+    "log_id": "18d2de325f916c853239025270b47c5dd2f5b567469512efbf"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "jane.smith@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "411afd7a-0bab-4fdd-a053-52e27f9f60bc",
+    "risk_score": 20,
+    "risk_level": "CRITICAL",
+    "total_breaches": 7,
+    "total_infostealers": 0,
+    "total_credentials": 17,
+    "plaintext_passwords": 5,
+    "hashed_passwords": 5,
+    "stolen_cookies": 22,
+    "infected_devices": 2,
+    "first_exposure_date": "2026-03-11T19:53:23Z",
+    "latest_exposure_date": "2026-03-14T21:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [],
+    "data_classes_exposed": [
+      "password",
+      "credit_card",
+      "ssn"
+    ],
+    "breach_sources": [
+      "5562883a",
+      "cf4b8277",
+      "4bcb55d8",
+      "9155c6c7"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-02-18T17:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-01T08:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-03-13T20:53:23Z",
+        "severity": 25
+      }
+    ],
+    "log_id": "2e69c72c7190f33fc05944929c2adc9a7af358ce412d78b46f"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "bob.wilson@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "ebeb79d6-db41-49e5-a7a5-a4cf4ed93435",
+    "risk_score": 30,
+    "risk_level": "CRITICAL",
+    "total_breaches": 10,
+    "total_infostealers": 3,
+    "total_credentials": 4,
+    "plaintext_passwords": 0,
+    "hashed_passwords": 12,
+    "stolen_cookies": 45,
+    "infected_devices": 0,
+    "first_exposure_date": "2025-10-16T00:53:23Z",
+    "latest_exposure_date": "2026-03-18T01:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [
+      {
+        "action": "PasswordReset",
+        "timestamp": "2026-03-16T13:53:23Z"
+      }
+    ],
+    "data_classes_exposed": [
+      "credit_card",
+      "password",
+      "address"
+    ],
+    "breach_sources": [
+      "b03c72e5",
+      "8f8b6156",
+      "1ad34831",
+      "675037ea"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-02T04:53:23Z",
+        "severity": 5
+      },
+      {
+        "date": "2026-03-03T03:53:23Z",
+        "severity": 5
+      },
+      {
+        "date": "2026-03-05T08:53:23Z",
+        "severity": 20
+      }
+    ],
+    "log_id": "0dd6c8f4c7ac08262fe353ca934b7146b41b9ea87b0cd2da06"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "sarah.johnson@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "1049bec5-343a-49f2-8580-592e9a48d32b",
+    "risk_score": 68,
+    "risk_level": "CRITICAL",
+    "total_breaches": 6,
+    "total_infostealers": 1,
+    "total_credentials": 3,
+    "plaintext_passwords": 7,
+    "hashed_passwords": 10,
+    "stolen_cookies": 37,
+    "infected_devices": 2,
+    "first_exposure_date": "2025-11-30T07:53:23Z",
+    "latest_exposure_date": "2026-03-11T20:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [],
+    "data_classes_exposed": [
+      "phone",
+      "password"
+    ],
+    "breach_sources": [
+      "cab15010",
+      "39e1bbd8",
+      "6da9c6c4",
+      "3313b634",
+      "55a2827e"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-14T21:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-06T12:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-02T22:53:23Z",
+        "severity": 25
+      }
+    ],
+    "log_id": "6b9a0cdd8c8f010f8afb3649690409406caea42cf209f8b174"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "david.lee@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "178242d6-6d2a-49ff-b18f-bb310c639960",
+    "risk_score": 65,
+    "risk_level": "MEDIUM",
+    "total_breaches": 17,
+    "total_infostealers": 0,
+    "total_credentials": 11,
+    "plaintext_passwords": 0,
+    "hashed_passwords": 5,
+    "stolen_cookies": 26,
+    "infected_devices": 1,
+    "first_exposure_date": "2025-06-02T09:53:23Z",
+    "latest_exposure_date": "2026-03-16T09:53:23Z",
+    "remediation_status": "in_progress",
+    "remediation_actions": [],
+    "data_classes_exposed": [
+      "credit_card",
+      "email",
+      "password"
+    ],
+    "breach_sources": [
+      "c00b9caf",
+      "34a9945d",
+      "9c49a580",
+      "a9161d01"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-01T23:53:23Z",
+        "severity": 5
+      },
+      {
+        "date": "2026-03-13T06:53:23Z",
+        "severity": 20
+      }
+    ],
+    "log_id": "e62d91daebd82139518e7ea5df484ebff6ce9ac3f5221272f0"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "lisa.wang@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "69eab8fe-150d-46b8-8be7-4863a7002236",
+    "risk_score": 71,
+    "risk_level": "CRITICAL",
+    "total_breaches": 10,
+    "total_infostealers": 0,
+    "total_credentials": 29,
+    "plaintext_passwords": 2,
+    "hashed_passwords": 3,
+    "stolen_cookies": 28,
+    "infected_devices": 1,
+    "first_exposure_date": "2026-02-22T10:53:23Z",
+    "latest_exposure_date": "2026-03-13T16:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [],
+    "data_classes_exposed": [
+      "password",
+      "ssn",
+      "phone",
+      "email",
+      "credit_card"
+    ],
+    "breach_sources": [
+      "6d772ae7"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-03-15T19:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-05T09:53:23Z",
+        "severity": 20
+      },
+      {
+        "date": "2026-03-07T12:53:23Z",
+        "severity": 5
+      }
+    ],
+    "log_id": "5160d1c5bd0ea2c376015686088de9d8c7a81c882c96f48ff8"
+  },
+  {
+    "TimeGenerated": "2026-03-18T04:53:23Z",
+    "email": "mike.brown@contoso.com",
+    "email_domain": "contoso.com",
+    "exposure_id": "c186bf21-62ea-409f-b273-344ac087e399",
+    "risk_score": 88,
+    "risk_level": "HIGH",
+    "total_breaches": 1,
+    "total_infostealers": 7,
+    "total_credentials": 2,
+    "plaintext_passwords": 4,
+    "hashed_passwords": 5,
+    "stolen_cookies": 20,
+    "infected_devices": 2,
+    "first_exposure_date": "2025-09-11T16:53:23Z",
+    "latest_exposure_date": "2026-03-12T01:53:23Z",
+    "remediation_status": "failed",
+    "remediation_actions": [],
+    "data_classes_exposed": [
+      "ssn",
+      "password",
+      "email"
+    ],
+    "breach_sources": [
+      "3c87404d",
+      "3e726f3f",
+      "db3e849e",
+      "50f691c2",
+      "93f828e8"
+    ],
+    "exposure_timeline": [
+      {
+        "date": "2026-02-20T20:53:23Z",
+        "severity": 25
+      },
+      {
+        "date": "2026-03-08T04:53:23Z",
+        "severity": 20
+      }
+    ],
+    "log_id": "dfb96cc0c086f920ec1502ea6544346b6fe97b7beb44008d6e"
+  }
+]
