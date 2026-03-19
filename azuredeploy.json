@@ -5196,9 +5196,9 @@
       "properties": {
         "connectorUiConfig": {
           "id": "SpyCloudIdentityIntelligence",
-          "title": "SpyCloud Holistic Identity Exposure Intelligence",
+          "title": "SpyCloud Enterprise Protection",
           "publisher": "SpyCloud, Inc.",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud_wordmark-black.png)\n\n## SpyCloud Holistic Identity Exposure Intelligence\n\nIngests recaptured darknet intelligence \u2014 breach credentials, infostealer logs, stolen cookies, compromised PII, and infected device data \u2014 into Microsoft Sentinel for automated detection and remediation.\n\n**Core (Enterprise API):** Breach Watchlist, Breach Catalog, Watchlist Identifiers \u2014 always active.\n\n**Compass (Compass license):** Compass Data, Compass Devices, Compass Applications \u2014 enable in Step 3.\n\n**Advanced (separate licenses):** SIP Cookies, Investigations, IdLink, Exposure, CAP, Data Partnership.\n\n**Includes:** 38 analytics rules, 8 hunting queries, 5 automated playbooks, 4-tab workbook, 400+ Security Copilot skills.",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-white.png)\n\n## SpyCloud Sentinel Supreme\n\nIngests recaptured darknet intelligence \u2014 breach credentials, infostealer logs, stolen cookies, compromised PII, and infected device data \u2014 into Microsoft Sentinel for automated detection and remediation.\n\n**Core (Enterprise API):** Breach Watchlist, Breach Catalog, Watchlist Identifiers \u2014 always active.\n\n**Compass (Compass license):** Compass Data, Compass Devices, Compass Applications \u2014 enable in Step 3.\n\n**Advanced (separate licenses):** SIP Cookies, Investigations, IdLink, Exposure, CAP, Data Partnership.\n\n**Includes:** 38 analytics rules, 8 hunting queries, 5 automated playbooks, 4-tab workbook, 400+ Security Copilot skills.",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
