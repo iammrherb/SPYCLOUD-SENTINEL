@@ -5252,7 +5252,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentTemplates', concat(variables('dataConnectorTemplateNameConnectorDefinition'), variables('dataConnectorVersionConnectorDefinition')))]"
       ]
     },
     {
@@ -6021,7 +6022,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentTemplates', concat(variables('dataConnectorTemplateNameConnectorDefinition'), variables('dataConnectorVersionConnectorDefinition')))]"
       ]
     },
     {
@@ -6073,7 +6075,8 @@
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
         "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
         "[resourceId('Microsoft.Insights/dataCollectionRules', concat('dcr-ccf-', parameters('workspace')))]",
-        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('_dcrExtFullName'))]"
+        "[resourceId('Microsoft.Insights/dataCollectionRules', variables('_dcrExtFullName'))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/dataConnectorDefinitions', variables('_dataConnectorContentIdConnectorDefinition'))]"
       ],
       "properties": {
         "contentId": "[variables('_dataConnectorContentIdConnections')]",
@@ -6155,46 +6158,32 @@
               }
             },
             "enableCompass": {
-              "defaultValue": [
-                "false"
-              ],
-              "type": "array"
+              "defaultValue": "false",
+              "type": "string"
             },
             "enableSip": {
-              "defaultValue": [
-                "false"
-              ],
-              "type": "array"
+              "defaultValue": "false",
+              "type": "string"
             },
             "enableInvestigations": {
-              "defaultValue": [
-                "false"
-              ],
-              "type": "array"
+              "defaultValue": "false",
+              "type": "string"
             },
             "enableIdLink": {
-              "defaultValue": [
-                "false"
-              ],
-              "type": "array"
+              "defaultValue": "false",
+              "type": "string"
             },
             "enableDataPartnership": {
-              "defaultValue": [
-                "false"
-              ],
-              "type": "array"
+              "defaultValue": "false",
+              "type": "string"
             },
             "enableExposure": {
-              "defaultValue": [
-                "false"
-              ],
-              "type": "array"
+              "defaultValue": "false",
+              "type": "string"
             },
             "enableCAP": {
-              "defaultValue": [
-                "false"
-              ],
-              "type": "array"
+              "defaultValue": "false",
+              "type": "string"
             },
             "severity": {
               "defaultValue": [
@@ -6482,7 +6471,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDataConnector')]",
-              "condition": "[equals(first(parameters('enableCompass')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableCompass'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6533,7 +6522,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDevicesConnector')]",
-              "condition": "[equals(first(parameters('enableCompass')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableCompass'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6584,7 +6573,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassApplicationsConnector')]",
-              "condition": "[equals(first(parameters('enableCompass')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableCompass'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6635,7 +6624,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudSipCookiesConnector')]",
-              "condition": "[equals(first(parameters('enableSip')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableSip'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6736,7 +6725,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudInvestigationsConnector')]",
-              "condition": "[equals(first(parameters('enableInvestigations')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableInvestigations'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6787,7 +6776,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudIdLinkConnector')]",
-              "condition": "[equals(first(parameters('enableIdLink')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableIdLink'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6838,7 +6827,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudDataPartnershipConnector')]",
-              "condition": "[equals(first(parameters('enableDataPartnership')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableDataPartnership'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6889,7 +6878,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudExposureConnector')]",
-              "condition": "[equals(first(parameters('enableExposure')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableExposure'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6940,7 +6929,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCAPConnector')]",
-              "condition": "[equals(first(parameters('enableCAP')), 'true')]",
+              "condition": "[contains(toLower(string(parameters('enableCAP'))), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
