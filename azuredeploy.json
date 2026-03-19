@@ -4702,7 +4702,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend corporate_record_count = toint(corporate_record_count) | extend infected_employee_record_count = toint(infected_employee_record_count) | extend infected_consumer_record_count = toint(infected_consumer_record_count) | extend infected_user_record_count = toint(infected_user_record_count) | extend identifier_status = tostring(status)",
+            "transformKql": "source | extend TimeGenerated = now() | extend corporate_record_count = toint(corporate_record_count) | extend infected_employee_record_count = toint(infected_employee_record_count) | extend infected_consumer_record_count = toint(infected_consumer_record_count) | extend infected_user_record_count = toint(infected_user_record_count)",
             "outputStream": "Custom-SpyCloudIdentityExposure_CL"
           },
           {
