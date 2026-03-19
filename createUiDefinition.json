@@ -1021,71 +1021,144 @@
                         "visible": true,
                         "options": {
                             "icon": "Info",
-                            "text": "Enrichment playbooks call the SpyCloud API in real-time when incidents are created, adding fresh breach context directly to incident comments. This is separate from the CCF pollers which do bulk data ingestion on a schedule. All enrichment playbooks use the Enterprise API key you provided in Step 1 — no additional key entry needed for base enrichment."
+                            "text": "Enrichment playbooks call the SpyCloud API in real-time when incidents fire, adding fresh breach context to incident comments. All enrichment uses the Enterprise API key from Step 1. Optional product API keys (Compass, SIP, Investigations) are entered once below and shared across all pollers and playbooks for that product."
                         }
                     },
                     {
                         "name": "enableEnrichmentPlaybooks",
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable SpyCloud Enrichment Playbooks (recommended)",
-                        "toolTip": "Deploy enrichment playbooks that call SpyCloud API at incident time for real-time entity-specific breach data. Uses the Enterprise API key provided above.",
+                        "toolTip": "Deploy enrichment playbooks that call SpyCloud API at incident time. All use the Enterprise API key — no additional key needed for core enrichment.",
                         "defaultValue": true
                     },
                     {
-                        "name": "sectionEnterprise",
+                        "name": "sectionApiKeys",
                         "type": "Microsoft.Common.Section",
-                        "label": "Enterprise Protection — Core Enrichment (Base License)",
+                        "label": "Optional SpyCloud Product API Keys",
                         "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
                         "elements": [
                             {
-                                "name": "enterpriseEnrichInfo",
+                                "name": "apiKeysInfo",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "These playbooks use your Enterprise API key to enrich incidents with fresh breach data. Each triggers automatically when matching entities are found in SpyCloud incidents. No additional API keys needed."
+                                    "text": "Enter API keys for additional SpyCloud products you are licensed for. Each key is entered ONCE here and automatically shared with both the CCF data pollers and the enrichment playbooks for that product. Leave blank for products you do not have."
+                                }
+                            },
+                            {
+                                "name": "compassApiKey",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Compass API Key (optional — leave blank if not licensed)"
+                                },
+                                "toolTip": "SpyCloud Compass (Endpoint Threat Protection) API key. Enables Compass data pollers + Compass enrichment playbooks. Provides post-infection device forensics, application-level stolen credentials, and consumer exposure data.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "options": {
+                                    "hideConfirmation": true
+                                }
+                            },
+                            {
+                                "name": "sipApiKey",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "SIP API Key (optional — leave blank if not licensed)"
+                                },
+                                "toolTip": "SpyCloud SIP (Session Identity Protection) API key. Enables stolen session cookie detection — critical for MFA bypass defense. May be the same as your Enterprise key depending on your license.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "options": {
+                                    "hideConfirmation": true
+                                }
+                            },
+                            {
+                                "name": "investigationsApiKey",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Investigations API Key (optional — separate license)"
+                                },
+                                "toolTip": "SpyCloud Investigations API key. Provides full database access for threat hunting and attribution. Rate limits are typically lower — enrichment playbooks use this judiciously.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "options": {
+                                    "hideConfirmation": true
+                                }
+                            },
+                            {
+                                "name": "idlinkApiKey",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "IdLink API Key (optional — leave blank if not licensed)"
+                                },
+                                "toolTip": "SpyCloud IdLink API key. Enables identity correlation and linking across personas, emails, and usernames.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "options": {
+                                    "hideConfirmation": true
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "sectionEnterprise",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Enterprise Protection — Core Enrichment Playbooks",
+                        "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
+                        "elements": [
+                            {
+                                "name": "enterpriseInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "These playbooks use your Enterprise API key (from Step 1) to enrich incidents with fresh breach data. Each triggers automatically via Sentinel automation rules when matching entities are found. No additional keys needed."
                                 }
                             },
                             {
                                 "name": "enableEnrichEmail",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Email Enrichment — Look up breach records by email address",
-                                "toolTip": "Calls /breach/data/emails/{email} to get all exposures for an email. Returns: total exposures, severity, plaintext passwords, target domains, infection details. Most commonly triggered enrichment.",
+                                "label": "Email Enrichment — breach records by email address",
+                                "toolTip": "Calls /breach/data/emails/{email}. Returns: total exposures, severity, plaintext passwords, target domains, infection details. Most commonly triggered.",
                                 "defaultValue": true
                             },
                             {
                                 "name": "enableEnrichDomain",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Domain Enrichment — Look up breach records by domain",
-                                "toolTip": "Calls /breach/data/domains/{domain} to assess organizational exposure scope. Returns: total exposed users, severity breakdown, top exposed accounts, breach sources.",
+                                "label": "Domain Enrichment — breach records by domain",
+                                "toolTip": "Calls /breach/data/domains/{domain}. Returns: total exposed users, severity breakdown, top accounts, breach sources.",
                                 "defaultValue": true
                             },
                             {
                                 "name": "enableEnrichIP",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "IP Enrichment — Look up breach records by IP address",
-                                "toolTip": "Calls /breach/data/ips/{ip} to find infected devices at an IP. Returns: devices, users, malware families, infection dates. Valuable for infostealer investigations.",
+                                "label": "IP Enrichment — breach records by IP address",
+                                "toolTip": "Calls /breach/data/ips/{ip}. Returns: infected devices at this IP, affected users, malware families. Valuable for infostealer investigations.",
                                 "defaultValue": true
                             },
                             {
                                 "name": "enableEnrichUsername",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Username Enrichment — Look up breach records by username",
-                                "toolTip": "Calls /breach/data/usernames/{username} for non-email identifiers. Useful for service accounts or identifiers without email format.",
+                                "label": "Username Enrichment — breach records by username",
+                                "toolTip": "Calls /breach/data/usernames/{username}. For non-email identifiers, service accounts.",
                                 "defaultValue": true
                             },
                             {
                                 "name": "enableEnrichCatalog",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Catalog Enrichment — Enrich incidents with breach source context",
-                                "toolTip": "Calls /breach/catalog/{source_id} to add 'where did this breach come from?' context. Returns: breach title, description, type, confidence, record count.",
+                                "label": "Catalog Enrichment — breach source metadata",
+                                "toolTip": "Calls /breach/catalog/{source_id}. Returns: breach title, description, type, confidence. Adds 'where did this come from?' context.",
                                 "defaultValue": true
                             },
                             {
                                 "name": "enableFullInvestigation",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Full Investigation Orchestration — Chains multiple enrichments for Critical incidents",
-                                "toolTip": "For High/Critical severity incidents only. Chains: email lookup → catalog enrichment → Compass device (if available) → SIP cookies (if available) → MDE correlation → Entra sign-in correlation. Makes 3-10 API calls depending on available licenses. Rate limited: max 1/minute, 50/day.",
+                                "label": "Full Investigation Orchestration — chains all enrichments for Critical incidents",
+                                "toolTip": "For High/Critical incidents only. Chains email → catalog → Compass (if key provided) → SIP (if key provided) → MDE → Entra correlation. Rate limited: max 50/day.",
                                 "defaultValue": true
                             }
                         ]
@@ -1093,114 +1166,79 @@
                     {
                         "name": "sectionCompass",
                         "type": "Microsoft.Common.Section",
-                        "label": "Compass — Endpoint Threat Protection (Requires Compass License)",
+                        "label": "Compass — Endpoint Threat Protection Enrichment",
                         "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
                         "elements": [
                             {
-                                "name": "compassInfo",
+                                "name": "compassEnrichInfo",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Compass provides post-infection visibility into what infostealers stole from devices — application credentials, session tokens, browser passwords, autofill data, and device fingerprints. This goes beyond the breach watchlist to show the complete blast radius of an infection. Requires a separate Compass API key from SpyCloud."
+                                    "text": "Compass enrichment provides post-infection device forensics, application-level stolen credentials, and consumer exposure data. Automatically enabled when a Compass API key is provided above. Deploys 3 CCF pollers + enrichment playbooks + 6 analytics rules."
                                 }
                             },
                             {
                                 "name": "enableEnrichCompass",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable Compass Enrichment Playbooks",
-                                "toolTip": "Deploy Compass enrichment playbooks for consumer exposure data, application-level stolen credentials, and device forensics. Requires Compass API key below.",
-                                "defaultValue": false
-                            },
-                            {
-                                "name": "compassApiKeyInput",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Compass API Key"
-                                },
-                                "toolTip": "SpyCloud Compass API key from portal.spycloud.com. Leave blank if you don't have a Compass license — pollers and enrichment for Compass will be skipped.",
-                                "visible": "[steps('enrichmentConfig').sectionCompass.enableEnrichCompass]",
-                                "constraints": {
-                                    "required": false
-                                }
+                                "label": "Enable Compass enrichment playbooks",
+                                "toolTip": "Deploys Compass email and device enrichment playbooks. Requires Compass API key above.",
+                                "defaultValue": true
                             }
                         ]
                     },
                     {
                         "name": "sectionSip",
                         "type": "Microsoft.Common.Section",
-                        "label": "SIP — Session Identity Protection (Requires SIP License)",
+                        "label": "SIP — Stolen Cookie & Session Enrichment",
                         "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
                         "elements": [
                             {
-                                "name": "sipInfo",
+                                "name": "sipEnrichInfo",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": true,
                                 "options": {
                                     "icon": "Warning",
-                                    "text": "SIP detects stolen session cookies and authentication tokens that enable MFA bypass. When attackers have valid session cookies, they can impersonate users WITHOUT needing their password or MFA. This is the most critical data type for preventing session hijacking attacks."
+                                    "text": "SIP detects stolen session cookies that enable MFA bypass. When attackers have valid cookies, they impersonate users WITHOUT passwords or MFA. Automatically enabled when a SIP API key is provided above. Deploys 1 CCF poller + cookie enrichment playbook + 4 analytics rules."
                                 }
                             },
                             {
                                 "name": "enableEnrichStolenCookies",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable SIP Stolen Cookie Enrichment",
-                                "toolTip": "Calls /sip/cookies/emails/{email} to find stolen session cookies. Reports affected applications, cookie types, MFA bypass risk assessment. Requires SIP API key.",
-                                "defaultValue": false
-                            },
-                            {
-                                "name": "sipApiKeyInput",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "SIP API Key"
-                                },
-                                "toolTip": "SpyCloud SIP API key. May be the same as your Enterprise key depending on your license tier.",
-                                "visible": "[steps('enrichmentConfig').sectionSip.enableEnrichStolenCookies]",
-                                "constraints": {
-                                    "required": false
-                                }
+                                "label": "Enable SIP stolen cookie enrichment playbook",
+                                "toolTip": "Deploys stolen cookie enrichment playbook. Requires SIP API key above.",
+                                "defaultValue": true
                             }
                         ]
                     },
                     {
                         "name": "sectionInvestigations",
                         "type": "Microsoft.Common.Section",
-                        "label": "Investigations — Deep Database Access (Requires Investigations License)",
+                        "label": "Investigations — Deep Database Enrichment",
                         "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
                         "elements": [
                             {
-                                "name": "investigationsInfo",
+                                "name": "investigationsEnrichInfo",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": true,
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Investigations provides full SpyCloud database access for threat hunting and attribution. Unlike Enterprise (scoped to your watchlist), Investigations searches the ENTIRE database. Use for: threat actor attribution, supply chain risk, insider threat investigation. API rate limits are typically lower — use judiciously."
+                                    "text": "Investigations provides full SpyCloud database access for threat hunting. Unlike Enterprise (scoped to your watchlist), Investigations searches the ENTIRE database. API rate limits are typically lower. Automatically enabled when an Investigations API key is provided above."
                                 }
                             },
                             {
                                 "name": "enableEnrichInvestigation",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable Investigations Enrichment Playbooks",
-                                "toolTip": "Deploy deep investigation playbooks. Makes full-database lookups by email, IP, and username. Rate limited due to higher API cost.",
-                                "defaultValue": false
-                            },
-                            {
-                                "name": "investigationsApiKeyInput",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Investigations API Key"
-                                },
-                                "visible": "[steps('enrichmentConfig').sectionInvestigations.enableEnrichInvestigation]",
-                                "constraints": {
-                                    "required": false
-                                }
+                                "label": "Enable Investigations deep enrichment playbooks",
+                                "toolTip": "Deploys full-database investigation playbooks. Requires Investigations API key above. Rate limited due to higher API cost.",
+                                "defaultValue": true
                             }
                         ]
                     },
                     {
                         "name": "sectionRateLimits",
                         "type": "Microsoft.Common.Section",
-                        "label": "API Rate Limiting & Quotas",
+                        "label": "API Rate Limiting",
                         "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
                         "elements": [
                             {
@@ -1209,14 +1247,14 @@
                                 "visible": true,
                                 "options": {
                                     "icon": "Warning",
-                                    "text": "SpyCloud API has per-key rate limits (typically 2-10 QPS for Enterprise). The enrichment playbooks include built-in retry logic with exponential backoff. Set a daily limit below to prevent exceeding your quota. Default of 200 handles ~50-100 incidents/day."
+                                    "text": "SpyCloud API has per-key rate limits (typically 2-10 QPS). Enrichment playbooks include built-in retry logic with exponential backoff. Set a daily limit to prevent exceeding your quota."
                                 }
                             },
                             {
                                 "name": "enrichmentDailyLimit",
                                 "type": "Microsoft.Common.DropDown",
                                 "label": "Daily Enrichment API Call Limit",
-                                "toolTip": "Maximum API calls per day across all enrichment playbooks. Prevents exceeding SpyCloud quota.",
+                                "toolTip": "Maximum API calls per day across all enrichment playbooks.",
                                 "defaultValue": "200 calls/day (recommended)",
                                 "constraints": {
                                     "required": true,
@@ -1880,9 +1918,9 @@
             "workspacePricingTier": "[steps('workspaceConfig').sectionWorkspace.workspaceSku]",
             "retentionInDays": "[steps('workspaceConfig').sectionWorkspace.dataRetention]",
             "apiKey": "[if(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enterpriseApiKey, '')]",
-            "sipApiKey": "[if(steps('dataConnector').sectionApiConfig.enableSipProduct, steps('dataConnector').sectionApiConfig.sipProductApiKey, '')]",
-            "investigationsApiKey": "[if(steps('dataConnector').sectionApiConfig.enableInvestigationsProduct, steps('dataConnector').sectionApiConfig.investigationsProductApiKey, '')]",
-            "idlinkApiKey": "[if(steps('dataConnector').sectionApiConfig.enableIdLinkProduct, steps('dataConnector').sectionApiConfig.idlinkProductApiKey, '')]",
+            "sipApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.sipApiKey, '')]",
+            "investigationsApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.investigationsApiKey, '')]",
+            "idlinkApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.idlinkApiKey, '')]",
             "dataPartnershipApiKey": "[if(steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct, steps('dataConnector').sectionApiConfig.dataPartnershipProductApiKey, '')]",
             "exposureApiKey": "[if(steps('dataConnector').sectionApiConfig.enableExposureProduct, steps('dataConnector').sectionApiConfig.exposureProductApiKey, '')]",
             "capApiKey": "[if(steps('dataConnector').sectionApiConfig.enableCapProduct, steps('dataConnector').sectionApiConfig.capProductApiKey, '')]",
@@ -1968,7 +2006,8 @@
             "enableEnrichCompass": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionCompass.enableEnrichCompass, false)]",
             "enableEnrichStolenCookies": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionSip.enableEnrichStolenCookies, false)]",
             "enableEnrichInvestigation": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionInvestigations.enableEnrichInvestigation, false)]",
-            "enrichmentDailyLimit": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionRateLimits.enrichmentDailyLimit, 200)]"
+            "enrichmentDailyLimit": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionRateLimits.enrichmentDailyLimit, 200)]",
+            "compassApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.compassApiKey, '')]"
         }
     }
 }
