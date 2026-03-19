@@ -1,34 +1,28 @@
 <div align="center">
 
-<img src="docs/images/SpyCloud-Logo-white.png" alt="SpyCloud" width="340" style="background:#0D1B2A;padding:24px;border-radius:10px"/>
+<img src="docs/images/SpyCloud_wordmark-black.png" alt="SpyCloud" width="400"/>
 
 <br><br>
 
-# Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel
+# SpyCloud Holistic Identity Exposure Intelligence
 
-**Recaptured darknet data meets automated identity threat protection -- powered by SpyCloud.**
+### Sentinel Connector for Recaptured Darknet Identity Intelligence
 
-[![Azure](https://img.shields.io/badge/Microsoft_Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com)
-[![Sentinel](https://img.shields.io/badge/Microsoft_Sentinel-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://learn.microsoft.com/azure/sentinel)
-[![SpyCloud](https://img.shields.io/badge/SpyCloud-FF3E00?style=for-the-badge)](https://spycloud.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
-[![Deploy Status](https://img.shields.io/badge/ARM-Validated-E34F26?style=for-the-badge&logo=json&logoColor=white)](#one-click-deploy)
+**Recaptured credentials. Stolen cookies. Infected devices.**
+**Detected in minutes — remediated automatically.**
 
 <br>
 
-![Version](https://img.shields.io/badge/version-8.0.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
-![Terraform](https://img.shields.io/badge/Terraform-Compatible-844FBA?style=flat-square&logo=terraform&logoColor=white)
-![Copilot](https://img.shields.io/badge/Security_Copilot-Enabled-6366F1?style=flat-square&logo=githubcopilot&logoColor=white)
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/iammrherb/SPYCLOUD-SENTINEL/deploy.yml?style=flat-square&label=CI%2FCD&logo=githubactions&logoColor=white)](https://github.com/iammrherb/SPYCLOUD-SENTINEL/actions/workflows/deploy.yml)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json)
 
 <br>
 
-<sub>Detect compromised credentials hours after recapture -- not weeks after breach disclosure.</sub>
-
-<br>
-
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json"><img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" height="44"></a>&nbsp;&nbsp;
-<a href="https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json"><img src="https://aka.ms/deploytoazuregovbutton" alt="Deploy to Azure Gov" height="44"></a>
+![Version](https://img.shields.io/badge/v11.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
+![Tables](https://img.shields.io/badge/14_Tables-417_Columns-0078D4?style=flat-square)
+![Rules](https://img.shields.io/badge/38_Analytics_Rules-FF3E00?style=flat-square)
+![Copilot](https://img.shields.io/badge/400+_Copilot_Skills-6366F1?style=flat-square)
+![Playbooks](https://img.shields.io/badge/5_Playbooks-22C55E?style=flat-square)
+![License: MIT](https://img.shields.io/badge/License-MIT-gray?style=flat-square)
 
 </div>
 

@@ -1114,8 +1114,8 @@
   },
   "variables": {
     "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
-    "_solutionName": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
-    "_solutionVersion": "9.0.0",
+    "_solutionName": "SpyCloud Holistic Identity Exposure Intelligence",
+    "_solutionVersion": "11.0.0",
     "_solutionAuthor": "SpyCloud",
     "_solutionId": "azuresentinel.azure-sentinel-solution-spycloud-threatintel",
     "dataConnectorVersionConnectorDefinition": "1.2.0",
@@ -1123,7 +1123,7 @@
     "_solutionTier": "Community",
     "_solutionEmail": "support@spycloud.com",
     "_solutionLink": "https://portal.spycloud.com",
-    "_dataConnectorContentIdConnectorDefinition": "SpyCloudCCF",
+    "_dataConnectorContentIdConnectorDefinition": "SpyCloudIdentityIntelligence",
     "dataConnectorTemplateNameConnectorDefinition": "[concat(take(parameters('workspace'), 30),'-dc-',uniquestring(variables('_dataConnectorContentIdConnectorDefinition')))]",
     "_dataConnectorContentIdConnections": "SpyCloudTIConn",
     "dataConnectorTemplateNameConnections": "[concat(take(parameters('workspace'), 30),'-dc-',uniquestring(variables('_dataConnectorContentIdConnections')))]",
@@ -5195,217 +5195,84 @@
       "kind": "Customizable",
       "properties": {
         "connectorUiConfig": {
-          "id": "SpyCloudCCF",
-          "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence",
-          "publisher": "SpyCloud",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-connector-logo.svg)\n\n## SpyCloud Enterprise Protection\n\nIngests breach, infostealer, and consumer identity intelligence from SpyCloud into Microsoft Sentinel.\n\n**Core Pollers (Enterprise API):** Breach Watchlist (new + modified), Breach Catalog, Watchlist Identifiers \u2014 always active.\n\n**Compass Pollers (Compass license):** Compass Data, Compass Devices, Compass Applications \u2014 enable in Step 3.\n\n**Advanced Pollers (separate licenses):** SIP Cookies, Investigations, IdLink, Exposure, CAP, Data Partnership \u2014 enable in Step 3 if licensed.\n\n**Includes:** 38 analytics rules, 8 hunting queries, 4 automated playbooks, 22-chart workbook, Security Copilot skills.",
+          "id": "SpyCloudIdentityIntelligence",
+          "title": "SpyCloud Holistic Identity Exposure Intelligence",
+          "publisher": "SpyCloud, Inc.",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud_wordmark-black.png)\n\n## SpyCloud Holistic Identity Exposure Intelligence\n\nIngests recaptured darknet intelligence \u2014 breach credentials, infostealer logs, stolen cookies, compromised PII, and infected device data \u2014 into Microsoft Sentinel for automated detection and remediation.\n\n**Core (Enterprise API):** Breach Watchlist, Breach Catalog, Watchlist Identifiers \u2014 always active.\n\n**Compass (Compass license):** Compass Data, Compass Devices, Compass Applications \u2014 enable in Step 3.\n\n**Advanced (separate licenses):** SIP Cookies, Investigations, IdLink, Exposure, CAP, Data Partnership.\n\n**Includes:** 38 analytics rules, 8 hunting queries, 5 automated playbooks, 4-tab workbook, 400+ Security Copilot skills.",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
-              "metricName": "Total Watchlist Exposures",
-              "legend": "SpyCloud Watchlist Exposures",
+              "metricName": "Breach Watchlist Records",
+              "legend": "SpyCloudBreachWatchlist_CL",
               "baseQuery": "SpyCloudBreachWatchlist_CL"
             },
             {
-              "metricName": "Total Breach Catalog Entries",
-              "legend": "SpyCloud Breach Catalog",
+              "metricName": "Breach Catalog Entries",
+              "legend": "SpyCloudBreachCatalog_CL",
               "baseQuery": "SpyCloudBreachCatalog_CL"
             },
             {
-              "metricName": "Total MDE Remediation Actions",
-              "legend": "SpyCloud MDE Remediations",
-              "baseQuery": "Spycloud_MDE_Logs_CL"
-            },
-            {
-              "metricName": "Total Conditional Access Actions",
-              "legend": "SpyCloud CA Remediations",
-              "baseQuery": "SpyCloud_ConditionalAccessLogs_CL"
-            },
-            {
-              "metricName": "Total Compass Exposures",
-              "legend": "SpyCloud Compass",
+              "metricName": "Compass Data Records",
+              "legend": "SpyCloudCompassData_CL",
               "baseQuery": "SpyCloudCompassData_CL"
             },
             {
-              "metricName": "Total Compass Devices",
-              "legend": "SpyCloud Compass Devices",
-              "baseQuery": "SpyCloudCompassDevices_CL"
+              "metricName": "MDE Remediation Logs",
+              "legend": "Spycloud_MDE_Logs_CL",
+              "baseQuery": "Spycloud_MDE_Logs_CL"
             },
             {
-              "metricName": "Total Compass Applications",
-              "legend": "SpyCloud Compass Applications",
-              "baseQuery": "SpyCloudCompassApplications_CL"
-            },
-            {
-              "metricName": "Total SIP Cookies",
-              "legend": "SpyCloud SIP Cookies",
-              "baseQuery": "SpyCloudSipCookies_CL"
-            },
-            {
-              "metricName": "Total Identity Exposures",
-              "legend": "SpyCloud Identity Exposure",
-              "baseQuery": "SpyCloudIdentityExposure_CL"
-            },
-            {
-              "metricName": "Total Investigation Records",
-              "legend": "SpyCloud Investigations",
-              "baseQuery": "SpyCloudInvestigations_CL"
-            },
-            {
-              "metricName": "Total IDLINK Records",
-              "legend": "SpyCloud IDLINK",
-              "baseQuery": "SpyCloudIdLink_CL"
-            },
-            {
-              "metricName": "Total Data Partnership Records",
-              "legend": "SpyCloud Data Partnership",
-              "baseQuery": "SpyCloudDataPartnership_CL"
-            },
-            {
-              "metricName": "Total Exposure Records",
-              "legend": "SpyCloud Exposure",
-              "baseQuery": "SpyCloudExposure_CL"
-            },
-            {
-              "metricName": "Total CAP Records",
-              "legend": "SpyCloud CAP",
-              "baseQuery": "SpyCloudCAP_CL"
+              "metricName": "CA Remediation Logs",
+              "legend": "SpyCloud_ConditionalAccessLogs_CL",
+              "baseQuery": "SpyCloud_ConditionalAccessLogs_CL"
             }
           ],
           "sampleQueries": [
             {
-              "description": "All Watchlist Exposures \u2014 Most Recent",
-              "query": "SpyCloudBreachWatchlist_CL\n| sort by TimeGenerated desc\n| take 100"
+              "description": "All high-severity exposures (last 24h)",
+              "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where TimeGenerated > ago(24h)\n| project TimeGenerated, email, severity, breach_title, target_domain, password_type"
             },
             {
-              "description": "Infostealer Exposures Only (Severity >= 20)",
-              "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| sort by TimeGenerated desc\n| project TimeGenerated, email, email_domain, target_domain, password_type, severity, infected_machine_id, user_hostname\n| take 100"
+              "description": "Enriched data (Watchlist + Catalog join)",
+              "query": "get_Spycloud_enriched_data(7d)\n| summarize count() by severity, breach_category"
             },
             {
-              "description": "Exposure Count by Corporate Email Domain",
-              "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(email_domain)\n| summarize ExposureCount = count(), UniqueEmails = dcount(email) by email_domain\n| sort by ExposureCount desc"
+              "description": "Infostealer infections by malware family",
+              "query": "SpyCloudBreachWatchlist_CL\n| where breach_category == 'infostealer'\n| summarize Victims=dcount(email) by breach_title\n| top 10 by Victims"
             },
             {
-              "description": "Plaintext Password Exposures (Requires show_plain_password=True)",
-              "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(password_plaintext)\n| project TimeGenerated, email, target_domain, password_type, severity, source_id\n| sort by TimeGenerated desc"
+              "description": "Stolen cookies by target domain",
+              "query": "SpyCloudSipCookies_CL\n| summarize Cookies=count() by cookie_domain\n| top 10 by Cookies"
             },
             {
-              "description": "Infected Devices Grouped by Machine ID and Hostname",
-              "query": "SpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where isnotempty(infected_machine_id)\n| summarize ExposureCount = count(), DistinctTargets = dcount(target_domain), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, user_os\n| sort by ExposureCount desc"
+              "description": "Device reinfection detection",
+              "query": "SpyCloudCompassDevices_CL\n| summarize Infections=count() by user_hostname\n| where Infections > 1"
             },
             {
-              "description": "Watchlist Exposures Enriched with Breach Catalog Metadata",
-              "query": "SpyCloudBreachWatchlist_CL\n| join kind=inner (\n    SpyCloudBreachCatalog_CL\n    | project source_id=uuid, short_title, breach_category, num_records, confidence\n) on source_id\n| project TimeGenerated, email, short_title, breach_category, severity, num_records, confidence\n| sort by TimeGenerated desc\n| take 100"
+              "description": "Unremediated high-severity exposures",
+              "query": "let remediated = SpyCloud_ConditionalAccessLogs_CL | distinct tolower(Email);\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where tolower(email) !in (remediated)\n| summarize count() by email, severity"
             },
             {
-              "description": "Recent Breaches from Catalog with Record Counts",
-              "query": "SpyCloudBreachCatalog_CL\n| sort by TimeGenerated desc\n| project TimeGenerated, uuid, short_title, breach_category, num_records, confidence, spycloud_publish_date\n| take 50"
+              "description": "MDE isolation audit trail",
+              "query": "Spycloud_MDE_Logs_CL\n| summarize count() by Action, ActionStatus\n| order by count_ desc"
             },
             {
-              "description": "MDE Remediation Actions \u2014 Device Isolation and Tagging Audit",
-              "query": "Spycloud_MDE_Logs_CL\n| project TimeGenerated, IncidentId, DeviceName, DeviceId, Action, IsolationType, Tag, ActionStatus, Email, Severity\n| sort by TimeGenerated desc\n| take 100"
-            },
-            {
-              "description": "Conditional Access Remediation \u2014 Password Resets and Session Revocations",
-              "query": "SpyCloud_ConditionalAccessLogs_CL\n| project TimeGenerated, IncidentId, UserPrincipalName, Email, Action, PasswordReset, SessionsRevoked, AddedToCAGroup, ActionStatus, Severity\n| sort by TimeGenerated desc\n| take 100"
-            },
-            {
-              "description": "Top 10 Most-Targeted Domains by Exposure Volume",
-              "query": "SpyCloudBreachWatchlist_CL\n| where isnotempty(target_domain)\n| summarize ExposureCount = count(), UniqueEmails = dcount(email), LatestExposure = max(TimeGenerated) by target_domain\n| sort by ExposureCount desc\n| take 10"
-            },
-            {
-              "description": "Exposure Timeline \u2014 Daily Ingestion Volume by Severity",
-              "query": "SpyCloudBreachWatchlist_CL\n| summarize Count = count() by bin(TimeGenerated, 1d), severity\n| render timechart"
-            },
-            {
-              "description": "Full Health Dashboard \u2014 All 10 SpyCloud Tables",
-              "query": "union\n  (SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Watchlist'),\n  (SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Catalog'),\n  (SpyCloudIdentityExposure_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Identity Exposure'),\n  (SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Data'),\n  (SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Devices'),\n  (SpyCloudCompassApplications_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Compass Apps'),\n  (SpyCloudSipCookies_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='SIP Cookies'),\n  (SpyCloudInvestigations_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='Investigations'),\n  (Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='MDE Logs'),\n  (SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated) | extend Table='CA Logs')\n| project Table, Records, Latest\n| order by Table asc"
-            },
-            {
-              "description": "Compass Exposures by Severity \u2014 with Malware Attribution (Enterprise+ Only)",
-              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d)\n| summarize Count=count(), MalwareFamilies=make_set(malware_family), HasCookies=countif(array_length(stolen_cookies) > 0), HasAutofill=countif(array_length(autofill_fields) > 0) by severity\n| order by severity asc"
-            },
-            {
-              "description": "Compass Stolen Cookies \u2014 Session Hijack Risk (Enterprise+ Only)",
-              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d) and array_length(stolen_cookies) > 0\n| mv-expand cookie = stolen_cookies\n| project TimeGenerated, email, target_domain, CookieDomain=tostring(cookie.domain), CookieName=tostring(cookie.name), malware_family, severity\n| take 100"
-            },
-            {
-              "description": "Compass C2 Infrastructure \u2014 Active Malware Callbacks",
-              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(30d) and isnotempty(c2_url)\n| summarize Victims=dcount(email), Devices=dcount(infected_machine_id) by c2_url, malware_family, campaign_id\n| order by Victims desc"
-            },
-            {
-              "description": "Compass Infected Devices \u2014 Top 25 by Application Count",
-              "query": "SpyCloudCompassDevices_CL\n| where TimeGenerated > ago(30d)\n| top 25 by application_count desc\n| project TimeGenerated, user_hostname, user_os, ip_addresses, application_count, infected_time"
-            },
-            {
-              "description": "Compass Applications \u2014 Most Targeted Applications per Device",
-              "query": "SpyCloudCompassApplications_CL\n| where TimeGenerated > ago(30d)\n| summarize TotalCredentials=sum(credential_count), TotalCookies=sum(cookie_count), DeviceCount=dcount(infected_machine_id) by target_domain\n| order by TotalCredentials desc\n| take 50"
-            },
-            {
-              "description": "Compass Applications \u2014 Devices with Stolen Corporate App Credentials",
-              "query": "SpyCloudCompassApplications_CL\n| where TimeGenerated > ago(30d) and credential_count > 0\n| project TimeGenerated, infected_machine_id, user_hostname, target_domain, target_url, credential_count, cookie_count, malware_family, severity\n| order by credential_count desc\n| take 100"
-            },
-            {
-              "description": "Compass + Watchlist Cross-Reference \u2014 Shared Exposures",
-              "query": "SpyCloudCompassData_CL\n| where TimeGenerated > ago(7d)\n| join kind=inner (\n    SpyCloudBreachWatchlist_CL\n    | where TimeGenerated > ago(7d)\n    | project email, w_severity=severity, w_source=source_id\n) on email\n| summarize CompassHits=count(), WatchlistMatches=dcount(w_source) by email, email_domain\n| sort by CompassHits desc\n| take 25"
+              "description": "VIP executive exposure check",
+              "query": "SpyCloudBreachWatchlist_CL\n| where email has_any ('ceo','cfo','ciso','admin','svc-')\n| project TimeGenerated, email, severity, breach_title, password_type"
             }
           ],
           "dataTypes": [
             {
-              "name": "{{graphQueriesTableName}}",
-              "lastDataReceivedQuery": "{{graphQueriesTableName}}\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+              "name": "SpyCloudBreachWatchlist_CL",
+              "lastDataReceivedQuery": "SpyCloudBreachWatchlist_CL\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
             },
             {
               "name": "SpyCloudBreachCatalog_CL",
-              "lastDataReceivedQuery": "SpyCloudBreachCatalog_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "Spycloud_MDE_Logs_CL",
-              "lastDataReceivedQuery": "Spycloud_MDE_Logs_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloud_ConditionalAccessLogs_CL",
-              "lastDataReceivedQuery": "SpyCloud_ConditionalAccessLogs_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+              "lastDataReceivedQuery": "SpyCloudBreachCatalog_CL\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
             },
             {
               "name": "SpyCloudCompassData_CL",
-              "lastDataReceivedQuery": "SpyCloudCompassData_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudCompassDevices_CL",
-              "lastDataReceivedQuery": "SpyCloudCompassDevices_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudCompassApplications_CL",
-              "lastDataReceivedQuery": "SpyCloudCompassApplications_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudSipCookies_CL",
-              "lastDataReceivedQuery": "SpyCloudSipCookies_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudIdentityExposure_CL",
-              "lastDataReceivedQuery": "SpyCloudIdentityExposure_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudInvestigations_CL",
-              "lastDataReceivedQuery": "SpyCloudInvestigations_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudIdLink_CL",
-              "lastDataReceivedQuery": "SpyCloudIdLink_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudDataPartnership_CL",
-              "lastDataReceivedQuery": "SpyCloudDataPartnership_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudExposure_CL",
-              "lastDataReceivedQuery": "SpyCloudExposure_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
-            },
-            {
-              "name": "SpyCloudCAP_CL",
-              "lastDataReceivedQuery": "SpyCloudCAP_CL\n |summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
+              "lastDataReceivedQuery": "SpyCloudCompassData_CL\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
             }
           ],
           "connectivityCriteria": [
@@ -5960,18 +5827,18 @@
         "kind": "DataConnector",
         "version": "[variables('dataConnectorVersionConnectorDefinition')]",
         "source": {
-          "sourceId": "[variables('_solutionId')]",
-          "name": "[variables('_solutionName')]",
-          "kind": "Solution"
+          "kind": "Solution",
+          "name": "SpyCloud Holistic Identity Exposure Intelligence"
         },
         "author": {
-          "name": "[variables('_solutionAuthor')]"
+          "name": "SpyCloud, Inc.",
+          "email": "support@spycloud.com"
         },
         "support": {
-          "name": "[variables('_solutionAuthor')]",
-          "tier": "[variables('_solutionTier')]",
-          "email": "[variables('_solutionEmail')]",
-          "link": "[variables('_solutionLink')]"
+          "name": "SpyCloud, Inc.",
+          "email": "support@spycloud.com",
+          "tier": "Partner",
+          "link": "https://spycloud.com/support"
         },
         "dependencies": {
           "criteria": [
@@ -6010,7 +5877,7 @@
           "contentVersion": "[variables('dataConnectorVersionConnections')]",
           "parameters": {
             "connectorDefinitionName": {
-              "defaultValue": "SpyCloudCCF",
+              "defaultValue": "SpyCloudIdentityIntelligence",
               "type": "string",
               "minLength": 1,
               "metadata": {
@@ -6960,7 +6827,8 @@
         "contentProductId": "[concat(substring(variables('_solutionId'), 0, 50),'-','sl','-', uniqueString(concat(variables('_solutionId'),'-','Solution','-',variables('_solutionId'),'-', variables('_solutionVersion'))))]",
         "displayName": "[variables('_solutionName')]",
         "publisherDisplayName": "[variables('_solutionAuthor')]",
-        "descriptionHtml": "<p>The <strong>SpyCloud Threat Intelligence Connector</strong> integrates SpyCloud's comprehensive breach and infostealer exposure data with Microsoft Sentinel, enabling security teams to detect compromised credentials, investigate infected devices, and automate identity protection responses.</p><h4>Data Tables</h4><ul><li><strong>SpyCloudBreachWatchlist_CL</strong> \u2014 Compromised credentials, PII, and infostealer-stolen data from your organization's monitored assets (email domains, IP ranges, executive watchlists)</li><li><strong>SpyCloudBreachCatalog_CL</strong> \u2014 Breach source metadata for contextual enrichment, correlation, and impact assessment</li><li><strong>Spycloud_MDE_Logs_CL</strong> \u2014 Audit log of automated Microsoft Defender for Endpoint remediation actions (device isolation, tagging, IOC submission)</li><li><strong>SpyCloud_ConditionalAccessLogs_CL</strong> \u2014 Audit log of automated Azure AD / Entra ID actions (forced password resets, session revocations, Conditional Access group assignments, account disablement)</li></ul><h4>Key Use Cases</h4><ul><li><strong>Compromised Credential Detection</strong> \u2014 Identify employee and customer credentials exposed in breaches or stolen by infostealer malware</li><li><strong>Post-Infection Remediation</strong> \u2014 Automatically isolate infected devices and force credential resets when infostealer activity is detected</li><li><strong>Darknet Exposure Monitoring</strong> \u2014 Continuously monitor for new exposures of corporate assets across SpyCloud's 600B+ recaptured data records</li><li><strong>Account Takeover Prevention</strong> \u2014 Detect and block credential stuffing attempts using real-time exposure intelligence</li><li><strong>Third-Party Risk Assessment</strong> \u2014 Monitor vendor and supply chain credential exposures for risk scoring</li><li><strong>Compliance &amp; Audit</strong> \u2014 Maintain evidence of credential exposure detection and automated remediation for regulatory requirements</li><li><strong>VIP/Executive Protection</strong> \u2014 Prioritized monitoring of high-value targets for both credential and PII exposure</li></ul><p><strong>Requirements:</strong> SpyCloud Enterprise or Enterprise+ API subscription. Contact <a href='mailto:support@spycloud.com'>support@spycloud.com</a> or visit <a href='https://portal.spycloud.com'>portal.spycloud.com</a>.</p>"
+        "descriptionHtml": "<p>The <strong>SpyCloud Threat Intelligence Connector</strong> integrates SpyCloud's comprehensive breach and infostealer exposure data with Microsoft Sentinel, enabling security teams to detect compromised credentials, investigate infected devices, and automate identity protection responses.</p><h4>Data Tables</h4><ul><li><strong>SpyCloudBreachWatchlist_CL</strong> \u2014 Compromised credentials, PII, and infostealer-stolen data from your organization's monitored assets (email domains, IP ranges, executive watchlists)</li><li><strong>SpyCloudBreachCatalog_CL</strong> \u2014 Breach source metadata for contextual enrichment, correlation, and impact assessment</li><li><strong>Spycloud_MDE_Logs_CL</strong> \u2014 Audit log of automated Microsoft Defender for Endpoint remediation actions (device isolation, tagging, IOC submission)</li><li><strong>SpyCloud_ConditionalAccessLogs_CL</strong> \u2014 Audit log of automated Azure AD / Entra ID actions (forced password resets, session revocations, Conditional Access group assignments, account disablement)</li></ul><h4>Key Use Cases</h4><ul><li><strong>Compromised Credential Detection</strong> \u2014 Identify employee and customer credentials exposed in breaches or stolen by infostealer malware</li><li><strong>Post-Infection Remediation</strong> \u2014 Automatically isolate infected devices and force credential resets when infostealer activity is detected</li><li><strong>Darknet Exposure Monitoring</strong> \u2014 Continuously monitor for new exposures of corporate assets across SpyCloud's 600B+ recaptured data records</li><li><strong>Account Takeover Prevention</strong> \u2014 Detect and block credential stuffing attempts using real-time exposure intelligence</li><li><strong>Third-Party Risk Assessment</strong> \u2014 Monitor vendor and supply chain credential exposures for risk scoring</li><li><strong>Compliance &amp; Audit</strong> \u2014 Maintain evidence of credential exposure detection and automated remediation for regulatory requirements</li><li><strong>VIP/Executive Protection</strong> \u2014 Prioritized monitoring of high-value targets for both credential and PII exposure</li></ul><p><strong>Requirements:</strong> SpyCloud Enterprise or Enterprise+ API subscription. Contact <a href='mailto:support@spycloud.com'>support@spycloud.com</a> or visit <a href='https://portal.spycloud.com'>portal.spycloud.com</a>.</p>",
+        "description": "SpyCloud Holistic Identity Exposure Intelligence for Microsoft Sentinel. Automated detection and remediation of compromised credentials, stolen cookies, and infected devices."
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
