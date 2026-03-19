@@ -5689,161 +5689,13 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
+                    "text": "Optional data sources are automatically enabled when you provide the corresponding API key in Step 1. No separate toggle needed — just add the API key and the pollers will activate."
+                  }
+                },
+                {
+                  "type": "InfoMessage",
+                  "parameters": {
                     "text": "**Always Active (Enterprise API):** Breach Watchlist (new), Breach Watchlist (modified), Breach Catalog, Watchlist Identifiers."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Enable Compass (Data, Devices, Applications)",
-                    "name": "enableCompass",
-                    "options": [
-                      {
-                        "key": "true",
-                        "text": "Yes - I have a Compass license"
-                      },
-                      {
-                        "key": "false",
-                        "text": "No - Skip Compass pollers"
-                      }
-                    ],
-                    "placeholder": "Enable Compass?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Requires SpyCloud Compass license. Ingests consumer identity data, infected device inventory, and application credentials."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Enable SIP Cookies",
-                    "name": "enableSip",
-                    "options": [
-                      {
-                        "key": "true",
-                        "text": "Yes - I have a SIP license"
-                      },
-                      {
-                        "key": "false",
-                        "text": "No - Skip SIP poller"
-                      }
-                    ],
-                    "placeholder": "Enable SIP?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Requires SpyCloud SIP license. Ingests stolen session cookies for MFA bypass detection."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Enable Investigations",
-                    "name": "enableInvestigations",
-                    "options": [
-                      {
-                        "key": "true",
-                        "text": "Yes - I have an Investigations license"
-                      },
-                      {
-                        "key": "false",
-                        "text": "No - Skip Investigations poller"
-                      }
-                    ],
-                    "placeholder": "Enable Investigations?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Requires SpyCloud Investigations license."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Enable IdLink",
-                    "name": "enableIdLink",
-                    "options": [
-                      {
-                        "key": "true",
-                        "text": "Yes"
-                      },
-                      {
-                        "key": "false",
-                        "text": "No"
-                      }
-                    ],
-                    "placeholder": "Enable IdLink?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Requires SpyCloud IdLink license. Identity correlation and link analysis."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Enable Exposure Stats",
-                    "name": "enableExposure",
-                    "options": [
-                      {
-                        "key": "true",
-                        "text": "Yes"
-                      },
-                      {
-                        "key": "false",
-                        "text": "No"
-                      }
-                    ],
-                    "placeholder": "Enable Exposure?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Requires SpyCloud Exposure license. Per-domain exposure statistics."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Enable CAP (Credential Access Protection)",
-                    "name": "enableCAP",
-                    "options": [
-                      {
-                        "key": "true",
-                        "text": "Yes"
-                      },
-                      {
-                        "key": "false",
-                        "text": "No"
-                      }
-                    ],
-                    "placeholder": "Enable CAP?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Requires SpyCloud CAP license. Credential access protection events."
-                  }
-                },
-                {
-                  "type": "Dropdown",
-                  "parameters": {
-                    "label": "Enable Data Partnership",
-                    "name": "enableDataPartnership",
-                    "options": [
-                      {
-                        "key": "true",
-                        "text": "Yes"
-                      },
-                      {
-                        "key": "false",
-                        "text": "No"
-                      }
-                    ],
-                    "placeholder": "Enable Data Partnership?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Requires SpyCloud Data Partnership license."
                   }
                 }
               ]
@@ -6156,34 +6008,6 @@
                 "description": "Dedicated API key for SpyCloud CAP (Credential Access Program) service."
               }
             },
-            "enableCompass": {
-              "defaultValue": "false",
-              "type": "string"
-            },
-            "enableSip": {
-              "defaultValue": "false",
-              "type": "string"
-            },
-            "enableInvestigations": {
-              "defaultValue": "false",
-              "type": "string"
-            },
-            "enableIdLink": {
-              "defaultValue": "false",
-              "type": "string"
-            },
-            "enableDataPartnership": {
-              "defaultValue": "false",
-              "type": "string"
-            },
-            "enableExposure": {
-              "defaultValue": "false",
-              "type": "string"
-            },
-            "enableCAP": {
-              "defaultValue": "false",
-              "type": "string"
-            },
             "severity": {
               "defaultValue": [
                 "2",
@@ -6470,7 +6294,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDataConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableCompass'))), 'true')]",
+              "condition": "[greater(length(parameters('compassApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6521,7 +6345,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDevicesConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableCompass'))), 'true')]",
+              "condition": "[greater(length(parameters('compassApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6572,7 +6396,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassApplicationsConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableCompass'))), 'true')]",
+              "condition": "[greater(length(parameters('compassApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6623,7 +6447,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudSipCookiesConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableSip'))), 'true')]",
+              "condition": "[greater(length(parameters('sipApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6724,7 +6548,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudInvestigationsConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableInvestigations'))), 'true')]",
+              "condition": "[greater(length(parameters('investigationsApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6775,7 +6599,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudIdLinkConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableIdLink'))), 'true')]",
+              "condition": "[greater(length(parameters('idlinkApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6826,7 +6650,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudDataPartnershipConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableDataPartnership'))), 'true')]",
+              "condition": "[greater(length(parameters('dataPartnershipApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6877,7 +6701,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudExposureConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableExposure'))), 'true')]",
+              "condition": "[greater(length(parameters('exposureApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6928,7 +6752,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCAPConnector')]",
-              "condition": "[contains(toLower(string(parameters('enableCAP'))), 'true')]",
+              "condition": "[greater(length(parameters('capApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
