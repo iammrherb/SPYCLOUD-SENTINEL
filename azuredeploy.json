@@ -6155,32 +6155,46 @@
               }
             },
             "enableCompass": {
-              "defaultValue": false,
-              "type": "bool"
+              "defaultValue": [
+                "false"
+              ],
+              "type": "array"
             },
             "enableSip": {
-              "defaultValue": false,
-              "type": "bool"
+              "defaultValue": [
+                "false"
+              ],
+              "type": "array"
             },
             "enableInvestigations": {
-              "defaultValue": false,
-              "type": "bool"
+              "defaultValue": [
+                "false"
+              ],
+              "type": "array"
             },
             "enableIdLink": {
-              "defaultValue": false,
-              "type": "bool"
+              "defaultValue": [
+                "false"
+              ],
+              "type": "array"
             },
             "enableDataPartnership": {
-              "defaultValue": false,
-              "type": "bool"
+              "defaultValue": [
+                "false"
+              ],
+              "type": "array"
             },
             "enableExposure": {
-              "defaultValue": false,
-              "type": "bool"
+              "defaultValue": [
+                "false"
+              ],
+              "type": "array"
             },
             "enableCAP": {
-              "defaultValue": false,
-              "type": "bool"
+              "defaultValue": [
+                "false"
+              ],
+              "type": "array"
             },
             "severity": {
               "defaultValue": [
@@ -6468,7 +6482,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDataConnector')]",
-              "condition": "[parameters('enableCompass')]",
+              "condition": "[equals(first(parameters('enableCompass')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6519,7 +6533,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassDevicesConnector')]",
-              "condition": "[parameters('enableCompass')]",
+              "condition": "[equals(first(parameters('enableCompass')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6570,7 +6584,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCompassApplicationsConnector')]",
-              "condition": "[parameters('enableCompass')]",
+              "condition": "[equals(first(parameters('enableCompass')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6621,7 +6635,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudSipCookiesConnector')]",
-              "condition": "[parameters('enableSip')]",
+              "condition": "[equals(first(parameters('enableSip')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6722,7 +6736,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudInvestigationsConnector')]",
-              "condition": "[parameters('enableInvestigations')]",
+              "condition": "[equals(first(parameters('enableInvestigations')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6773,7 +6787,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudIdLinkConnector')]",
-              "condition": "[parameters('enableIdLink')]",
+              "condition": "[equals(first(parameters('enableIdLink')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6824,7 +6838,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudDataPartnershipConnector')]",
-              "condition": "[parameters('enableDataPartnership')]",
+              "condition": "[equals(first(parameters('enableDataPartnership')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6875,7 +6889,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudExposureConnector')]",
-              "condition": "[parameters('enableExposure')]",
+              "condition": "[equals(first(parameters('enableExposure')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
@@ -6926,7 +6940,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCAPConnector')]",
-              "condition": "[parameters('enableCAP')]",
+              "condition": "[equals(first(parameters('enableCAP')), 'true')]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudCCF",
