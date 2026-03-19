@@ -13325,7 +13325,7 @@
       "name": "[variables('spycloudConnectorName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
       "condition": "[parameters('enableEnrichmentPlaybooks')]",
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "properties": {
         "displayName": "SpyCloud Enterprise Protection API",
         "description": "SpyCloud Enterprise v2 API connector for real-time breach data enrichment, credential exposure lookup, device forensics, and stolen cookie detection. Supports all SpyCloud products: Enterprise, Compass, SIP, Investigations, IdLink.",
@@ -13703,7 +13703,7 @@
       "dependsOn": [
         "[variables('spycloudConnectorId')]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "properties": {
         "displayName": "SpyCloud Enterprise API Connection",
         "customParameterValues": {},
@@ -13841,7 +13841,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14097,7 +14097,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14353,7 +14353,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14609,7 +14609,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14865,7 +14865,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -15121,7 +15121,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -15377,7 +15377,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -15633,7 +15633,7 @@
         "[variables('spycloudConnectionId')]",
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
       ],
-      "tags": "[variables('_allTags')]",
+      "tags": "[variables('allTags')]",
       "identity": {
         "type": "SystemAssigned"
       },
