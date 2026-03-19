@@ -5331,7 +5331,7 @@
           "id": "SpyCloudIdentityIntelligence",
           "title": "SpyCloud Darknet Identity Threat Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-white.png)\n\n## Darknet Identity Breach Intelligence for Microsoft Sentinel\n\nSpyCloud recaptures stolen credentials, session cookies, and infected device data from the criminal underground — hours after exposure, not weeks after disclosure.\n\n**This connector ingests identity threat intelligence across 14 custom tables:**\n\n**Core (Enterprise API — always active):**\n- Breach Watchlist (84 fields) — credential exposures with full PII and device forensics\n- Breach Catalog (29 fields) — breach metadata, malware families, targeted industries\n- Watchlist Identifiers (11 fields) — monitored domain exposure summary\n\n**Compass (requires Compass license):**\n- Compass Data (32 fields) — consumer identity exposures\n- Compass Devices (10 fields) — infected device inventory\n- Compass Applications (9 fields) — compromised application statistics\n\n**Advanced (requires separate licenses):**\n- SIP Cookies (33 fields) — stolen session cookies for MFA bypass detection\n- Investigations (84 fields) — deep investigation breach records\n- IdLink (29 fields) — identity correlation and link analysis\n- Data Partnership, Exposure, CAP\n\n**Remediation audit tables (written by playbooks):**\n- MDE Logs — device isolation tracking\n- Conditional Access Logs — password reset and session revocation tracking\n\n**Includes:** 38 analytics rules, 5 automated playbooks, 22-chart workbook, 8 hunting queries, 400+ Security Copilot skills, parser function, 3 watchlists, 4 automation rules.",
+          "descriptionMarkdown": "**SpyCloud Darknet Identity Threat Intelligence**\n\nSpyCloud recaptures stolen credentials, session cookies, and infected device data from the criminal underground — hours after exposure, not weeks after disclosure.\n\n**This connector ingests identity threat intelligence across 15 custom tables:**\n\n**Core (Enterprise API — always active):**\n- **Breach Watchlist** (84 fields) — credential exposures with full PII and device forensics\n- **Breach Catalog** (29 fields) — breach metadata, malware families, targeted industries\n\n**Compass — Endpoint Threat Protection (requires Compass license):**\n- **Compass Data** (32 fields) — consumer identity exposures\n- **Compass Devices** (10 fields) — infected device inventory\n- **Compass Applications** (9 fields) — compromised application statistics\n\n**Advanced (requires separate licenses):**\n- **SIP Cookies** (22 fields) — stolen session cookies for MFA bypass detection\n- **Investigations** (84 fields) — full database access for threat hunting\n- **IdLink** (15 fields) — identity correlation across personas\n- **Exposure Stats** (12 fields) — domain exposure metrics\n- **CAP** (40 fields) — consumer compromised account data\n- **Data Partnership** (50 fields) — partner intelligence feeds\n\n**Also deployed:** Enrichment Audit table, MDE Response Logs, Conditional Access Logs.\n\nFor more information, visit [portal.spycloud.com](https://portal.spycloud.com) or contact [integrations@spycloud.com](mailto:integrations@spycloud.com).",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -5535,7 +5535,7 @@
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Required:** SpyCloud Enterprise API key from portal.spycloud.com\n\n**Required Permissions:** Sentinel Contributor + Log Analytics Contributor on the resource group.\n\n**Network:** Outbound HTTPS to api.spycloud.io only.\n\n**What Works Immediately:** Data ingestion, 38 analytics rules, workbook, hunting queries, all notifications.\n\n**Requires MDE P2:** Device isolation playbooks.\n\n**Requires Entra P1+:** Password reset and Conditional Access playbooks."
+                    "text": "**Required:** SpyCloud Enterprise API key from portal.spycloud.com. **Required Permissions:** Sentinel Contributor + Log Analytics Contributor on the resource group. **Network:** Outbound HTTPS to api.spycloud.io only. **What Works Immediately:** Data ingestion, 38 analytics rules, workbook, hunting queries, all notifications. **Requires MDE P2:** Device isolation playbooks. **Requires Entra P1+:** Password reset and Conditional Access playbooks."
                   }
                 }
               ]
@@ -5547,63 +5547,94 @@
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "name": "apiKey",
                     "label": "SpyCloud Enterprise API Key (required)",
-                    "placeholder": "Enterprise API key from portal.spycloud.com",
+                    "placeholder": "Paste your Enterprise API key from portal.spycloud.com",
                     "type": "password",
-                    "toolTip": "Required. Authenticates Watchlist, Catalog, and Identity Exposure pollers."
+                    "name": "apiKey"
                   }
                 },
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "The keys below are only needed if you have the corresponding SpyCloud licenses. Leave blank to skip."
+                    "text": "The keys below are only needed if you have the corresponding SpyCloud licenses. Leave blank to skip. Data pollers for each product activate automatically when the API key is provided."
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "name": "compassApiKey",
-                    "label": "Compass API Key (optional)",
+                    "label": "Compass API Key (optional — Endpoint Threat Protection)",
                     "placeholder": "Leave blank if not licensed",
                     "type": "password",
-                    "toolTip": "Required for Compass Data, Devices, and Applications pollers. Leave blank if not licensed."
+                    "name": "compassApiKey"
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "name": "sipApiKey",
-                    "label": "SIP Cookies API Key (optional)",
+                    "label": "SIP Cookies API Key (optional — Session Identity Protection)",
                     "placeholder": "Leave blank if not licensed",
                     "type": "password",
-                    "toolTip": "Required for SIP stolen cookies poller. Leave blank if not licensed."
+                    "name": "sipApiKey"
                   }
                 },
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "name": "investigationsApiKey",
-                    "label": "Investigations API Key (optional)",
+                    "label": "Investigations API Key (optional — Deep Database Access)",
                     "placeholder": "Leave blank if not licensed",
                     "type": "password",
-                    "toolTip": "Required for Investigations poller. Leave blank if not licensed."
+                    "name": "investigationsApiKey"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "IdLink API Key (optional — Identity Correlation)",
+                    "placeholder": "Leave blank if not licensed",
+                    "type": "password",
+                    "name": "idlinkApiKey"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "Exposure Stats API Key (optional — Domain Exposure Metrics)",
+                    "placeholder": "Leave blank if not licensed — may share Enterprise key",
+                    "type": "password",
+                    "name": "exposureApiKey"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "CAP API Key (optional — Compromised Account Protection)",
+                    "placeholder": "Leave blank if not licensed",
+                    "type": "password",
+                    "name": "capApiKey"
+                  }
+                },
+                {
+                  "type": "Textbox",
+                  "parameters": {
+                    "label": "Data Partnership API Key (optional — Partner Intelligence)",
+                    "placeholder": "Leave blank if not licensed",
+                    "type": "password",
+                    "name": "dataPartnershipApiKey"
                   }
                 }
               ]
             },
             {
               "title": "Step 2 - Data Filters",
-              "description": "Configure severity, exposure types, and your monitored domain.",
+              "description": "Configure which data to ingest and how to filter it.",
               "instructions": [
                 {
                   "type": "Textbox",
                   "parameters": {
-                    "name": "monitoredDomain",
                     "label": "Monitored Domain",
-                    "placeholder": "e.g. contoso.com",
+                    "placeholder": "e.g., contoso.com",
                     "type": "text",
-                    "toolTip": "Your primary email domain. Required for SIP Cookies, Investigations, IdLink, Exposure, CAP, and Data Partnership pollers."
+                    "name": "monitoredDomain"
                   }
                 },
                 {
@@ -5611,29 +5642,31 @@
                   "parameters": {
                     "label": "Severity Levels",
                     "name": "severity",
+                    "isMultiSelect": true,
                     "options": [
                       {
                         "key": "2",
-                        "text": "2 - Breach Credential"
+                        "text": "2 — Credential exposure (public breach)"
                       },
                       {
                         "key": "5",
-                        "text": "5 - Breach + PII"
+                        "text": "5 — Credential exposure (private/underground)"
                       },
                       {
                         "key": "20",
-                        "text": "20 - Infostealer"
+                        "text": "20 — Infostealer malware infection"
                       },
                       {
                         "key": "25",
-                        "text": "25 - Infostealer + Cookies/Sessions"
+                        "text": "25 — Infostealer with session cookies/tokens"
                       }
                     ],
-                    "placeholder": "Select severity levels",
-                    "isMultiSelect": true,
-                    "required": true,
-                    "defaultAllSelected": true,
-                    "toolTip": "25=critical (MFA bypass). 20=high (malware). 5=standard. 2=low. Select all recommended."
+                    "defaultValue": [
+                      "2",
+                      "5",
+                      "20",
+                      "25"
+                    ]
                   }
                 },
                 {
@@ -5641,21 +5674,21 @@
                   "parameters": {
                     "label": "Exposure Types",
                     "name": "watchlistType",
+                    "isMultiSelect": true,
                     "options": [
                       {
                         "key": "corporate",
-                        "text": "Corporate"
+                        "text": "Corporate — employee email domain matches"
                       },
                       {
                         "key": "infected",
-                        "text": "Infected Devices"
+                        "text": "Infected — infostealer malware on devices"
                       }
                     ],
-                    "placeholder": "Select types",
-                    "isMultiSelect": true,
-                    "required": true,
-                    "defaultAllSelected": true,
-                    "toolTip": "Corporate=monitored domains. Infected=malware-stolen."
+                    "defaultValue": [
+                      "corporate",
+                      "infected"
+                    ]
                   }
                 },
                 {
@@ -5663,79 +5696,55 @@
                   "parameters": {
                     "label": "Plaintext Passwords",
                     "name": "show_plain_password",
+                    "isMultiSelect": false,
                     "options": [
                       {
                         "key": "False",
-                        "text": "No (recommended)"
+                        "text": "No — Omit passwords (recommended)"
                       },
                       {
                         "key": "True",
-                        "text": "Yes"
+                        "text": "Yes — Include passwords (requires data handling policy)"
                       }
                     ],
-                    "placeholder": "Include plaintext?",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "No excludes cleartext passwords for security."
+                    "defaultValue": "False"
                   }
                 }
               ]
             },
             {
-              "title": "Step 3 - Enable Data Sources",
-              "description": "Enable only the data sources you are licensed for. Core pollers (Watchlist + Catalog) are always active.",
-              "instructions": [
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "Optional data sources are automatically enabled when you provide the corresponding API key in Step 1. No separate toggle needed — just add the API key and the pollers will activate."
-                  }
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "**Always Active (Enterprise API):** Breach Watchlist (new), Breach Watchlist (modified), Breach Catalog, Watchlist Identifiers."
-                  }
-                }
-              ]
-            },
-            {
-              "title": "Step 4 - Polling Settings",
-              "description": "Configure polling frequency and retrieval settings.",
+              "title": "Step 3 - Polling Settings",
+              "description": "Configure how often the connector fetches new data from SpyCloud.",
               "instructions": [
                 {
                   "type": "Dropdown",
                   "parameters": {
                     "label": "Polling Interval",
                     "name": "pollingIntervalMin",
+                    "isMultiSelect": false,
                     "options": [
                       {
-                        "key": "5",
-                        "text": "5 min"
-                      },
-                      {
                         "key": "15",
-                        "text": "15 min"
+                        "text": "15 minutes (most frequent)"
                       },
                       {
                         "key": "30",
-                        "text": "30 min (recommended)"
+                        "text": "30 minutes (recommended)"
                       },
                       {
                         "key": "60",
                         "text": "1 hour"
                       },
                       {
+                        "key": "360",
+                        "text": "6 hours"
+                      },
+                      {
                         "key": "1440",
-                        "text": "24 hours"
+                        "text": "24 hours (daily)"
                       }
                     ],
-                    "placeholder": "Interval",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "How often to fetch new records. 30 min recommended."
+                    "defaultValue": "30"
                   }
                 },
                 {
@@ -5743,11 +5752,8 @@
                   "parameters": {
                     "label": "Lookback Days",
                     "name": "lookbackDays",
+                    "isMultiSelect": false,
                     "options": [
-                      {
-                        "key": "7",
-                        "text": "7 days"
-                      },
                       {
                         "key": "30",
                         "text": "30 days"
@@ -5757,15 +5763,15 @@
                         "text": "90 days"
                       },
                       {
+                        "key": "180",
+                        "text": "180 days"
+                      },
+                      {
                         "key": "365",
-                        "text": "365 days (recommended)"
+                        "text": "365 days (maximum)"
                       }
                     ],
-                    "placeholder": "First pull",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "How far back on first connection."
+                    "defaultValue": "365"
                   }
                 },
                 {
@@ -5773,25 +5779,22 @@
                   "parameters": {
                     "label": "Retries",
                     "name": "retryCount",
+                    "isMultiSelect": false,
                     "options": [
                       {
+                        "key": "1",
+                        "text": "1 retry"
+                      },
+                      {
                         "key": "3",
-                        "text": "3"
+                        "text": "3 retries (recommended)"
                       },
                       {
-                        "key": "5",
-                        "text": "5 (recommended)"
-                      },
-                      {
-                        "key": "10",
-                        "text": "10"
+                        "key": "6",
+                        "text": "6 retries (maximum)"
                       }
                     ],
-                    "placeholder": "Retries",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Retry count with exponential backoff."
+                    "defaultValue": "3"
                   }
                 },
                 {
@@ -5799,71 +5802,62 @@
                   "parameters": {
                     "label": "Timeout",
                     "name": "timeoutInSeconds",
+                    "isMultiSelect": false,
                     "options": [
                       {
                         "key": "60",
-                        "text": "60s"
+                        "text": "60 seconds"
                       },
                       {
                         "key": "120",
-                        "text": "120s (recommended)"
+                        "text": "120 seconds (recommended)"
                       },
                       {
                         "key": "300",
-                        "text": "300s"
+                        "text": "300 seconds (maximum)"
                       }
                     ],
-                    "placeholder": "Timeout",
-                    "isMultiSelect": false,
-                    "required": true,
-                    "defaultAllSelected": false,
-                    "toolTip": "Max wait per request."
+                    "defaultValue": "120"
                   }
                 }
               ]
             },
             {
-              "title": "Step 5 - Recommended Settings",
-              "description": "Enable these Sentinel features for maximum value.",
+              "title": "Step 4 - Recommended Settings",
+              "description": "",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Enable UEBA:** Sentinel > Settings > User and Entity Behavior Analytics > ON.\n\n**Enable Fusion:** Sentinel > Analytics > Fusion > Enable.\n\n**Install Threat Intelligence:** Content Hub > Threat Intelligence > Install.\n\n**Recommended Connectors:**\n- Entra ID (Critical) — Sign-in correlation\n- Microsoft 365 Defender (Critical) — MDE device correlation\n- Office 365 (High) — Mail forwarding detection\n- DNS (High) — Malicious domain resolution\n- Azure Activity (Medium) — Cloud resource tracking\n- Firewall CEF/Syslog (Medium) — Infected IP detection"
+                    "text": "**After connecting:** (1) Verify data appears in SpyCloudBreachWatchlist_CL within 5-10 minutes. (2) Enable analytics rules in the Analytics blade. (3) Assign the SpyCloud Sentinel Responder role to enrichment playbook managed identities. (4) Review the SpyCloud Threat Intelligence workbook for initial exposure assessment."
                   }
                 }
               ]
             },
             {
-              "title": "Step 6 - Connect",
-              "description": "Activate pollers and start data ingestion.",
+              "title": "Step 5 - Connect",
+              "description": "Click Connect below to start ingesting SpyCloud data.",
               "instructions": [
                 {
                   "type": "ConnectionToggleButton",
                   "parameters": {}
-                },
-                {
-                  "type": "InfoMessage",
-                  "parameters": {
-                    "text": "Data appears within 5-10 minutes. Only enabled pollers will activate. Disabled pollers are skipped."
-                  }
                 }
               ]
             },
             {
-              "title": "Step 7 - Verification",
-              "description": "Verify data flow.",
+              "title": "Step 6 - Verification",
+              "description": "Verify data ingestion after connecting.",
               "instructions": [
                 {
                   "type": "InfoMessage",
                   "parameters": {
-                    "text": "**Verify data:**\n\nSpyCloudBreachWatchlist_CL | summarize count() by bin(TimeGenerated, 1h)\n\n**Troubleshooting:**\n- No data after 10 min: Check DCR in Monitor > Data Collection Rules\n- 401/403 on connect: Check API key tier matches enabled pollers\n- Pollers skipped: Disable unused data sources in Step 3\n\n**QA Testing:**\ncurl -sL https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/scripts/spycloud-qa.sh | bash"
+                    "text": "Run this query in Log Analytics to verify: SpyCloudBreachWatchlist_CL | take 10"
                   }
                 }
               ]
             }
           ],
-          "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+          "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
           "availability": {
             "status": 1,
             "isPreview": false
@@ -7133,7 +7127,7 @@
                               "sections": [
                                 {
                                   "activityTitle": "SpyCloud MDE — Device Isolated",
-                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
                                   "text": "Device isolated in Defender due to infostealer infection."
                                 }
                               ]
@@ -7241,7 +7235,7 @@
           },
           "outputs": {},
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
           },
           "description": "SpyCloud MDE Device Isolation — Automatically isolates infected devices in Microsoft Defender for Endpoint when SpyCloud detects infostealer malware. Extracts host entities from incidents, searches MDE for matching devices, isolates them (Full or Selective), adds a SpyCloud tag, logs the action, and notifies SOC via Slack, Teams, and Email. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate devices."
         },
@@ -7611,7 +7605,7 @@
                               "sections": [
                                 {
                                   "activityTitle": "SpyCloud CA — Identity Protected",
-                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
                                   "text": "Password reset and sessions revoked for compromised user."
                                 }
                               ]
@@ -7719,7 +7713,7 @@
           },
           "outputs": {},
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
           },
           "description": "SpyCloud CA Identity Protection — Automatically resets passwords and revokes sessions in Entra ID when SpyCloud detects compromised credentials. Looks up users via Microsoft Graph, forces immediate password reset, revokes all active sessions, optionally adds to a Conditional Access security group, logs the action, and notifies SOC. REQUIRES: Entra ID P1/P2. Without it, deploys but cannot reset passwords."
         },
@@ -9450,7 +9444,7 @@
                             {
                               "activityTitle": "SpyCloud Credential Response",
                               "activitySubtitle": "@{triggerBody()?['object']?['properties']?['title']}",
-                              "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                              "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
                               "facts": [
                                 {
                                   "name": "User",
@@ -9738,7 +9732,7 @@
             }
           },
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
           },
           "description": "SpyCloud Credential Response — Full SOC investigation and remediation workflow. Checks recent sign-in activity for compromised users, forces password reset, revokes sessions, then creates tickets in ServiceNow/Jira/Azure DevOps and sends rich notifications to Slack/Teams/Email. Designed as the primary automated response playbook. REQUIRES: Entra ID P1/P2 for password reset. Notifications work without license."
         },
@@ -9996,7 +9990,7 @@
                               "sections": [
                                 {
                                   "activityTitle": "SpyCloud Blocklist — Sev25 Isolation",
-                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
                                   "text": "Critical severity 25 infected device automatically isolated."
                                 }
                               ]
@@ -10096,7 +10090,7 @@
             }
           },
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
           },
           "description": "SpyCloud MDE Blocklist (Scheduled) — Runs on a configurable schedule (default every 4 hours) to scan for severity 25 critical infostealer infections. Queries SpyCloudBreachWatchlist_CL for the highest severity exposures, searches MDE for matching devices, and isolates them with a 'SpyCloud-Sev25-Infostealer' tag. Proactive defense against the most dangerous infections. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate."
         },
@@ -13152,9 +13146,9 @@
       "tags": "[variables('allTags')]",
       "properties": {
         "displayName": "SpyCloud Enterprise Protection API",
-        "description": "SpyCloud Enterprise v2 API connector for real-time breach data enrichment, credential exposure lookup, device forensics, and stolen cookie detection. Supports all SpyCloud products: Enterprise, Compass, SIP, Investigations, IdLink.",
-        "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.svg",
-        "brandColor": "#00C7B7",
+        "description": "SpyCloud Enterprise v2 API — real-time breach data enrichment, credential exposure lookup, device forensics, stolen cookie detection, and identity correlation.",
+        "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
+        "brandColor": "#00D4AA",
         "connectionParameters": {
           "api_key": {
             "type": "securestring",
