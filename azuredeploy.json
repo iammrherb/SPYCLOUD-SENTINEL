@@ -4642,7 +4642,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend sighting = toint(sighting) | extend source_id = toint(source_id)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudBreachWatchlist_CL"
           },
           {
@@ -4652,7 +4652,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend confidence = toint(confidence) | extend num_records = toint(num_records)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudBreachCatalog_CL"
           },
           {
@@ -4662,7 +4662,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend severity = toint(severity) | extend source_id = toint(source_id)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudCompassData_CL"
           },
           {
@@ -4672,7 +4672,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend application_count = toint(application_count)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudCompassDevices_CL"
           },
           {
@@ -4682,7 +4682,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend total_records = toint(total_records) | extend email_count = toint(email_count) | extend username_count = toint(username_count) | extend compromised_device_count = toint(compromised_device_count)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudCompassApplications_CL"
           },
           {
@@ -4692,7 +4692,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend severity = toint(severity) | extend email = tolower(tostring(email)) | extend cookie_domain = tolower(tostring(cookie_domain)) | extend target_domain = tolower(tostring(target_domain))",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudSipCookies_CL"
           },
           {
@@ -4702,7 +4702,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend corporate_record_count = toint(corporate_record_count) | extend infected_employee_record_count = toint(infected_employee_record_count) | extend infected_consumer_record_count = toint(infected_consumer_record_count) | extend infected_user_record_count = toint(infected_user_record_count)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudIdentityExposure_CL"
           },
           {
@@ -4712,7 +4712,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend source_id = toint(source_id) | extend severity = toint(severity) | extend sighting = toint(sighting) | extend email = tolower(tostring(email)) | extend target_domain = tolower(tostring(target_domain)) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudInvestigations_CL"
           },
           {
@@ -4722,7 +4722,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend linked_emails = iff(gettype(linked_emails) == 'string', parse_json(linked_emails), linked_emails) | extend linked_usernames = iff(gettype(linked_usernames) == 'string', parse_json(linked_usernames), linked_usernames) | extend linked_ips = iff(gettype(linked_ips) == 'string', parse_json(linked_ips), linked_ips) | extend linked_devices = iff(gettype(linked_devices) == 'string', parse_json(linked_devices), linked_devices) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend risk_score = toint(risk_score) | extend total_exposures = toint(total_exposures) | extend graph_depth = toint(graph_depth) | extend link_strength = todouble(link_strength)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudIdLink_CL"
           },
           {
@@ -4732,7 +4732,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend severity = toint(severity) | extend ip_addresses = iff(gettype(ip_addresses) == 'string', parse_json(ip_addresses), ip_addresses) | extend data_classes = iff(gettype(data_classes) == 'string', parse_json(data_classes), data_classes)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudDataPartnership_CL"
           }
         ]
@@ -5064,7 +5064,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend risk_score = toint(risk_score) | extend total_breaches = toint(total_breaches) | extend total_infostealers = toint(total_infostealers) | extend total_credentials = toint(total_credentials) | extend plaintext_passwords = toint(plaintext_passwords) | extend hashed_passwords = toint(hashed_passwords) | extend stolen_cookies = toint(stolen_cookies) | extend infected_devices = toint(infected_devices) | extend remediation_actions = iff(gettype(remediation_actions) == 'string', parse_json(remediation_actions), remediation_actions) | extend data_classes_exposed = iff(gettype(data_classes_exposed) == 'string', parse_json(data_classes_exposed), data_classes_exposed) | extend breach_sources = iff(gettype(breach_sources) == 'string', parse_json(breach_sources), breach_sources) | extend exposure_timeline = iff(gettype(exposure_timeline) == 'string', parse_json(exposure_timeline), exposure_timeline)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudExposure_CL"
           },
           {
@@ -5074,7 +5074,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend email = tolower(tostring(email)) | extend email_domain = tolower(tostring(email_domain)) | extend trigger_severity = toint(trigger_severity) | extend notification_sent = tobool(notification_sent) | extend affected_applications = iff(gettype(affected_applications) == 'string', parse_json(affected_applications), affected_applications) | extend compliance_tags = iff(gettype(compliance_tags) == 'string', parse_json(compliance_tags), compliance_tags)",
+            "transformKql": "source | extend TimeGenerated = now()",
             "outputStream": "Custom-SpyCloudCAP_CL"
           },
           {
@@ -5235,33 +5235,63 @@
       "properties": {
         "connectorUiConfig": {
           "id": "SpyCloudIdentityIntelligence",
-          "title": "SpyCloud Enterprise Protection",
-          "publisher": "SpyCloud, Inc.",
-          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-white.png)\n\n## SpyCloud Sentinel Supreme\n\nIngests recaptured darknet intelligence \u2014 breach credentials, infostealer logs, stolen cookies, compromised PII, and infected device data \u2014 into Microsoft Sentinel for automated detection and remediation.\n\n**Core (Enterprise API):** Breach Watchlist, Breach Catalog, Watchlist Identifiers \u2014 always active.\n\n**Compass (Compass license):** Compass Data, Compass Devices, Compass Applications \u2014 enable in Step 3.\n\n**Advanced (separate licenses):** SIP Cookies, Investigations, IdLink, Exposure, CAP, Data Partnership.\n\n**Includes:** 38 analytics rules, 8 hunting queries, 5 automated playbooks, 4-tab workbook, 400+ Security Copilot skills.",
+          "title": "SpyCloud Darknet Identity Threat Intelligence",
+          "publisher": "SpyCloud",
+          "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-white.png)\n\n## Darknet Identity Breach Intelligence for Microsoft Sentinel\n\nSpyCloud recaptures stolen credentials, session cookies, and infected device data from the criminal underground \u2014 hours after exposure, not weeks after disclosure.\n\n**This connector ingests identity threat intelligence across 14 custom tables:**\n\n**Core (Enterprise API \u2014 always active):**\n- Breach Watchlist (84 fields) \u2014 credential exposures with full PII and device forensics\n- Breach Catalog (29 fields) \u2014 breach metadata, malware families, targeted industries\n- Watchlist Identifiers (11 fields) \u2014 monitored domain exposure summary\n\n**Compass (requires Compass license):**\n- Compass Data (32 fields) \u2014 consumer identity exposures\n- Compass Devices (10 fields) \u2014 infected device inventory\n- Compass Applications (9 fields) \u2014 compromised application statistics\n\n**Advanced (requires separate licenses):**\n- SIP Cookies (33 fields) \u2014 stolen session cookies for MFA bypass detection\n- Investigations (84 fields) \u2014 deep investigation breach records\n- IdLink (29 fields) \u2014 identity correlation and link analysis\n- Data Partnership, Exposure, CAP\n\n**Remediation audit tables (written by playbooks):**\n- MDE Logs \u2014 device isolation tracking\n- Conditional Access Logs \u2014 password reset and session revocation tracking\n\n**Includes:** 38 analytics rules, 5 automated playbooks, 22-chart workbook, 8 hunting queries, 400+ Security Copilot skills, parser function, 3 watchlists, 4 automation rules.",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
-              "metricName": "Breach Watchlist Records",
+              "metricName": "Breach Watchlist",
               "legend": "SpyCloudBreachWatchlist_CL",
-              "baseQuery": "SpyCloudBreachWatchlist_CL"
+              "baseQuery": "{{graphQueriesTableName}}"
             },
             {
-              "metricName": "Breach Catalog Entries",
+              "metricName": "Breach Catalog",
               "legend": "SpyCloudBreachCatalog_CL",
               "baseQuery": "SpyCloudBreachCatalog_CL"
             },
             {
-              "metricName": "Compass Data Records",
+              "metricName": "Compass Data",
               "legend": "SpyCloudCompassData_CL",
               "baseQuery": "SpyCloudCompassData_CL"
             },
             {
-              "metricName": "MDE Remediation Logs",
+              "metricName": "Compass Devices",
+              "legend": "SpyCloudCompassDevices_CL",
+              "baseQuery": "SpyCloudCompassDevices_CL"
+            },
+            {
+              "metricName": "Compass Applications",
+              "legend": "SpyCloudCompassApplications_CL",
+              "baseQuery": "SpyCloudCompassApplications_CL"
+            },
+            {
+              "metricName": "Watchlist Identifiers",
+              "legend": "SpyCloudIdentityExposure_CL",
+              "baseQuery": "SpyCloudIdentityExposure_CL"
+            },
+            {
+              "metricName": "SIP Cookies",
+              "legend": "SpyCloudSipCookies_CL",
+              "baseQuery": "SpyCloudSipCookies_CL"
+            },
+            {
+              "metricName": "Investigations",
+              "legend": "SpyCloudInvestigations_CL",
+              "baseQuery": "SpyCloudInvestigations_CL"
+            },
+            {
+              "metricName": "IdLink",
+              "legend": "SpyCloudIdLink_CL",
+              "baseQuery": "SpyCloudIdLink_CL"
+            },
+            {
+              "metricName": "MDE Remediation",
               "legend": "Spycloud_MDE_Logs_CL",
               "baseQuery": "Spycloud_MDE_Logs_CL"
             },
             {
-              "metricName": "CA Remediation Logs",
+              "metricName": "CA Remediation",
               "legend": "SpyCloud_ConditionalAccessLogs_CL",
               "baseQuery": "SpyCloud_ConditionalAccessLogs_CL"
             }
@@ -5302,16 +5332,60 @@
           ],
           "dataTypes": [
             {
-              "name": "SpyCloudBreachWatchlist_CL",
-              "lastDataReceivedQuery": "SpyCloudBreachWatchlist_CL\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
+              "name": "{{graphQueriesTableName}}",
+              "lastDataReceivedQuery": "{{graphQueriesTableName}}\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
             },
             {
               "name": "SpyCloudBreachCatalog_CL",
-              "lastDataReceivedQuery": "SpyCloudBreachCatalog_CL\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
+              "lastDataReceivedQuery": "SpyCloudBreachCatalog_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
             },
             {
               "name": "SpyCloudCompassData_CL",
-              "lastDataReceivedQuery": "SpyCloudCompassData_CL\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
+              "lastDataReceivedQuery": "SpyCloudCompassData_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCompassDevices_CL",
+              "lastDataReceivedQuery": "SpyCloudCompassDevices_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCompassApplications_CL",
+              "lastDataReceivedQuery": "SpyCloudCompassApplications_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudIdentityExposure_CL",
+              "lastDataReceivedQuery": "SpyCloudIdentityExposure_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudSipCookies_CL",
+              "lastDataReceivedQuery": "SpyCloudSipCookies_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudInvestigations_CL",
+              "lastDataReceivedQuery": "SpyCloudInvestigations_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudIdLink_CL",
+              "lastDataReceivedQuery": "SpyCloudIdLink_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudDataPartnership_CL",
+              "lastDataReceivedQuery": "SpyCloudDataPartnership_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudExposure_CL",
+              "lastDataReceivedQuery": "SpyCloudExposure_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloudCAP_CL",
+              "lastDataReceivedQuery": "SpyCloudCAP_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "Spycloud_MDE_Logs_CL",
+              "lastDataReceivedQuery": "Spycloud_MDE_Logs_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
+            },
+            {
+              "name": "SpyCloud_ConditionalAccessLogs_CL",
+              "lastDataReceivedQuery": "SpyCloud_ConditionalAccessLogs_CL\n|summarize Time = max(TimeGenerated)\n|where isnotempty(Time)"
             }
           ],
           "connectivityCriteria": [
