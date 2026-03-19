@@ -29,10 +29,6 @@ on:
         description: 'Deploy CA identity protection playbook'
         type: boolean
         default: true
-      enable_key_vault:
-        description: 'Create Key Vault for API key'
-        type: boolean
-        default: true
       enable_rules_library:
         description: 'Deploy full analytics rules library (all disabled by default)'
         type: boolean
@@ -130,7 +126,6 @@ jobs:
             resourceGroupName=${{ inputs.resource_group }}
             enableMdePlaybook=${{ inputs.enable_mde_playbook }}
             enableCaPlaybook=${{ inputs.enable_ca_playbook }}
-            enableKeyVault=${{ inputs.enable_key_vault }}
             enableAnalyticsRule=true
             enableAutomationRule=true
             enableAnalyticsRulesLibrary=${{ inputs.enable_rules_library }}

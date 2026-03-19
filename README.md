@@ -251,7 +251,7 @@ The repo includes a production-ready GitHub Actions workflow at [`.github/workfl
 <details>
 <summary><strong>Trigger options</strong></summary>
 
-The workflow supports `workflow_dispatch` with inputs for resource group, workspace, region, and toggles for each component (MDE playbook, CA playbook, Key Vault, analytics rules library, etc.).
+The workflow supports `workflow_dispatch` with inputs for resource group, workspace, region, and toggles for each component (MDE playbook, CA playbook, analytics rules library, TI enrichment, etc.).
 
 ```bash
 gh workflow run deploy.yml \
@@ -374,10 +374,9 @@ Deployed via the `hunting-queries.json` template.
 | Firewall integration | **Yes** | Fortinet + Palo Alto block rules |
 | UEBA correlation | **Yes** | Cross-reference exposures with behavioral anomalies |
 | Fusion ML multi-stage detection | **Yes** | Patented ML correlates low-fidelity signals into high-confidence incidents |
-| Security Copilot integration | **Yes** | 168 skills (90 KQL + 20 API + 58 agent) + autonomous investigation agent |
+| Security Copilot integration | **Yes** | 267 skills (138 KQL plugin + 129 agent) + GPT-4.1 investigation agent |
 | Terraform module | **Yes** | Full IaC alternative in `terraform/` |
 | GitHub Actions CI/CD | **Yes** | Validate + Deploy + Configure pipeline |
-| Key Vault secret storage | **Yes** | Optional secure storage for API keys |
 | ServiceNow / Jira ticketing | **Yes** | Automatic ticket creation from playbooks |
 | Teams / Slack notifications | **Yes** | Real-time SOC alerts via webhooks |
 | VirusTotal / AbuseIPDB enrichment | **Yes** | TI enrichment playbook with free-tier support |

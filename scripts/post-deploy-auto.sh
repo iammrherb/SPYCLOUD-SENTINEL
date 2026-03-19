@@ -1298,25 +1298,10 @@ phase8_verify() {
         fi
     done
 
-    # --- 8i: Key Vault ---
-    echo -e "\n  ${BOLD}--- Key Vault ---${NC}" >&2
-    local kv_name
-    kv_name=$(az keyvault list -g "$RG" \
-        --query "[?contains(name,'spycloud') || contains(name,'spytel')].name | [0]" \
-        -o tsv 2>/dev/null || echo "")
-    if [[ -n "$kv_name" ]]; then
-        vpass "Key Vault '${kv_name}' exists"
-        local secret_check
-        secret_check=$(az keyvault secret show --vault-name "$kv_name" --name "spycloud-api-key" \
-            --query name -o tsv 2>/dev/null || echo "")
-        if [[ -n "$secret_check" ]]; then
-            vpass "API key secret exists in Key Vault"
-        else
-            vwarn "API key secret not found in Key Vault"
-        fi
-    else
-        vinfo "No Key Vault found (optional)"
-    fi
+    # --- 8i: API Key Delivery ---
+    echo -e "\n  ${BOLD}--- API Key Configuration ---${NC}" >&2
+    vinfo "API keys are entered on the Sentinel connector page at connect time"
+    vinfo "Sentinel → Data connectors → SpyCloud → Open connector page → Enter API keys → Connect"
 
     # --- 8j: Workbook ---
     echo -e "\n  ${BOLD}--- Workbook ---${NC}" >&2

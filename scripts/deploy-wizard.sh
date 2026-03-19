@@ -869,7 +869,6 @@ execute_deployment() {
             subscription=$SUBSCRIPTION \
             enableMdePlaybook=$DEPLOY_PLAYBOOKS \
             enableCaPlaybook=$DEPLOY_PLAYBOOKS \
-            enableKeyVault=true \
             enableAnalyticsRule=$DEPLOY_ANALYTICS \
             enableAutomationRule=$DEPLOY_ANALYTICS \
             enableAnalyticsRulesLibrary=$DEPLOY_ANALYTICS \
@@ -1033,9 +1032,6 @@ run_validation() {
 
     v_check "Data Collection Rule (dcr-spycloud-${WORKSPACE})" \
         az monitor data-collection rule show --name "dcr-spycloud-${WORKSPACE}" -g "$RESOURCE_GROUP"
-
-    v_check "Key Vault" \
-        az keyvault list -g "$RESOURCE_GROUP" --query "[0].name"
 
     if $DEPLOY_PLAYBOOKS; then
         v_check "MDE Remediation Playbook" \
