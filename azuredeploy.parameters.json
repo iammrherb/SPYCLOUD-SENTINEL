@@ -407,6 +407,39 @@
         },
         "capApiKey": {
             "value": ""
+        },
+        "enableEnrichmentPlaybooks": {
+            "value": true
+        },
+        "enableEnrichEmail": {
+            "value": true
+        },
+        "enableEnrichDomain": {
+            "value": true
+        },
+        "enableEnrichIP": {
+            "value": true
+        },
+        "enableEnrichUsername": {
+            "value": true
+        },
+        "enableEnrichCatalog": {
+            "value": true
+        },
+        "enableEnrichCompass": {
+            "value": false
+        },
+        "enableEnrichStolenCookies": {
+            "value": false
+        },
+        "enableEnrichInvestigation": {
+            "value": false
+        },
+        "enableFullInvestigation": {
+            "value": true
+        },
+        "enrichmentDailyLimit": {
+            "value": 200
         }
     }
 }
