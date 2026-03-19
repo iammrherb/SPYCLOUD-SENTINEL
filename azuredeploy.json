@@ -5331,7 +5331,7 @@
           "id": "SpyCloudIdentityIntelligence",
           "title": "SpyCloud Darknet Identity Threat Intelligence",
           "publisher": "SpyCloud",
-          "descriptionMarkdown": "**SpyCloud Darknet Identity Threat Intelligence**\n\nSpyCloud recaptures stolen credentials, session cookies, and infected device data from the criminal underground — hours after exposure, not weeks after disclosure.\n\n**This connector ingests identity threat intelligence across 15 custom tables:**\n\n**Core (Enterprise API — always active):**\n- **Breach Watchlist** (84 fields) — credential exposures with full PII and device forensics\n- **Breach Catalog** (29 fields) — breach metadata, malware families, targeted industries\n\n**Compass — Endpoint Threat Protection (requires Compass license):**\n- **Compass Data** (32 fields) — consumer identity exposures\n- **Compass Devices** (10 fields) — infected device inventory\n- **Compass Applications** (9 fields) — compromised application statistics\n\n**Advanced (requires separate licenses):**\n- **SIP Cookies** (22 fields) — stolen session cookies for MFA bypass detection\n- **Investigations** (84 fields) — full database access for threat hunting\n- **IdLink** (15 fields) — identity correlation across personas\n- **Exposure Stats** (12 fields) — domain exposure metrics\n- **CAP** (40 fields) — consumer compromised account data\n- **Data Partnership** (50 fields) — partner intelligence feeds\n\n**Also deployed:** Enrichment Audit table, MDE Response Logs, Conditional Access Logs.\n\nFor more information, visit [portal.spycloud.com](https://portal.spycloud.com) or contact [integrations@spycloud.com](mailto:integrations@spycloud.com).",
+          "descriptionMarkdown": "<img src=\"https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-white.png\" alt=\"SpyCloud\" width=\"200\"/>\n\n**Darknet Identity Breach Intelligence for Microsoft Sentinel**\n\nSpyCloud recaptures stolen credentials, session cookies, and infected device data from the criminal underground — hours after exposure, not weeks after disclosure.\n\n**This connector ingests identity threat intelligence across 15 custom tables:**\n\n**Core (Enterprise API — always active):**\n- **Breach Watchlist** (84 fields) — credential exposures with full PII and device forensics\n- **Breach Catalog** (29 fields) — breach metadata, malware families, targeted industries\n\n**Compass — Endpoint Threat Protection (requires Compass license):**\n- **Compass Data** (32 fields) — consumer identity exposures\n- **Compass Devices** (10 fields) — infected device inventory\n- **Compass Applications** (9 fields) — compromised application statistics\n\n**Advanced (requires separate licenses):**\n- **SIP Cookies** (22 fields) — stolen session cookies for MFA bypass detection\n- **Investigations** (84 fields) — full database access for threat hunting\n- **IdLink** (15 fields) — identity correlation across personas\n- **Exposure Stats** (12 fields) — domain exposure metrics and trends\n- **CAP** (40 fields) — consumer compromised account data\n- **Data Partnership** (50 fields) — partner intelligence feeds\n\n**Also deployed:** Enrichment Audit table, MDE Response Logs, Conditional Access Logs.\n\nFor more information, visit [portal.spycloud.com](https://portal.spycloud.com) or contact [integrations@spycloud.com](mailto:integrations@spycloud.com).",
           "graphQueriesTableName": "[variables('_logAnalyticsTableId1')]",
           "graphQueries": [
             {
@@ -6134,7 +6134,7 @@
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dataType": "[variables('_logAnalyticsTableId1')]",
                 "auth": {
                   "type": "APIKey",
@@ -6187,7 +6187,7 @@
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dataType": "[variables('_logAnalyticsTableId1')]",
                 "auth": {
                   "type": "APIKey",
@@ -6241,7 +6241,7 @@
               "location": "[variables('_effectiveWorkspaceLocation')]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dataType": "[variables('_logAnalyticsTableId2')]",
                 "auth": {
                   "type": "APIKey",
@@ -6291,7 +6291,7 @@
               "condition": "[greater(length(parameters('compassApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6342,7 +6342,7 @@
               "condition": "[greater(length(parameters('compassApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6393,7 +6393,7 @@
               "condition": "[greater(length(parameters('compassApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6444,7 +6444,7 @@
               "condition": "[greater(length(parameters('sipApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6494,7 +6494,7 @@
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudIdentityExposureConnector')]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6545,7 +6545,7 @@
               "condition": "[greater(length(parameters('investigationsApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6596,7 +6596,7 @@
               "condition": "[greater(length(parameters('idlinkApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6647,7 +6647,7 @@
               "condition": "[greater(length(parameters('dataPartnershipApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]",
@@ -6698,7 +6698,7 @@
               "condition": "[greater(length(parameters('exposureApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfigExt').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfigExt').dataCollectionRuleImmutableId]",
@@ -6749,7 +6749,7 @@
               "condition": "[greater(length(parameters('capApiKey')), 0)]",
               "kind": "RestApiPoller",
               "properties": {
-                "connectorDefinitionName": "SpyCloudCCF",
+                "connectorDefinitionName": "SpyCloudIdentityIntelligence",
                 "dcrConfig": {
                   "dataCollectionEndpoint": "[[parameters('dcrConfigExt').dataCollectionEndpoint]",
                   "dataCollectionRuleImmutableId": "[[parameters('dcrConfigExt').dataCollectionRuleImmutableId]",
