@@ -13322,11 +13322,14 @@
       "condition": "[parameters('enableAnalyticsRulesLibrary')]",
       "type": "object",
       "value": {
-        "totalRulesDeployed": 16,
+        "totalRulesDeployed": 38,
         "allDisabledByDefault": true,
-        "spycloudRules": 12,
+        "spycloudRules": 14,
         "idpCorrelationRules": 4,
-        "note": "ALL rules are deployed DISABLED. Review each rule's KQL logic, then enable individually in Sentinel \u2192 Analytics.",
+        "crossPlatformRules": 12,
+        "o365EntraRules": 4,
+        "uebaFirewallRules": 4,
+        "note": "ALL 38 rules are deployed DISABLED. Review each rule's KQL logic, then enable individually in Sentinel → Analytics. Additional 49 rules available in analytics-rules.json for manual import.",
         "idpNote": "Identity Provider correlation rules (Okta, Duo, Ping, Entra) require those IdP logs to be ingested into Sentinel first via their respective Content Hub connectors."
       }
     },
@@ -13453,13 +13456,20 @@
     "analyticsRulesInfo": {
       "type": "object",
       "value": {
-        "totalRules": 22,
+        "totalRules": 38,
         "allDisabledByDefault": true,
         "categories": {
-          "coreDetection": 12,
+          "coreDetection": 14,
           "idpCorrelation": 4,
-          "advancedCorrelation": 5,
+          "crossPlatformCorrelation": 12,
+          "o365EntraCorrelation": 4,
+          "uebaFirewallNetwork": 4,
           "healthMonitoring": 1
+        },
+        "additionalRulesAvailable": {
+          "file": "analytics-rules.json",
+          "totalRules": 49,
+          "note": "Extended rule library with UEBA, firewall, fusion, multi-stage, and MDE correlation rules for manual import"
         },
         "recommendedFirstEnable": [
           "Infostealer Exposure",

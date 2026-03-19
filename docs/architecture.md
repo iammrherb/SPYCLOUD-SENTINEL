@@ -1,4 +1,4 @@
-# SpyCloud Sentinel v8.0 -- Architecture & Quick Reference
+# SpyCloud Sentinel v11.0 -- Architecture & Quick Reference
 
 ## Deployment Architecture
 
@@ -14,12 +14,12 @@ graph TB
     end
 
     subgraph "Tier 1: Data Pipeline"
-        CCF["CCF Connector<br/>9 REST API Pollers"]
+        CCF["CCF Connector<br/>13 REST API Pollers"]
         DCE["Data Collection Endpoint"]
-        DCR["Data Collection Rule<br/>KQL Transforms"]
+        DCR["Data Collection Rule<br/>14 Stream KQL Transforms"]
     end
 
-    subgraph "Tier 2: Custom Tables"
+    subgraph "Tier 2: Custom Tables (14)"
         T1["SpyCloudBreachWatchlist_CL<br/>73 columns"]
         T2["SpyCloudBreachCatalog_CL<br/>13 columns"]
         T3["SpyCloudCompassData_CL<br/>29 columns"]
@@ -30,6 +30,10 @@ graph TB
         T8["SpyCloudSipCookies_CL"]
         T9["SpyCloudIdentityExposure_CL"]
         T10["SpyCloudInvestigations_CL"]
+        T11["SpyCloudIdLink_CL"]
+        T12["SpyCloudDataPartnership_CL"]
+        T13["SpyCloudExposure_CL"]
+        T14["SpyCloudCAP_CL"]
     end
 
     subgraph "Tier 3: Detection & Hunting"
@@ -44,20 +48,19 @@ graph TB
     end
 
     subgraph "Tier 5: Visualization & Intelligence"
-        WB["3 Workbooks<br/>Executive | SOC | Threat Intel"]
+        WB["4 Workbooks<br/>Executive | SOC | Threat Intel | Defender/CA"]
         NB["3 Notebooks<br/>Triage | Hunting | Landscape"]
         WL["4 Watchlists<br/>VIP | IOC | Domains | Assets"]
     end
 
     subgraph "Tier 6: Security Copilot"
-        KQL["KQL Plugin<br/>90 Skills"]
-        APIP["API Plugin<br/>20 Skills"]
-        AGENT["Investigation Agent<br/>17 Sub-Agents + 6 GPT-4o + 35 KQL"]
+        KQL["KQL Plugin<br/>138 Skills"]
+        AGENT["Investigation Agent<br/>129 Skills + GPT-4.1 Analysis"]
     end
 
     API1 & API2 & API3 & API4 & API5 & API6 --> CCF
     CCF --> DCE --> DCR
-    DCR --> T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8 & T9 & T10
+    DCR --> T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8 & T9 & T10 & T11 & T12 & T13 & T14
     T1 & T2 & T3 & T4 --> RULES & HUNT
     RULES --> FUSION
     RULES --> AUTO --> PB
@@ -65,23 +68,22 @@ graph TB
     T1 & T2 & T3 --> WB & NB
     T1 --> WL
     T1 & T2 & T3 & T4 & T5 & T6 --> KQL & AGENT
-    API1 & API2 & API3 & API4 & API5 & API6 --> APIP
 ```
 
 ## What Gets Deployed
 
 | Tier | Components | Count | Default |
 |------|-----------|-------|---------|
-| **Foundation** | Workspace, Sentinel, DCE, DCR, 10 Custom Tables, CCF Connector (9 pollers), Content Package | 14 | Always |
-| **Detection** | Analytics Rules (Core, O365, UEBA, Advanced, MSIC, Fusion, NRT) | 49 | All ON |
-| **Playbooks** | Identity, Device, Network, Notification, Enrichment, Orchestration | 10 | All ON |
-| **Dashboards** | Executive Dashboard, SOC Operations, Threat Intel | 3 | All ON |
-| **Investigation** | Hunting Queries, Jupyter Notebooks | 31 | All ON |
+| **Foundation** | Workspace, Sentinel, DCE, DCR, 14 Custom Tables, CCF Connector (13 pollers), Content Package | 18 | Always |
+| **Detection** | Analytics Rules (Core, IdP, Cross-Platform, O365, UEBA, Firewall, Fusion, NRT) | 38 embedded + 49 extended | All ON |
+| **Playbooks** | Identity, Device, Network, Notification, Enrichment (VT/AbuseIPDB/GreyNoise) | 5 in ARM + 19 standalone | Toggled |
+| **Dashboards** | Executive Dashboard, SOC Operations, Threat Intel, Defender/CA Response | 4 + 13 templates | All ON |
+| **Investigation** | Hunting Queries, Jupyter Notebooks | 28 + 3 | All ON |
 | **Watchlists** | VIP/Executive, IOC Blocklist, Approved Domains, High-Value Assets | 4 | All ON |
-| **Copilot** | KQL Plugin (90), API Plugin (20), Investigation Agent (58) | 168 skills | All ON |
+| **Copilot** | KQL Plugin (138 skills), Investigation Agent (129 skills + GPT-4.1) | 267 skills | Upload separately |
 | **Platform** | UEBA, Anomaly Detection, Fusion ML, MSIC Rules | 4 | All ON |
 
-## 10 Custom Tables
+## 14 Custom Tables
 
 | Table | Columns | Source | Description |
 |-------|---------|--------|-------------|
@@ -93,35 +95,41 @@ graph TB
 | `SpyCloudSipCookies_CL` | -- | SIP API | Stolen session cookies and token data |
 | `SpyCloudIdentityExposure_CL` | -- | Identity API | Aggregated identity exposure profiles |
 | `SpyCloudInvestigations_CL` | -- | Investigations API | Full database investigation records |
+| `SpyCloudIdLink_CL` | -- | IdLink API | Identity correlation and linking records |
+| `SpyCloudDataPartnership_CL` | -- | Data Partnership API | Partner data sharing records |
+| `SpyCloudExposure_CL` | -- | Exposure API | Domain-level exposure statistics |
+| `SpyCloudCAP_CL` | -- | CAP API | Compromised Account Protection records |
 | `SpyCloud_ConditionalAccessLogs_CL` | 14 | Playbook output | Identity remediation audit trail |
 | `Spycloud_MDE_Logs_CL` | 19 | Playbook output | MDE device isolation and tagging audit trail |
 
 ## Data Flow
 
 ```
-SpyCloud APIs (6 endpoints)
+SpyCloud APIs (9 endpoint families)
     | X-API-Key header auth
     v
-CCF REST API Pollers (9 independent pollers)
+CCF REST API Pollers (13 independent pollers)
     | HTTPS POST
     v
 Data Collection Endpoint (DCE)
     | Routing
     v
-Data Collection Rule (DCR) -- KQL transforms
+Data Collection Rule (DCR) -- 14 stream KQL transforms
     | Normalized & routed
     v
-10 Custom Tables in Log Analytics
+14 Custom Tables in Log Analytics
     | Correlated with SigninLogs, AuditLogs, UEBA, Firewalls, DNS,
     | DeviceInfo, IdentityLogonEvents, CloudAppEvents, IntuneDevices
     v
-49 Analytics Rules --> Sentinel Incidents
+38 Analytics Rules (ARM) + 49 Extended Rules --> Sentinel Incidents
     | Automation Rules
     v
-10 Playbooks --> Password Reset, Session Revocation, MFA Enforcement,
-                 CA Blocking, Firewall Blocking, Device Isolation,
-                 User Notify, SOC Notify, Incident Enrichment,
-                 Full Remediation Orchestration
+5 Playbooks (ARM) + 19 Standalone -->
+    Password Reset, Session Revocation, MFA Enforcement,
+    CA Blocking, Firewall Blocking, Device Isolation,
+    User Notify, SOC Notify, Incident Enrichment,
+    TI Enrichment (VirusTotal/AbuseIPDB/GreyNoise),
+    Full Remediation Orchestration, Jira/ServiceNow/DevOps
 ```
 
 ## Authentication
@@ -135,19 +143,23 @@ Data Collection Rule (DCR) -- KQL transforms
 | **Copilot Agent** | None (Sentinel RBAC) | Same workspace settings as KQL Plugin; optional SpyCloudApiKey for API Plugin integration |
 | **Playbooks** | Managed Identity | System-assigned managed identity with Graph API and MDE API permissions |
 
-## API Endpoints
+## API Endpoints & Pollers (13)
 
 | API | Endpoint | Table | Tier |
 |-----|----------|-------|------|
 | Enterprise | `/enterprise-v2/breach/data/watchlist` (new) | SpyCloudBreachWatchlist_CL | Enterprise |
-| Enterprise | `/enterprise-v2/breach/data/watchlist` (modified) | SpyCloudBreachWatchlist_CL | Enterprise |
+| Enterprise | `/enterprise-v2/breach/data/watchlist` (modified, 1440min) | SpyCloudBreachWatchlist_CL | Enterprise |
 | Catalog | `/enterprise-v2/breach/catalog` | SpyCloudBreachCatalog_CL | Enterprise |
 | Compass | `/enterprise-v2/compass/data` | SpyCloudCompassData_CL | Enterprise+ |
 | Compass | `/enterprise-v2/compass/devices` | SpyCloudCompassDevices_CL | Enterprise+ |
-| SIP | `/sip/breach/data/cookies` | SpyCloudSipCookies_CL | SIP |
-| Identity | `/identity/exposure` | SpyCloudIdentityExposure_CL | Enterprise |
-| Investigations | `/investigations/data` | SpyCloudInvestigations_CL | Investigations |
-| Enterprise | (playbook output) | SpyCloud_ConditionalAccessLogs_CL | -- |
+| Compass | `/enterprise-v2/compass/applications` | SpyCloudCompassApplications_CL | Enterprise+ |
+| SIP | `/enterprise-v2/sip/cookies/domains/{domain}` | SpyCloudSipCookies_CL | SIP |
+| Identity | `/enterprise-v2/watchlist/identifiers` | SpyCloudIdentityExposure_CL | Enterprise |
+| Investigations | `/investigations-v2/records/domains/{domain}` | SpyCloudInvestigations_CL | Investigations |
+| IdLink | `/idlink/records/emails/{domain}` | SpyCloudIdLink_CL | IdLink |
+| Data Partnership | `/data-partnership/records/domains/{domain}` | SpyCloudDataPartnership_CL | Data Partnership |
+| Exposure | `/exposure/stats/domains/{domain}` | SpyCloudExposure_CL | Enterprise |
+| CAP | `/cap/records/domains/{domain}` | SpyCloudCAP_CL | CAP |
 
 ## Severity Levels
 
@@ -227,11 +239,10 @@ Run `scripts/post-deploy-auto.sh` to automatically:
 
 | Plugin | Skills | Auth | Purpose |
 |--------|--------|------|---------|
-| **KQL Plugin** | 90 | Sentinel RBAC | Query all SpyCloud tables via natural language KQL |
-| **API Plugin** | 20 | X-API-Key | Real-time SpyCloud API lookups across 6 APIs |
-| **Investigation Agent** | 58 (17 sub-agents + 6 GPT-4o + 35 KQL) | Sentinel RBAC | Autonomous multi-step investigation with SENTINEL persona |
-| **Total** | **168** | -- | -- |
+| **KQL Plugin** | 138 | Sentinel RBAC | Query all 14 SpyCloud tables via natural language KQL |
+| **Investigation Agent** | 129 + GPT-4.1 analysis | Sentinel RBAC | Autonomous multi-step investigation with structured reporting |
+| **Total** | **267** | -- | -- |
 
 ---
 
-*SpyCloud Sentinel v8.0.0 -- Darknet & Identity Threat Exposure Intelligence*
+*SpyCloud Sentinel v11.0.0 -- Darknet & Identity Threat Exposure Intelligence*
