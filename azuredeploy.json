@@ -4702,7 +4702,7 @@
             "destinations": [
               "scWorkspace"
             ],
-            "transformKql": "source | extend TimeGenerated = now() | extend corporate_record_count = toint(corporate_record_count) | extend infected_employee_record_count = toint(infected_employee_record_count) | extend infected_consumer_record_count = toint(infected_consumer_record_count) | extend infected_user_record_count = toint(infected_user_record_count) | extend identifier_status = tostring(status)",
+            "transformKql": "source | extend TimeGenerated = now() | extend corporate_record_count = toint(corporate_record_count) | extend infected_employee_record_count = toint(infected_employee_record_count) | extend infected_consumer_record_count = toint(infected_consumer_record_count) | extend infected_user_record_count = toint(infected_user_record_count)",
             "outputStream": "Custom-SpyCloudIdentityExposure_CL"
           },
           {
@@ -5153,7 +5153,7 @@
         "contentProductId": "[variables('_solutioncontentProductId')]",
         "displayName": "[variables('_solutionName')]",
         "publisherDisplayName": "SpyCloud",
-        "descriptionHtml": "SpyCloud Sentinel Supreme \u2014 Darknet identity threat intelligence, automated remediation, and Security Copilot integration for Microsoft Sentinel.",
+        "descriptionHtml": "SpyCloud Sentinel Supreme \u2014 Darknet identity threat intelligence with automated remediation for Microsoft Sentinel.",
         "description": "SpyCloud Holistic Identity Exposure Intelligence for Microsoft Sentinel. Automated detection and remediation of compromised credentials, stolen cookies, and infected devices."
       },
       "dependsOn": [
@@ -5220,7 +5220,7 @@
         "packageKind": "Solution",
         "packageVersion": "[variables('_solutionVersion')]",
         "packageName": "[variables('_solutionName')]",
-        "contentProductId": "[concat(substring(variables('_solutionId'), 0, 50),'-','dc','-', uniqueString(concat(variables('_solutionId'),'-','DataConnector','-',variables('_dataConnectorContentIdConnectorDefinition'),'-', variables('dataConnectorVersionConnectorDefinition'))))]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','dc','-', uniqueString(concat(variables('_solutionId'),'-','DataConnector','-',variables('_dataConnectorContentIdConnectorDefinition'),'-', variables('dataConnectorVersionConnectorDefinition'))))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
         "version": "[variables('_solutionVersion')]"
@@ -6810,7 +6810,7 @@
         "packageKind": "Solution",
         "packageVersion": "[variables('_solutionVersion')]",
         "packageName": "[variables('_solutionName')]",
-        "contentProductId": "[concat(substring(variables('_solutionId'), 0, 50),'-','rdc','-', uniqueString(concat(variables('_solutionId'),'-','ResourcesDataConnector','-',variables('_dataConnectorContentIdConnections'),'-', variables('dataConnectorVersionConnections'))))]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','rdc','-', uniqueString(concat(variables('_solutionId'),'-','ResourcesDataConnector','-',variables('_dataConnectorContentIdConnections'),'-', variables('dataConnectorVersionConnections'))))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
         "version": "[variables('_solutionVersion')]"
@@ -8272,7 +8272,7 @@
                 "displayName": "SpyCloud \u2014 Device Re-Infection Detected",
                 "description": "Detects when the same infected_machine_id appears in new SpyCloud exposure records after a previous remediation was logged in the MDE table. Indicates the device was re-compromised after initial remediation, suggesting incomplete cleanup or persistent malware.",
                 "severity": "High",
-                "query": "let remediated_devices = Spycloud_MDE_Logs_CL | extend _IsolationStatus = column_ifexists(\"IsolationStatus\", ActionStatus) | where _IsolationStatus == true or ActionStatus == \"Succeeded\" | distinct InfectedMachineId;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where infected_machine_id in (remediated_devices)\n| summarize NewExposures = count(), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, email\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = email",
+                "query": "let remediated_devices = Spycloud_MDE_Logs_CL | extend _IsolationStatus = ActionStatus | where _IsolationStatus == true or ActionStatus == \"Succeeded\" | distinct InfectedMachineId;\nSpyCloudBreachWatchlist_CL\n| where severity >= 20\n| where infected_machine_id in (remediated_devices)\n| summarize NewExposures = count(), LatestExposure = max(TimeGenerated) by infected_machine_id, user_hostname, email\n| extend HostCustomEntity = user_hostname, AccountCustomEntity = email",
                 "queryFrequency": "[parameters('analyticsRuleFrequency')]",
                 "queryPeriod": "PT24H",
                 "triggerOperator": "GreaterThan",

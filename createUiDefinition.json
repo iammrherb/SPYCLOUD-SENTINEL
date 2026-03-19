@@ -481,40 +481,6 @@
                 "visible": "[steps('dataConnector').sectionApiConfig.enableCapProduct]"
               },
               {
-                "name": "separatorLineOpenAI",
-                "type": "Microsoft.Common.InfoBox",
-                "visible": true,
-                "options": {
-                  "icon": "None",
-                  "text": "\u2500\u2500 Optional: OpenAI Integration \u2500\u2500"
-                }
-              },
-              {
-                "name": "enableOpenAIIntegration",
-                "type": "Microsoft.Common.CheckBox",
-                "label": "OpenAI GPT-4o Integration \u2014 Advanced AI-powered analysis for executive reports, threat narratives, and compliance assessments.",
-                "toolTip": "Enable to use GPT-4o AI analysis skills in Security Copilot agent. Requires an OpenAI API key.",
-                "defaultValue": false
-              },
-              {
-                "name": "openAIApiKey",
-                "type": "Microsoft.Common.PasswordBox",
-                "label": {
-                  "password": "OpenAI API Key",
-                  "confirmPassword": "Confirm OpenAI API Key"
-                },
-                "toolTip": "Your OpenAI API key from platform.openai.com/api-keys. Powers GPT-4o analysis skills for executive summaries, threat narratives, and compliance reporting.",
-                "constraints": {
-                  "required": true,
-                  "regex": "^sk-.{20,}$",
-                  "validationMessage": "OpenAI API key must start with 'sk-' and be at least 23 characters."
-                },
-                "options": {
-                  "hideConfirmation": false
-                },
-                "visible": "[steps('dataConnector').sectionApiConfig.enableOpenAIIntegration]"
-              },
-              {
                 "name": "separatorLine2",
                 "type": "Microsoft.Common.InfoBox",
                 "visible": true,
@@ -1684,8 +1650,6 @@
       "exposureApiKey": "[if(steps('dataConnector').sectionApiConfig.enableExposureProduct, steps('dataConnector').sectionApiConfig.exposureProductApiKey, '')]",
       "capApiKey": "[if(steps('dataConnector').sectionApiConfig.enableCapProduct, steps('dataConnector').sectionApiConfig.capProductApiKey, '')]",
       "monitoredDomain": "[steps('dataConnector').sectionApiConfig.monitoredDomain]",
-      "openAIApiKey": "[if(steps('dataConnector').sectionApiConfig.enableOpenAIIntegration, steps('dataConnector').sectionApiConfig.openAIApiKey, '')]",
-      "enableOpenAIIntegration": "[steps('dataConnector').sectionApiConfig.enableOpenAIIntegration]",
       "pollingInterval": "[steps('dataConnector').sectionApiConfig.pollingInterval]",
       "dataCollectionEndpointName": "[steps('dataConnector').sectionDataCollection.dceName]",
       "dataCollectionRuleName": "[steps('dataConnector').sectionDataCollection.dcrName]",
