@@ -1348,7 +1348,7 @@
         "description": "[concat('SpyCloud Threat Intelligence data ingestion endpoint for Sentinel workspace: ', parameters('workspace'), ' in region: ', variables('_effectiveWorkspaceLocation'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ]
     },
     {
@@ -1433,7 +1433,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1503,7 +1503,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1561,7 +1561,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1615,7 +1615,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1761,7 +1761,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1911,7 +1911,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1973,7 +1973,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2327,14 +2327,13 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
       "apiVersion": "2022-10-01",
-      "condition": "[parameters('enableIdLink')]",
       "name": "[concat(parameters('workspace'), '/SpyCloudIdLink_CL')]",
       "properties": {
         "schema": {
@@ -2462,14 +2461,13 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
       "apiVersion": "2022-10-01",
-      "condition": "[parameters('enableDataPartnership')]",
       "name": "[concat(parameters('workspace'), '/SpyCloudDataPartnership_CL')]",
       "properties": {
         "schema": {
@@ -2597,14 +2595,13 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
       "apiVersion": "2022-10-01",
-      "condition": "[parameters('enableExposure')]",
       "name": "[concat(parameters('workspace'), '/SpyCloudExposure_CL')]",
       "properties": {
         "schema": {
@@ -2700,14 +2697,13 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/tables",
       "apiVersion": "2022-10-01",
-      "condition": "[parameters('enableCAP')]",
       "name": "[concat(parameters('workspace'), '/SpyCloudCAP_CL')]",
       "properties": {
         "schema": {
@@ -2783,7 +2779,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2917,7 +2913,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -3271,7 +3267,7 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -4836,7 +4832,7 @@
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
         "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
@@ -5198,7 +5194,7 @@
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
         "[resourceId('Microsoft.Insights/dataCollectionEndpoints', parameters('dataCollectionEndpointName'))]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudExposure_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCAP_CL')]",
@@ -7002,7 +6998,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
       ]
     },
     {
@@ -13141,7 +13137,9 @@
         "type": "SystemAssigned"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "properties": {
         "state": "Enabled",
@@ -13719,8 +13717,9 @@
       "type": "Microsoft.OperationalInsights/workspaces/tables",
       "apiVersion": "2022-10-01",
       "name": "[concat(parameters('workspace'), '/SpyCloudEnrichmentAudit_CL')]",
-      "condition": "[parameters('enableEnrichmentPlaybooks')]",
-      "dependsOn": [],
+      "dependsOn": [
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+      ],
       "properties": {
         "schema": {
           "name": "SpyCloudEnrichmentAudit_CL",
@@ -13839,7 +13838,8 @@
       "condition": "[and(parameters('enableEnrichEmail'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
@@ -14095,7 +14095,8 @@
       "condition": "[and(parameters('enableEnrichDomain'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
@@ -14351,7 +14352,8 @@
       "condition": "[and(parameters('enableEnrichIP'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
@@ -14607,7 +14609,8 @@
       "condition": "[and(parameters('enableEnrichUsername'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
@@ -14863,7 +14866,8 @@
       "condition": "[and(parameters('enableEnrichCatalog'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
@@ -14987,7 +14991,7 @@
                   "type": "Http",
                   "inputs": {
                     "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/breach/catalog/@{items('For_Each_SourceId')}",
+                    "uri": "https://api.spycloud.io/enterprise-v2/breach/catalog/@{items('For_Each_Entity')?['Name']}",
                     "headers": {
                       "X-API-Key": "[parameters('apiKey')]",
                       "Accept": "application/json"
@@ -15119,7 +15123,8 @@
       "condition": "[and(parameters('enableEnrichCompass'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
@@ -15375,7 +15380,8 @@
       "condition": "[and(parameters('enableEnrichStolenCookies'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
@@ -15631,7 +15637,8 @@
       "condition": "[and(parameters('enableEnrichInvestigation'), parameters('enableEnrichmentPlaybooks'))]",
       "dependsOn": [
         "[variables('spycloudConnectionId')]",
-        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]"
+        "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
       "tags": "[variables('allTags')]",
       "identity": {
