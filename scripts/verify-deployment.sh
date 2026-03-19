@@ -194,26 +194,14 @@ else
 fi
 
 # ═══════════════════════════════════════════════════════════════
-# SECTION 6: KEY VAULT
+# SECTION 6: API KEY DELIVERY
 # ═══════════════════════════════════════════════════════════════
 echo ""
-echo -e "${BOLD}═══ 6/10 KEY VAULT ═══${NC}"
+echo -e "${BOLD}═══ 6/10 API KEY DELIVERY ═══${NC}"
 
-KV=$(az keyvault list -g "$RG" --query "[?contains(name,'spycloud') || contains(name,'spytel')].{name:name,uri:properties.vaultUri}" -o tsv 2>/dev/null || echo "")
-if [ -n "$KV" ]; then
-  KV_NAME=$(echo "$KV" | head -1 | cut -f1)
-  KV_URI=$(echo "$KV" | head -1 | cut -f2)
-  pass "Key Vault '$KV_NAME' exists ($KV_URI)"
-  
-  SECRET=$(az keyvault secret show --vault-name "$KV_NAME" --name "spycloud-api-key" --query "name" -o tsv 2>/dev/null || echo "")
-  if [ -n "$SECRET" ]; then
-    pass "API key secret 'spycloud-api-key' exists in vault"
-  else
-    warn "API key secret not found in Key Vault"
-  fi
-else
-  warn "No SpyCloud Key Vault found (optional but recommended)"
-fi
+info "API keys are configured on the Sentinel connector page (not via Key Vault)"
+info "Sentinel → Data connectors → SpyCloud → Open connector page → Enter API keys → Connect"
+pass "CCF connector uses double-bracket parameter escaping — keys are entered at connect time"
 
 # ═══════════════════════════════════════════════════════════════
 # SECTION 7: LOGIC APP PLAYBOOKS

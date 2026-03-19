@@ -1138,7 +1138,6 @@
     "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb",
     "sentinelResponderRoleId": "3e150fc0-dc56-4d73-b22a-05e7c05ab4b7",
     "sentinelAutomationContributorRoleId": "f4c81013-99ee-4d62-a7ee-b3f1f648599a",
-    "spycloudApiKeySecretName": "spycloud-api-key",
     "actionGroupName": "[concat('ag-spycloud-', take(parameters('workspace'), 30))]",
     "healthAlertName": "[concat('SpyCloud-DataHealth-', take(parameters('workspace'), 30))]",
     "rulesPrefix": "SpyCloud-Rule-",
@@ -13293,11 +13292,9 @@
         "step2_graph_permissions": "REQUIRED (if CA playbook enabled): Assign User.ReadWrite.All + Directory.ReadWrite.All to the CA Logic App managed identity via PowerShell",
         "step3_sentinel_automation": "REQUIRED (if automation rule enabled): Assign 'Microsoft Sentinel Automation Contributor' to the Sentinel service principal",
         "step4_monitoring_publisher": "REQUIRED (if playbooks enabled): Assign 'Monitoring Metrics Publisher' on the DCR to both Logic App identities",
-        "step5_key_vault_access": "OPTIONAL: If using Key Vault with Logic Apps, assign Key Vault Secrets User role to Logic App identities",
-        "step6_defender_xdr": "OPTIONAL: Enable Microsoft Defender XDR connector via Sentinel \u2192 Content Hub",
-        "step7_copilot_kql_plugin": "OPTIONAL: Upload copilot/SpyCloud_Plugin.yaml to Security Copilot > Sources > Custom (120+ KQL skills, no API key needed)",
-        "step8_copilot_api_plugin": "OPTIONAL: Upload copilot/SpyCloud_API_Plugin.yaml to Security Copilot > Sources > Custom (35+ API skills, requires SpyCloud API key)",
-        "step9_copilot_agent": "OPTIONAL: Upload copilot/SpyCloud_Agent.yaml to Security Copilot > Sources > Custom (23 sub-agents, 12 AI skills, 65 KQL skills)",
+        "step5_defender_xdr": "OPTIONAL: Enable Microsoft Defender XDR connector via Sentinel \u2192 Content Hub",
+        "step6_copilot_plugin": "OPTIONAL: Upload copilot/SpyCloud_Plugin.yaml to Security Copilot \u2192 Sources \u2192 Custom (138 KQL skills)",
+        "step7_copilot_agent": "OPTIONAL: Upload copilot/SpyCloud_Agent.yaml to Security Copilot \u2192 Build \u2192 Upload YAML (129 skills + GPT-4.1 analysis)",
         "step0_dcr_dce": "REQUIRED (if playbooks enabled): Get the DCE Logs Ingestion URI and both DCR Immutable IDs (primary dcr-ccf-* and extended dcr-ccf-ext-*). Go to Azure Portal > Monitor > Data Collection Endpoints > copy Logs Ingestion URI. Then Monitor > Data Collection Rules > JSON View > copy immutableId for both DCRs. Update the Logic App parameters with these values, or redeploy the template with them filled in."
       }
     },
@@ -13322,11 +13319,14 @@
       "condition": "[parameters('enableAnalyticsRulesLibrary')]",
       "type": "object",
       "value": {
-        "totalRulesDeployed": 16,
+        "totalRulesDeployed": 38,
         "allDisabledByDefault": true,
-        "spycloudRules": 12,
+        "spycloudRules": 14,
         "idpCorrelationRules": 4,
-        "note": "ALL rules are deployed DISABLED. Review each rule's KQL logic, then enable individually in Sentinel \u2192 Analytics.",
+        "crossPlatformRules": 12,
+        "o365EntraRules": 4,
+        "uebaFirewallRules": 4,
+        "note": "ALL 38 rules are deployed DISABLED. Review each rule's KQL logic, then enable individually in Sentinel → Analytics. Additional 49 rules available in analytics-rules.json for manual import.",
         "idpNote": "Identity Provider correlation rules (Okta, Duo, Ping, Entra) require those IdP logs to be ingested into Sentinel first via their respective Content Hub connectors."
       }
     },
@@ -13453,13 +13453,20 @@
     "analyticsRulesInfo": {
       "type": "object",
       "value": {
-        "totalRules": 22,
+        "totalRules": 38,
         "allDisabledByDefault": true,
         "categories": {
-          "coreDetection": 12,
+          "coreDetection": 14,
           "idpCorrelation": 4,
-          "advancedCorrelation": 5,
+          "crossPlatformCorrelation": 12,
+          "o365EntraCorrelation": 4,
+          "uebaFirewallNetwork": 4,
           "healthMonitoring": 1
+        },
+        "additionalRulesAvailable": {
+          "file": "analytics-rules.json",
+          "totalRules": 49,
+          "note": "Extended rule library with UEBA, firewall, fusion, multi-stage, and MDE correlation rules for manual import"
         },
         "recommendedFirstEnable": [
           "Infostealer Exposure",

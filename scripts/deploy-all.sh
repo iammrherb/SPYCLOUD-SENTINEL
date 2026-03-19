@@ -62,7 +62,7 @@ echo ""
 
 # ─── Parse Arguments ──────────────────────────────────────────────────────────
 RG="";WS="";KEY="";LOC=""
-ENABLE_MDE=true;ENABLE_CA=true;ENABLE_KV=true
+ENABLE_MDE=true;ENABLE_CA=true
 ENABLE_RULES=false;ENABLE_NOTIFY=false;EMAIL=""
 INTERACTIVE=true;TEMPLATE_URL=""
 
@@ -76,7 +76,6 @@ while [[ $# -gt 0 ]]; do
     --enable-notify)ENABLE_NOTIFY=true;shift;;
     --disable-mde)ENABLE_MDE=false;shift;;
     --disable-ca)ENABLE_CA=false;shift;;
-    --disable-kv)ENABLE_KV=false;shift;;
     --email)EMAIL="$2";shift 2;;
     --template)TEMPLATE_URL="$2";shift 2;;
     --non-interactive)INTERACTIVE=false;shift;;
@@ -94,7 +93,6 @@ while [[ $# -gt 0 ]]; do
       echo "    --enable-notify        Enable email/Teams notifications"
       echo "    --disable-mde          Skip MDE playbook"
       echo "    --disable-ca           Skip CA playbook"
-      echo "    --disable-kv           Skip Key Vault"
       echo "    --email EMAIL          Notification email address"
       echo "    --template URL         Custom ARM template URL"
       echo "    --non-interactive      Skip all prompts (requires -g -w -k)"
@@ -233,10 +231,7 @@ read -rp "   Enable MDE device isolation playbook? [Y/n]: " ans
 read -rp "   Enable CA identity protection playbook? [Y/n]: " ans
 [[ "$ans" =~ ^[Nn] ]] && ENABLE_CA=false
 
-read -rp "   Enable Azure Key Vault for API key? [Y/n]: " ans
-[[ "$ans" =~ ^[Nn] ]] && ENABLE_KV=false
-
-read -rp "   Deploy full analytics rules library (17 rules, all disabled)? [y/N]: " ans
+read -rp "   Deploy full analytics rules library (38 rules, all disabled)? [y/N]: " ans
 [[ "$ans" =~ ^[Yy] ]] && ENABLE_RULES=true
 
 read -rp "   Enable email/Teams notifications? [y/N]: " ans
@@ -256,7 +251,6 @@ echo -e "${TEAL}│${NC}  Region:            ${BOLD}${LOC}${NC}"
 echo -e "${TEAL}│${NC}  API Key:           ${BOLD}${KEY:0:8}...${NC}"
 echo -e "${TEAL}│${NC}  MDE Playbook:      ${BOLD}${ENABLE_MDE}${NC}"
 echo -e "${TEAL}│${NC}  CA Playbook:       ${BOLD}${ENABLE_CA}${NC}"
-echo -e "${TEAL}│${NC}  Key Vault:         ${BOLD}${ENABLE_KV}${NC}"
 echo -e "${TEAL}│${NC}  Rules Library:     ${BOLD}${ENABLE_RULES}${NC}"
 echo -e "${TEAL}│${NC}  Notifications:     ${BOLD}${ENABLE_NOTIFY}${NC}"
 echo -e "${TEAL}└──────────────────────────────────────────────┘${NC}"
@@ -271,7 +265,7 @@ else
     ok "RG=${RG} WS=${WS} LOC=${LOC}"
 fi
 
-debug "Config: RG=$RG WS=$WS LOC=$LOC MDE=$ENABLE_MDE CA=$ENABLE_CA KV=$ENABLE_KV RULES=$ENABLE_RULES"
+debug "Config: RG=$RG WS=$WS LOC=$LOC MDE=$ENABLE_MDE CA=$ENABLE_CA RULES=$ENABLE_RULES"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PHASE 3: Resource Group
@@ -309,7 +303,6 @@ DEPLOY_CMD="az deployment group create \
     subscription=$SUBID \
     enableMdePlaybook=$ENABLE_MDE \
     enableCaPlaybook=$ENABLE_CA \
-    enableKeyVault=$ENABLE_KV \
     enableAnalyticsRule=true \
     enableAutomationRule=true \
     enableAnalyticsRulesLibrary=$ENABLE_RULES \
@@ -479,7 +472,6 @@ echo -e "${TEAL}├────────────────────�
 verify "Log Analytics Workspace" az monitor log-analytics workspace show --workspace-name "$WS" -g "$RG"
 [[ -n "$DCE_URI" ]] && echo -e "  ${GREEN}✅${NC} Data Collection Endpoint" || echo -e "  ${RED}❌${NC} Data Collection Endpoint"
 [[ -n "$DCR_ID" ]]  && echo -e "  ${GREEN}✅${NC} Data Collection Rule" || echo -e "  ${YELLOW}⚠️${NC}  Data Collection Rule (may still be deploying)"
-verify "Key Vault" az keyvault list -g "$RG" --query "[0].name"
 verify "MDE Logic App ($MDE_PB)" az logic workflow show --name "$MDE_PB" -g "$RG"
 verify "CA Logic App ($CA_PB)" az logic workflow show --name "$CA_PB" -g "$RG"
 echo -e "${TEAL}└──────────────────────────────────────────────────────────┘${NC}"

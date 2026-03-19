@@ -143,7 +143,6 @@ verify(){ local n="$1";local c="$2"; $c &>/dev/null && echo "║  ✅ $n" || ech
 verify "Workspace: ${WS}" "az monitor log-analytics workspace show --workspace-name ${WS} -g ${RG}"
 [[ -n "$DCE_URI" ]] && echo "║  ✅ DCE: ${DCE_URI}" || echo "║  ❌ DCE not resolved"
 [[ -n "$DCR_ID" ]]  && echo "║  ✅ DCR: ${DCR_ID}" || echo "║  ❌ DCR not resolved"
-verify "Key Vault" "az keyvault list -g ${RG} --query [0].name"
 verify "MDE Playbook" "az logic workflow show --name ${MDE_PB} -g ${RG}"
 verify "CA Playbook" "az logic workflow show --name ${CA_PB} -g ${RG}"
 echo "╠══════════════════════════════════════════════════════════╣"
