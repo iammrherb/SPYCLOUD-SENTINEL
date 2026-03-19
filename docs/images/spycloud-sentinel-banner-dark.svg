@@ -41,7 +41,7 @@
   <rect x="130" y="82" width="52" height="20" rx="10" fill="#00D4AA" opacity="0.15"/>
   <text x="140" y="96" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
         font-size="10" font-weight="600" fill="#00D4AA">
-    v10.0
+    v11.0
   </text>
   <!-- Accent line bottom -->
   <rect x="100" y="118" width="600" height="2" fill="url(#accentLine)" rx="1"/>

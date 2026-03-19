@@ -1,12 +1,16 @@
 <div align="center">
 
-<img src="docs/images/SpyCloud_wordmark-black.png" alt="SpyCloud" width="400"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/spycloud-wordmark-white.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/images/spycloud-wordmark-black.png">
+  <img src="docs/images/spycloud-wordmark-white.png" alt="SpyCloud" width="400"/>
+</picture>
 
 <br><br>
 
-# SpyCloud Holistic Identity Exposure Intelligence
+# SpyCloud Sentinel Supreme
 
-### Sentinel Connector for Recaptured Darknet Identity Intelligence
+### Darknet Identity Threat Intelligence for Microsoft Sentinel
 
 **Recaptured credentials. Stolen cookies. Infected devices.**
 **Detected in minutes — remediated automatically.**
