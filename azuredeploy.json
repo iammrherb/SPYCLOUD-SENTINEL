@@ -5248,7 +5248,8 @@
         "displayName": "[variables('_solutionName')]",
         "publisherDisplayName": "SpyCloud",
         "descriptionHtml": "SpyCloud Sentinel Supreme — Darknet identity threat intelligence with automated remediation for Microsoft Sentinel.",
-        "description": "SpyCloud Holistic Identity Exposure Intelligence for Microsoft Sentinel. Automated detection and remediation of compromised credentials, stolen cookies, and infected devices."
+        "description": "SpyCloud Holistic Identity Exposure Intelligence for Microsoft Sentinel. Automated detection and remediation of compromised credentials, stolen cookies, and infected devices.",
+        "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
@@ -5287,7 +5288,8 @@
                 "source": {
                   "sourceId": "[variables('_solutionId')]",
                   "name": "[variables('_solutionName')]",
-                  "kind": "Solution"
+                  "kind": "Solution",
+                  "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
                 },
                 "author": {
                   "name": "[variables('_solutionAuthor')]"
@@ -5857,7 +5859,7 @@
               ]
             }
           ],
-          "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
+          "iconUrl": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png",
           "availability": {
             "status": 1,
             "isPreview": false
@@ -5882,7 +5884,8 @@
         "version": "[variables('dataConnectorVersionConnectorDefinition')]",
         "source": {
           "kind": "Solution",
-          "name": "SpyCloud Holistic Identity Exposure Intelligence"
+          "name": "SpyCloud Holistic Identity Exposure Intelligence",
+          "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
         },
         "author": {
           "name": "SpyCloud, Inc.",
@@ -6114,7 +6117,8 @@
                 "source": {
                   "sourceId": "[variables('_solutionId')]",
                   "name": "[variables('_solutionName')]",
-                  "kind": "Solution"
+                  "kind": "Solution",
+                  "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
                 },
                 "author": {
                   "name": "[variables('_solutionAuthor')]"
@@ -7127,7 +7131,7 @@
                               "sections": [
                                 {
                                   "activityTitle": "SpyCloud MDE — Device Isolated",
-                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png",
                                   "text": "Device isolated in Defender due to infostealer infection."
                                 }
                               ]
@@ -7235,7 +7239,7 @@
           },
           "outputs": {},
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
           },
           "description": "SpyCloud MDE Device Isolation — Automatically isolates infected devices in Microsoft Defender for Endpoint when SpyCloud detects infostealer malware. Extracts host entities from incidents, searches MDE for matching devices, isolates them (Full or Selective), adds a SpyCloud tag, logs the action, and notifies SOC via Slack, Teams, and Email. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate devices."
         },
@@ -7605,7 +7609,7 @@
                               "sections": [
                                 {
                                   "activityTitle": "SpyCloud CA — Identity Protected",
-                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png",
                                   "text": "Password reset and sessions revoked for compromised user."
                                 }
                               ]
@@ -7713,7 +7717,7 @@
           },
           "outputs": {},
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
           },
           "description": "SpyCloud CA Identity Protection — Automatically resets passwords and revokes sessions in Entra ID when SpyCloud detects compromised credentials. Looks up users via Microsoft Graph, forces immediate password reset, revokes all active sessions, optionally adds to a Conditional Access security group, logs the action, and notifies SOC. REQUIRES: Entra ID P1/P2. Without it, deploys but cannot reset passwords."
         },
@@ -9444,7 +9448,7 @@
                             {
                               "activityTitle": "SpyCloud Credential Response",
                               "activitySubtitle": "@{triggerBody()?['object']?['properties']?['title']}",
-                              "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
+                              "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png",
                               "facts": [
                                 {
                                   "name": "User",
@@ -9732,7 +9736,7 @@
             }
           },
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
           },
           "description": "SpyCloud Credential Response — Full SOC investigation and remediation workflow. Checks recent sign-in activity for compromised users, forces password reset, revokes sessions, then creates tickets in ServiceNow/Jira/Azure DevOps and sends rich notifications to Slack/Teams/Email. Designed as the primary automated response playbook. REQUIRES: Entra ID P1/P2 for password reset. Notifications work without license."
         },
@@ -9990,7 +9994,7 @@
                               "sections": [
                                 {
                                   "activityTitle": "SpyCloud Blocklist — Sev25 Isolation",
-                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
+                                  "activityImage": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png",
                                   "text": "Critical severity 25 infected device automatically isolated."
                                 }
                               ]
@@ -10090,7 +10094,7 @@
             }
           },
           "metadata": {
-            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg"
+            "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
           },
           "description": "SpyCloud MDE Blocklist (Scheduled) — Runs on a configurable schedule (default every 4 hours) to scan for severity 25 critical infostealer infections. Queries SpyCloudBreachWatchlist_CL for the highest severity exposures, searches MDE for matching devices, and isolates them with a 'SpyCloud-Sev25-Infostealer' tag. Proactive defense against the most dangerous infections. REQUIRES: Defender for Endpoint P1/P2. Without MDE, deploys but cannot isolate."
         },
@@ -13106,6 +13110,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           },
@@ -13147,7 +13156,7 @@
       "properties": {
         "displayName": "SpyCloud Enterprise Protection API",
         "description": "SpyCloud Enterprise v2 API — real-time breach data enrichment, credential exposure lookup, device forensics, stolen cookie detection, and identity correlation.",
-        "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-sentinel-icon-32.svg",
+        "iconUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFf0lEQVR4nO2bb2wTZRzHv3e9a/e/Lbd2o8MOJ4xt7A+DKJABY5lGjJM3RHGJUREjLIiJicToG19IlMRETdAohBcYXgjCGHEmmvBHYdNExIWOZX/c32xrXdeOtV27/rv2fDHX7Xbt1l6Tdaz3Te7Nc7/73e/3ud/z3HPP5SEQrTp+4KK2XQkqfYmIxiyy0YNLj1bCS6nsYNhchY3tqyzxhSrng+ADMKzy5GdVMQdhDsD9JEl+VltmIFChhuRKP6SZCmhLsqc/q60HiZkKSM70Acx2AQlAgqNIoAjcTdL+/7+oZH76gARAAiABkABIABIdQmIlAZAASAASHUJiRcX7JcTQchzKLcC+NbnYnK6EmpKDA4dJ1gcb64fJ60aHy44HLjvu2CzodU8t6TNDRuGgVo8alRbbMtXQ0ClQUjS8wQDG/V50uRxotVtwzWpE17QjrvgJ3LoomsDzjA7fFW8HQ8ujsv/a2Iu3/2mLeF5GEHhfX4wT+iKoKDoqn4e67uL82GBUtuEkugtsy1TjamkV5CQZ/UUcIhZcFkXjx/LdqFZpYoojQxZfEYsGcLKgjJe8K8DiRJ8BP1lNGPd5kCGjUJKuxHPMWry2dj10itQZwzD3owkSjaVVguSnAwF8OdKDS+YR9LmnQIKAPiUNtWty0JC3AcXpWYtCjUYErsfeBeQkiam9B3gAPuhrx6mhrrD2FEHgDV0BtHIFTg52Cs6/q9+Ezwu38Nom/D7Utv0Kw5QtQuDA4bwCeINBXPh3KNYU5mITQ09LpwhKf9g9HfFJsByHs6P9Yc8pSBIfPl4saD/S+RcMDlvEGDgA50YHog05oshQCcVw+AJBgaN39BuRQ6fE7KtapUU2reD56nY50GgejdmXmENUBYx7PTB63MhLSQ21bVcyGNpThxsTZrRMWtDmmMQ9+0PYWP+ivqrVwkHvF+vYsq1Tih4ETw/34lRhOa8thZShTqNDnUYHAAhyHAxTNlweG8GZkX489PsEfkKD4zz1OB3LBkBUFwAHfDbQjQvGocWdEwQqs9T4pLAc/Xvq8IJGJ/CjooRzCCfLLkv5g4sDQDDI4VXDn9h/rwW3H1qWfGAqmsblyiqUzH91cYAtTFWE3u0rdQyYr2azCc1mEzRyBaoZLXaoGOxUM3hKxYAi+D+fFSSJY/kbcazj71CbyeMW+Nw0C2kZJLoCFh4WrxdXTCN4r/M+qn6/idzr13BuWPiaqsxS8667PWER2OzT5K78LrDUMeH1oaH9HtyBAC85miB4dnesFlh9Xp5NUUYWDuSuW9kAbuzci2c1uSAWsUkjKdALJkxGj5tn4wkE8GmvcAZ5pvxJVGSqIvomOODwYwV4JS8/LgCix4BdazSo3ZGDwWkXLhqHccdqQbvDBqvPizSZDBVKFT4uKhOMA9fHzVh4z9MDvajL0aEmWxtqY+Ry/LH7aXzR34NLxmH0uZwgQSA/LQ21mhwcXb8BJZlZON7eJvAXiwg0ifsc9ux/EYpYvgQBDE67sPnmz4JuAcy8JZp37MEuJjsmn8fb2/DVQG9M18yX6C7gZNmYbtThsOOZ1t/gZgNh/dl8fuxtuYWPujpg9y8+e5wvpz++OQOBRnEVICdJVDHZqGKysVWlxhPpGchLTUMmRUFGEHCyLIxuNwx2G5pMo2gyjYLlortVJkXh5XV61GhysE2tRrZcASVNwxsMwuzxoNvpQKvViibTKLqm4l0RuiJ+RWg1SFoUjWsIXQWSKkACIAFIdAiJlQRAAiABSHQIiZUEINkBzKxWnP8+OTG8Xi/tF5AAAEhqAHMrlueSbBx4s17aNQYs3Dh5Nkmq4K36MBsnZ3VmlUM4Ur/I1tn5+naVgThaH+Xm6Uj65hED0hA+4YX6Dz1MDRtp+dqJAAAAAElFTkSuQmCC",
         "brandColor": "#00D4AA",
         "connectionParameters": {
           "api_key": {
@@ -13780,14 +13789,15 @@
               "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/breach/data/emails/@{items('For_Each_Entity')?['Name']}",
-                    "headers": {
-                      "X-API-Key": "[parameters('apiKey')]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/enterprise-v2/breach/data/emails/@{items('For_Each_Entity')?['Name']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -13901,6 +13911,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }
@@ -14037,14 +14052,15 @@
               "foreach": "@body('Entities_-_Get_DNSResolutions')?['DNSResolutions']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/breach/data/domains/@{items('For_Each_Entity')?['DnsDomain']}",
-                    "headers": {
-                      "X-API-Key": "[parameters('apiKey')]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/enterprise-v2/breach/data/domains/@{items('For_Each_Entity')?['DnsDomain']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -14158,6 +14174,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }
@@ -14294,14 +14315,15 @@
               "foreach": "@body('Entities_-_Get_IPs')?['IPs']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/breach/data/ips/@{items('For_Each_Entity')?['Address']}",
-                    "headers": {
-                      "X-API-Key": "[parameters('apiKey')]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/enterprise-v2/breach/data/ips/@{items('For_Each_Entity')?['Address']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -14415,6 +14437,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }
@@ -14551,14 +14578,15 @@
               "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/breach/data/usernames/@{items('For_Each_Entity')?['Name']}",
-                    "headers": {
-                      "X-API-Key": "[parameters('apiKey')]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/enterprise-v2/breach/data/usernames/@{items('For_Each_Entity')?['Name']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -14672,6 +14700,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }
@@ -14808,14 +14841,15 @@
               "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/breach/catalog/@{items('For_Each_Entity')?['Name']}",
-                    "headers": {
-                      "X-API-Key": "[parameters('apiKey')]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/enterprise-v2/breach/catalog/@{items('For_Each_Entity')?['Name']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -14929,6 +14963,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }
@@ -15065,14 +15104,15 @@
               "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/compass/data/emails/@{items('For_Each_Entity')?['Name']}",
-                    "headers": {
-                      "X-API-Key": "[if(not(empty(parameters('compassApiKey'))), parameters('compassApiKey'), parameters('apiKey'))]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/enterprise-v2/compass/data/emails/@{items('For_Each_Entity')?['Name']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -15186,6 +15226,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }
@@ -15322,14 +15367,15 @@
               "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/enterprise-v2/sip/cookies/emails/@{items('For_Each_Entity')?['Name']}",
-                    "headers": {
-                      "X-API-Key": "[if(not(empty(parameters('sipApiKey'))), parameters('sipApiKey'), parameters('apiKey'))]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/enterprise-v2/sip/cookies/emails/@{items('For_Each_Entity')?['Name']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -15443,6 +15489,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }
@@ -15579,14 +15630,15 @@
               "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
               "actions": {
                 "Call_SpyCloud_API": {
-                  "type": "Http",
+                  "type": "ApiConnection",
                   "inputs": {
-                    "method": "GET",
-                    "uri": "https://api.spycloud.io/investigations-v2/records/emails/@{items('For_Each_Entity')?['Name']}",
-                    "headers": {
-                      "X-API-Key": "[if(not(empty(parameters('investigationsApiKey'))), parameters('investigationsApiKey'), parameters('apiKey'))]",
-                      "Accept": "application/json"
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['spycloudapi']['connectionId']"
+                      }
                     },
+                    "method": "get",
+                    "path": "/investigations-v2/records/emails/@{items('For_Each_Entity')?['Name']}",
                     "retryPolicy": {
                       "type": "exponential",
                       "count": 3,
@@ -15700,6 +15752,11 @@
                     "type": "ManagedServiceIdentity"
                   }
                 }
+              },
+              "spycloudapi": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]",
+                "connectionName": "[variables('spycloudConnectionName')]",
+                "id": "[variables('spycloudConnectorId')]"
               }
             }
           }

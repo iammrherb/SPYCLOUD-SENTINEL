@@ -3,9 +3,14 @@
   "offerId": "spycloud-sentinel-solution",
   "firstPublishDate": "2024-01-15",
   "lastPublishDate": "2026-03-11",
-  "providers": ["SpyCloud, Inc."],
+  "providers": [
+    "SpyCloud, Inc."
+  ],
   "categories": {
-    "domains": ["Security - Threat Protection", "Security - Automation (SOAR)"],
+    "domains": [
+      "Security - Threat Protection",
+      "Security - Automation (SOAR)"
+    ],
     "verticals": []
   },
   "support": {
@@ -119,5 +124,6 @@
     "T1528",
     "T1550",
     "T1556"
-  ]
+  ],
+  "iconUri": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon-64.png"
 }
