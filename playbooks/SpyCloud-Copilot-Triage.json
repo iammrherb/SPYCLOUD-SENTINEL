@@ -2,16 +2,28 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
-    "title": "SpyCloud — Copilot-Powered Incident Triage",
+    "title": "SpyCloud \u2014 Copilot-Powered Incident Triage",
     "description": "Logic App that auto-triages SpyCloud Sentinel incidents using Security Copilot prompts. Triggered by Sentinel automation rule, enriches incidents with SpyCloud exposure data, classifies severity, and writes investigation comments.",
     "version": "1.0.0",
-    "author": "SpyCloud"
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-Copilot-Triage",
-      "metadata": { "description": "Name of the Logic App" }
+      "metadata": {
+        "description": "Name of the Logic App"
+      }
     },
     "location": {
       "type": "string",
@@ -33,7 +45,9 @@
       "kind": "V1",
       "properties": {
         "displayName": "Sentinel - SpyCloud Triage",
-        "api": { "id": "[variables('SentinelConnectionApiId')]" },
+        "api": {
+          "id": "[variables('SentinelConnectionApiId')]"
+        },
         "parameterValueType": "Alternative"
       }
     },
@@ -45,7 +59,9 @@
       "kind": "V1",
       "properties": {
         "displayName": "Security Copilot - SpyCloud Triage",
-        "api": { "id": "[variables('CopilotConnectionApiId')]" }
+        "api": {
+          "id": "[variables('CopilotConnectionApiId')]"
+        }
       }
     },
     {
@@ -59,7 +75,9 @@
         "hidden-SentinelTemplateName": "SpyCloud-Copilot-Triage",
         "hidden-SentinelTemplateVersion": "1.0"
       },
-      "identity": { "type": "SystemAssigned" },
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "dependsOn": [
         "[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('CopilotConnectionName'))]"
@@ -79,8 +97,14 @@
             "Microsoft_Sentinel_incident": {
               "type": "ApiConnectionWebhook",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                "body": { "callback_url": "@{listCallbackUrl()}" },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@{listCallbackUrl()}"
+                },
                 "path": "/incident-creation"
               }
             }
@@ -89,19 +113,35 @@
             "Initialize_SessionId": {
               "type": "InitializeVariable",
               "inputs": {
-                "variables": [{ "name": "SessionId", "type": "string", "value": "" }]
+                "variables": [
+                  {
+                    "name": "SessionId",
+                    "type": "string",
+                    "value": ""
+                  }
+                ]
               },
               "runAfter": {}
             },
             "Extract_Entities": {
               "type": "ApiConnection",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
                 "method": "post",
                 "path": "/entities/get",
-                "body": { "incidentArmId": "@triggerBody()?['object']?['id']" }
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']"
+                }
               },
-              "runAfter": { "Initialize_SessionId": ["Succeeded"] }
+              "runAfter": {
+                "Initialize_SessionId": [
+                  "Succeeded"
+                ]
+              }
             },
             "Parse_Account_Entities": {
               "type": "ParseJson",
@@ -112,13 +152,21 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "Name": { "type": "string" },
-                      "UPNSuffix": { "type": "string" }
+                      "Name": {
+                        "type": "string"
+                      },
+                      "UPNSuffix": {
+                        "type": "string"
+                      }
                     }
                   }
                 }
               },
-              "runAfter": { "Extract_Entities": ["Succeeded"] }
+              "runAfter": {
+                "Extract_Entities": [
+                  "Succeeded"
+                ]
+              }
             },
             "For_Each_Account": {
               "type": "Foreach",
@@ -131,17 +179,27 @@
                 "Copilot_Step1_Investigate": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['securitycopilot']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['securitycopilot']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/prompt",
                     "body": {
                       "PromptContent": "Search SpyCloud exposures for @{outputs('Build_Email')} and provide a severity assessment with exposure count, plaintext passwords found, infected devices, and whether remediation actions have been taken. Include MITRE ATT&CK technique mapping.",
                       "SessionId": "@variables('SessionId')",
-                      "Plugins": ["SpyCloud Sentinel Threat Intelligence"],
+                      "Plugins": [
+                        "SpyCloud Sentinel Threat Intelligence"
+                      ],
                       "DirectSkillName": "GetUserExposures"
                     }
                   },
-                  "runAfter": { "Build_Email": ["Succeeded"] }
+                  "runAfter": {
+                    "Build_Email": [
+                      "Succeeded"
+                    ]
+                  }
                 },
                 "Save_SessionId": {
                   "type": "SetVariable",
@@ -149,12 +207,20 @@
                     "name": "SessionId",
                     "value": "@body('Copilot_Step1_Investigate')?['sessionId']"
                   },
-                  "runAfter": { "Copilot_Step1_Investigate": ["Succeeded"] }
+                  "runAfter": {
+                    "Copilot_Step1_Investigate": [
+                      "Succeeded"
+                    ]
+                  }
                 },
                 "Copilot_Step2_Classify": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['securitycopilot']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['securitycopilot']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/prompt",
                     "body": {
@@ -162,23 +228,39 @@
                       "SessionId": "@variables('SessionId')"
                     }
                   },
-                  "runAfter": { "Save_SessionId": ["Succeeded"] }
+                  "runAfter": {
+                    "Save_SessionId": [
+                      "Succeeded"
+                    ]
+                  }
                 },
                 "Add_Incident_Comment": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/comment",
                     "body": {
                       "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<h3>🛡️ SpyCloud SCORCH — Automated Triage</h3><p><strong>User:</strong> @{outputs('Build_Email')}</p><hr/><h4>Exposure Analysis</h4><p>@{body('Copilot_Step1_Investigate')?['EvaluationResult']}</p><hr/><h4>Classification & Actions</h4><p>@{body('Copilot_Step2_Classify')?['EvaluationResult']}</p><hr/><p><em>Auto-generated by SpyCloud Copilot Triage Playbook v13.0</em></p>"
+                      "message": "<h3>\ud83d\udee1\ufe0f SpyCloud SCORCH \u2014 Automated Triage</h3><p><strong>User:</strong> @{outputs('Build_Email')}</p><hr/><h4>Exposure Analysis</h4><p>@{body('Copilot_Step1_Investigate')?['EvaluationResult']}</p><hr/><h4>Classification & Actions</h4><p>@{body('Copilot_Step2_Classify')?['EvaluationResult']}</p><hr/><p><em>Auto-generated by SpyCloud Copilot Triage Playbook v13.0</em></p>"
                     }
                   },
-                  "runAfter": { "Copilot_Step2_Classify": ["Succeeded"] }
+                  "runAfter": {
+                    "Copilot_Step2_Classify": [
+                      "Succeeded"
+                    ]
+                  }
                 }
               },
-              "runAfter": { "Parse_Account_Entities": ["Succeeded"] }
+              "runAfter": {
+                "Parse_Account_Entities": [
+                  "Succeeded"
+                ]
+              }
             }
           }
         },
@@ -189,7 +271,11 @@
                 "connectionId": "[resourceId('Microsoft.Web/connections', variables('SentinelConnectionName'))]",
                 "connectionName": "[variables('SentinelConnectionName')]",
                 "id": "[variables('SentinelConnectionApiId')]",
-                "connectionProperties": { "authentication": { "type": "ManagedServiceIdentity" } }
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
               },
               "securitycopilot": {
                 "connectionId": "[resourceId('Microsoft.Web/connections', variables('CopilotConnectionName'))]",
@@ -203,8 +289,17 @@
     }
   ],
   "outputs": {
-    "logicAppName": { "type": "string", "value": "[parameters('PlaybookName')]" },
-    "logicAppId": { "type": "string", "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]" },
-    "managedIdentityPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]" }
+    "logicAppName": {
+      "type": "string",
+      "value": "[parameters('PlaybookName')]"
+    },
+    "logicAppId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "managedIdentityPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2017-07-01', 'full').identity.principalId]"
+    }
   }
 }

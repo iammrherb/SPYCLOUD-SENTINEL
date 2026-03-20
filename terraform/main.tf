@@ -16,6 +16,7 @@ terraform {
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
+  environment     = var.cloud_environment == "AzureUSGovernment" ? "usgovernment" : "public"
 }
 
 # ─── Resource Group ────────────────────────────────────────────────────────────
@@ -39,6 +40,19 @@ locals {
     var.arm_template_url,
     "https://raw.githubusercontent.com/${var.github_repo}/main/azuredeploy.json"
   )
+
+  # Azure Gov portal URL differs from commercial
+  portal_url = var.cloud_environment == "AzureUSGovernment" ? "https://portal.azure.us" : "https://portal.azure.com"
+}
+
+# ─── Fetch ARM template from URL when no local path provided ─────────────────
+data "http" "arm_template" {
+  count = var.arm_template_local_path == "" ? 1 : 0
+  url   = local.template_url
+
+  request_headers = {
+    Accept = "application/json"
+  }
 }
 
 # ─── ARM Template Deployment ──────────────────────────────────────────────────
@@ -47,7 +61,7 @@ resource "azurerm_resource_group_template_deployment" "spycloud" {
   resource_group_name = local.resource_group_name
   deployment_mode     = "Incremental"
 
-  template_content = var.arm_template_local_path != "" ? file(var.arm_template_local_path) : null
+  template_content = var.arm_template_local_path != "" ? file(var.arm_template_local_path) : data.http.arm_template[0].response_body
 
   parameters_content = jsonencode({
     workspace = {
@@ -100,6 +114,18 @@ resource "azurerm_resource_group_template_deployment" "spycloud" {
     }
     enableCompass = {
       value = var.enable_compass
+    }
+    monitoredDomain = {
+      value = var.monitored_domain
+    }
+    pollingInterval = {
+      value = var.polling_interval
+    }
+    spycloudSeverityThreshold = {
+      value = var.severity_threshold
+    }
+    enablePlaintextPasswords = {
+      value = var.enable_plaintext_passwords
     }
   })
 

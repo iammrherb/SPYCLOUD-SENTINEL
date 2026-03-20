@@ -5,19 +5,27 @@
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-IsolateDevice",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     }
   },
   "variables": {
@@ -96,7 +104,10 @@
               "expression": {
                 "and": [
                   {
-                    "greaterOrEquals": ["@int(outputs('Parse_SpyCloud_Severity'))", 25]
+                    "greaterOrEquals": [
+                      "@int(outputs('Parse_SpyCloud_Severity'))",
+                      25
+                    ]
                   }
                 ]
               },
@@ -123,7 +134,9 @@
                 }
               },
               "runAfter": {
-                "Initialize_IsolationType": ["Succeeded"]
+                "Initialize_IsolationType": [
+                  "Succeeded"
+                ]
               }
             },
             "Initialize_IsolationType": {
@@ -138,7 +151,9 @@
                 ]
               },
               "runAfter": {
-                "Parse_SpyCloud_Severity": ["Succeeded"]
+                "Parse_SpyCloud_Severity": [
+                  "Succeeded"
+                ]
               }
             },
             "Process_Each_Host": {
@@ -165,7 +180,10 @@
                       "expression": {
                         "and": [
                           {
-                            "greater": ["@length(body('Lookup_MDE_Machine')?['value'])", 0]
+                            "greater": [
+                              "@length(body('Lookup_MDE_Machine')?['value'])",
+                              0
+                            ]
                           }
                         ]
                       },
@@ -205,7 +223,9 @@
                             }
                           },
                           "runAfter": {
-                            "Isolate_Machine": ["Succeeded"]
+                            "Isolate_Machine": [
+                              "Succeeded"
+                            ]
                           }
                         }
                       },
@@ -231,7 +251,9 @@
                         }
                       },
                       "runAfter": {
-                        "Lookup_MDE_Machine": ["Succeeded"]
+                        "Lookup_MDE_Machine": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -259,13 +281,20 @@
                     }
                   },
                   "runAfter": {
-                    "Isolate_Device_Scope": ["Failed", "TimedOut"]
+                    "Isolate_Device_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Hosts": ["Succeeded"],
-                "Determine_Isolation_Type": ["Succeeded"]
+                "Entities_-_Get_Hosts": [
+                  "Succeeded"
+                ],
+                "Determine_Isolation_Type": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -292,6 +321,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-IsolateDevice",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -303,6 +336,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }

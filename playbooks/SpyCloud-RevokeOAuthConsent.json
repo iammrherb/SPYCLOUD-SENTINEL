@@ -5,19 +5,27 @@
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-RevokeOAuthConsent",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     }
   },
   "variables": {
@@ -98,7 +106,9 @@
                 ]
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             },
             "Process_Each_Account": {
@@ -131,7 +141,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_User": ["Succeeded"]
+                        "Resolve_User": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "List_App_Role_Assignments": {
@@ -145,7 +157,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_User": ["Succeeded"]
+                        "Resolve_User": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Revoke_Each_OAuth_Grant": {
@@ -166,7 +180,9 @@
                         }
                       },
                       "runAfter": {
-                        "List_OAuth_Permission_Grants": ["Succeeded"]
+                        "List_OAuth_Permission_Grants": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Revoke_Sessions_After_OAuth": {
@@ -180,7 +196,9 @@
                         }
                       },
                       "runAfter": {
-                        "Revoke_Each_OAuth_Grant": ["Succeeded"]
+                        "Revoke_Each_OAuth_Grant": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_Success": {
@@ -197,7 +215,9 @@
                         }
                       },
                       "runAfter": {
-                        "Revoke_Sessions_After_OAuth": ["Succeeded"]
+                        "Revoke_Sessions_After_OAuth": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -220,12 +240,17 @@
                     }
                   },
                   "runAfter": {
-                    "Revoke_OAuth_Scope": ["Failed", "TimedOut"]
+                    "Revoke_OAuth_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Initialize_Results": ["Succeeded"]
+                "Initialize_Results": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Summary_Comment": {
@@ -244,7 +269,10 @@
                 }
               },
               "runAfter": {
-                "Process_Each_Account": ["Succeeded", "Failed"]
+                "Process_Each_Account": [
+                  "Succeeded",
+                  "Failed"
+                ]
               }
             }
           },
@@ -271,6 +299,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-RevokeOAuthConsent",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -282,6 +314,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }

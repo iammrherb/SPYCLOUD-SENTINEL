@@ -22,7 +22,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - CAP Credential Response",
     "description": "Uses the SpyCloud Compass (CAP) API to check if compromised credentials are actively being traded or used. Triggers automated password reset and session revocation when active credential abuse is detected.",
     "prerequisites": [
@@ -31,41 +34,63 @@
       "Managed Identity with User.ReadWrite.All on Microsoft Graph"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-CAPResponse",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "SpyCloudCAPApiKey": {
       "type": "securestring",
-      "metadata": { "description": "SpyCloud CAP (Compass) API key" }
+      "metadata": {
+        "description": "SpyCloud CAP (Compass) API key"
+      }
     },
     "SpyCloudCAPApiUrl": {
       "type": "string",
       "defaultValue": "https://api.spycloud.io/cap-v1",
-      "metadata": { "description": "SpyCloud CAP API base URL" }
+      "metadata": {
+        "description": "SpyCloud CAP API base URL"
+      }
     },
     "AutoRemediateOnActiveAbuse": {
       "type": "bool",
       "defaultValue": true,
-      "metadata": { "description": "Automatically reset passwords and revoke sessions when active credential abuse is detected" }
+      "metadata": {
+        "description": "Automatically reset passwords and revoke sessions when active credential abuse is detected"
+      }
     }
   },
   "variables": {
@@ -199,7 +224,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_Email": ["Succeeded"]
+                        "Resolve_Email": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Parse_CAP_Response": {
@@ -209,28 +236,48 @@
                         "schema": {
                           "type": "object",
                           "properties": {
-                            "email": { "type": "string" },
-                            "credential_status": { "type": "string" },
-                            "active_abuse_detected": { "type": "boolean" },
-                            "last_seen_active": { "type": "string" },
+                            "email": {
+                              "type": "string"
+                            },
+                            "credential_status": {
+                              "type": "string"
+                            },
+                            "active_abuse_detected": {
+                              "type": "boolean"
+                            },
+                            "last_seen_active": {
+                              "type": "string"
+                            },
                             "credential_sources": {
                               "type": "array",
                               "items": {
                                 "type": "object",
                                 "properties": {
-                                  "source_type": { "type": "string" },
-                                  "first_seen": { "type": "string" },
-                                  "last_seen": { "type": "string" },
-                                  "severity": { "type": "integer" }
+                                  "source_type": {
+                                    "type": "string"
+                                  },
+                                  "first_seen": {
+                                    "type": "string"
+                                  },
+                                  "last_seen": {
+                                    "type": "string"
+                                  },
+                                  "severity": {
+                                    "type": "integer"
+                                  }
                                 }
                               }
                             },
-                            "recommended_action": { "type": "string" }
+                            "recommended_action": {
+                              "type": "string"
+                            }
                           }
                         }
                       },
                       "runAfter": {
-                        "Query_CAP_API": ["Succeeded"]
+                        "Query_CAP_API": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Check_Active_Abuse": {
@@ -238,7 +285,10 @@
                       "expression": {
                         "and": [
                           {
-                            "equals": ["@body('Parse_CAP_Response')?['active_abuse_detected']", true]
+                            "equals": [
+                              "@body('Parse_CAP_Response')?['active_abuse_detected']",
+                              true
+                            ]
                           }
                         ]
                       },
@@ -256,7 +306,10 @@
                           "expression": {
                             "and": [
                               {
-                                "equals": ["@parameters('AutoRemediateOnActiveAbuse')", true]
+                                "equals": [
+                                  "@parameters('AutoRemediateOnActiveAbuse')",
+                                  true
+                                ]
                               }
                             ]
                           },
@@ -278,7 +331,9 @@
                               "inputs": {
                                 "method": "PATCH",
                                 "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_User_For_Remediation')?['id']}",
-                                "headers": { "Content-Type": "application/json" },
+                                "headers": {
+                                  "Content-Type": "application/json"
+                                },
                                 "body": {
                                   "passwordProfile": {
                                     "forceChangePasswordNextSignIn": true,
@@ -291,7 +346,9 @@
                                 }
                               },
                               "runAfter": {
-                                "Get_User_For_Remediation": ["Succeeded"]
+                                "Get_User_For_Remediation": [
+                                  "Succeeded"
+                                ]
                               }
                             },
                             "Revoke_Sessions": {
@@ -305,7 +362,9 @@
                                 }
                               },
                               "runAfter": {
-                                "Force_Password_Reset": ["Succeeded"]
+                                "Force_Password_Reset": [
+                                  "Succeeded"
+                                ]
                               }
                             },
                             "Append_Remediation_Action": {
@@ -315,7 +374,9 @@
                                 "value": "Active abuse on @{outputs('Resolve_Email')}: password reset forced, sessions revoked"
                               },
                               "runAfter": {
-                                "Revoke_Sessions": ["Succeeded"]
+                                "Revoke_Sessions": [
+                                  "Succeeded"
+                                ]
                               }
                             }
                           },
@@ -332,13 +393,19 @@
                             }
                           },
                           "runAfter": {
-                            "Set_Active_Abuse_Flag": ["Succeeded"]
+                            "Set_Active_Abuse_Flag": [
+                              "Succeeded"
+                            ]
                           }
                         }
                       },
-                      "else": { "actions": {} },
+                      "else": {
+                        "actions": {}
+                      },
                       "runAfter": {
-                        "Parse_CAP_Response": ["Succeeded"]
+                        "Parse_CAP_Response": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_CAP_Result": {
@@ -354,7 +421,9 @@
                         }
                       },
                       "runAfter": {
-                        "Check_Active_Abuse": ["Succeeded"]
+                        "Check_Active_Abuse": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -376,15 +445,26 @@
                     }
                   },
                   "runAfter": {
-                    "CAP_Check_Scope": ["Failed", "TimedOut"]
+                    "CAP_Check_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"],
-                "Initialize_CAPResults": ["Succeeded"],
-                "Initialize_RemediationActions": ["Succeeded"],
-                "Initialize_ActiveAbuseDetected": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ],
+                "Initialize_CAPResults": [
+                  "Succeeded"
+                ],
+                "Initialize_RemediationActions": [
+                  "Succeeded"
+                ],
+                "Initialize_ActiveAbuseDetected": [
+                  "Succeeded"
+                ]
               }
             },
             "Update_Incident_Severity_On_Abuse": {
@@ -392,7 +472,10 @@
               "expression": {
                 "and": [
                   {
-                    "equals": ["@variables('ActiveAbuseDetected')", true]
+                    "equals": [
+                      "@variables('ActiveAbuseDetected')",
+                      true
+                    ]
                   }
                 ]
               },
@@ -411,7 +494,10 @@
                       "incidentArmId": "@triggerBody()?['object']?['id']",
                       "severity": "High",
                       "tagsToAdd": {
-                        "TagsToAdd": ["SpyCloud-CAP-Checked", "SpyCloud-Active-Abuse"]
+                        "TagsToAdd": [
+                          "SpyCloud-CAP-Checked",
+                          "SpyCloud-Active-Abuse"
+                        ]
                       }
                     }
                   },
@@ -433,7 +519,10 @@
                       "body": {
                         "incidentArmId": "@triggerBody()?['object']?['id']",
                         "tagsToAdd": {
-                          "TagsToAdd": ["SpyCloud-CAP-Checked", "SpyCloud-No-Active-Abuse"]
+                          "TagsToAdd": [
+                            "SpyCloud-CAP-Checked",
+                            "SpyCloud-No-Active-Abuse"
+                          ]
                         }
                       }
                     },
@@ -442,7 +531,9 @@
                 }
               },
               "runAfter": {
-                "Process_Each_Account": ["Succeeded"]
+                "Process_Each_Account": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_CAP_Summary_Comment": {
@@ -461,7 +552,9 @@
                 }
               },
               "runAfter": {
-                "Update_Incident_Severity_On_Abuse": ["Succeeded"]
+                "Update_Incident_Severity_On_Abuse": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -500,6 +593,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-CAPResponse-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

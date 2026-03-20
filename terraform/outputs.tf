@@ -24,7 +24,17 @@ output "dcr_immutable_id" {
 
 output "sentinel_url" {
   description = "Direct link to Microsoft Sentinel in Azure Portal"
-  value       = "https://portal.azure.com/#blade/Microsoft_Azure_Security_Insights/MainMenuBlade/0/subscriptionId/${var.subscription_id}/resourceGroup/${local.resource_group_name}/workspaceName/${var.workspace_name}"
+  value       = "${local.portal_url}/#blade/Microsoft_Azure_Security_Insights/MainMenuBlade/0/subscriptionId/${var.subscription_id}/resourceGroup/${local.resource_group_name}/workspaceName/${var.workspace_name}"
+}
+
+output "cloud_environment" {
+  description = "Azure cloud environment (AzureCloud or AzureUSGovernment)"
+  value       = var.cloud_environment
+}
+
+output "workspace_id" {
+  description = "Log Analytics workspace name"
+  value       = var.workspace_name
 }
 
 output "identity_exposure_table" {
@@ -49,7 +59,7 @@ output "sip_table" {
 
 output "post_deployment_steps" {
   description = "Required post-deployment steps"
-  value = <<-EOT
+  value       = <<-EOT
     Post-Deployment Steps:
     1. Run: ./scripts/post-deploy.sh -g ${local.resource_group_name} -w ${var.workspace_name}
     2. Enable analytics rules: Sentinel > Analytics > filter 'SpyCloud'

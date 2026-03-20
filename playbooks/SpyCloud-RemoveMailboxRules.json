@@ -5,19 +5,27 @@
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-RemoveMailboxRules",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     }
   },
   "variables": {
@@ -115,7 +123,9 @@
                 ]
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             },
             "Process_Each_Account": {
@@ -141,7 +151,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_User_UPN": ["Succeeded"]
+                        "Resolve_User_UPN": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Initialize_Suspicious_Rules": {
@@ -156,7 +168,9 @@
                         ]
                       },
                       "runAfter": {
-                        "Get_Mailbox_Rules": ["Succeeded"]
+                        "Get_Mailbox_Rules": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Filter_Suspicious_Rules": {
@@ -169,28 +183,46 @@
                             "or": [
                               {
                                 "not": {
-                                  "equals": ["@items('Filter_Suspicious_Rules')?['actions']?['forwardTo']", null]
+                                  "equals": [
+                                    "@items('Filter_Suspicious_Rules')?['actions']?['forwardTo']",
+                                    null
+                                  ]
                                 }
                               },
                               {
                                 "not": {
-                                  "equals": ["@items('Filter_Suspicious_Rules')?['actions']?['forwardAsAttachmentTo']", null]
+                                  "equals": [
+                                    "@items('Filter_Suspicious_Rules')?['actions']?['forwardAsAttachmentTo']",
+                                    null
+                                  ]
                                 }
                               },
                               {
                                 "not": {
-                                  "equals": ["@items('Filter_Suspicious_Rules')?['actions']?['redirectTo']", null]
+                                  "equals": [
+                                    "@items('Filter_Suspicious_Rules')?['actions']?['redirectTo']",
+                                    null
+                                  ]
                                 }
                               },
                               {
-                                "equals": ["@items('Filter_Suspicious_Rules')?['actions']?['delete']", true]
+                                "equals": [
+                                  "@items('Filter_Suspicious_Rules')?['actions']?['delete']",
+                                  true
+                                ]
                               },
                               {
-                                "equals": ["@items('Filter_Suspicious_Rules')?['actions']?['permanentDelete']", true]
+                                "equals": [
+                                  "@items('Filter_Suspicious_Rules')?['actions']?['permanentDelete']",
+                                  true
+                                ]
                               },
                               {
                                 "not": {
-                                  "equals": ["@items('Filter_Suspicious_Rules')?['actions']?['moveToFolder']", null]
+                                  "equals": [
+                                    "@items('Filter_Suspicious_Rules')?['actions']?['moveToFolder']",
+                                    null
+                                  ]
                                 }
                               }
                             ]
@@ -226,7 +258,9 @@
                                 }
                               },
                               "runAfter": {
-                                "Disable_Suspicious_Rule": ["Succeeded"]
+                                "Disable_Suspicious_Rule": [
+                                  "Succeeded"
+                                ]
                               }
                             }
                           },
@@ -234,7 +268,9 @@
                         }
                       },
                       "runAfter": {
-                        "Initialize_Suspicious_Rules": ["Succeeded"]
+                        "Initialize_Suspicious_Rules": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_User_Result": {
@@ -251,7 +287,9 @@
                         }
                       },
                       "runAfter": {
-                        "Filter_Suspicious_Rules": ["Succeeded"]
+                        "Filter_Suspicious_Rules": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -274,12 +312,17 @@
                     }
                   },
                   "runAfter": {
-                    "Mailbox_Rules_Scope": ["Failed", "TimedOut"]
+                    "Mailbox_Rules_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Initialize_Results": ["Succeeded"]
+                "Initialize_Results": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Summary_Comment": {
@@ -298,7 +341,10 @@
                 }
               },
               "runAfter": {
-                "Process_Each_Account": ["Succeeded", "Failed"]
+                "Process_Each_Account": [
+                  "Succeeded",
+                  "Failed"
+                ]
               }
             }
           },
@@ -325,6 +371,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-RemoveMailboxRules",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -336,6 +386,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }

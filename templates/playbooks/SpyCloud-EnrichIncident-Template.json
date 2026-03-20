@@ -20,7 +20,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Enrich Incident",
     "description": "Enriches Sentinel incidents with SpyCloud breach data including exposure count, severity scores, malware source indicators, and breach timeline. Updates incident severity and tags based on findings.",
     "prerequisites": [
@@ -29,36 +32,56 @@
       "Managed Identity with Sentinel Responder role"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-EnrichIncident",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "SpyCloudApiKey": {
       "type": "securestring",
-      "metadata": { "description": "SpyCloud API key for breach data lookups" }
+      "metadata": {
+        "description": "SpyCloud API key for breach data lookups"
+      }
     },
     "SpyCloudApiUrl": {
       "type": "string",
       "defaultValue": "https://api.spycloud.io/enterprise-v2",
-      "metadata": { "description": "SpyCloud Enterprise API base URL" }
+      "metadata": {
+        "description": "SpyCloud Enterprise API base URL"
+      }
     }
   },
   "variables": {
@@ -160,7 +183,9 @@
                   {
                     "name": "IncidentTags",
                     "type": "array",
-                    "value": ["SpyCloud-Enriched"]
+                    "value": [
+                      "SpyCloud-Enriched"
+                    ]
                   }
                 ]
               },
@@ -189,7 +214,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_Email": ["Succeeded"]
+                        "Resolve_Email": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Parse_SpyCloud_Response": {
@@ -199,19 +226,35 @@
                         "schema": {
                           "type": "object",
                           "properties": {
-                            "hits": { "type": "integer" },
+                            "hits": {
+                              "type": "integer"
+                            },
                             "results": {
                               "type": "array",
                               "items": {
                                 "type": "object",
                                 "properties": {
-                                  "severity": { "type": "integer" },
-                                  "source_id": { "type": "integer" },
-                                  "email": { "type": "string" },
-                                  "document_id": { "type": "string" },
-                                  "spycloud_publish_date": { "type": "string" },
-                                  "infected_machine_id": { "type": "string" },
-                                  "infected_path": { "type": "string" }
+                                  "severity": {
+                                    "type": "integer"
+                                  },
+                                  "source_id": {
+                                    "type": "integer"
+                                  },
+                                  "email": {
+                                    "type": "string"
+                                  },
+                                  "document_id": {
+                                    "type": "string"
+                                  },
+                                  "spycloud_publish_date": {
+                                    "type": "string"
+                                  },
+                                  "infected_machine_id": {
+                                    "type": "string"
+                                  },
+                                  "infected_path": {
+                                    "type": "string"
+                                  }
                                 }
                               }
                             }
@@ -219,7 +262,9 @@
                         }
                       },
                       "runAfter": {
-                        "Query_SpyCloud_Breach_Data": ["Succeeded"]
+                        "Query_SpyCloud_Breach_Data": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Process_Each_Breach_Record": {
@@ -231,7 +276,10 @@
                           "expression": {
                             "and": [
                               {
-                                "greater": ["@items('Process_Each_Breach_Record')?['severity']", "@variables('MaxSpyCloudSeverity')"]
+                                "greater": [
+                                  "@items('Process_Each_Breach_Record')?['severity']",
+                                  "@variables('MaxSpyCloudSeverity')"
+                                ]
                               }
                             ]
                           },
@@ -245,7 +293,9 @@
                               "runAfter": {}
                             }
                           },
-                          "else": { "actions": {} },
+                          "else": {
+                            "actions": {}
+                          },
                           "runAfter": {}
                         },
                         "Check_Malware_Source": {
@@ -254,7 +304,10 @@
                             "and": [
                               {
                                 "not": {
-                                  "equals": ["@coalesce(items('Process_Each_Breach_Record')?['infected_machine_id'], '')", ""]
+                                  "equals": [
+                                    "@coalesce(items('Process_Each_Breach_Record')?['infected_machine_id'], '')",
+                                    ""
+                                  ]
                                 }
                               }
                             ]
@@ -269,12 +322,16 @@
                               "runAfter": {}
                             }
                           },
-                          "else": { "actions": {} },
+                          "else": {
+                            "actions": {}
+                          },
                           "runAfter": {}
                         }
                       },
                       "runAfter": {
-                        "Parse_SpyCloud_Response": ["Succeeded"]
+                        "Parse_SpyCloud_Response": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_User_Enrichment": {
@@ -288,7 +345,9 @@
                         }
                       },
                       "runAfter": {
-                        "Process_Each_Breach_Record": ["Succeeded"]
+                        "Process_Each_Breach_Record": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -310,22 +369,35 @@
                     }
                   },
                   "runAfter": {
-                    "Enrich_Scope": ["Failed", "TimedOut"]
+                    "Enrich_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"],
-                "Initialize_MaxSeverity": ["Succeeded"],
-                "Initialize_EnrichmentData": ["Succeeded"],
-                "Initialize_Tags": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ],
+                "Initialize_MaxSeverity": [
+                  "Succeeded"
+                ],
+                "Initialize_EnrichmentData": [
+                  "Succeeded"
+                ],
+                "Initialize_Tags": [
+                  "Succeeded"
+                ]
               }
             },
             "Map_Severity_To_Sentinel": {
               "type": "Compose",
               "inputs": "@if(greaterOrEquals(variables('MaxSpyCloudSeverity'), 25), 'High', if(greaterOrEquals(variables('MaxSpyCloudSeverity'), 20), 'Medium', 'Low'))",
               "runAfter": {
-                "Process_Each_Account": ["Succeeded"]
+                "Process_Each_Account": [
+                  "Succeeded"
+                ]
               }
             },
             "Update_Incident": {
@@ -347,7 +419,9 @@
                 }
               },
               "runAfter": {
-                "Map_Severity_To_Sentinel": ["Succeeded"]
+                "Map_Severity_To_Sentinel": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Enrichment_Comment": {
@@ -366,7 +440,9 @@
                 }
               },
               "runAfter": {
-                "Update_Incident": ["Succeeded"]
+                "Update_Incident": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -401,6 +477,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-EnrichIncident-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

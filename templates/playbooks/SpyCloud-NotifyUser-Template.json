@@ -21,7 +21,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Notify User",
     "description": "Sends an email notification to compromised users informing them of the credential exposure and required actions such as password changes and MFA enrollment.",
     "prerequisites": [
@@ -30,32 +33,50 @@
       "Managed Identity or O365 connector with Mail.Send permissions"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-NotifyUser",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "NotificationFromAddress": {
       "type": "string",
       "defaultValue": "security@contoso.com",
-      "metadata": { "description": "Email address to send notifications from" }
+      "metadata": {
+        "description": "Email address to send notifications from"
+      }
     }
   },
   "variables": {
@@ -170,7 +191,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_Email": ["Succeeded"]
+                        "Resolve_Email": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Add_Comment_Notified": {
@@ -189,7 +212,9 @@
                         }
                       },
                       "runAfter": {
-                        "Send_Notification_Email": ["Succeeded"]
+                        "Send_Notification_Email": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -217,12 +242,17 @@
                     }
                   },
                   "runAfter": {
-                    "Notify_User_Scope": ["Failed", "TimedOut"]
+                    "Notify_User_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -254,6 +284,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-NotifyUser-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
