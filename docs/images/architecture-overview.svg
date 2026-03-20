@@ -1,0 +1,308 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="spycloudGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D4AA"/>
+      <stop offset="100%" stop-color="#0097A7"/>
+    </linearGradient>
+    <linearGradient id="azureGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0078D4"/>
+      <stop offset="100%" stop-color="#005A9E"/>
+    </linearGradient>
+    <linearGradient id="sentinelGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5B2D8E"/>
+      <stop offset="100%" stop-color="#7B3FA0"/>
+    </linearGradient>
+    <linearGradient id="responseGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E74C3C"/>
+      <stop offset="100%" stop-color="#C0392B"/>
+    </linearGradient>
+    <linearGradient id="enrichGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F39C12"/>
+      <stop offset="100%" stop-color="#E67E22"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#00D4AA"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="900" fill="#0D1117" rx="12"/>
+
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" fill="#E6EDF3" font-size="22" font-weight="700">SpyCloud Sentinel Supreme — Architecture Overview</text>
+  <text x="600" y="62" text-anchor="middle" fill="#8B949E" font-size="12">Darknet Identity Threat Intelligence → Detection → Enrichment → Automated Response</text>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ROW 1: DATA SOURCES (SpyCloud APIs) -->
+  <!-- ═══════════════════════════════════════════ -->
+  <rect x="20" y="85" width="1160" height="130" rx="8" fill="#0E1A18" stroke="#00D4AA" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="40" y="108" fill="#00D4AA" font-size="13" font-weight="700">SPYCLOUD DARKNET INTELLIGENCE</text>
+  <text x="1160" y="108" text-anchor="end" fill="#8B949E" font-size="10">api.spycloud.io/enterprise-v2</text>
+
+  <!-- API boxes -->
+  <g transform="translate(40, 118)">
+    <rect width="130" height="80" rx="6" fill="url(#spycloudGrad)" filter="url(#shadow)"/>
+    <text x="65" y="25" text-anchor="middle" fill="white" font-size="11" font-weight="700">Breach Watchlist</text>
+    <text x="65" y="42" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">84 fields</text>
+    <text x="65" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Credentials + PII</text>
+    <text x="65" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Sev 2/5/20/25</text>
+  </g>
+  <g transform="translate(185, 118)">
+    <rect width="130" height="80" rx="6" fill="url(#spycloudGrad)" filter="url(#shadow)"/>
+    <text x="65" y="25" text-anchor="middle" fill="white" font-size="11" font-weight="700">Breach Catalog</text>
+    <text x="65" y="42" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">29 fields</text>
+    <text x="65" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Source metadata</text>
+    <text x="65" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Malware families</text>
+  </g>
+  <g transform="translate(330, 118)">
+    <rect width="130" height="80" rx="6" fill="#008577" filter="url(#shadow)"/>
+    <text x="65" y="25" text-anchor="middle" fill="white" font-size="11" font-weight="700">Compass</text>
+    <text x="65" y="42" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Data + Devices + Apps</text>
+    <text x="65" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Endpoint forensics</text>
+    <text x="65" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Requires license</text>
+  </g>
+  <g transform="translate(475, 118)">
+    <rect width="130" height="80" rx="6" fill="#008577" filter="url(#shadow)"/>
+    <text x="65" y="25" text-anchor="middle" fill="white" font-size="11" font-weight="700">SIP Cookies</text>
+    <text x="65" y="42" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">22 fields</text>
+    <text x="65" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Stolen sessions</text>
+    <text x="65" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">MFA bypass risk</text>
+  </g>
+  <g transform="translate(620, 118)">
+    <rect width="130" height="80" rx="6" fill="#006B5E" filter="url(#shadow)"/>
+    <text x="65" y="25" text-anchor="middle" fill="white" font-size="11" font-weight="700">Investigations</text>
+    <text x="65" y="42" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Full database</text>
+    <text x="65" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Deep threat hunting</text>
+    <text x="65" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">On-demand only</text>
+  </g>
+  <g transform="translate(765, 118)">
+    <rect width="130" height="80" rx="6" fill="#006B5E" filter="url(#shadow)"/>
+    <text x="65" y="25" text-anchor="middle" fill="white" font-size="11" font-weight="700">IdLink</text>
+    <text x="65" y="42" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Identity correlation</text>
+    <text x="65" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Cross-persona</text>
+    <text x="65" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Requires license</text>
+  </g>
+  <g transform="translate(910, 118)">
+    <rect width="120" height="80" rx="6" fill="#005549" filter="url(#shadow)"/>
+    <text x="60" y="25" text-anchor="middle" fill="white" font-size="10" font-weight="700">Exposure</text>
+    <text x="60" y="42" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Stats + CAP</text>
+    <text x="60" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Data Partnership</text>
+  </g>
+  <g transform="translate(1045, 118)">
+    <rect width="120" height="80" rx="6" fill="#005549" filter="url(#shadow)"/>
+    <text x="60" y="20" text-anchor="middle" fill="white" font-size="10" font-weight="700">Risk Score</text>
+    <text x="60" y="37" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="700">0-100</text>
+    <text x="60" y="55" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Function App</text>
+    <text x="60" y="68" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">+ Key Vault</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ROW 2: INGESTION PIPELINE -->
+  <!-- ═══════════════════════════════════════════ -->
+  <path d="M 600 215 L 600 240" stroke="#00D4AA" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="600" y="258" text-anchor="middle" fill="#8B949E" font-size="10">CCF Pollers (13) → DCR Transform → DCE Ingestion</text>
+
+  <rect x="20" y="268" width="1160" height="85" rx="8" fill="#0E1420" stroke="#0078D4" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="40" y="290" fill="#0078D4" font-size="13" font-weight="700">AZURE DATA PIPELINE</text>
+
+  <g transform="translate(40, 298)">
+    <rect width="170" height="42" rx="4" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="85" y="18" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="600">Data Collection Endpoint</text>
+    <text x="85" y="32" text-anchor="middle" fill="#8B949E" font-size="9">HTTPS ingestion gateway</text>
+  </g>
+  <g transform="translate(230, 298)">
+    <rect width="170" height="42" rx="4" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="85" y="18" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="600">Data Collection Rules (2)</text>
+    <text x="85" y="32" text-anchor="middle" fill="#8B949E" font-size="9">KQL transforms + routing</text>
+  </g>
+  <g transform="translate(420, 298)">
+    <rect width="170" height="42" rx="4" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="85" y="18" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="600">15 Custom Tables</text>
+    <text x="85" y="32" text-anchor="middle" fill="#8B949E" font-size="9">Log Analytics workspace</text>
+  </g>
+  <g transform="translate(610, 298)">
+    <rect width="170" height="42" rx="4" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="85" y="18" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="600">Key Vault</text>
+    <text x="85" y="32" text-anchor="middle" fill="#8B949E" font-size="9">API keys + managed identity</text>
+  </g>
+  <g transform="translate(800, 298)">
+    <rect width="170" height="42" rx="4" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="85" y="18" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="600">Function App</text>
+    <text x="85" y="32" text-anchor="middle" fill="#8B949E" font-size="9">17 enrichment endpoints</text>
+  </g>
+  <g transform="translate(990, 298)">
+    <rect width="170" height="42" rx="4" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="85" y="18" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="600">App Insights</text>
+    <text x="85" y="32" text-anchor="middle" fill="#8B949E" font-size="9">Telemetry + monitoring</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ROW 3: MICROSOFT SENTINEL -->
+  <!-- ═══════════════════════════════════════════ -->
+  <path d="M 600 353 L 600 378" stroke="#5B2D8E" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="20" y="385" width="1160" height="200" rx="8" fill="#120E1F" stroke="#7B3FA0" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="40" y="408" fill="#A855F7" font-size="13" font-weight="700">MICROSOFT SENTINEL</text>
+
+  <!-- Analytics Rules -->
+  <g transform="translate(40, 418)">
+    <rect width="220" height="150" rx="6" fill="url(#sentinelGrad)" filter="url(#shadow)" opacity="0.9"/>
+    <text x="110" y="22" text-anchor="middle" fill="white" font-size="12" font-weight="700">38 Analytics Rules</text>
+    <line x1="15" y1="30" x2="205" y2="30" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="15" y="48" fill="rgba(255,255,255,0.9)" font-size="9">● 8 Core credential detection</text>
+    <text x="15" y="63" fill="rgba(255,255,255,0.9)" font-size="9">● 8 Identity provider correlation</text>
+    <text x="15" y="78" fill="rgba(255,255,255,0.9)" font-size="9">● 6 MDE/Defender correlation</text>
+    <text x="15" y="93" fill="rgba(255,255,255,0.9)" font-size="9">● 4 M365/Email correlation</text>
+    <text x="15" y="108" fill="rgba(255,255,255,0.9)" font-size="9">● 4 UEBA behavioral</text>
+    <text x="15" y="123" fill="rgba(255,255,255,0.9)" font-size="9">● 4 Network/firewall</text>
+    <text x="15" y="138" fill="rgba(255,255,255,0.9)" font-size="9">● 4 SLA/operations + Risk Score</text>
+  </g>
+
+  <!-- Hunting + Workbooks -->
+  <g transform="translate(280, 418)">
+    <rect width="180" height="70" rx="6" fill="#2D1B4E" stroke="#7B3FA0" stroke-width="1" filter="url(#shadow)"/>
+    <text x="90" y="22" text-anchor="middle" fill="white" font-size="11" font-weight="700">16 Hunting Queries</text>
+    <text x="90" y="40" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Proactive threat hunting</text>
+    <text x="90" y="55" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Cross-table correlation</text>
+  </g>
+  <g transform="translate(280, 498)">
+    <rect width="180" height="70" rx="6" fill="#2D1B4E" stroke="#7B3FA0" stroke-width="1" filter="url(#shadow)"/>
+    <text x="90" y="22" text-anchor="middle" fill="white" font-size="11" font-weight="700">Workbooks</text>
+    <text x="90" y="40" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">SOC Dashboard (6 tabs)</text>
+    <text x="90" y="55" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Executive Risk Dashboard</text>
+  </g>
+
+  <!-- Automation -->
+  <g transform="translate(480, 418)">
+    <rect width="180" height="150" rx="6" fill="#2D1B4E" stroke="#F39C12" stroke-width="1" filter="url(#shadow)"/>
+    <text x="90" y="22" text-anchor="middle" fill="#F39C12" font-size="11" font-weight="700">4 Automation Rules</text>
+    <line x1="15" y1="30" x2="165" y2="30" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="15" y="48" fill="rgba(255,255,255,0.8)" font-size="9">Auto-enrich Account</text>
+    <text x="15" y="63" fill="rgba(255,255,255,0.8)" font-size="9">Auto-enrich IP</text>
+    <text x="15" y="78" fill="rgba(255,255,255,0.8)" font-size="9">Auto-enrich Domain</text>
+    <text x="15" y="93" fill="rgba(255,255,255,0.8)" font-size="9">Auto-escalate VIP</text>
+    <line x1="15" y1="103" x2="165" y2="103" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="90" y="120" text-anchor="middle" fill="#F39C12" font-size="10" font-weight="600">4 Watchlists</text>
+    <text x="15" y="138" fill="rgba(255,255,255,0.7)" font-size="9">VIP, Exclusions, Severity, Domains</text>
+  </g>
+
+  <!-- Copilot -->
+  <g transform="translate(680, 418)">
+    <rect width="180" height="70" rx="6" fill="#1A2332" stroke="#0078D4" stroke-width="1" filter="url(#shadow)"/>
+    <text x="90" y="22" text-anchor="middle" fill="#58A6FF" font-size="11" font-weight="700">Security Copilot</text>
+    <text x="90" y="40" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">28+ KQL skills</text>
+    <text x="90" y="55" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">AI investigation agent</text>
+  </g>
+  <g transform="translate(680, 498)">
+    <rect width="180" height="70" rx="6" fill="#1A2332" stroke="#0078D4" stroke-width="1" filter="url(#shadow)"/>
+    <text x="90" y="22" text-anchor="middle" fill="#58A6FF" font-size="11" font-weight="700">MCP Server</text>
+    <text x="90" y="40" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">External tool integration</text>
+    <text x="90" y="55" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">SCORCH orchestration</text>
+  </g>
+
+  <!-- Enrichment Playbooks -->
+  <g transform="translate(880, 418)">
+    <rect width="280" height="150" rx="6" fill="url(#enrichGrad)" filter="url(#shadow)" opacity="0.9"/>
+    <text x="140" y="22" text-anchor="middle" fill="white" font-size="12" font-weight="700">13 Logic App Playbooks</text>
+    <line x1="15" y1="30" x2="265" y2="30" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="15" y="48" fill="white" font-size="10" font-weight="600">Response (5):</text>
+    <text x="15" y="63" fill="rgba(255,255,255,0.85)" font-size="9">MDE Isolate · CA Reset · Cred Alert · Blocklist · TI</text>
+    <text x="15" y="83" fill="white" font-size="10" font-weight="600">Enrichment (8):</text>
+    <text x="15" y="98" fill="rgba(255,255,255,0.85)" font-size="9">Email · Domain · IP · Username · Catalog</text>
+    <text x="15" y="113" fill="rgba(255,255,255,0.85)" font-size="9">Compass · SIP Cookies · Deep Investigation</text>
+    <line x1="15" y1="123" x2="265" y2="123" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="140" y="142" text-anchor="middle" fill="white" font-size="9">All via Function App → Key Vault → SpyCloud API</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ROW 4: RESPONSE ACTIONS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <path d="M 600 585 L 600 610" stroke="#E74C3C" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="20" y="618" width="1160" height="120" rx="8" fill="#1A0E0E" stroke="#E74C3C" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="40" y="640" fill="#E74C3C" font-size="13" font-weight="700">AUTOMATED RESPONSE ACTIONS</text>
+
+  <g transform="translate(40, 650)">
+    <rect width="140" height="70" rx="6" fill="#2D1A1A" stroke="#E74C3C" stroke-width="1"/>
+    <text x="70" y="20" text-anchor="middle" fill="#FF6B6B" font-size="10" font-weight="700">MDE</text>
+    <text x="70" y="36" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Device isolation</text>
+    <text x="70" y="49" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">IOC submission</text>
+    <text x="70" y="62" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Requires P2</text>
+  </g>
+  <g transform="translate(195, 650)">
+    <rect width="140" height="70" rx="6" fill="#2D1A1A" stroke="#E74C3C" stroke-width="1"/>
+    <text x="70" y="20" text-anchor="middle" fill="#FF6B6B" font-size="10" font-weight="700">Entra ID / CA</text>
+    <text x="70" y="36" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Password reset</text>
+    <text x="70" y="49" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Session revocation</text>
+    <text x="70" y="62" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Requires P1+</text>
+  </g>
+  <g transform="translate(350, 650)">
+    <rect width="140" height="70" rx="6" fill="#2D1A1A" stroke="#F39C12" stroke-width="1"/>
+    <text x="70" y="20" text-anchor="middle" fill="#F39C12" font-size="10" font-weight="700">Risk Score → CA</text>
+    <text x="70" y="36" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Custom attribute</text>
+    <text x="70" y="49" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Policy enforcement</text>
+    <text x="70" y="62" text-anchor="middle" fill="#FFD700" font-size="8" font-weight="600">CLOSED LOOP</text>
+  </g>
+  <g transform="translate(505, 650)">
+    <rect width="140" height="70" rx="6" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="70" y="20" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="700">Notifications</text>
+    <text x="70" y="36" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Teams · Slack · Email</text>
+    <text x="70" y="49" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Webhooks</text>
+  </g>
+  <g transform="translate(660, 650)">
+    <rect width="140" height="70" rx="6" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="70" y="20" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="700">ITSM</text>
+    <text x="70" y="36" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">ServiceNow · Jira</text>
+    <text x="70" y="49" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Azure DevOps</text>
+  </g>
+  <g transform="translate(815, 650)">
+    <rect width="160" height="70" rx="6" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="80" y="20" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="700">Third-Party EDR</text>
+    <text x="80" y="36" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">CrowdStrike · SentinelOne</text>
+    <text x="80" y="49" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Carbon Black · Cortex</text>
+  </g>
+  <g transform="translate(990, 650)">
+    <rect width="170" height="70" rx="6" fill="#1A2332" stroke="#0078D4" stroke-width="1"/>
+    <text x="85" y="20" text-anchor="middle" fill="#58A6FF" font-size="10" font-weight="700">Network/Firewall</text>
+    <text x="85" y="36" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">PAN · Fortinet · Cisco</text>
+    <text x="85" y="49" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Zscaler · DNS · VPN</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ROW 5: REPORTING & AUDIT -->
+  <!-- ═══════════════════════════════════════════ -->
+  <rect x="20" y="755" width="1160" height="60" rx="8" fill="#0E1420" stroke="#8B949E" stroke-width="1" stroke-opacity="0.2"/>
+  <text x="40" y="778" fill="#8B949E" font-size="13" font-weight="700">REPORTING & COMPLIANCE</text>
+  <text x="200" y="798" fill="#8B949E" font-size="10">EnrichmentAudit_CL</text>
+  <text x="370" y="798" fill="#8B949E" font-size="10">MDE_Logs_CL</text>
+  <text x="500" y="798" fill="#8B949E" font-size="10">CA_Logs_CL</text>
+  <text x="630" y="798" fill="#8B949E" font-size="10">Risk Score Trends</text>
+  <text x="790" y="798" fill="#8B949E" font-size="10">Remediation SLAs</text>
+  <text x="940" y="798" fill="#8B949E" font-size="10">Executive Reports</text>
+  <text x="1090" y="798" fill="#8B949E" font-size="10">Compliance Evidence</text>
+
+  <!-- Stats bar -->
+  <rect x="20" y="830" width="1160" height="55" rx="8" fill="#161B22"/>
+  <text x="100" y="855" text-anchor="middle" fill="#00D4AA" font-size="20" font-weight="700">144</text>
+  <text x="100" y="872" text-anchor="middle" fill="#8B949E" font-size="9">ARM Resources</text>
+  <text x="250" y="855" text-anchor="middle" fill="#00D4AA" font-size="20" font-weight="700">15</text>
+  <text x="250" y="872" text-anchor="middle" fill="#8B949E" font-size="9">Custom Tables</text>
+  <text x="400" y="855" text-anchor="middle" fill="#A855F7" font-size="20" font-weight="700">38</text>
+  <text x="400" y="872" text-anchor="middle" fill="#8B949E" font-size="9">Analytics Rules</text>
+  <text x="530" y="855" text-anchor="middle" fill="#F39C12" font-size="20" font-weight="700">13</text>
+  <text x="530" y="872" text-anchor="middle" fill="#8B949E" font-size="9">Playbooks</text>
+  <text x="660" y="855" text-anchor="middle" fill="#58A6FF" font-size="20" font-weight="700">17</text>
+  <text x="660" y="872" text-anchor="middle" fill="#8B949E" font-size="9">Function Endpoints</text>
+  <text x="800" y="855" text-anchor="middle" fill="#58A6FF" font-size="20" font-weight="700">16</text>
+  <text x="800" y="872" text-anchor="middle" fill="#8B949E" font-size="9">Hunting Queries</text>
+  <text x="940" y="855" text-anchor="middle" fill="#58A6FF" font-size="20" font-weight="700">28+</text>
+  <text x="940" y="872" text-anchor="middle" fill="#8B949E" font-size="9">Copilot Skills</text>
+  <text x="1100" y="855" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="700">0-100</text>
+  <text x="1100" y="872" text-anchor="middle" fill="#8B949E" font-size="9">Risk Score</text>
+</svg>
