@@ -1640,7 +1640,20 @@
     "functionAppInsightsName": "[concat('spycloud-fn-ai-', take(parameters('workspace'), 20))]",
     "functionHostingPlanName": "[concat('spycloud-fn-plan-', take(parameters('workspace'), 20))]",
     "keyVaultName": "[concat('sc-kv-', take(uniqueString(resourceGroup().id), 10))]",
-    "riskScoreFunctionName": "SpyCloudRiskScore"
+    "riskScoreFunctionName": "SpyCloudRiskScore",
+    "playbookContentId1": "fe8d760c-295f-5ac2-bd45-7c73b0e44a6d",
+    "playbookContentId2": "489aeaf6-ceb8-5abb-9833-6db18358106b",
+    "playbookContentId3": "fb019086-25f1-5536-b213-aeb406d0bc99",
+    "playbookContentId4": "217d9f6b-ec62-5640-a73e-f7d976971893",
+    "playbookContentId5": "3dca300e-2ec4-5c29-82c4-9ad2b2eaa22f",
+    "playbookContentId6": "7409d36f-d469-5126-92eb-3392aa6ed31b",
+    "playbookContentId7": "49cbba3c-cbce-57ea-81e5-7ee84e5caad0",
+    "playbookContentId8": "3b053996-4db5-53a3-8d47-e343db0b14f2",
+    "playbookContentId9": "ea0835df-8464-529c-9422-e73266f1c904",
+    "playbookContentId10": "be0c22c0-de07-559e-8aa0-a6d69a373ced",
+    "playbookContentId11": "8db15afc-75d7-5a84-af1f-2db6917bb710",
+    "playbookContentId12": "e3a4ccef-b4f0-58cc-b87b-d6fc404fd3d4",
+    "playbookContentId13": "cd71437a-617a-545b-98ea-2520aab33423"
   },
   "resources": [
     {
@@ -5864,6 +5877,71 @@
               "kind": "Workbook",
               "contentId": "[variables('workbookContentId1')]",
               "version": "[variables('workbookVersion1')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId1')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId2')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId3')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId4')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId5')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId6')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId7')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId8')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId9')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId10')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId11')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId12')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "Playbook",
+              "contentId": "[variables('playbookContentId13')]",
+              "version": "[variables('_solutionVersion')]"
             }
           ]
         },
@@ -18431,6 +18509,552 @@
           }
         },
         "suppressionDuration": "PT6H"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'fe8d760c-295f-5ac2-bd45-7c73b0e44a6d', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId1')]",
+        "displayName": "SpyCloud-MDE-DeviceIsolation",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','fe8d760c-295f-5ac2-bd45-7c73b0e44a6d')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', '489aeaf6-ceb8-5abb-9833-6db18358106b', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId2')]",
+        "displayName": "SpyCloud-CA-IdentityProtection",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','489aeaf6-ceb8-5abb-9833-6db18358106b')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'fb019086-25f1-5536-b213-aeb406d0bc99', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId3')]",
+        "displayName": "SpyCloud-CredentialResponse",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','fb019086-25f1-5536-b213-aeb406d0bc99')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', '217d9f6b-ec62-5640-a73e-f7d976971893', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId4')]",
+        "displayName": "SpyCloud-MDE-Blocklist",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','217d9f6b-ec62-5640-a73e-f7d976971893')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', '3dca300e-2ec4-5c29-82c4-9ad2b2eaa22f', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId5')]",
+        "displayName": "SpyCloud-TI-Enrichment",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','3dca300e-2ec4-5c29-82c4-9ad2b2eaa22f')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', '7409d36f-d469-5126-92eb-3392aa6ed31b', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId6')]",
+        "displayName": "SpyCloud-Enrich-Email",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','7409d36f-d469-5126-92eb-3392aa6ed31b')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', '49cbba3c-cbce-57ea-81e5-7ee84e5caad0', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId7')]",
+        "displayName": "SpyCloud-Enrich-Domain",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','49cbba3c-cbce-57ea-81e5-7ee84e5caad0')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', '3b053996-4db5-53a3-8d47-e343db0b14f2', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId8')]",
+        "displayName": "SpyCloud-Enrich-IP",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','3b053996-4db5-53a3-8d47-e343db0b14f2')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'ea0835df-8464-529c-9422-e73266f1c904', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId9')]",
+        "displayName": "SpyCloud-Enrich-Username",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','ea0835df-8464-529c-9422-e73266f1c904')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'be0c22c0-de07-559e-8aa0-a6d69a373ced', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId10')]",
+        "displayName": "SpyCloud-Enrich-Catalog",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','be0c22c0-de07-559e-8aa0-a6d69a373ced')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', '8db15afc-75d7-5a84-af1f-2db6917bb710', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId11')]",
+        "displayName": "SpyCloud-Enrich-Compass",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','8db15afc-75d7-5a84-af1f-2db6917bb710')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'e3a4ccef-b4f0-58cc-b87b-d6fc404fd3d4', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId12')]",
+        "displayName": "SpyCloud-Enrich-StolenCookies",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','e3a4ccef-b4f0-58cc-b87b-d6fc404fd3d4')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', 'cd71437a-617a-545b-98ea-2520aab33423', '-', variables('_solutionVersion'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('playbookContentId13')]",
+        "displayName": "SpyCloud-Investigate-Deep",
+        "contentKind": "Playbook",
+        "version": "[variables('_solutionVersion')]",
+        "contentSchemaVersion": "3.0.0",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','pb','-', uniqueString(concat(variables('_solutionId'),'-','Playbook','-','cd71437a-617a-545b-98ea-2520aab33423')))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('_solutionVersion')]",
+          "parameters": {},
+          "variables": {},
+          "resources": []
+        }
       }
     }
   ],
