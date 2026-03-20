@@ -1187,6 +1187,314 @@
       "metadata": {
         "description": "Deploy the SpyCloud Enrichment Function App. Provides centralized API enrichment with risk scoring, rate limiting, and Key Vault integration. Recommended for production deployments."
       }
+    },
+    "enableScorchAgent": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy SCORCH AI Agent Logic App"
+      }
+    },
+    "enableMcpServer": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy MCP Server container"
+      }
+    },
+    "enableBlockConditionalAccess": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy Block Conditional Access playbook"
+      }
+    },
+    "enableBlockFirewall": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy Block Firewall playbook"
+      }
+    },
+    "enableIsolateDevice": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy MDE device isolation playbook"
+      }
+    },
+    "enableForcePasswordReset": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy CA force password reset playbook"
+      }
+    },
+    "enableRevokeSessions": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy session revocation playbook"
+      }
+    },
+    "enableEnforceMFA": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy enforce MFA playbook"
+      }
+    },
+    "enableFullRemediation": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy full remediation orchestration playbook"
+      }
+    },
+    "enableEnrichIncident": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy incident enrichment playbook"
+      }
+    },
+    "enableBreachWatchlist": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Enable Breach Watchlist poller"
+      }
+    },
+    "enableBreachCatalog": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Enable Breach Catalog poller"
+      }
+    },
+    "enableEmail": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable email notifications"
+      }
+    },
+    "enableTeams": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable Teams notifications"
+      }
+    },
+    "enableSlack": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable Slack notifications"
+      }
+    },
+    "enableWebhook": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable webhook notifications"
+      }
+    },
+    "enableCAPRules": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable CAP analytics rules"
+      }
+    },
+    "enableExposureRules": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable Exposure analytics rules"
+      }
+    },
+    "enableIDLinkRules": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable IDLink analytics rules"
+      }
+    },
+    "enableInvestigationsRules": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable Investigations rules"
+      }
+    },
+    "enableUEBANetworkRules": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Enable UEBA/Network rules"
+      }
+    },
+    "enableMSICRules": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Enable Microsoft Security Incident Creation rules"
+      }
+    },
+    "enableAnomalyDetection": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Enable anomaly detection"
+      }
+    },
+    "pollingInterval": {
+      "type": "string",
+      "defaultValue": "60",
+      "metadata": {
+        "description": "Polling interval in minutes"
+      }
+    },
+    "emailFrequency": {
+      "type": "string",
+      "defaultValue": "immediate",
+      "metadata": {
+        "description": "Email notification frequency"
+      }
+    },
+    "environmentTag": {
+      "type": "string",
+      "defaultValue": "production",
+      "metadata": {
+        "description": "Environment tag"
+      }
+    },
+    "ownerTag": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Owner tag"
+      }
+    },
+    "costCenterTag": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Cost center tag"
+      }
+    },
+    "adoOrgUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps org URL"
+      }
+    },
+    "adoProject": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure DevOps project"
+      }
+    },
+    "adoWorkItemType": {
+      "type": "string",
+      "defaultValue": "Issue",
+      "metadata": {
+        "description": "Azure DevOps work item type"
+      }
+    },
+    "snowInstanceUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ServiceNow instance URL"
+      }
+    },
+    "snowUsername": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ServiceNow username"
+      }
+    },
+    "snowPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ServiceNow password"
+      }
+    },
+    "snowAuthType": {
+      "type": "string",
+      "defaultValue": "basic",
+      "metadata": {
+        "description": "ServiceNow auth type"
+      }
+    },
+    "snowTable": {
+      "type": "string",
+      "defaultValue": "incident",
+      "metadata": {
+        "description": "ServiceNow table"
+      }
+    },
+    "snowAssignmentGroup": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ServiceNow assignment group"
+      }
+    },
+    "webhookUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Webhook notification URL"
+      }
+    },
+    "webhookCustomHeaders": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Webhook custom headers (JSON)"
+      }
+    },
+    "teamsGroupId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Teams group ID"
+      }
+    },
+    "teamsChannelId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Teams channel ID"
+      }
+    },
+    "slackBotDisplayName": {
+      "type": "string",
+      "defaultValue": "SpyCloud Sentinel",
+      "metadata": {
+        "description": "Slack bot display name"
+      }
+    },
+    "slackChannelName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Slack channel name"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Deployment location"
+      }
     }
   },
   "variables": {
@@ -1396,7 +1704,7 @@
         "description": "[concat('SpyCloud Threat Intelligence data ingestion endpoint for Sentinel workspace: ', parameters('workspace'), ' in region: ', variables('_effectiveWorkspaceLocation'))]"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
       ]
     },
     {
@@ -5639,7 +5947,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','dc','-', uniqueString(concat(variables('_solutionId'),'-','DataConnector','-',variables('_dataConnectorContentIdConnectorDefinition'),'-', variables('dataConnectorVersionConnectorDefinition'))))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -5850,6 +6163,20 @@
             ]
           },
           "instructionSteps": [
+            {
+              "title": "Step 1: Grant Playbook Permissions",
+              "description": "After deployment, grant API permissions to the Logic App managed identities. Go to **Entra ID → Enterprise Applications → filter 'SpyCloud'** to find each playbook's managed identity.",
+              "instructions": [
+                {
+                  "type": "InstructionStepsGroup",
+                  "parameters": {
+                    "title": "Required Permissions",
+                    "description": "**MDE Isolation Playbook:**\n- Machine.Isolate (Application)\n- Machine.ReadWrite.All (Application)\n\n**CA Password Reset Playbook:**\n- User.ReadWrite.All (Application)\n- Directory.ReadWrite.All (Application)\n\n**All Enrichment Playbooks:**\n- Microsoft Sentinel Responder role on the workspace\n- (Auto-granted if you have Sentinel Contributor on the RG)\n\n**How to grant:**\n1. Go to Entra ID → App Registrations → API Permissions\n2. Add the permissions listed above\n3. Click 'Grant admin consent'\n4. Or use: scripts/grant-permissions.sh",
+                    "canCollapseAllSections": true
+                  }
+                }
+              ]
+            },
             {
               "title": "Prerequisites",
               "description": "",
@@ -7124,7 +7451,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','rdc','-', uniqueString(concat(variables('_solutionId'),'-','ResourcesDataConnector','-',variables('_dataConnectorContentIdConnections'),'-', variables('dataConnectorVersionConnections'))))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -7141,7 +7473,7 @@
         }
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
       ]
     },
     {
@@ -8143,7 +8475,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8154,7 +8487,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId1')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8292,7 +8630,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8303,7 +8642,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId2')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8371,7 +8715,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8382,7 +8727,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId3')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8450,7 +8800,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8461,7 +8812,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId4')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8540,7 +8896,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8551,7 +8908,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId5')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8631,7 +8993,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8642,7 +9005,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId6')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8711,7 +9079,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8722,7 +9091,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId7')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8791,7 +9165,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8802,7 +9177,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId8')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8870,7 +9250,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8881,7 +9262,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId9')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -8950,7 +9336,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8961,7 +9348,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId10')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -9035,7 +9427,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9046,7 +9439,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId11')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -9100,7 +9498,8 @@
                 },
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9111,7 +9510,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId12')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -9161,7 +9565,8 @@
                 },
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9172,7 +9577,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId13')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -9250,7 +9660,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9261,7 +9672,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId14')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -9339,7 +9755,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9350,7 +9767,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId15')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -9428,7 +9850,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9439,7 +9862,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId16')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -9508,7 +9936,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9519,7 +9948,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId17')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -10508,7 +10942,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10519,7 +10954,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId18')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -10588,7 +11028,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10599,7 +11040,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId19')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -10668,7 +11114,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10679,7 +11126,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId20')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -10749,7 +11201,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10760,7 +11213,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId21')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -10829,7 +11287,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10840,7 +11299,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId22')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -10937,7 +11401,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10948,7 +11413,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId23')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11033,7 +11503,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11044,7 +11515,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId24')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11120,7 +11596,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11131,7 +11608,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId25')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11198,7 +11680,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11209,7 +11692,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId26')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11276,7 +11764,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11287,7 +11776,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId27')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11352,7 +11846,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11363,7 +11858,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId28')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11430,7 +11930,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11441,7 +11942,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId29')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11506,7 +12012,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11517,7 +12024,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId30')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11591,7 +12103,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11602,7 +12115,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId31')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11667,7 +12185,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11678,7 +12197,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId32')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11743,7 +12267,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11754,7 +12279,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId33')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11819,7 +12349,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11830,7 +12361,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId34')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11905,7 +12441,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11916,7 +12453,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId35')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -11981,7 +12523,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11992,7 +12535,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId36')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -12066,7 +12614,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -12077,7 +12626,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId37')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -12151,7 +12705,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -12162,7 +12717,12 @@
         "contentProductId": "[concat(take(variables('_solutionId'), 50), '-ar-', uniqueString(variables('analyticRuleContentId38')))]",
         "packageId": "[variables('_solutionId')]",
         "contentSchemaVersion": "3.0.0",
-        "version": "[variables('_solutionVersion')]"
+        "version": "[variables('_solutionVersion')]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        }
       }
     },
     {
@@ -17449,7 +18009,7 @@
       "apiVersion": "2020-08-01",
       "name": "[concat(parameters('workspace'), '/SpyCloudRiskScoreFunction')]",
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]"
       ],
       "properties": {
         "etag": "*",
@@ -17467,7 +18027,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-RiskScore-Critical')]",
       "kind": "Scheduled",
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
