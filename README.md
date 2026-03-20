@@ -21,10 +21,11 @@
 
 <br>
 
-![Version](https://img.shields.io/badge/v11.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
+![Version](https://img.shields.io/badge/v13.0-00C7B7?style=flat-square&logo=semver&logoColor=white)
 ![Tables](https://img.shields.io/badge/14_Tables-417_Columns-0078D4?style=flat-square)
 ![Rules](https://img.shields.io/badge/38_Analytics_Rules-FF3E00?style=flat-square)
-![Copilot](https://img.shields.io/badge/400+_Copilot_Skills-6366F1?style=flat-square)
+![Copilot](https://img.shields.io/badge/SCORCH_Agent_+_400+_Skills-6366F1?style=flat-square)
+![API](https://img.shields.io/badge/54_API_Endpoints-F59E0B?style=flat-square)
 ![Playbooks](https://img.shields.io/badge/5_Playbooks-22C55E?style=flat-square)
 ![License: MIT](https://img.shields.io/badge/License-MIT-gray?style=flat-square)
 
@@ -540,72 +541,87 @@ All workbooks are deployed via the ARM template when `enableWorkbook` is set to 
 
 ## Security Copilot Integration
 
-SpyCloud Sentinel v8.0 includes **three Security Copilot integrations** in the unified `copilot/` directory, providing **168 skills (90 KQL + 20 API + 58 agent) + 1 autonomous investigation agent with 17 sub-agents** for natural-language investigation of darknet threat exposure data.
+SpyCloud Sentinel v13.0 includes **six Security Copilot integrations** in the unified `copilot/` directory — featuring **SCORCH** (SpyCloud Compromised Operations Research & Credential Hunter), a grumpy, sarcastic, brilliantly overworked SOC analyst personality with 400+ skills, 54 API endpoints, Logic App remediation actions, and MCP server architecture.
 
-> **New in v8.0:** Connector health assessment, missing data source detection, playbook permission gap analysis, capability matrix, admin-ready recommendation reports, enhanced educational onboarding, and audience-adaptive personality. [Read the full Agents & Plugins Guide](docs/AGENTS-AND-PLUGINS-GUIDE.md) for a deep dive.
+> **New in v13.0:** SCORCH personality (grumpy SOC analyst persona), Full API Suite plugin covering all 8 SpyCloud API products (54 endpoints, up from 9), Logic App plugin for remediation actions from Copilot, MCP server architecture design, 150+ prompt library, MITRE ATT&CK mapping, exhaustive research capabilities, compliance evidence generation, and executive briefing skills. [Read the full evaluation](docs/SCORCH-AGENT-EVALUATION-v13.md).
 
 <details>
 <summary><strong>All files in <code>copilot/</code></strong></summary>
 
 | File | Type | Skills | Description |
 |------|:----:|:------:|-------------|
-| `SpyCloud_Plugin.yaml` | KQL Plugin | 90 | Promptbook skills querying 10 Sentinel custom tables plus 20+ native Microsoft tables for user investigation, device forensics, breach catalog, UEBA correlation, remediation audit, connector health, executive reporting, and more |
-| `SpyCloud_API_Plugin.yaml` | API Plugin | 20 | Direct REST API skills calling SpyCloud Enterprise, Compass, Identity Exposure, SIP, and Investigations APIs for real-time lookups by email, domain, IP, username, or password |
-| `SpyCloud_API_Plugin_OpenAPI.yaml` | OpenAPI Spec | -- | OpenAPI 3.0 specification backing the API Plugin |
-| `SpyCloud_Agent.yaml` | Agent | 1 (17 sub-agents) | Autonomous interactive investigation agent with connector awareness, educational mode, and audience adaptation. Orchestrates 17 sub-agents across 11 Microsoft security products |
-| `manifest.json` | OpenAI | -- | Plugin manifest for OpenAI-compatible hosts (not for Security Copilot) |
+| `SpyCloud_Plugin.yaml` | KQL Plugin | 90 | Promptbook skills querying 10 Sentinel custom tables plus 20+ native Microsoft tables for user investigation, device forensics, breach catalog, UEBA correlation, remediation audit, connector health, executive reporting |
+| `SpyCloud_Agent.yaml` | Agent | 26 sub-agents | **SCORCH** — autonomous interactive investigation agent with grumpy SOC analyst personality. Orchestrates 26 sub-agents across 11 Microsoft security products with MITRE ATT&CK mapping and exhaustive research |
+| `SpyCloud_API_Plugin.yaml` | API Plugin | 20 | Direct REST API skills calling SpyCloud Enterprise, Compass, Identity Exposure, SIP, and Investigations APIs |
+| `SpyCloud_FullAPI_Plugin.yaml` | API Plugin | 54 | **NEW** — Complete SpyCloud API Suite covering all 8 products: Enterprise, Compass, SIP, CAP, Investigations, IdLink, Exposure Metrics, NIST Password Check, Credit Cards, Data Partnership |
+| `SpyCloud_FullAPI_OpenAPI.yaml` | OpenAPI Spec | -- | OpenAPI 3.0 specification for the Full API Suite (54 endpoints) |
+| `SpyCloud_API_Plugin_OpenAPI.yaml` | OpenAPI Spec | -- | OpenAPI 3.0 specification for the original API Plugin |
+| `SpyCloud_LogicApp_Plugin.yaml` | LogicApp Plugin | 8 | **NEW** — Invokable Logic App skills for enrichment + remediation actions directly from Security Copilot. Includes MCP server architecture design |
+| `SCORCH_Prompt_Library.md` | Prompt Library | 150+ | **NEW** — Categorized prompt catalog across 12 investigation types with complexity tiers and persona mapping |
+| `manifest.json` | OpenAI | -- | Plugin manifest for OpenAI-compatible hosts |
 
 </details>
 
 <details>
-<summary><strong>What's the difference between Agents and Plugins?</strong></summary>
+<summary><strong>What's the difference between Agents, Plugins, and Logic App Skills?</strong></summary>
 
-| Feature | Plugin | Agent |
-|---------|--------|-------|
-| **Nature** | Collection of discrete skills | Conversational AI personality |
-| **Memory** | None — stateless | Remembers context across conversation |
-| **Chaining** | Manual — one skill at a time | Automatic — chains skills intelligently |
-| **Interpretation** | Returns raw data | Interprets, analyzes, recommends |
-| **Personality** | None | SENTINEL — witty, thorough, empathetic |
-| **Use case** | Automation, promptbooks, quick lookups | Investigations, correlations, reporting |
+| Feature | KQL Plugin | API Plugin | Logic App Plugin | Agent |
+|---------|-----------|-----------|-----------------|-------|
+| **Nature** | Discrete KQL skills | REST API calls | Orchestrated actions | Conversational AI |
+| **Data Source** | Sentinel tables | Live SpyCloud API | API + Sentinel + Graph | All of the above |
+| **Memory** | Stateless | Stateless | Stateless | Context across conversation |
+| **Chaining** | Manual | Manual | Manual | Automatic — chains intelligently |
+| **Actions** | Read-only queries | Read-only lookups | Read + Write (remediate) | Read + orchestrate |
+| **Personality** | None | None | None | SCORCH — grumpy, brilliant, thorough |
+| **Use case** | Promptbooks, quick lookups | Real-time enrichment | Device isolation, password reset | Full investigations, reporting |
 
-**Use all three together for maximum coverage.** [Full guide here](docs/AGENTS-AND-PLUGINS-GUIDE.md).
+**Use all together for maximum coverage.** The SCORCH agent orchestrates KQL skills internally, and analysts can invoke API and Logic App skills directly or let the agent call them.
 
 </details>
 
-**Example prompts:**
+**Example SCORCH prompts:**
 
-- "Show me all users exposed in the last 24 hours with severity 25"
-- "What data sources am I missing and what should I enable?" *(NEW)*
-- "Generate a connector recommendation report for my admin" *(NEW)*
-- "Are my playbooks actually running?" *(NEW)*
-- "What's the single most dangerous finding right now?"
-- "If you were an attacker with our exposed data, what would you do?"
-- "Walk me through onboarding — what should I set up first?" *(NEW)*
-- "Look up SpyCloud breach data for this email" *(API Plugin)*
-- "Investigate this user's full dark web exposure" *(Agent)*
+- "Show me an overview of our dark web exposure — hit me with the bad news"
+- "Investigate john.doe@company.com — full exposure report"
+- "Which users have the most critical credential exposures right now?"
+- "Are any devices infected with infostealer malware?"
+- "What stolen session cookies could bypass our MFA?"
+- "Do we have sensitive PII exposed requiring breach notification?"
+- "Run a full threat hunt across all our exposure data"
+- "Draft an executive summary for leadership with severity and trends"
+- "What would an attacker's kill chain look like with this data?"
+- "Research the Lumma Stealer — TTPs, C2, recent campaigns"
 
 <details>
 <summary><strong>Setup</strong></summary>
 
-**KQL Plugin (queries Sentinel tables -- no API key needed):**
+**KQL Plugin (queries Sentinel tables — no API key needed):**
 
 1. Navigate to **Security Copilot > Settings > Plugins > Add Plugin**
 2. Upload `copilot/SpyCloud_Plugin.yaml`
 3. Enter your Tenant ID, Subscription ID, Resource Group, and Workspace Name
 4. 90 KQL skills become available in promptbooks and standalone prompts
 
-**API Plugin (direct SpyCloud API access):**
+**Full API Plugin (all 8 SpyCloud API products):**
 
-1. Upload `copilot/SpyCloud_API_Plugin.yaml`
-2. Enter your SpyCloud Enterprise API key when prompted (sent as `X-API-Key` header)
-3. 20 REST API skills for real-time lookups are available immediately
+1. Upload `copilot/SpyCloud_FullAPI_Plugin.yaml`
+2. Enter your SpyCloud Enterprise API key when prompted (sent as `X-Api-Key` header)
+3. 54 REST API skills for real-time lookups across all SpyCloud products
+4. Skills are available based on your SpyCloud license (graceful degradation for unlicensed products)
 
-**Investigation Agent (autonomous interactive triage):**
+**Logic App Plugin (remediation actions from Copilot):**
+
+1. Deploy the SpyCloud Logic Apps via the ARM template (playbooks must be deployed first)
+2. Upload `copilot/SpyCloud_LogicApp_Plugin.yaml`
+3. Enter your Subscription ID and Resource Group
+4. 8 action skills: email/domain/IP enrichment, device isolation, password reset, SOC notification, full investigation
+
+**SCORCH Investigation Agent (autonomous interactive triage):**
 
 1. Upload `copilot/SpyCloud_Agent.yaml`
 2. Configure the same Sentinel workspace settings
-3. Use the agent for guided, multi-step investigations with automatic pivoting
+3. Find SCORCH in **Agents** and start chatting
+4. Use the 150+ prompt library (`copilot/SCORCH_Prompt_Library.md`) for investigation ideas
 
 All three integrations work together -- the KQL plugin queries historical Sentinel data, the API plugin pulls real-time data from SpyCloud, and the agent orchestrates complex investigations across both. The agent proactively identifies missing connectors and generates admin-ready recommendations.
 

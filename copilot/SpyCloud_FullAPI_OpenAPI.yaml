@@ -1,0 +1,832 @@
+openapi: 3.0.3
+info:
+  title: SpyCloud Full API Suite — Security Copilot Integration
+  description: >-
+    Complete SpyCloud API coverage across all 8 product APIs for real-time 
+    dark web threat intelligence. Covers Enterprise ATO Prevention, Session 
+    Identity Protection (SIP), Consumer ATO Protection (CAP), Compass, 
+    Investigations, IdLink, Exposure Metrics, Data Partnership, Compromised 
+    Credit Cards, and Password Exposure checking.
+  version: 2.0.0
+  contact:
+    name: SpyCloud Support
+    url: https://portal.spycloud.com
+    email: support@spycloud.com
+
+servers:
+  - url: https://api.spycloud.io
+    description: SpyCloud US API
+  - url: https://api.eu.spycloud.io
+    description: SpyCloud EU API
+
+paths:
+
+  # ═══════════════════════════════════════════════════════════════════
+  # ENTERPRISE ATO PREVENTION API — Breach Data
+  # ═══════════════════════════════════════════════════════════════════
+
+  /enterprise-v2/breach/data/emails/{email}:
+    get:
+      operationId: eapLookupByEmail
+      summary: "[Enterprise] Look up breach exposures by email"
+      description: >-
+        Returns all compromised credentials, PII, and infostealer records 
+        for a specific email. Primary user investigation endpoint.
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string, format: email }
+        - name: severity
+          in: query
+          schema: { type: integer }
+        - name: since
+          in: query
+          description: Records published after this date (YYYY-MM-DD)
+          schema: { type: string, format: date }
+        - name: until
+          in: query
+          schema: { type: string, format: date }
+        - name: source_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { description: Breach records for the email }
+
+  /enterprise-v2/breach/data/domains/{domain}:
+    get:
+      operationId: eapLookupByDomain
+      summary: "[Enterprise] Look up breach exposures by domain"
+      description: >-
+        Returns all compromised credentials for a corporate domain. 
+        Organizational exposure assessment.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema: { type: string }
+        - name: severity
+          in: query
+          schema: { type: integer }
+        - name: since
+          in: query
+          schema: { type: string, format: date }
+        - name: type
+          in: query
+          description: "corporate, infected, compass"
+          schema: { type: string }
+      responses:
+        '200': { description: Breach records for the domain }
+
+  /enterprise-v2/breach/data/ips/{ip}:
+    get:
+      operationId: eapLookupByIP
+      summary: "[Enterprise] Look up breach exposures by IP"
+      description: >-
+        Returns breach records associated with an IP address. 
+        Valuable for infostealer infection investigation.
+      parameters:
+        - name: ip
+          in: path
+          required: true
+          schema: { type: string }
+        - name: severity
+          in: query
+          schema: { type: integer }
+        - name: since
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200': { description: Breach records for the IP }
+
+  /enterprise-v2/breach/data/usernames/{username}:
+    get:
+      operationId: eapLookupByUsername
+      summary: "[Enterprise] Look up breach exposures by username"
+      description: >-
+        Returns breach records for a non-email username. Service accounts, 
+        application accounts, non-email identities.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+        - name: severity
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { description: Breach records for the username }
+
+  /enterprise-v2/breach/data/passwords:
+    get:
+      operationId: eapLookupByPassword
+      summary: "[Enterprise] Check if a password hash exists in breach data"
+      description: >-
+        Checks if a specific password (hash) appears in breach data. 
+        SENSITIVE — disabled by default. Hash-only, never stores cleartext.
+      parameters:
+        - name: password
+          in: query
+          required: true
+          description: Password hash to check
+          schema: { type: string }
+      responses:
+        '200': { description: Breach records matching the password hash }
+
+  /enterprise-v2/breach/data/watchlist:
+    get:
+      operationId: eapGetWatchlist
+      summary: "[Enterprise] Get all watchlist exposure records"
+      description: >-
+        Returns all exposure records for the monitored watchlist — corporate 
+        domains, IP ranges, executive accounts. Same data flowing to Sentinel.
+      parameters:
+        - name: since
+          in: query
+          description: Records published after this timestamp (epoch)
+          schema: { type: integer }
+        - name: since_modification_date
+          in: query
+          description: Records modified after this date
+          schema: { type: string }
+        - name: severity
+          in: query
+          schema: { type: string }
+        - name: type
+          in: query
+          description: "corporate, infected, compass"
+          schema: { type: string }
+      responses:
+        '200': { description: Watchlist exposure records }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # ENTERPRISE ATO PREVENTION API — Breach Catalog
+  # ═══════════════════════════════════════════════════════════════════
+
+  /enterprise-v2/breach/catalog:
+    get:
+      operationId: eapGetBreachCatalog
+      summary: "[Enterprise] List all breach metadata"
+      description: >-
+        Returns metadata about all breach sources — title, description, 
+        type, confidence, record count, acquisition date, malware family.
+      parameters:
+        - name: since
+          in: query
+          schema: { type: string }
+      responses:
+        '200': { description: Breach catalog entries }
+
+  /enterprise-v2/breach/catalog/{id}:
+    get:
+      operationId: eapGetBreachById
+      summary: "[Enterprise] Get metadata for a specific breach"
+      description: >-
+        Returns full catalog metadata for a specific breach source ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Breach catalog entry }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # ENTERPRISE ATO PREVENTION API — Watchlist Identifiers
+  # ═══════════════════════════════════════════════════════════════════
+
+  /enterprise-v2/watchlist/identifiers:
+    get:
+      operationId: eapListWatchlistIdentifiers
+      summary: "[Enterprise] List all watchlist identifiers"
+      description: >-
+        Returns all monitored identifiers (domains, emails, IPs) on 
+        the customer's watchlist.
+      responses:
+        '200': { description: List of watchlist identifiers }
+    post:
+      operationId: eapCreateWatchlistIdentifier
+      summary: "[Enterprise] Add identifier to watchlist"
+      description: >-
+        Adds a new domain, email, or IP to the monitored watchlist.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type: { type: string, enum: [domain, email, ip] }
+                value: { type: string }
+      responses:
+        '201': { description: Identifier created }
+
+  /enterprise-v2/watchlist/identifiers/{id}:
+    get:
+      operationId: eapGetWatchlistIdentifier
+      summary: "[Enterprise] Get a specific watchlist identifier"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Watchlist identifier details }
+    delete:
+      operationId: eapDeleteWatchlistIdentifier
+      summary: "[Enterprise] Remove identifier from watchlist"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Identifier deleted }
+
+  /enterprise-v2/watchlist/identifiers/{id}/verify:
+    get:
+      operationId: eapVerifyWatchlistIdentifier
+      summary: "[Enterprise] Verify a watchlist identifier"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Verification result }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # ENTERPRISE ATO PREVENTION API — Compass
+  # ═══════════════════════════════════════════════════════════════════
+
+  /enterprise-v2/compass/data:
+    get:
+      operationId: compassGetAllRecords
+      summary: "[Compass] Get all Compass exposure records"
+      description: >-
+        Returns all Compass endpoint exposure data including infected 
+        device records, application exposure, and infection details.
+      parameters:
+        - name: since
+          in: query
+          schema: { type: string }
+        - name: infected_machine_id
+          in: query
+          schema: { type: string }
+      responses:
+        '200': { description: Compass exposure records }
+
+  /enterprise-v2/compass/applications:
+    get:
+      operationId: compassListApplications
+      summary: "[Compass] List all compromised applications"
+      description: >-
+        Returns all applications with compromised credentials across 
+        monitored endpoints. Application blast radius assessment.
+      responses:
+        '200': { description: Compromised application list }
+
+  /enterprise-v2/compass/applications/{application_id}:
+    get:
+      operationId: compassGetApplicationRecords
+      summary: "[Compass] Get records for a specific application"
+      parameters:
+        - name: application_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Application exposure records }
+
+  /enterprise-v2/compass/devices:
+    get:
+      operationId: compassListDevices
+      summary: "[Compass] List all compromised devices"
+      description: >-
+        Returns device-level Compass data — OS, hostname, infection path, 
+        AV status, all users compromised on each device.
+      parameters:
+        - name: since
+          in: query
+          schema: { type: string }
+      responses:
+        '200': { description: Compass device list }
+
+  /enterprise-v2/compass/devices/{device_id}:
+    get:
+      operationId: compassGetDeviceRecords
+      summary: "[Compass] Get records for a specific device"
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Device exposure records }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # SESSION IDENTITY PROTECTION (SIP) API
+  # ═══════════════════════════════════════════════════════════════════
+
+  /sip-v2/cookies/domains/{domain}:
+    get:
+      operationId: sipGetCookiesByDomain
+      summary: "[SIP] Get stolen cookies for a domain"
+      description: >-
+        Returns stolen session cookies for a specific domain. Critical for 
+        detecting MFA bypass risk via session hijacking. Includes cookie 
+        name, value, domain, expiry, and associated user email.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema: { type: string }
+        - name: since
+          in: query
+          schema: { type: string }
+      responses:
+        '200': { description: Stolen cookie records }
+
+  /sip-v2/breach/catalog:
+    get:
+      operationId: sipGetBreachCatalog
+      summary: "[SIP] List SIP breach metadata"
+      responses:
+        '200': { description: SIP breach catalog }
+
+  /sip-v2/breach/catalog/{id}:
+    get:
+      operationId: sipGetBreachById
+      summary: "[SIP] Get SIP breach by ID"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: SIP breach details }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # CAP — CONSUMER ATO PROTECTION (User Exposure) API
+  # ═══════════════════════════════════════════════════════════════════
+
+  /cap-v2/breach/data/emails/{email}:
+    get:
+      operationId: capLookupByEmail
+      summary: "[CAP] Look up consumer exposure by email"
+      description: >-
+        Returns consumer compromised account records for customer-facing 
+        identity protection. ATO risk for customer accounts.
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Consumer exposure records }
+
+  /cap-v2/breach/data/usernames/{username}:
+    get:
+      operationId: capLookupByUsername
+      summary: "[CAP] Look up consumer exposure by username"
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Consumer exposure records }
+
+  /cap-v2/breach/data/ips/{ip}:
+    get:
+      operationId: capLookupByIP
+      summary: "[CAP] Look up consumer exposure by IP"
+      parameters:
+        - name: ip
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Consumer exposure records }
+
+  /cap-v2/breach/data/phones/{phone}:
+    get:
+      operationId: capLookupByPhone
+      summary: "[CAP] Look up consumer exposure by phone number"
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Consumer exposure records }
+
+  /cap-v2/zero-knowledge:
+    get:
+      operationId: capZeroKnowledge
+      summary: "[CAP] Zero-knowledge password check"
+      description: >-
+        Privacy-preserving check whether a credential appears in breach 
+        data without exposing the actual credential.
+      parameters:
+        - name: hash_prefix
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Zero-knowledge check result }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # CAP — PASSWORD EXPOSURE API (NIST-aligned)
+  # ═══════════════════════════════════════════════════════════════════
+
+  /nist-v2/check:
+    get:
+      operationId: nistCheckPasswordHash
+      summary: "[NIST] Check password hash against breach corpus"
+      description: >-
+        NIST SP 800-63B compliant password check. Verifies whether a 
+        password hash appears in SpyCloud's breach database. Used for 
+        password policy enforcement and credential screening.
+      parameters:
+        - name: hash
+          in: query
+          required: true
+          description: SHA256 hash of the password to check
+          schema: { type: string }
+      responses:
+        '200': { description: Password exposure check result }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # EXPOSURE METRICS API
+  # ═══════════════════════════════════════════════════════════════════
+
+  /exposure/stats/emails/{email}:
+    get:
+      operationId: exposureStatsForEmail
+      summary: "[Exposure] Get exposure statistics for an email"
+      description: >-
+        Aggregate exposure statistics for an email — total records, 
+        severity distribution, breach source count, timeline.
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Email exposure statistics }
+
+  /exposure/stats/domains/{domain}:
+    get:
+      operationId: exposureStatsForDomain
+      summary: "[Exposure] Get exposure statistics for a domain"
+      description: >-
+        Aggregate exposure statistics for an organization domain — 
+        total exposed records, severity trends, breach sources, 
+        most recent exposure. Executive-level posture assessment.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Domain exposure statistics }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # INVESTIGATIONS API (Cybercrime / OSINT)
+  # ═══════════════════════════════════════════════════════════════════
+
+  /investigations-v2/breach/data/emails/{email}:
+    get:
+      operationId: invLookupByEmail
+      summary: "[Investigations] Deep investigation by email"
+      description: >-
+        Cybercrime investigation-grade lookup by email. Returns expanded 
+        data including linked identities and investigation metadata.
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/domains/{domain}:
+    get:
+      operationId: invLookupByDomain
+      summary: "[Investigations] Deep investigation by domain"
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/ips/{ip}:
+    get:
+      operationId: invLookupByIP
+      summary: "[Investigations] Deep investigation by IP"
+      parameters:
+        - name: ip
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/phones/{phone}:
+    get:
+      operationId: invLookupByPhone
+      summary: "[Investigations] Deep investigation by phone number"
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/passwords:
+    get:
+      operationId: invLookupByPassword
+      summary: "[Investigations] Investigation by password hash"
+      parameters:
+        - name: password
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/usernames/{username}:
+    get:
+      operationId: invLookupByUsername
+      summary: "[Investigations] Deep investigation by username"
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/log_ids/{log_id}:
+    get:
+      operationId: invLookupByLogId
+      summary: "[Investigations] Investigation by log ID"
+      description: >-
+        Look up records by SpyCloud log ID for specific infostealer log 
+        correlation and malware campaign tracking.
+      parameters:
+        - name: log_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/infected_machine_ids/{machine_id}:
+    get:
+      operationId: invLookupByMachineId
+      summary: "[Investigations] Investigation by infected machine ID"
+      description: >-
+        Deep investigation of a specific infected device — all users, 
+        all credentials, full infection context.
+      parameters:
+        - name: machine_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/social_handles/{handle}:
+    get:
+      operationId: invLookupBySocialHandle
+      summary: "[Investigations] Investigation by social media handle"
+      description: >-
+        Look up records by social media handle — LinkedIn, Twitter, 
+        Instagram, etc. OSINT enrichment capability.
+      parameters:
+        - name: handle
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/credit_cards/{cc_number}:
+    get:
+      operationId: invLookupByCreditCard
+      summary: "[Investigations] Investigation by credit card number"
+      parameters:
+        - name: cc_number
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/email_usernames/{email_username}:
+    get:
+      operationId: invLookupByEmailUsername
+      summary: "[Investigations] Investigation by email username part"
+      description: >-
+        Look up by the username portion of email (before @). Finds all 
+        domains where this username was used.
+      parameters:
+        - name: email_username
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/ssns/{ssn}:
+    get:
+      operationId: invLookupBySSN
+      summary: "[Investigations] Investigation by Social Security Number"
+      parameters:
+        - name: ssn
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/bank_numbers/{bank_number}:
+    get:
+      operationId: invLookupByBankNumber
+      summary: "[Investigations] Investigation by bank account number"
+      parameters:
+        - name: bank_number
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/drivers_licenses/{dl}:
+    get:
+      operationId: invLookupByDriversLicense
+      summary: "[Investigations] Investigation by driver's license"
+      parameters:
+        - name: dl
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/national_ids/{national_id}:
+    get:
+      operationId: invLookupByNationalId
+      summary: "[Investigations] Investigation by national ID"
+      parameters:
+        - name: national_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  /investigations-v2/breach/data/passports/{passport}:
+    get:
+      operationId: invLookupByPassport
+      summary: "[Investigations] Investigation by passport number"
+      parameters:
+        - name: passport
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Investigation records }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # IDLINK API — Identity Graph
+  # ═══════════════════════════════════════════════════════════════════
+
+  /idlink-v2/breach/data/emails/{email}:
+    get:
+      operationId: idlinkLookupByEmail
+      summary: "[IdLink] Resolve identity graph by email"
+      description: >-
+        Returns linked identities for an email — all associated accounts, 
+        usernames, phone numbers, and connected identities. Maps the full 
+        identity exposure blast radius.
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: IdLink identity graph }
+
+  /idlink-v2/breach/data/phones/{phone}:
+    get:
+      operationId: idlinkLookupByPhone
+      summary: "[IdLink] Resolve identity graph by phone"
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: IdLink identity graph }
+
+  /idlink-v2/breach/data/usernames/{username}:
+    get:
+      operationId: idlinkLookupByUsername
+      summary: "[IdLink] Resolve identity graph by username"
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: IdLink identity graph }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # COMPROMISED CREDIT CARD API
+  # ═══════════════════════════════════════════════════════════════════
+
+  /fraud-detection-v2/credit-cards/bins/{bin}:
+    get:
+      operationId: ccLookupByBIN
+      summary: "[Fraud] Get compromised credit cards by BIN"
+      description: >-
+        Returns compromised credit card records matching a Bank 
+        Identification Number (BIN). Financial fraud detection.
+      parameters:
+        - name: bin
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Compromised card records }
+
+  /fraud-detection-v2/credit-cards:
+    get:
+      operationId: ccListCards
+      summary: "[Fraud] List compromised credit cards"
+      description: >-
+        Returns all compromised credit card records for the organization's 
+        monitored BIN ranges.
+      responses:
+        '200': { description: Compromised card list }
+
+  # ═══════════════════════════════════════════════════════════════════
+  # DATA PARTNERSHIP API
+  # ═══════════════════════════════════════════════════════════════════
+
+  /data-partnership-v2/breach/data/emails/{email}:
+    get:
+      operationId: dpLookupByEmail
+      summary: "[Partnership] Look up partner data by email"
+      description: >-
+        Returns partner-contributed breach and exposure data extending 
+        beyond SpyCloud's own collection.
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Partner data records }
+
+  /data-partnership-v2/breach/data/domains/{domain}:
+    get:
+      operationId: dpLookupByDomain
+      summary: "[Partnership] Look up partner data by domain"
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Partner data records }
+
+  /data-partnership-v2/breach/data/ssns/{ssn}:
+    get:
+      operationId: dpLookupBySSN
+      summary: "[Partnership] Look up partner data by SSN"
+      parameters:
+        - name: ssn
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Partner data records }
+
+  /data-partnership-v2/breach/data/phones/{phone}:
+    get:
+      operationId: dpLookupByPhone
+      summary: "[Partnership] Look up partner data by phone"
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Partner data records }

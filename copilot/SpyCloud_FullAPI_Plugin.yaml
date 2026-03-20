@@ -1,0 +1,40 @@
+# ═══════════════════════════════════════════════════════════════════════
+# SpyCloud Full API Suite — Security Copilot API Plugin
+# Covers ALL 8 SpyCloud API Products
+# ═══════════════════════════════════════════════════════════════════════
+# Version:  2.0.0
+# Date:     2026-03-19
+# Spec:     https://learn.microsoft.com/en-us/copilot/security/plugin-api
+#
+# NOTE: This plugin enables Security Copilot to call SpyCloud APIs
+# directly for real-time enrichment. Each API product requires its
+# own license/key. The plugin gracefully handles unauthorized endpoints
+# (customers only see data for products they're licensed for).
+# ═══════════════════════════════════════════════════════════════════════
+
+Descriptor:
+  Name: SpyCloud.FullAPI.ThreatIntelligence
+  DisplayName: SpyCloud Full API Suite — Live Threat Intelligence
+  Description: >-
+    Complete SpyCloud API integration covering all 8 product APIs for 
+    real-time dark web threat intelligence. Supports Enterprise ATO 
+    Prevention (breach data, watchlist, catalog), Compass (devices, 
+    applications), Session Identity Protection (stolen cookies), 
+    Consumer ATO Protection (CAP), Investigations (deep OSINT), 
+    IdLink (identity graph), Exposure Metrics (domain/email stats), 
+    NIST Password Check, Compromised Credit Cards, and Data Partnership.
+    Complements the KQL plugin (Sentinel-ingested data) with live API 
+    lookups across 50+ endpoints for on-demand investigation.
+  SupportedAuthTypes:
+    - ApiKey
+  Authorization:
+    Type: APIKey
+    Key: X-Api-Key
+    Location: Header
+    AuthScheme: ''
+
+SkillGroups:
+  - Format: API
+    Settings:
+      OpenApiSpecUrl: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/spycloud-full-openapi-spec.yaml
+      EndpointUrl: https://api.spycloud.io
