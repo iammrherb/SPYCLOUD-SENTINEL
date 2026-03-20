@@ -13823,7 +13823,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/Ueba')]",
       "kind": "Ueba",
       "etag": "*",
-      "condition": "[parameters('enableUEBA')]",
+      "condition": "[parameters('createNewWorkspace')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
@@ -13844,7 +13844,7 @@
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/Anomalies')]",
       "kind": "Anomalies",
       "etag": "*",
-      "condition": "[parameters('enableAnomalies')]",
+      "condition": "[parameters('createNewWorkspace')]",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
         "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
@@ -18453,7 +18453,8 @@
       "kind": "Scheduled",
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudBreachWatchlist_CL')]"
       ],
       "properties": {
         "displayName": "SpyCloud — Identity Risk Score Exceeds Critical Threshold",
