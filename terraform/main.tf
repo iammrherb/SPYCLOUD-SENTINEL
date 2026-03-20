@@ -55,16 +55,6 @@ data "http" "arm_template" {
   }
 }
 
-# ─── Fetch ARM template from URL when no local path provided ─────────────────
-data "http" "arm_template" {
-  count = var.arm_template_local_path == "" ? 1 : 0
-  url   = local.template_url
-
-  request_headers = {
-    Accept = "application/json"
-  }
-}
-
 # ─── ARM Template Deployment ──────────────────────────────────────────────────
 resource "azurerm_resource_group_template_deployment" "spycloud" {
   name                = "spycloud-sentinel-${formatdate("YYYYMMDDhhmmss", timestamp())}"
