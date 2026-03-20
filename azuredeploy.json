@@ -8474,7 +8474,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -8629,7 +8629,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -8714,7 +8714,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -8799,7 +8799,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -8895,7 +8895,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -8992,7 +8992,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9078,7 +9078,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT6H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9164,7 +9164,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT6H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9249,7 +9249,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT6H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9335,7 +9335,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT12H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9426,7 +9426,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT6H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9497,7 +9497,7 @@
                   }
                 },
                 "status": "Available",
-                "suppressionDuration": "PT12H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9564,7 +9564,7 @@
                   }
                 },
                 "status": "Available",
-                "suppressionDuration": "PT12H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9659,7 +9659,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9754,7 +9754,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9849,7 +9849,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -9935,7 +9935,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -10941,7 +10941,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11027,7 +11027,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT6H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11113,7 +11113,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11200,7 +11200,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT6H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11286,7 +11286,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT12H",
+                "suppressionDuration": "[parameters('analyticsRuleFrequency')]",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11400,7 +11400,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11502,7 +11502,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11595,7 +11595,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11679,7 +11679,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11763,7 +11763,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11845,7 +11845,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -11929,7 +11929,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -12011,7 +12011,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -12102,7 +12102,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -12184,7 +12184,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -12266,7 +12266,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -12348,7 +12348,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -12522,7 +12522,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -12613,7 +12613,7 @@
                   }
                 ],
                 "status": "Available",
-                "suppressionDuration": "PT1H",
+                "suppressionDuration": "PT6H",
                 "suppressionEnabled": true,
                 "enabled": true
               }
@@ -18044,7 +18044,9 @@
         "tactics": [
           "CredentialAccess",
           "InitialAccess",
-          "Persistence"
+          "Persistence",
+          "DefenseEvasion",
+          "LateralMovement"
         ],
         "techniques": [
           "T1078",
@@ -18053,8 +18055,8 @@
           "T1550"
         ],
         "alertDetailsOverride": {
-          "alertDisplayNameFormat": "SpyCloud Risk Score {{RiskTier}} — {{email}} (Score: {{RiskScore}})",
-          "alertDescriptionFormat": "User {{email}} has a SpyCloud risk score of {{RiskScore}}/100 ({{RiskTier}}). {{ExposureCount}} exposures found, max severity {{MaxSeverity}}, plaintext passwords: {{HasPlaintext}}, stolen cookies: {{HasCookies}}, {{DeviceCount}} infected devices across {{DomainCount}} domains. Most recent exposure: {{MostRecent}} ({{AgeDays}} days ago).",
+          "alertDisplayNameFormat": "SpyCloud Risk {{RiskTier}} — {{email}} (Score: {{RiskScore}})",
+          "alertDescriptionFormat": "User {{email}} has a SpyCloud risk score of {{RiskScore}}/100 ({{RiskTier}}). Review the incident entities for full exposure details including breach sources, device infections, and remediation recommendations.",
           "alertSeverityColumnName": null,
           "alertTacticsColumnName": null
         },
@@ -18081,7 +18083,7 @@
             ]
           }
         },
-        "suppressionDuration": "PT1H"
+        "suppressionDuration": "PT6H"
       }
     }
   ],
