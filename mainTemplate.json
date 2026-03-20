@@ -1,10 +1,10 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "10.0.0.0",
+  "contentVersion": "13.12.0.0",
   "metadata": {
     "_generator": {
       "name": "SpyCloud Solution Builder",
-      "version": "10.0.0"
+      "version": "13.12.0"
     }
   },
   "parameters": {
@@ -60,7 +60,7 @@
   "variables": {
     "solutionId": "spycloud.spycloud-sentinel-solution",
     "_solutionId": "spycloud.spycloud-sentinel-solution",
-    "solutionVersion": "10.0.0",
+    "solutionVersion": "13.12.0",
     "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
     "uiConfigId1": "SpyCloudDataConnector",
     "_uiConfigId1": "SpyCloudDataConnector",

@@ -20,7 +20,7 @@
   "contact_email": "support@spycloud.com",
   "legal_info_url": "https://spycloud.com/terms",
   "privacy_policy_url": "https://spycloud.com/privacy",
-  "version": "10.0.0",
+  "version": "13.12.0",
   "capabilities": {
     "plugins": [
       {

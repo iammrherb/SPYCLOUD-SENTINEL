@@ -6,7 +6,7 @@
 
 ### The Most Powerful Darknet Identity Threat Intelligence Platform for Microsoft Sentinel
 
-[![Version](https://img.shields.io/badge/version-13.2-00D4AA?style=for-the-badge)](#) [![ARM Resources](https://img.shields.io/badge/ARM_Resources-144-0097A7?style=for-the-badge)](#) [![Analytics Rules](https://img.shields.io/badge/Analytics_Rules-38+-E91E63?style=for-the-badge)](#) [![Playbooks](https://img.shields.io/badge/Playbooks-32-9C27B0?style=for-the-badge)](#) [![AI Skills](https://img.shields.io/badge/Copilot_Skills-28+-FF9800?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/version-13.12.0-00D4AA?style=for-the-badge)](#) [![ARM Resources](https://img.shields.io/badge/ARM_Resources-144-0097A7?style=for-the-badge)](#) [![Analytics Rules](https://img.shields.io/badge/Analytics_Rules-38+-E91E63?style=for-the-badge)](#) [![Playbooks](https://img.shields.io/badge/Playbooks-32-9C27B0?style=for-the-badge)](#) [![AI Skills](https://img.shields.io/badge/Copilot_Skills-28+-FF9800?style=for-the-badge)](#)
 
 **173 files** · **144 ARM resources** · **57 content templates** · **32 playbooks** · **4 workbooks** · **13 workbook templates** · **3 notebooks** · **16 scripts** · **5 promptbooks** · **MCP server** · **Terraform module** · **13 test data sets**
 

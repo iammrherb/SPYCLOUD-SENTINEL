@@ -19,8 +19,8 @@
     "tier": "Partner",
     "link": "https://spycloud.com/support"
   },
-  "version": "10.0.0",
-  "source": {
+    "version": "13.12.0",
+    "source": {
     "kind": "Solution",
     "name": "SpyCloud Identity Threat Protection"
   },
@@ -39,72 +39,72 @@
       {
         "kind": "DataConnector",
         "contentId": "SpyCloudDataConnector",
-        "version": "10.0.0"
+        "version": "13.12.0"
       },
       {
         "kind": "Workbook",
         "contentId": "SpyCloudExecutiveDashboard",
-        "version": "10.0.0"
+        "version": "13.12.0"
       },
       {
         "kind": "Workbook",
         "contentId": "SpyCloudSOCOperations",
-        "version": "10.0.0"
+        "version": "13.12.0"
       },
       {
         "kind": "Workbook",
         "contentId": "SpyCloudThreatIntelDashboard",
-        "version": "10.0.0"
+        "version": "13.12.0"
       },
       {
         "kind": "AnalyticsRule",
-        "contentId": "spycloud-infostealer-detection",
-        "version": "10.0.0"
+        "contentId": "spycloud-ar-afea3581841e",
+        "version": "13.12.0"
       },
       {
         "kind": "AnalyticsRule",
-        "contentId": "spycloud-credential-exposure",
-        "version": "10.0.0"
+        "contentId": "spycloud-ar-3f81b645043c",
+        "version": "13.12.0"
       },
       {
         "kind": "AnalyticsRule",
-        "contentId": "spycloud-darknet-breach-alert",
-        "version": "10.0.0"
+        "contentId": "spycloud-ar-91e7033da569",
+        "version": "13.12.0"
       },
       {
         "kind": "AnalyticsRule",
-        "contentId": "spycloud-session-hijack-detection",
-        "version": "10.0.0"
+        "contentId": "spycloud-ar-aa7b9165b0a2",
+        "version": "13.12.0"
       },
       {
         "kind": "AnalyticsRule",
-        "contentId": "spycloud-malware-infected-device",
-        "version": "10.0.0"
+        "contentId": "spycloud-ar-91fd8db10531",
+        "version": "13.12.0"
       },
       {
         "kind": "AnalyticsRule",
-        "contentId": "spycloud-botnet-credential-theft",
-        "version": "10.0.0"
+        "contentId": "spycloud-ar-1a5c78847c8c",
+        "version": "13.12.0"
       },
       {
         "kind": "HuntingQuery",
         "contentId": "spycloud-hunting-queries",
-        "version": "10.0.0"
+        "version": "13.12.0"
       },
       {
         "kind": "Notebook",
         "contentId": "SpyCloud-Incident-Triage",
-        "version": "10.0.0"
+        "version": "13.12.0"
       },
       {
         "kind": "Notebook",
         "contentId": "SpyCloud-Threat-Landscape",
-        "version": "10.0.0"
+        "version": "13.12.0"
       },
       {
         "kind": "Notebook",
         "contentId": "SpyCloud-ThreatHunting",
-        "version": "10.0.0"
+        "version": "13.12.0"
       }
     ]
   },

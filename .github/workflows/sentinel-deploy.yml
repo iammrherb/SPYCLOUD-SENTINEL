@@ -28,7 +28,7 @@ permissions:
   contents: read
 
 env:
-  SOLUTION_VERSION: '10.0.0'
+  SOLUTION_VERSION: '13.12.0'
   SOLUTION_NAME: 'SpyCloud Identity Threat Protection'
 
 jobs:
