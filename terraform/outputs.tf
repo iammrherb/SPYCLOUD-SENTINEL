@@ -59,7 +59,7 @@ output "sip_table" {
 
 output "post_deployment_steps" {
   description = "Required post-deployment steps"
-  value = <<-EOT
+  value       = <<-EOT
     Post-Deployment Steps:
     1. Run: ./scripts/post-deploy.sh -g ${local.resource_group_name} -w ${var.workspace_name}
     2. Enable analytics rules: Sentinel > Analytics > filter 'SpyCloud'
