@@ -55,18 +55,30 @@ DAILY_LIMIT = int(os.environ.get("ENRICHMENT_DAILY_LIMIT", "200"))
 _RATE_LIMIT_TABLE = "SpyCloudRateLimits"
 _RATE_LIMIT_FILE = "/tmp/spycloud_rate_limits.json"
 _rate_limit_lock = threading.Lock()
+_cached_table_client = None
+_table_client_initialized = False
 
 
 def _get_table_client():
-    """Return Azure Table Storage client if connection string is configured."""
+    """Return Azure Table Storage client if connection string is configured.
+
+    Caches the client after first successful creation to avoid redundant
+    create_table_if_not_exists HTTP calls on every invocation.
+    """
+    global _cached_table_client, _table_client_initialized
+    if _table_client_initialized:
+        return _cached_table_client
     conn_str = os.environ.get("AZURE_STORAGE_CONNECTION_STRING", "")
     if conn_str and _HAS_TABLE_STORAGE:
         try:
             svc = TableServiceClient.from_connection_string(conn_str)
             svc.create_table_if_not_exists(_RATE_LIMIT_TABLE)
-            return svc.get_table_client(_RATE_LIMIT_TABLE)
+            _cached_table_client = svc.get_table_client(_RATE_LIMIT_TABLE)
+            _table_client_initialized = True
+            return _cached_table_client
         except Exception as e:
             logging.warning(f"Table Storage unavailable, using file fallback: {e}")
+    _table_client_initialized = True
     return None
 
 
@@ -132,12 +144,13 @@ def _query_log_analytics(workspace_id: str, query: str) -> list:
         token = credential.get_token("https://api.loganalytics.io/.default")
         headers["Authorization"] = f"Bearer {token.token}"
     except Exception:
-        # Fall back to shared key if managed identity unavailable
-        shared_key = LOG_ANALYTICS_KEY
-        if not shared_key:
-            logging.warning("No Log Analytics credentials available")
-            return []
-        headers["X-Api-Key"] = shared_key
+        # Managed identity unavailable — Log Analytics REST API requires OAuth
+        # bearer token; shared key auth uses HMAC-SHA256 signing which is not
+        # supported here.  Return empty when no credential is available.
+        logging.warning("DefaultAzureCredential unavailable; Log Analytics queries require "
+                        "managed identity or a service principal. Configure a system-assigned "
+                        "managed identity on the Function App with Log Analytics Reader role.")
+        return []
 
     try:
         resp = requests.post(url, headers=headers, json={"query": query.strip()}, timeout=60)
@@ -797,7 +810,7 @@ def report_daily(req: func.HttpRequest) -> func.HttpResponse:
 
         metrics = _query_log_analytics(workspace_id, f"""
             let today = datetime({today});
-            let new_exposures = SpyCloudBreachData_CL
+            let new_exposures = SpyCloudBreachWatchlist_CL
                 | where TimeGenerated >= today
                 | summarize NewExposures=count(),
                             CriticalCount=countif(severity_d >= 20),
@@ -850,7 +863,7 @@ def report_executive(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         trend = _query_log_analytics(workspace_id, f"""
-            SpyCloudBreachData_CL
+            SpyCloudBreachWatchlist_CL
             | where TimeGenerated >= ago({days}d)
             | summarize
                 TotalExposures=count(),
