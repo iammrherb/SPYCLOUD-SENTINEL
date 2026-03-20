@@ -10,3 +10,4 @@ Thumbs.db
 __pycache__/
 node_modules/
 .venv/
+package-lock.json
