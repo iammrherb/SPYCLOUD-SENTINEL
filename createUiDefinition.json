@@ -6,7 +6,7 @@
     "config": {
       "isWizard": true,
       "basics": {
-        "description": "## SpyCloud Darknet Identity Exposure Intelligence\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-200.png)\n\n**Version 13.9 \u2014 Enterprise Identity Threat Intelligence Platform**\n\nDeploy the most comprehensive darknet identity threat intelligence integration for Microsoft Sentinel \u2014 144 ARM resources, 38 analytics rules, 32 playbooks, SCORCH AI agent, Identity Risk Score engine, and seamless integration with 100+ security products.\n\n**Deploys:** Data Connector (13 pollers, 15 tables) \u00b7 38 Analytics Rules \u00b7 16 Hunting Queries \u00b7 13 Logic Apps \u00b7 Azure Function App \u00b7 Key Vault \u00b7 SOC Dashboard Workbook \u00b7 Security Copilot Plugin \u00b7 SCORCH AI Agent \u00b7 MCP Server \u00b7 3 Notebooks\n\nFor setup help: [integrations@spycloud.com](mailto:integrations@spycloud.com) | [portal.spycloud.com](https://portal.spycloud.com)",
+        "description": "## SpyCloud Darknet Identity Exposure Intelligence\n\n![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-200.png)\n\n**Version 13.12.0 — Enterprise Identity Threat Intelligence Platform**\n\nDeploy the most comprehensive darknet identity threat intelligence integration for Microsoft Sentinel — 144 ARM resources, 38 analytics rules, 32 playbooks, SCORCH AI agent, Identity Risk Score engine, and seamless integration with 100+ security products.\n\n**Deploys:** Data Connector (13 pollers, 15 tables) · 38 Analytics Rules · 16 Hunting Queries · 13 Logic Apps · Azure Function App · Key Vault · SOC Dashboard Workbook · Security Copilot Plugin · SCORCH AI Agent · MCP Server · 3 Notebooks\n\nFor setup help: [integrations@spycloud.com](mailto:integrations@spycloud.com) | [portal.spycloud.com](https://portal.spycloud.com)",
         "location": {
           "label": "Deployment Region",
           "resourceTypes": [
@@ -239,13 +239,13 @@
                 "visible": true,
                 "options": {
                   "icon": "Warning",
-                  "text": "You must enable at least one product below. Only enable products you are licensed for \u2014 using an invalid or unauthorized key will cause 403 Forbidden errors during data ingestion."
+                  "text": "You must enable at least one product below. Only enable products you are licensed for — using an invalid or unauthorized key will cause 403 Forbidden errors during data ingestion."
                 }
               },
               {
                 "name": "enableEnterprise",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Enterprise / Compass \u2014 Breach watchlist monitoring, breach catalog, identity exposure, and Compass infostealer intelligence. Selecting this product enables ALL data source pollers below.",
+                "label": "Enterprise / Compass — Breach watchlist monitoring, breach catalog, identity exposure, and Compass infostealer intelligence. Selecting this product enables ALL data source pollers below.",
                 "toolTip": "Enable if you have a SpyCloud Enterprise or Enterprise+ subscription. Enterprise and Compass share the same API key.",
                 "defaultValue": true
               },
@@ -304,48 +304,48 @@
                 "visible": true,
                 "options": {
                   "icon": "None",
-                  "text": "\u2500\u2500 Standalone Products (each requires its own dedicated API key) \u2500\u2500"
+                  "text": "── Standalone Products (each requires its own dedicated API key) ──"
                 }
               },
               {
                 "name": "enableSipProduct",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Session Identity Protection (SIP) \u2014 Stolen session cookies and tokens for your monitored domains.",
+                "label": "Session Identity Protection (SIP) — Stolen session cookies and tokens for your monitored domains.",
                 "toolTip": "Enable if you have a standalone SIP subscription or SIP entitlement with a dedicated key.",
                 "defaultValue": false
               },
               {
                 "name": "enableInvestigationsProduct",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Investigations \u2014 Deep-dive investigative data for threat hunting and incident response across the full SpyCloud dataset.",
+                "label": "Investigations — Deep-dive investigative data for threat hunting and incident response across the full SpyCloud dataset.",
                 "toolTip": "Enable if you have a standalone Investigations subscription or Investigations entitlement with a dedicated key.",
                 "defaultValue": false
               },
               {
                 "name": "enableIdLinkProduct",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "IDLink \u2014 Identity correlation and graph analysis mapping relationships between compromised identities.",
+                "label": "IDLink — Identity correlation and graph analysis mapping relationships between compromised identities.",
                 "toolTip": "Enable if you have a standalone IDLink subscription with a dedicated API key.",
                 "defaultValue": false
               },
               {
                 "name": "enableDataPartnershipProduct",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Data Partnership \u2014 Partner-sourced intelligence feeds for expanded compromised credential coverage.",
+                "label": "Data Partnership — Partner-sourced intelligence feeds for expanded compromised credential coverage.",
                 "toolTip": "Enable if you have a Data Partnership subscription with a dedicated API key.",
                 "defaultValue": false
               },
               {
                 "name": "enableExposureProduct",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Exposure \u2014 Aggregated exposure metrics and risk scores for monitored assets.",
+                "label": "Exposure — Aggregated exposure metrics and risk scores for monitored assets.",
                 "toolTip": "Enable if you have an Exposure subscription with a dedicated API key.",
                 "defaultValue": false
               },
               {
                 "name": "enableCapProduct",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "CAP (Credential Access Program) \u2014 Automated credential protection policies and lifecycle management.",
+                "label": "CAP (Credential Access Program) — Automated credential protection policies and lifecycle management.",
                 "toolTip": "Enable if you have a CAP subscription with a dedicated API key.",
                 "defaultValue": false
               },
@@ -355,7 +355,7 @@
                 "visible": true,
                 "options": {
                   "icon": "None",
-                  "text": "\u2500\u2500 Polling Configuration \u2500\u2500"
+                  "text": "── Polling Configuration ──"
                 }
               },
               {
@@ -494,7 +494,7 @@
               {
                 "name": "enableBreachWatchlist",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Breach Watchlist \u2014 Monitors your organization's domains and email addresses against SpyCloud's breach database for compromised credentials and PII. (Requires Enterprise/Compass)",
+                "label": "Breach Watchlist — Monitors your organization's domains and email addresses against SpyCloud's breach database for compromised credentials and PII. (Requires Enterprise/Compass)",
                 "toolTip": "Enables the Breach Watchlist data poller. Requires Enterprise/Compass product.",
                 "defaultValue": true,
                 "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]"
@@ -502,7 +502,7 @@
               {
                 "name": "enableBreachCatalog",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Breach Catalog \u2014 Provides metadata about breaches in SpyCloud's database including source, severity, acquisition date, and affected record counts. (Requires Enterprise/Compass)",
+                "label": "Breach Catalog — Provides metadata about breaches in SpyCloud's database including source, severity, acquisition date, and affected record counts. (Requires Enterprise/Compass)",
                 "toolTip": "Enables the Breach Catalog data poller. Requires Enterprise/Compass product.",
                 "defaultValue": true,
                 "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]"
@@ -510,7 +510,7 @@
               {
                 "name": "enableCompass",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Compass \u2014 Delivers infostealer malware intelligence including infected device details, stolen credentials, and session cookies. (Requires Enterprise/Compass)",
+                "label": "Compass — Delivers infostealer malware intelligence including infected device details, stolen credentials, and session cookies. (Requires Enterprise/Compass)",
                 "toolTip": "Enables the Compass data poller. Requires Enterprise/Compass product.",
                 "defaultValue": true,
                 "visible": "[steps('dataConnector').sectionApiConfig.enableEnterprise]"
@@ -518,7 +518,7 @@
               {
                 "name": "enableSIP",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Session Identity Protection (SIP) \u2014 Detects stolen session cookies and tokens for your monitored domains.",
+                "label": "Session Identity Protection (SIP) — Detects stolen session cookies and tokens for your monitored domains.",
                 "toolTip": "Enables the SIP data poller.",
                 "defaultValue": false,
                 "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableSipProduct)]"
@@ -539,7 +539,7 @@
               {
                 "name": "enableInvestigations",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Investigations \u2014 Deep-dive investigative data for threat hunting and incident response across the full SpyCloud dataset.",
+                "label": "Investigations — Deep-dive investigative data for threat hunting and incident response across the full SpyCloud dataset.",
                 "toolTip": "Enables the Investigations data poller.",
                 "defaultValue": false,
                 "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableInvestigationsProduct)]"
@@ -547,7 +547,7 @@
               {
                 "name": "enableIDLink",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "IDLink \u2014 Maps relationships between compromised identities, devices, and credentials to reveal identity linkage patterns.",
+                "label": "IDLink — Maps relationships between compromised identities, devices, and credentials to reveal identity linkage patterns.",
                 "toolTip": "Enables the IDLink data poller.",
                 "defaultValue": false,
                 "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableIdLinkProduct)]"
@@ -555,7 +555,7 @@
               {
                 "name": "enableExposure",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Exposure \u2014 Aggregates exposure metrics and risk scores for monitored assets based on historical and ongoing breach data.",
+                "label": "Exposure — Aggregates exposure metrics and risk scores for monitored assets based on historical and ongoing breach data.",
                 "toolTip": "Enables the Exposure data poller.",
                 "defaultValue": false,
                 "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableExposureProduct)]"
@@ -563,7 +563,7 @@
               {
                 "name": "enableCAP",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Compromised Application Protection (CAP) \u2014 Identifies compromised consumer accounts and application credentials in real time.",
+                "label": "Compromised Application Protection (CAP) — Identifies compromised consumer accounts and application credentials in real time.",
                 "toolTip": "Enables the CAP data poller.",
                 "defaultValue": false,
                 "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableCapProduct)]"
@@ -571,7 +571,7 @@
               {
                 "name": "enableDataPartnership",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Data Partnership \u2014 Ingests partner-sourced intelligence feeds for expanded coverage of compromised credential sources.",
+                "label": "Data Partnership — Ingests partner-sourced intelligence feeds for expanded coverage of compromised credential sources.",
                 "toolTip": "Enables the Data Partnership data poller.",
                 "defaultValue": false,
                 "visible": "[or(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct)]"
@@ -935,7 +935,7 @@
             "name": "enableEnrichmentPlaybooks",
             "type": "Microsoft.Common.CheckBox",
             "label": "Enable SpyCloud Enrichment Playbooks (recommended)",
-            "toolTip": "Deploy enrichment playbooks that call SpyCloud API at incident time. All use the Enterprise API key \u2014 no additional key needed for core enrichment.",
+            "toolTip": "Deploy enrichment playbooks that call SpyCloud API at incident time. All use the Enterprise API key — no additional key needed for core enrichment.",
             "defaultValue": true
           },
           {
@@ -944,13 +944,13 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "API keys for all SpyCloud products (Compass, SIP, Investigations, etc.) are entered on the Data Connector page after deployment \u2014 not here. The connector page stores keys persistently and you can update them at any time without redeploying. This step only controls which enrichment playbooks to deploy."
+              "text": "API keys for all SpyCloud products (Compass, SIP, Investigations, etc.) are entered on the Data Connector page after deployment — not here. The connector page stores keys persistently and you can update them at any time without redeploying. This step only controls which enrichment playbooks to deploy."
             }
           },
           {
             "name": "sectionEnterprise",
             "type": "Microsoft.Common.Section",
-            "label": "Enterprise Protection \u2014 Core Enrichment Playbooks",
+            "label": "Enterprise Protection — Core Enrichment Playbooks",
             "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
             "elements": [
               {
@@ -965,43 +965,43 @@
               {
                 "name": "enableEnrichEmail",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Email Enrichment \u2014 breach records by email address",
+                "label": "Email Enrichment — breach records by email address",
                 "toolTip": "Calls /breach/data/emails/{email}. Returns: total exposures, severity, plaintext passwords, target domains, infection details. Most commonly triggered.",
                 "defaultValue": true
               },
               {
                 "name": "enableEnrichDomain",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Domain Enrichment \u2014 breach records by domain",
+                "label": "Domain Enrichment — breach records by domain",
                 "toolTip": "Calls /breach/data/domains/{domain}. Returns: total exposed users, severity breakdown, top accounts, breach sources.",
                 "defaultValue": true
               },
               {
                 "name": "enableEnrichIP",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "IP Enrichment \u2014 breach records by IP address",
+                "label": "IP Enrichment — breach records by IP address",
                 "toolTip": "Calls /breach/data/ips/{ip}. Returns: infected devices at this IP, affected users, malware families. Valuable for infostealer investigations.",
                 "defaultValue": true
               },
               {
                 "name": "enableEnrichUsername",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Username Enrichment \u2014 breach records by username",
+                "label": "Username Enrichment — breach records by username",
                 "toolTip": "Calls /breach/data/usernames/{username}. For non-email identifiers, service accounts.",
                 "defaultValue": true
               },
               {
                 "name": "enableEnrichCatalog",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Catalog Enrichment \u2014 breach source metadata",
+                "label": "Catalog Enrichment — breach source metadata",
                 "toolTip": "Calls /breach/catalog/{source_id}. Returns: breach title, description, type, confidence. Adds 'where did this come from?' context.",
                 "defaultValue": true
               },
               {
                 "name": "enableFullInvestigation",
                 "type": "Microsoft.Common.CheckBox",
-                "label": "Full Investigation Orchestration \u2014 chains all enrichments for Critical incidents",
-                "toolTip": "For High/Critical incidents only. Chains email \u2192 catalog \u2192 Compass (if key provided) \u2192 SIP (if key provided) \u2192 MDE \u2192 Entra correlation. Rate limited: max 50/day.",
+                "label": "Full Investigation Orchestration — chains all enrichments for Critical incidents",
+                "toolTip": "For High/Critical incidents only. Chains email → catalog → Compass (if key provided) → SIP (if key provided) → MDE → Entra correlation. Rate limited: max 50/day.",
                 "defaultValue": true
               }
             ]
@@ -1009,7 +1009,7 @@
           {
             "name": "sectionCompass",
             "type": "Microsoft.Common.Section",
-            "label": "Compass \u2014 Endpoint Threat Protection Enrichment",
+            "label": "Compass — Endpoint Threat Protection Enrichment",
             "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
             "elements": [
               {
@@ -1033,7 +1033,7 @@
           {
             "name": "sectionSip",
             "type": "Microsoft.Common.Section",
-            "label": "SIP \u2014 Stolen Cookie & Session Enrichment",
+            "label": "SIP — Stolen Cookie & Session Enrichment",
             "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
             "elements": [
               {
@@ -1057,7 +1057,7 @@
           {
             "name": "sectionInvestigations",
             "type": "Microsoft.Common.Section",
-            "label": "Investigations \u2014 Deep Database Enrichment",
+            "label": "Investigations — Deep Database Enrichment",
             "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
             "elements": [
               {
@@ -1619,7 +1619,7 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "The SpyCloud Enrichment Function App provides centralized API enrichment with the Identity Risk Score engine (0-100). It deploys as a serverless Azure Function (Consumption plan \u2014 first 1M executions/month free) with Key Vault for secure API key storage. The Risk Score combines exposure severity, credential availability, stolen cookies, device infections, temporal decay, and remediation credit into a single actionable metric."
+              "text": "The SpyCloud Enrichment Function App provides centralized API enrichment with the Identity Risk Score engine (0-100). It deploys as a serverless Azure Function (Consumption plan — first 1M executions/month free) with Key Vault for secure API key storage. The Risk Score combines exposure severity, credential availability, stolen cookies, device infections, temporal decay, and remediation credit into a single actionable metric."
             }
           },
           {
@@ -1680,14 +1680,14 @@
           {
             "name": "enableScorchAgent",
             "type": "Microsoft.Common.CheckBox",
-            "label": "Deploy SCORCH AI Agent Logic App (optional \u2014 requires Security Copilot)",
+            "label": "Deploy SCORCH AI Agent Logic App (optional — requires Security Copilot)",
             "toolTip": "Deploys the SCORCH Copilot Triage Logic App that automatically investigates SpyCloud incidents using Security Copilot. Triggers on high-severity incidents, runs cross-table analysis, computes risk score, and adds an AI-generated investigation report to the incident. Requires Microsoft Security Copilot license.",
             "defaultValue": false
           },
           {
             "name": "enableMcpServer",
             "type": "Microsoft.Common.CheckBox",
-            "label": "Deploy MCP Server (optional \u2014 for AI-native integration)",
+            "label": "Deploy MCP Server (optional — for AI-native integration)",
             "toolTip": "Deploys a Model Context Protocol (MCP) server that exposes SpyCloud data as tools for any MCP-compatible AI platform. Enables real-time data access from AI agents, custom copilots, and third-party AI services. Runs as a Node.js container.",
             "defaultValue": false
           },
@@ -1697,7 +1697,7 @@
             "visible": true,
             "options": {
               "icon": "Info",
-              "text": "After deployment, upload Copilot files manually:\n\u2022 copilot/SpyCloud_Plugin.yaml \u2192 Security Copilot \u2192 Sources \u2192 Custom Plugin\n\u2022 copilot/SpyCloud_Agent.yaml \u2192 Security Copilot \u2192 Build \u2192 Upload YAML\n\u2022 copilot/promptbooks/*.yaml \u2192 Security Copilot \u2192 Promptbooks \u2192 Import"
+              "text": "After deployment, upload Copilot files manually:\n• copilot/SpyCloud_Plugin.yaml → Security Copilot → Sources → Custom Plugin\n• copilot/SpyCloud_Agent.yaml → Security Copilot → Build → Upload YAML\n• copilot/promptbooks/*.yaml → Security Copilot → Promptbooks → Import"
             }
           }
         ]
@@ -1746,6 +1746,194 @@
                 "type": "Microsoft.Common.CheckBox",
                 "label": "Enable Microsoft Security Incident Creation Rules -- Deploys rules that automatically create Sentinel incidents from alerts generated by Microsoft security products (Defender for Endpoint, Defender for Identity, Defender for Cloud Apps, etc.).",
                 "toolTip": "Deploys MSIC analytics rules for Microsoft security product alert integration.",
+                "defaultValue": false
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionKeyVault",
+            "type": "Microsoft.Common.Section",
+            "label": "Key Vault Configuration",
+            "elements": [
+              {
+                "name": "kvInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Azure Key Vault securely stores SpyCloud API keys, service account credentials, and ITSM tokens. All Logic Apps and the Function App access secrets via Managed Identity."
+                }
+              },
+              {
+                "name": "keyVaultName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Key Vault Name",
+                "toolTip": "Name for the Azure Key Vault. Must be globally unique, 3-24 characters.",
+                "defaultValue": "",
+                "placeholder": "kv-spycloud-sentinel",
+                "constraints": {
+                  "required": false,
+                  "regex": "^$|^[a-zA-Z][a-zA-Z0-9-]{2,23}$",
+                  "validationMessage": "Must be 3-24 characters, start with a letter, contain only letters, numbers, and hyphens."
+                },
+                "visible": true
+              },
+              {
+                "name": "keyVaultSku",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Key Vault SKU",
+                "toolTip": "Standard is sufficient for most deployments. Premium adds HSM-backed keys (FIPS 140-2 Level 2).",
+                "defaultValue": "Standard",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Standard",
+                      "value": "standard"
+                    },
+                    {
+                      "label": "Premium (HSM-backed)",
+                      "value": "premium"
+                    }
+                  ],
+                  "required": true
+                },
+                "visible": true
+              },
+              {
+                "name": "enableSoftDelete",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Soft Delete (recommended) — Retains deleted secrets for 90 days to prevent accidental data loss.",
+                "toolTip": "Soft delete protects against accidental secret deletion.",
+                "defaultValue": true
+              },
+              {
+                "name": "enablePurgeProtection",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Purge Protection — Prevents permanent deletion during soft-delete retention. Cannot be disabled once enabled.",
+                "toolTip": "Additional data loss prevention layer.",
+                "defaultValue": false
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionAppService",
+            "type": "Microsoft.Common.Section",
+            "label": "App Service & Function App",
+            "elements": [
+              {
+                "name": "appServiceInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "The SpyCloud Enrichment Function App runs on a Consumption (Serverless) plan by default. For high-volume environments, select a Premium plan. Provides 17 API endpoints including risk scoring, enrichment, and reporting."
+                }
+              },
+              {
+                "name": "appServicePlanSku",
+                "type": "Microsoft.Common.DropDown",
+                "label": "App Service Plan SKU",
+                "toolTip": "Consumption plan is free for first 1M executions/month. Premium plans provide reserved compute and VNet integration.",
+                "defaultValue": "Consumption (Serverless — recommended)",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Consumption (Serverless — recommended)",
+                      "value": "Y1"
+                    },
+                    {
+                      "label": "Premium EP1 (1 core, 3.5 GB, VNet)",
+                      "value": "EP1"
+                    },
+                    {
+                      "label": "Premium EP2 (2 cores, 7 GB, VNet)",
+                      "value": "EP2"
+                    },
+                    {
+                      "label": "Premium EP3 (4 cores, 14 GB, VNet)",
+                      "value": "EP3"
+                    }
+                  ],
+                  "required": true
+                },
+                "visible": true
+              },
+              {
+                "name": "functionAppAlwaysOn",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Always On — Eliminates cold-start latency. Only available on Premium plans.",
+                "toolTip": "Prevents cold-start delays. Only effective on Premium plans.",
+                "defaultValue": false
+              },
+              {
+                "name": "enableAppInsights",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Application Insights — Telemetry, performance monitoring, and failure diagnostics. Strongly recommended.",
+                "toolTip": "Monitors Function App health, performance, and errors.",
+                "defaultValue": true
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionPermissions",
+            "type": "Microsoft.Common.Section",
+            "label": "Permissions & RBAC Summary",
+            "elements": [
+              {
+                "name": "permissionsInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Warning",
+                  "text": "Required permissions:\n\n• Deployer: Contributor or Owner on target resource group\n• Microsoft Graph: User.ReadWrite.All, Group.ReadWrite.All, Directory.ReadWrite.All\n• MDE: Machine.Isolate, Machine.ReadWrite.All (for device isolation)\n• Log Analytics: Sentinel Contributor, Log Analytics Contributor\n• Key Vault: Key Vault Secrets Officer (managed identity access)\n• Logic Apps: Logic App Contributor\n\nPost-deployment, Managed Identities handle all service-to-service auth."
+                }
+              },
+              {
+                "name": "autoAssignPermissions",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Auto-assign Managed Identity permissions via post-deployment script — Grants Graph and MDE API permissions to Logic App Managed Identities. Requires Application Administrator or Global Administrator role.",
+                "toolTip": "If disabled, manually grant API permissions to each Logic App's Managed Identity after deployment.",
+                "defaultValue": true
+              }
+            ],
+            "visible": true
+          },
+          {
+            "name": "sectionValidation",
+            "type": "Microsoft.Common.Section",
+            "label": "Validation & Purple Team Testing",
+            "elements": [
+              {
+                "name": "validationInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                  "icon": "Info",
+                  "text": "Post-deployment validation ensures all components function correctly. The QA framework simulates data ingestion, triggers analytics rules, and validates playbook execution without live API access."
+                }
+              },
+              {
+                "name": "enableTestDataIngestion",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Deploy test data for validation — Injects synthetic SpyCloud records tagged with source_id='SPYCLOUD-QA-TEST' to trigger analytics rules and validate playbooks. Safe for production.",
+                "toolTip": "Enables post-deployment QA validation with synthetic test data.",
+                "defaultValue": false
+              },
+              {
+                "name": "enablePurpleTeamSimulation",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable Purple Team simulation — Simulates infostealer exposure scenarios (credential theft, session hijacking, device infection) for SOC training. Auto-cleaned after 24 hours.",
+                "toolTip": "Creates realistic but safe test scenarios for SOC training and detection validation.",
+                "defaultValue": false
+              },
+              {
+                "name": "enableBenchmarking",
+                "type": "Microsoft.Common.CheckBox",
+                "label": "Enable detection benchmarking — Measures detection latency, playbook execution time, and enrichment API response times. Publishes metrics to Application Insights.",
+                "toolTip": "Measures end-to-end detection and response performance.",
                 "defaultValue": false
               }
             ],
@@ -1944,8 +2132,19 @@
       "enableScorchAgent": "[steps('aiAgentConfig').enableScorchAgent]",
       "enableMcpServer": "[steps('aiAgentConfig').enableMcpServer]",
       "enableNotifications": "[or(steps('notifications').sectionEmail.enableEmail, steps('notifications').sectionTeams.enableTeams, steps('notifications').sectionSlack.enableSlack, steps('notifications').sectionWebhooks.enableWebhook)]",
-      "spycloudSeverityThreshold": "[int(steps('step1').sectionApiConfig.severitySelection)]",
-      "enablePlaintextPasswords": "[steps('step1').sectionApiConfig.enablePlaintextPasswords]"
+      "spycloudSeverityThreshold": "[int(steps('dataConnector').sectionApiConfig.severitySelection)]",
+      "enablePlaintextPasswords": "[steps('dataConnector').sectionApiConfig.enablePlaintextPasswords]",
+      "keyVaultName": "[steps('advancedSettings').sectionKeyVault.keyVaultName]",
+      "keyVaultSku": "[steps('advancedSettings').sectionKeyVault.keyVaultSku]",
+      "enableSoftDelete": "[steps('advancedSettings').sectionKeyVault.enableSoftDelete]",
+      "enablePurgeProtection": "[steps('advancedSettings').sectionKeyVault.enablePurgeProtection]",
+      "appServicePlanSku": "[steps('advancedSettings').sectionAppService.appServicePlanSku]",
+      "functionAppAlwaysOn": "[steps('advancedSettings').sectionAppService.functionAppAlwaysOn]",
+      "enableAppInsights": "[steps('advancedSettings').sectionAppService.enableAppInsights]",
+      "autoAssignPermissions": "[steps('advancedSettings').sectionPermissions.autoAssignPermissions]",
+      "enableTestDataIngestion": "[steps('advancedSettings').sectionValidation.enableTestDataIngestion]",
+      "enablePurpleTeamSimulation": "[steps('advancedSettings').sectionValidation.enablePurpleTeamSimulation]",
+      "enableBenchmarking": "[steps('advancedSettings').sectionValidation.enableBenchmarking]"
     }
   }
 }

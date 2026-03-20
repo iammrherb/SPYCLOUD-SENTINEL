@@ -24,8 +24,8 @@ variable "location" {
   type        = string
   default     = "eastus"
   validation {
-    condition     = contains(["eastus", "eastus2", "westus2", "centralus", "northeurope", "westeurope", "uksouth", "australiaeast", "southeastasia", "japaneast"], var.location)
-    error_message = "Location must be a supported Azure region with Sentinel and DCE/DCR availability."
+    condition     = contains(["eastus", "eastus2", "westus2", "centralus", "northeurope", "westeurope", "uksouth", "australiaeast", "southeastasia", "japaneast", "usgovvirginia", "usgovarizona", "usgovtexas"], var.location)
+    error_message = "Location must be a supported Azure region with Sentinel and DCE/DCR availability. For Azure Gov use usgovvirginia, usgovarizona, or usgovtexas."
   }
 }
 
@@ -144,6 +144,50 @@ variable "github_repo" {
   description = "GitHub repository (owner/repo) for remote template URL"
   type        = string
   default     = "iammrherb/SPYCLOUD-SENTINEL"
+}
+
+# ─── Cloud Environment ────────────────────────────────────────────────────────
+
+variable "cloud_environment" {
+  description = "Azure cloud environment: AzureCloud (commercial) or AzureUSGovernment (GCC-High / DoD)"
+  type        = string
+  default     = "AzureCloud"
+  validation {
+    condition     = contains(["AzureCloud", "AzureUSGovernment"], var.cloud_environment)
+    error_message = "cloud_environment must be 'AzureCloud' or 'AzureUSGovernment'."
+  }
+}
+
+variable "monitored_domain" {
+  description = "Primary corporate domain to monitor (e.g., example.com)"
+  type        = string
+  default     = ""
+}
+
+variable "polling_interval" {
+  description = "Data polling interval (1h, 4h, 8h, 12h, 24h)"
+  type        = string
+  default     = "4h"
+  validation {
+    condition     = contains(["1h", "4h", "8h", "12h", "24h"], var.polling_interval)
+    error_message = "polling_interval must be one of: 1h, 4h, 8h, 12h, 24h."
+  }
+}
+
+variable "severity_threshold" {
+  description = "Minimum SpyCloud severity level to ingest (2=all breaches, 5=combo lists, 20=infostealer, 25=infostealer+sessions)"
+  type        = number
+  default     = 20
+  validation {
+    condition     = contains([2, 5, 20, 25], var.severity_threshold)
+    error_message = "severity_threshold must be 2, 5, 20, or 25."
+  }
+}
+
+variable "enable_plaintext_passwords" {
+  description = "Include plaintext passwords in Sentinel records (disable for SIEM compliance)"
+  type        = bool
+  default     = false
 }
 
 # ─── Tags ──────────────────────────────────────────────────────────────────────
