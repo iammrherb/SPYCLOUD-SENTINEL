@@ -619,6 +619,10 @@
             "value": "[parameters('restrictedGroupId')]"
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-FullRemediation",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -630,6 +634,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }

@@ -394,6 +394,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-RemoveMailboxRules-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ]

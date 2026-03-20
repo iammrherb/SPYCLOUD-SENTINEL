@@ -5,39 +5,55 @@
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-BlockFirewall",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "FortinetApiUrl": {
       "type": "string",
       "defaultValue": "",
-      "metadata": { "description": "Fortinet FortiGate API base URL (e.g., https://firewall.example.com/api/v2)" }
+      "metadata": {
+        "description": "Fortinet FortiGate API base URL (e.g., https://firewall.example.com/api/v2)"
+      }
     },
     "FortinetApiKey": {
       "type": "securestring",
       "defaultValue": "",
-      "metadata": { "description": "Fortinet FortiGate API key" }
+      "metadata": {
+        "description": "Fortinet FortiGate API key"
+      }
     },
     "PaloAltoApiUrl": {
       "type": "string",
       "defaultValue": "",
-      "metadata": { "description": "Palo Alto Panorama/Firewall API URL" }
+      "metadata": {
+        "description": "Palo Alto Panorama/Firewall API URL"
+      }
     },
     "PaloAltoApiKey": {
       "type": "securestring",
       "defaultValue": "",
-      "metadata": { "description": "Palo Alto API key" }
+      "metadata": {
+        "description": "Palo Alto API key"
+      }
     }
   },
   "variables": {
@@ -118,7 +134,9 @@
                 ]
               },
               "runAfter": {
-                "Entities_-_Get_IPs": ["Succeeded"]
+                "Entities_-_Get_IPs": [
+                  "Succeeded"
+                ]
               }
             },
             "Process_Each_IP": {
@@ -134,7 +152,10 @@
                         "and": [
                           {
                             "not": {
-                              "equals": ["@parameters('FortinetApiUrl')", ""]
+                              "equals": [
+                                "@parameters('FortinetApiUrl')",
+                                ""
+                              ]
                             }
                           }
                         ]
@@ -172,11 +193,15 @@
                             }
                           },
                           "runAfter": {
-                            "Fortinet_Add_Address": ["Succeeded"]
+                            "Fortinet_Add_Address": [
+                              "Succeeded"
+                            ]
                           }
                         }
                       },
-                      "else": { "actions": {} },
+                      "else": {
+                        "actions": {}
+                      },
                       "runAfter": {}
                     },
                     "Block_On_PaloAlto": {
@@ -185,7 +210,10 @@
                         "and": [
                           {
                             "not": {
-                              "equals": ["@parameters('PaloAltoApiUrl')", ""]
+                              "equals": [
+                                "@parameters('PaloAltoApiUrl')",
+                                ""
+                              ]
                             }
                           }
                         ]
@@ -216,7 +244,9 @@
                           "runAfter": {}
                         }
                       },
-                      "else": { "actions": {} },
+                      "else": {
+                        "actions": {}
+                      },
                       "runAfter": {}
                     },
                     "Append_Block_Success": {
@@ -230,8 +260,14 @@
                         }
                       },
                       "runAfter": {
-                        "Block_On_Fortinet": ["Succeeded", "Skipped"],
-                        "Block_On_PaloAlto": ["Succeeded", "Skipped"]
+                        "Block_On_Fortinet": [
+                          "Succeeded",
+                          "Skipped"
+                        ],
+                        "Block_On_PaloAlto": [
+                          "Succeeded",
+                          "Skipped"
+                        ]
                       }
                     }
                   },
@@ -254,12 +290,17 @@
                     }
                   },
                   "runAfter": {
-                    "Block_IP_Scope": ["Failed", "TimedOut"]
+                    "Block_IP_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Initialize_BlockResults": ["Succeeded"]
+                "Initialize_BlockResults": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Summary_Comment": {
@@ -278,7 +319,10 @@
                 }
               },
               "runAfter": {
-                "Process_Each_IP": ["Succeeded", "Failed"]
+                "Process_Each_IP": [
+                  "Succeeded",
+                  "Failed"
+                ]
               }
             }
           },
@@ -321,6 +365,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-BlockFirewall",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -332,6 +380,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }

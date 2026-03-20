@@ -20,7 +20,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Investigations Lookup",
     "description": "Performs deep lookups using the SpyCloud Investigations API to retrieve comprehensive breach data for entities in a Sentinel incident. Returns detailed records including passwords, hashes, IPs, and malware details for forensic investigation.",
     "prerequisites": [
@@ -29,36 +32,56 @@
       "Managed Identity with Sentinel Responder role"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-InvestigationsLookup",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "SpyCloudInvestigationsApiKey": {
       "type": "securestring",
-      "metadata": { "description": "SpyCloud Investigations API key" }
+      "metadata": {
+        "description": "SpyCloud Investigations API key"
+      }
     },
     "SpyCloudInvestigationsApiUrl": {
       "type": "string",
       "defaultValue": "https://api.spycloud.io/investigations-v2",
-      "metadata": { "description": "SpyCloud Investigations API base URL" }
+      "metadata": {
+        "description": "SpyCloud Investigations API base URL"
+      }
     }
   },
   "variables": {
@@ -194,7 +217,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_Email": ["Succeeded"]
+                        "Resolve_Email": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Parse_Investigations_Response": {
@@ -204,25 +229,53 @@
                         "schema": {
                           "type": "object",
                           "properties": {
-                            "hits": { "type": "integer" },
+                            "hits": {
+                              "type": "integer"
+                            },
                             "results": {
                               "type": "array",
                               "items": {
                                 "type": "object",
                                 "properties": {
-                                  "severity": { "type": "integer" },
-                                  "email": { "type": "string" },
-                                  "username": { "type": "string" },
-                                  "password": { "type": "string" },
-                                  "password_plaintext": { "type": "string" },
-                                  "password_type": { "type": "string" },
-                                  "ip_addresses": { "type": "array" },
-                                  "infected_machine_id": { "type": "string" },
-                                  "infected_path": { "type": "string" },
-                                  "target_url": { "type": "string" },
-                                  "source_id": { "type": "integer" },
-                                  "spycloud_publish_date": { "type": "string" },
-                                  "document_id": { "type": "string" }
+                                  "severity": {
+                                    "type": "integer"
+                                  },
+                                  "email": {
+                                    "type": "string"
+                                  },
+                                  "username": {
+                                    "type": "string"
+                                  },
+                                  "password": {
+                                    "type": "string"
+                                  },
+                                  "password_plaintext": {
+                                    "type": "string"
+                                  },
+                                  "password_type": {
+                                    "type": "string"
+                                  },
+                                  "ip_addresses": {
+                                    "type": "array"
+                                  },
+                                  "infected_machine_id": {
+                                    "type": "string"
+                                  },
+                                  "infected_path": {
+                                    "type": "string"
+                                  },
+                                  "target_url": {
+                                    "type": "string"
+                                  },
+                                  "source_id": {
+                                    "type": "integer"
+                                  },
+                                  "spycloud_publish_date": {
+                                    "type": "string"
+                                  },
+                                  "document_id": {
+                                    "type": "string"
+                                  }
                                 }
                               }
                             }
@@ -230,7 +283,9 @@
                         }
                       },
                       "runAfter": {
-                        "Query_Investigations_API_Email": ["Succeeded"]
+                        "Query_Investigations_API_Email": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Update_Total_Records": {
@@ -240,7 +295,9 @@
                         "value": "@add(variables('TotalRecords'), body('Parse_Investigations_Response')?['hits'])"
                       },
                       "runAfter": {
-                        "Parse_Investigations_Response": ["Succeeded"]
+                        "Parse_Investigations_Response": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_Investigation_Result": {
@@ -257,7 +314,9 @@
                         }
                       },
                       "runAfter": {
-                        "Update_Total_Records": ["Succeeded"]
+                        "Update_Total_Records": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -280,14 +339,23 @@
                     }
                   },
                   "runAfter": {
-                    "Investigate_Account_Scope": ["Failed", "TimedOut"]
+                    "Investigate_Account_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"],
-                "Initialize_InvestigationResults": ["Succeeded"],
-                "Initialize_TotalRecords": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ],
+                "Initialize_InvestigationResults": [
+                  "Succeeded"
+                ],
+                "Initialize_TotalRecords": [
+                  "Succeeded"
+                ]
               }
             },
             "Process_IPs_For_Investigation": {
@@ -323,7 +391,9 @@
                         }
                       },
                       "runAfter": {
-                        "Query_Investigations_API_IP": ["Succeeded"]
+                        "Query_Investigations_API_IP": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -331,8 +401,12 @@
                 }
               },
               "runAfter": {
-                "Entities_-_Get_IPs": ["Succeeded"],
-                "Initialize_InvestigationResults": ["Succeeded"]
+                "Entities_-_Get_IPs": [
+                  "Succeeded"
+                ],
+                "Initialize_InvestigationResults": [
+                  "Succeeded"
+                ]
               }
             },
             "Update_Incident_With_Investigation": {
@@ -348,13 +422,19 @@
                 "body": {
                   "incidentArmId": "@triggerBody()?['object']?['id']",
                   "tagsToAdd": {
-                    "TagsToAdd": ["SpyCloud-Investigated"]
+                    "TagsToAdd": [
+                      "SpyCloud-Investigated"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Process_Accounts_For_Investigation": ["Succeeded"],
-                "Process_IPs_For_Investigation": ["Succeeded"]
+                "Process_Accounts_For_Investigation": [
+                  "Succeeded"
+                ],
+                "Process_IPs_For_Investigation": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Investigation_Comment": {
@@ -373,7 +453,9 @@
                 }
               },
               "runAfter": {
-                "Update_Incident_With_Investigation": ["Succeeded"]
+                "Update_Incident_With_Investigation": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -408,6 +490,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-InvestigationsLookup-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

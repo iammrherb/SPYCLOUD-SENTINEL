@@ -5,23 +5,33 @@
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-EnforceMFA",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "MFAReRegistrationGroupId": {
       "type": "string",
-      "metadata": { "description": "Object ID of the Azure AD group that triggers MFA re-registration via Conditional Access" }
+      "metadata": {
+        "description": "Object ID of the Azure AD group that triggers MFA re-registration via Conditional Access"
+      }
     }
   },
   "variables": {
@@ -113,7 +123,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_UPN": ["Succeeded"]
+                        "Resolve_UPN": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "List_Phone_Auth_Methods": {
@@ -127,7 +139,9 @@
                         }
                       },
                       "runAfter": {
-                        "Get_User_Id": ["Succeeded"]
+                        "Get_User_Id": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Delete_Each_Phone_Method": {
@@ -148,7 +162,9 @@
                         }
                       },
                       "runAfter": {
-                        "List_Phone_Auth_Methods": ["Succeeded"]
+                        "List_Phone_Auth_Methods": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "List_Software_OATH_Methods": {
@@ -162,7 +178,9 @@
                         }
                       },
                       "runAfter": {
-                        "Get_User_Id": ["Succeeded"]
+                        "Get_User_Id": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Delete_Each_OATH_Method": {
@@ -183,7 +201,9 @@
                         }
                       },
                       "runAfter": {
-                        "List_Software_OATH_Methods": ["Succeeded"]
+                        "List_Software_OATH_Methods": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Add_User_To_MFA_ReRegistration_Group": {
@@ -203,8 +223,12 @@
                         }
                       },
                       "runAfter": {
-                        "Delete_Each_Phone_Method": ["Succeeded"],
-                        "Delete_Each_OATH_Method": ["Succeeded"]
+                        "Delete_Each_Phone_Method": [
+                          "Succeeded"
+                        ],
+                        "Delete_Each_OATH_Method": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Comment_MFA_Success": {
@@ -223,7 +247,9 @@
                         }
                       },
                       "runAfter": {
-                        "Add_User_To_MFA_ReRegistration_Group": ["Succeeded"]
+                        "Add_User_To_MFA_ReRegistration_Group": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -251,12 +277,17 @@
                     }
                   },
                   "runAfter": {
-                    "MFA_Reset_Scope": ["Failed", "TimedOut"]
+                    "MFA_Reset_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -287,6 +318,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-EnforceMFA",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -298,6 +333,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }

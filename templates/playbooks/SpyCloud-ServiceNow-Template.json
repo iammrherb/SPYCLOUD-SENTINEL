@@ -33,7 +33,12 @@
       "name": "SpyCloud"
     },
     "version": "13.12.0",
-    "kind": "Playbook"
+    "kind": "Playbook",
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {

@@ -20,7 +20,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Notify SOC",
     "description": "Sends a Teams message and incident comment to the SOC team when a SpyCloud credential exposure incident is created. Includes severity details and recommended actions.",
     "prerequisites": [
@@ -29,36 +32,56 @@
       "SOC Teams channel"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-NotifySOC",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "TeamsWebhookUrl": {
       "type": "securestring",
-      "metadata": { "description": "Microsoft Teams incoming webhook URL for SOC channel notifications" }
+      "metadata": {
+        "description": "Microsoft Teams incoming webhook URL for SOC channel notifications"
+      }
     },
     "SOCEmailDistributionList": {
       "type": "string",
       "defaultValue": "soc@contoso.com",
-      "metadata": { "description": "SOC team email distribution list for fallback notifications" }
+      "metadata": {
+        "description": "SOC team email distribution list for fallback notifications"
+      }
     }
   },
   "variables": {
@@ -125,11 +148,26 @@
                     "activityTitle": "SpyCloud Credential Exposure Alert",
                     "activitySubtitle": "Incident #@{triggerBody()?['object']?['properties']?['incidentNumber']}",
                     "facts": [
-                      { "name": "Severity", "value": "@{triggerBody()?['object']?['properties']?['severity']}" },
-                      { "name": "Title", "value": "@{triggerBody()?['object']?['properties']?['title']}" },
-                      { "name": "Status", "value": "@{triggerBody()?['object']?['properties']?['status']}" },
-                      { "name": "Created", "value": "@{triggerBody()?['object']?['properties']?['createdTimeUtc']}" },
-                      { "name": "Alert Count", "value": "@{length(triggerBody()?['object']?['properties']?['alerts'])}" }
+                      {
+                        "name": "Severity",
+                        "value": "@{triggerBody()?['object']?['properties']?['severity']}"
+                      },
+                      {
+                        "name": "Title",
+                        "value": "@{triggerBody()?['object']?['properties']?['title']}"
+                      },
+                      {
+                        "name": "Status",
+                        "value": "@{triggerBody()?['object']?['properties']?['status']}"
+                      },
+                      {
+                        "name": "Created",
+                        "value": "@{triggerBody()?['object']?['properties']?['createdTimeUtc']}"
+                      },
+                      {
+                        "name": "Alert Count",
+                        "value": "@{length(triggerBody()?['object']?['properties']?['alerts'])}"
+                      }
                     ],
                     "markdown": true
                   }
@@ -160,7 +198,9 @@
                 "body": "@outputs('Compose_Teams_Card')"
               },
               "runAfter": {
-                "Compose_Teams_Card": ["Succeeded"]
+                "Compose_Teams_Card": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_SOC_Notification_Comment": {
@@ -179,7 +219,9 @@
                 }
               },
               "runAfter": {
-                "Post_To_Teams_Webhook": ["Succeeded"]
+                "Post_To_Teams_Webhook": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -210,6 +252,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-NotifySOC-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

@@ -439,6 +439,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-AddToSecurityGroup-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ]

@@ -23,7 +23,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Full Remediation",
     "description": "Orchestrates a comprehensive remediation workflow: forces password reset, revokes sessions, enforces MFA, and optionally isolates devices. Severity-driven escalation determines which actions are taken.",
     "prerequisites": [
@@ -32,36 +35,56 @@
       "Pre-configured MFA enforcement group in Azure AD"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-FullRemediation",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "MFAGroupObjectId": {
       "type": "string",
-      "metadata": { "description": "Object ID of the Azure AD group that enforces MFA via Conditional Access" }
+      "metadata": {
+        "description": "Object ID of the Azure AD group that enforces MFA via Conditional Access"
+      }
     },
     "IsolateHighSeverityDevices": {
       "type": "bool",
       "defaultValue": true,
-      "metadata": { "description": "Whether to isolate devices for high-severity incidents (severity >= 25)" }
+      "metadata": {
+        "description": "Whether to isolate devices for high-severity incidents (severity >= 25)"
+      }
     }
   },
   "variables": {
@@ -186,7 +209,9 @@
                       "inputs": {
                         "method": "PATCH",
                         "uri": "https://graph.microsoft.com/v1.0/users/@{body('Get_User')?['id']}",
-                        "headers": { "Content-Type": "application/json" },
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
                         "body": {
                           "passwordProfile": {
                             "forceChangePasswordNextSignIn": true,
@@ -199,7 +224,9 @@
                         }
                       },
                       "runAfter": {
-                        "Get_User": ["Succeeded"]
+                        "Get_User": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Step2_Revoke_Sessions": {
@@ -213,7 +240,9 @@
                         }
                       },
                       "runAfter": {
-                        "Step1_Force_Password_Reset": ["Succeeded"]
+                        "Step1_Force_Password_Reset": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Step3_Add_To_MFA_Group": {
@@ -221,7 +250,9 @@
                       "inputs": {
                         "method": "POST",
                         "uri": "https://graph.microsoft.com/v1.0/groups/@{parameters('MFAGroupObjectId')}/members/$ref",
-                        "headers": { "Content-Type": "application/json" },
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
                         "body": {
                           "@@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/@{body('Get_User')?['id']}"
                         },
@@ -231,7 +262,9 @@
                         }
                       },
                       "runAfter": {
-                        "Step2_Revoke_Sessions": ["Succeeded"]
+                        "Step2_Revoke_Sessions": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_Account_Summary": {
@@ -241,7 +274,9 @@
                         "value": "Account @{body('Get_User')?['userPrincipalName']}: password reset forced, sessions revoked, MFA enforced"
                       },
                       "runAfter": {
-                        "Step3_Add_To_MFA_Group": ["Succeeded"]
+                        "Step3_Add_To_MFA_Group": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -260,13 +295,20 @@
                     }
                   },
                   "runAfter": {
-                    "Account_Remediation_Scope": ["Failed", "TimedOut"]
+                    "Account_Remediation_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"],
-                "Initialize_RemediationSummary": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ],
+                "Initialize_RemediationSummary": [
+                  "Succeeded"
+                ]
               }
             },
             "Check_If_Device_Isolation_Needed": {
@@ -274,10 +316,16 @@
               "expression": {
                 "and": [
                   {
-                    "equals": ["@outputs('Parse_Incident_Severity')", "High"]
+                    "equals": [
+                      "@outputs('Parse_Incident_Severity')",
+                      "High"
+                    ]
                   },
                   {
-                    "equals": ["@parameters('IsolateHighSeverityDevices')", true]
+                    "equals": [
+                      "@parameters('IsolateHighSeverityDevices')",
+                      true
+                    ]
                   }
                 ]
               },
@@ -304,7 +352,14 @@
                         "Isolate_If_Found": {
                           "type": "If",
                           "expression": {
-                            "and": [{ "greater": ["@length(body('Lookup_MDE_Machine')?['value'])", 0] }]
+                            "and": [
+                              {
+                                "greater": [
+                                  "@length(body('Lookup_MDE_Machine')?['value'])",
+                                  0
+                                ]
+                              }
+                            ]
                           },
                           "actions": {
                             "Isolate_Machine": {
@@ -312,7 +367,9 @@
                               "inputs": {
                                 "method": "POST",
                                 "uri": "https://api.securitycenter.microsoft.com/api/machines/@{body('Lookup_MDE_Machine')?['value']?[0]?['id']}/isolate",
-                                "headers": { "Content-Type": "application/json" },
+                                "headers": {
+                                  "Content-Type": "application/json"
+                                },
                                 "body": {
                                   "Comment": "SpyCloud Full Remediation: Device isolation for high-severity incident",
                                   "IsolationType": "Full"
@@ -331,13 +388,19 @@
                                 "value": "Device @{items('Process_Each_Host')?['HostName']}: isolated (Full)"
                               },
                               "runAfter": {
-                                "Isolate_Machine": ["Succeeded"]
+                                "Isolate_Machine": [
+                                  "Succeeded"
+                                ]
                               }
                             }
                           },
-                          "else": { "actions": {} },
+                          "else": {
+                            "actions": {}
+                          },
                           "runAfter": {
-                            "Lookup_MDE_Machine": ["Succeeded"]
+                            "Lookup_MDE_Machine": [
+                              "Succeeded"
+                            ]
                           }
                         }
                       },
@@ -347,11 +410,19 @@
                   "runAfter": {}
                 }
               },
-              "else": { "actions": {} },
+              "else": {
+                "actions": {}
+              },
               "runAfter": {
-                "Process_Each_Account": ["Succeeded"],
-                "Entities_-_Get_Hosts": ["Succeeded"],
-                "Parse_Incident_Severity": ["Succeeded"]
+                "Process_Each_Account": [
+                  "Succeeded"
+                ],
+                "Entities_-_Get_Hosts": [
+                  "Succeeded"
+                ],
+                "Parse_Incident_Severity": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Remediation_Summary_Comment": {
@@ -370,7 +441,10 @@
                 }
               },
               "runAfter": {
-                "Check_If_Device_Isolation_Needed": ["Succeeded", "Skipped"]
+                "Check_If_Device_Isolation_Needed": [
+                  "Succeeded",
+                  "Skipped"
+                ]
               }
             }
           },
@@ -405,6 +479,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-FullRemediation-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

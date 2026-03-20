@@ -338,6 +338,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-DisableAccount-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ]

@@ -20,7 +20,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - IDLINK Identity Correlation",
     "description": "Uses the SpyCloud IDLINK API to correlate identities across breaches. Maps relationships between email addresses, usernames, passwords, and infected machines to identify linked accounts and lateral movement risk.",
     "prerequisites": [
@@ -29,36 +32,56 @@
       "Managed Identity with Sentinel Responder role"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-IdLinkCorrelation",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "SpyCloudApiKey": {
       "type": "securestring",
-      "metadata": { "description": "SpyCloud API key with IDLINK access" }
+      "metadata": {
+        "description": "SpyCloud API key with IDLINK access"
+      }
     },
     "SpyCloudApiUrl": {
       "type": "string",
       "defaultValue": "https://api.spycloud.io/enterprise-v2",
-      "metadata": { "description": "SpyCloud API base URL" }
+      "metadata": {
+        "description": "SpyCloud API base URL"
+      }
     }
   },
   "variables": {
@@ -189,7 +212,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_Email": ["Succeeded"]
+                        "Resolve_Email": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Parse_IDLINK_Response": {
@@ -199,18 +224,32 @@
                         "schema": {
                           "type": "object",
                           "properties": {
-                            "hits": { "type": "integer" },
+                            "hits": {
+                              "type": "integer"
+                            },
                             "results": {
                               "type": "array",
                               "items": {
                                 "type": "object",
                                 "properties": {
-                                  "email": { "type": "string" },
-                                  "linked_emails": { "type": "array" },
-                                  "linked_usernames": { "type": "array" },
-                                  "infected_machine_id": { "type": "string" },
-                                  "shared_credential_count": { "type": "integer" },
-                                  "confidence_score": { "type": "number" }
+                                  "email": {
+                                    "type": "string"
+                                  },
+                                  "linked_emails": {
+                                    "type": "array"
+                                  },
+                                  "linked_usernames": {
+                                    "type": "array"
+                                  },
+                                  "infected_machine_id": {
+                                    "type": "string"
+                                  },
+                                  "shared_credential_count": {
+                                    "type": "integer"
+                                  },
+                                  "confidence_score": {
+                                    "type": "number"
+                                  }
                                 }
                               }
                             }
@@ -218,7 +257,9 @@
                         }
                       },
                       "runAfter": {
-                        "Query_IDLINK_API": ["Succeeded"]
+                        "Query_IDLINK_API": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Process_Linked_Identities": {
@@ -230,7 +271,10 @@
                           "expression": {
                             "and": [
                               {
-                                "greater": ["@length(coalesce(items('Process_Linked_Identities')?['linked_emails'], json('[]')))", 0]
+                                "greater": [
+                                  "@length(coalesce(items('Process_Linked_Identities')?['linked_emails'], json('[]')))",
+                                  0
+                                ]
                               }
                             ]
                           },
@@ -250,7 +294,9 @@
                               "runAfter": {}
                             }
                           },
-                          "else": { "actions": {} },
+                          "else": {
+                            "actions": {}
+                          },
                           "runAfter": {}
                         },
                         "Update_Risk_For_Shared_Creds": {
@@ -258,7 +304,10 @@
                           "expression": {
                             "and": [
                               {
-                                "greater": ["@coalesce(items('Process_Linked_Identities')?['shared_credential_count'], 0)", 0]
+                                "greater": [
+                                  "@coalesce(items('Process_Linked_Identities')?['shared_credential_count'], 0)",
+                                  0
+                                ]
                               }
                             ]
                           },
@@ -272,12 +321,16 @@
                               "runAfter": {}
                             }
                           },
-                          "else": { "actions": {} },
+                          "else": {
+                            "actions": {}
+                          },
                           "runAfter": {}
                         }
                       },
                       "runAfter": {
-                        "Parse_IDLINK_Response": ["Succeeded"]
+                        "Parse_IDLINK_Response": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_Correlation_Result": {
@@ -291,7 +344,9 @@
                         }
                       },
                       "runAfter": {
-                        "Process_Linked_Identities": ["Succeeded"]
+                        "Process_Linked_Identities": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -313,22 +368,35 @@
                     }
                   },
                   "runAfter": {
-                    "IdLink_Scope": ["Failed", "TimedOut"]
+                    "IdLink_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"],
-                "Initialize_CorrelationResults": ["Succeeded"],
-                "Initialize_LinkedIdentities": ["Succeeded"],
-                "Initialize_RiskScore": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ],
+                "Initialize_CorrelationResults": [
+                  "Succeeded"
+                ],
+                "Initialize_LinkedIdentities": [
+                  "Succeeded"
+                ],
+                "Initialize_RiskScore": [
+                  "Succeeded"
+                ]
               }
             },
             "Determine_Correlation_Severity": {
               "type": "Compose",
               "inputs": "@if(greaterOrEquals(variables('CorrelationRiskScore'), 50), 'High', if(greaterOrEquals(variables('CorrelationRiskScore'), 20), 'Medium', 'Informational'))",
               "runAfter": {
-                "Process_Each_Account": ["Succeeded"]
+                "Process_Each_Account": [
+                  "Succeeded"
+                ]
               }
             },
             "Update_Incident_With_Correlation": {
@@ -344,12 +412,17 @@
                 "body": {
                   "incidentArmId": "@triggerBody()?['object']?['id']",
                   "tagsToAdd": {
-                    "TagsToAdd": ["SpyCloud-IDLINK-Correlated", "@{if(greater(length(variables('LinkedIdentities')), 0), 'SpyCloud-LinkedAccounts-Found', 'SpyCloud-No-Links')}"]
+                    "TagsToAdd": [
+                      "SpyCloud-IDLINK-Correlated",
+                      "@{if(greater(length(variables('LinkedIdentities')), 0), 'SpyCloud-LinkedAccounts-Found', 'SpyCloud-No-Links')}"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Determine_Correlation_Severity": ["Succeeded"]
+                "Determine_Correlation_Severity": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Correlation_Comment": {
@@ -368,7 +441,9 @@
                 }
               },
               "runAfter": {
-                "Update_Incident_With_Correlation": ["Succeeded"]
+                "Update_Incident_With_Correlation": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -403,6 +478,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-IdLinkCorrelation-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
