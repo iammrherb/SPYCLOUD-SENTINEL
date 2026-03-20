@@ -982,14 +982,14 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Your primary corporate email domain (e.g., contoso.com). Optional — only needed for SIP Cookies, Investigations, IdLink, Exposure Stats, CAP, and Data Partnership pollers. Leave blank if you only need Enterprise Watchlist + Breach Catalog + Compass (these use SpyCloud's server-side watchlist configuration and do not require a domain)."
+        "description": "Primary corporate email domain (e.g., contoso.com). Optional during deployment — can also be entered on the Data Connector page. Required only for SIP, Investigations, IdLink, Exposure, CAP, and Data Partnership pollers. NOT needed for Enterprise Watchlist, Breach Catalog, or Compass (these use SpyCloud server-side watchlist configuration)."
       }
     },
     "apiKey": {
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "SpyCloud Enterprise/Compass API Key — used for Breach Watchlist, Breach Catalog, Identity Exposure, and Compass endpoints. Only required if you are deploying Enterprise/Compass data sources. Leave blank if you are only deploying standalone products (Investigations, IDLink, etc.) with their own dedicated keys. Enterprise and Compass share this single key. Obtain from portal.spycloud.com > Settings > API Keys."
+        "description": "SpyCloud Enterprise API Key (required). Obtained from portal.spycloud.com → Settings → API Keys. This is the ONLY key needed during deployment. It's stored in Key Vault and used by the Function App, enrichment playbooks, and the core data pollers (Breach Watchlist, Breach Catalog). Product-specific keys (Compass, SIP, etc.) are entered on the Data Connector page AFTER deployment."
       }
     },
     "enableCompass": {
@@ -1003,7 +1003,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "DEPRECATED: Compass uses the same API key as Enterprise. Leave blank — the Enterprise/Compass apiKey parameter is automatically used for all Compass endpoints."
+        "description": "Compass API Key. Leave blank during deployment — enter on the Data Connector page after deployment. Compass pollers activate automatically when this key is provided on the connector page. The Enterprise key is used as fallback if this is blank."
       }
     },
     "enableSip": {
@@ -1017,7 +1017,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "API key for SpyCloud SIP (Session Identity Protection) endpoints. Required if deploying SIP as a standalone product. If you have Enterprise/Compass enabled and leave this blank, the Enterprise API key is used as fallback."
+        "description": "SIP (Session Identity Protection) API Key. Leave blank during deployment — enter on the Data Connector page after deployment. SIP pollers detect stolen session cookies for MFA bypass detection."
       }
     },
     "sipCookieDomain": {
@@ -1038,7 +1038,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "API key for SpyCloud Investigations endpoints. Required if deploying Investigations as a standalone product. If you have Enterprise/Compass enabled and leave this blank, the Enterprise API key is used as fallback."
+        "description": "Investigations API Key. Leave blank during deployment — enter on the Data Connector page after deployment. Provides full SpyCloud database access for deep threat hunting."
       }
     },
     "enableIdLink": {
@@ -1052,7 +1052,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "REQUIRED when enableIdLink is TRUE: Dedicated API key for the SpyCloud IDLINK service. This is a separate key from your Enterprise key."
+        "description": "IdLink API Key. Leave blank during deployment — enter on the Data Connector page after deployment. Enables identity correlation across email addresses, usernames, and personas."
       }
     },
     "enableDataPartnership": {
@@ -1066,7 +1066,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "REQUIRED when enableDataPartnership is TRUE: Dedicated API key for the SpyCloud Data Partnership service."
+        "description": "Data Partnership API Key. Leave blank during deployment — enter on the Data Connector page after deployment. Requires special SpyCloud partnership agreement."
       }
     },
     "enableExposure": {
@@ -1080,7 +1080,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "REQUIRED when enableExposure is TRUE: Dedicated API key for the SpyCloud Exposure service."
+        "description": "Exposure Stats API Key. Leave blank during deployment — enter on the Data Connector page after deployment. Provides domain-level aggregate exposure statistics for executive dashboards."
       }
     },
     "enableCAP": {
@@ -1094,7 +1094,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "REQUIRED when enableCAP is TRUE: Dedicated API key for the SpyCloud CAP service."
+        "description": "CAP (Compromised Account Protection) API Key. Leave blank during deployment — enter on the Data Connector page after deployment. For B2C businesses protecting customer accounts."
       }
     },
     "enableEnrichmentPlaybooks": {
