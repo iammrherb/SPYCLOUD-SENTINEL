@@ -1904,7 +1904,8 @@
             "enrichmentDailyLimit": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionRateLimits.enrichmentDailyLimit, 200)]",
             "enableFunctionApp": "[steps('functionAppConfig').enableFunctionApp]",
             "enableScorchAgent": "[steps('aiAgentConfig').enableScorchAgent]",
-            "enableMcpServer": "[steps('aiAgentConfig').enableMcpServer]"
+            "enableMcpServer": "[steps('aiAgentConfig').enableMcpServer]",
+            "enableNotifications": "[or(steps('notifications').sectionEmail.enableEmail, steps('notifications').sectionTeams.enableTeams, steps('notifications').sectionSlack.enableSlack, steps('notifications').sectionWebhooks.enableWebhook)]"
         }
     }
 }
