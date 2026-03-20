@@ -1481,7 +1481,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1551,7 +1552,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1609,7 +1611,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1663,7 +1666,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1809,7 +1813,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -1959,7 +1964,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2021,7 +2027,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2375,7 +2382,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2509,7 +2517,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2643,7 +2652,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2745,7 +2755,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2827,7 +2838,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -2961,7 +2973,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -3315,7 +3328,8 @@
         "plan": "Analytics"
       },
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -4893,7 +4907,8 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudIdentityExposure_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudInvestigations_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudIdLink_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudDataPartnership_CL')]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudDataPartnership_CL')]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -5247,7 +5262,8 @@
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudExposure_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloudCAP_CL')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'Spycloud_MDE_Logs_CL')]",
-        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces/tables', parameters('workspace'), 'SpyCloud_ConditionalAccessLogs_CL')]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "tags": "[variables('allTags')]"
     },
@@ -13862,7 +13878,8 @@
       "apiVersion": "2022-10-01",
       "name": "[concat(parameters('workspace'), '/SpyCloudEnrichmentAudit_CL')]",
       "dependsOn": [
-        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]",
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/onboardingStates', 'default')]"
       ],
       "properties": {
         "schema": {
