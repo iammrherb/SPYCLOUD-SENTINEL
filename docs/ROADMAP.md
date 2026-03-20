@@ -1,79 +1,62 @@
-# SpyCloud Sentinel — Roadmap
+# SpyCloud Sentinel Supreme — Roadmap
 
-## v13.0.0 (Current Release — SCORCH)
+## Released
 
-The v13.0 release introduces **SCORCH** (SpyCloud Compromised Operations Research & Credential Hunter) — a grumpy, sarcastic, brilliantly overworked SOC analyst personality powering the most comprehensive identity threat intelligence agent in the Security Copilot ecosystem. Massively expanded API coverage, Logic App remediation actions callable from Copilot, and MCP server architecture.
+### v12.0–v12.11 — Foundation + Enrichment + Risk Score
+- 13 CCF pollers ingesting across 15 custom tables
+- 38 analytics rule templates in content package
+- 16 hunting queries in content package
+- 13 Logic App playbooks (5 response + 8 enrichment)
+- Azure Function App (17 endpoints) with Identity Risk Score (0-100)
+- Key Vault centralized API key management
+- Content Package with 56 dependencies for Content Hub
+- SpyCloud branding and icons across all surfaces
+- createUiDefinition wizard with single API key entry
 
-### SCORCH Agent Enhancements
-- **SCORCH persona**: Grumpy, sarcastic, comedic overworked SOC analyst personality
-- Personality calibration by audience (SOC → full snark, CISO → professional wit, compliance → formal)
-- MITRE ATT&CK mapping for all SpyCloud data types (10+ techniques)
-- Exhaustive research capabilities for malware families, threat actors, campaigns
-- 150+ categorized prompt library across 12 investigation types
-- Executive brief and compliance evidence generation GPT skills
-- Cross-ecosystem correlation guide with 6 priority patterns
-- Password risk model with time-to-crack and sarcastic assessments
+### v13.0–v13.2 — SCORCH Agent + MCP + Documentation
+- SCORCH orchestration agent for Security Copilot
+- MCP server for external tool integration
+- 5 Security Copilot promptbooks
+- Comprehensive architecture diagrams and documentation
+- 28+ Copilot KQL skills + AI investigation agent
 
-### Full API Suite Plugin (NEW)
-- **54 API endpoints** across all 8 SpyCloud products (up from 9 — 500% increase)
-- Enterprise ATO: email, domain, IP, username, password, watchlist CRUD, catalog
-- Compass: devices, applications, records (list + detail)
-- SIP: stolen cookies by domain, SIP breach catalog
-- CAP: email, username, IP, phone, zero-knowledge check
-- Investigations: 15 lookup types (email, domain, IP, phone, username, log ID, machine ID, social handle, credit card, email username, SSN, bank number, drivers license, national ID, passport)
-- IdLink: identity graph by email, phone, username
-- Exposure Metrics: per-email and per-domain aggregate stats
-- NIST Password Check: SHA256 hash verification against breach corpus
-- Compromised Credit Cards: BIN lookup, card list
-- Data Partnership: email, domain, SSN, phone lookups
+## Next (v14.x)
 
-### Logic App Plugin (NEW)
-- 8 Logic App skills invokable from Security Copilot conversations
-- Enrichment: email, domain, IP, catalog context → writes to Sentinel incident
-- Response: MDE device isolation, CA password reset + session revocation
-- Notification: Teams/Slack SOC channel alert
-- Investigation: full multi-API investigation playbook
-- Automated incident triage pattern (Sentinel → Logic App → Copilot → remediate)
+### v14.0 — Multiple Workbooks
+- SOC Operational Dashboard (6 tabs: overview, credentials, infostealers, enrichment, remediation, health)
+- Executive Risk Dashboard (6 tabs: risk score, trends, remediation, benchmark, compliance, ROI)
+- Compass & SIP Deep Dive workbook
+- Risk Score heatmap with user-level drill-down
 
-### MCP Server Architecture (NEW — Design)
-- 20 MCP tools covering all SpyCloud APIs + Sentinel KQL + remediation
-- 5 MCP resources (severity model, password risk, MITRE mapping, catalog, watchlist)
-- 6 MCP prompts (investigate-user, device, org-overview, hunt, compliance, executive)
-- Multi-client: Security Copilot, Claude, VS Code, Copilot Studio
-- Azure App Service hosting with managed identity + Key Vault
+### v14.1 — Cross-Connector Rules Expansion (+22 rules)
+- MDE/Defender correlation (10 rules)
+- Identity Provider — Okta, Duo, Ping (8 rules)
+- Network/Firewall — PAN, Fortinet, Cisco (6 rules)
+- UEBA behavioral fusion (4 rules)
 
-### Previous Capabilities (Carried Forward)
-- 6 SpyCloud APIs integrated (Enterprise, Catalog, Compass, SIP, Identity Exposure, Investigations)
-- 9 independent REST API pollers via Codeless Connector Framework (CCF)
-- 14 custom Log Analytics tables
-- 38 analytics rules + 28 hunting queries
-- 10 Logic App playbooks + 4 automation rules
-- 3 workbooks + 3 Jupyter notebooks + 4 watchlists
-- 90 KQL plugin skills + 26 agent sub-agents
-- GitHub Actions CI/CD + ARM template + post-deploy automation
+### v14.2 — Entra ID Risk Score Integration
+- Push risk score to Entra custom security attributes via Graph API
+- Conditional Access policy templates per risk tier
+- Automatic risk-based MFA enforcement
 
----
+### v14.3 — Reporting Automation
+- Daily SOC brief (Teams/email)
+- Weekly exposure report (PDF)
+- Monthly executive summary
+- Compliance evidence package
 
-## v13.1 (Planned)
+## Future (v15.x)
 
-- [ ] MCP server implementation (Node.js on Azure App Service)
-- [ ] Logic App ARM templates for all 8 enrichment + remediation playbooks
-- [ ] Additional IdP correlations (CyberArk, OneLogin)
-- [ ] ServiceNow ticketing playbook
-- [ ] Jira ticketing playbook
-- [ ] EU API region support
-- [ ] NHI (Non-Human Identity) detection skills for exposed API keys/tokens
-- [ ] Promptbook templates for common SCORCH workflows
+### v15.0 — Azure Marketplace Publication
+- Certification and listing
+- One-click Content Hub install
+- Automated update delivery
 
----
+### v15.1 — Advanced
+- ASIM parsers, multi-tenant MSSP, Defender XDR, Power BI
 
-## v14.0 (Future)
+### v15.2 — Compliance
+- NIST, ISO 27001, SOC2, GDPR mapping
 
-- [ ] Security Store publication (Microsoft partner marketplace)
-- [ ] A2A agent orchestration for multi-step remediation
-- [ ] Real-time streaming ingestion via Azure Event Hubs
-- [ ] Custom ML models for credential risk scoring
-- [ ] Multi-tenant MSSP support
-- [ ] Predictive breach impact analysis
-- [ ] PagerDuty / Opsgenie integration
-- [ ] Power BI embedded executive dashboards
+### v15.3 — AI/ML
+- Predictive risk scoring, anomaly detection, NL investigation
