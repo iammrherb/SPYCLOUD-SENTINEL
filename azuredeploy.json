@@ -8141,7 +8141,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8288,7 +8290,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8365,7 +8369,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8442,7 +8448,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8530,7 +8538,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8619,7 +8629,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8697,7 +8709,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8775,7 +8789,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8852,7 +8868,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -8930,7 +8948,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT12H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -9013,7 +9033,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -9076,7 +9098,9 @@
                     "matchingMethod": "AnyAlert"
                   }
                 },
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT12H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -9135,7 +9159,9 @@
                     "matchingMethod": "AnyAlert"
                   }
                 },
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT12H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -9222,7 +9248,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -9309,7 +9337,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -9396,7 +9426,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -9474,7 +9506,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -10472,7 +10506,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -10550,7 +10586,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -10628,7 +10666,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -10707,7 +10747,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -10785,7 +10827,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT12H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -10891,7 +10935,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -10985,7 +11031,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11070,7 +11118,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11146,7 +11196,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11222,7 +11274,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11296,7 +11350,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11372,7 +11428,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11446,7 +11504,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11529,7 +11589,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11603,7 +11665,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11677,7 +11741,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11751,7 +11817,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11835,7 +11903,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11909,7 +11979,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -11992,7 +12064,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -12075,7 +12149,9 @@
                     ]
                   }
                 ],
-                "status": "Available"
+                "status": "Available",
+                "suppressionDuration": "PT6H",
+                "suppressionEnabled": true
               }
             }
           ]
@@ -17404,7 +17480,7 @@
         "queryPeriod": "P7D",
         "triggerOperator": "GreaterThan",
         "triggerThreshold": 0,
-        "suppressionEnabled": false,
+        "suppressionEnabled": true,
         "tactics": [
           "CredentialAccess",
           "InitialAccess",
@@ -17445,7 +17521,7 @@
             ]
           }
         },
-        "suppressionDuration": "PT5H"
+        "suppressionDuration": "PT1H"
       }
     }
   ],
