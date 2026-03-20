@@ -1,0 +1,64 @@
+Descriptor:
+  Name: SpyCloud.Promptbook.IncidentTriage
+  DisplayName: "SpyCloud — Sentinel Incident Triage"
+  Description: >-
+    Automated incident triage for Sentinel incidents involving SpyCloud 
+    exposure data. Designed to be called from a Logic App automation rule 
+    when a SpyCloud analytics rule fires. Enriches the incident with 
+    exposure context, risk assessment, and remediation recommendations.
+
+Prompts:
+  - Name: Step1_IncidentContext
+    PromptType: Prompt
+    Content: >-
+      You are triaging Sentinel incident {{incident_id}}. The incident was 
+      triggered by a SpyCloud analytics rule detecting dark web credential 
+      exposure. The primary entity is {{entity_email}}.
+
+      First, summarize what we know about this incident from the alert details.
+
+  - Name: Step2_SpyCloudEnrichment
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetUserExposures
+    Content: "Search SpyCloud exposures for {{entity_email}}"
+    Inputs:
+      - Name: entity_email
+        Description: "Email from the Sentinel incident entity"
+        Required: true
+
+  - Name: Step3_RemediationCheck
+    PromptType: Prompt
+    Content: >-
+      Check if automated remediation has already been applied for {{entity_email}}:
+      - Was the password reset via Conditional Access playbook?
+      - Were sessions revoked?
+      - Were any infected devices isolated in MDE?
+      Report what was done and what gaps remain.
+
+  - Name: Step4_Classification
+    PromptType: Prompt
+    Content: >-
+      Based on ALL findings, classify this incident:
+
+      SEVERITY: Critical / High / Medium / Low
+      CLASSIFICATION: True Positive / Benign Positive / False Positive
+      CONFIDENCE: High / Medium / Low
+
+      Provide your reasoning in 2-3 sentences. Consider:
+      - Is the credential plaintext or easily crackable?
+      - Is there evidence of active use (sign-in logs)?
+      - Was remediation already applied?
+      - Is sensitive PII exposed?
+
+  - Name: Step5_ActionPlan
+    PromptType: Prompt
+    Content: >-
+      Generate a concise action plan for the SOC analyst:
+
+      IMMEDIATE (do now): List specific actions needed right now
+      INVESTIGATE FURTHER: What additional checks should be done
+      CLOSE CONDITIONS: Under what conditions can this incident be closed
+      TAGS: Suggest 3-5 tags for this incident
+
+      Keep it actionable and specific. This goes into the incident comments.

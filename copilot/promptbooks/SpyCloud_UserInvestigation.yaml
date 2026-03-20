@@ -1,0 +1,69 @@
+# ═══════════════════════════════════════════════════════════════════
+# SpyCloud Promptbook: Full User Investigation
+# ═══════════════════════════════════════════════════════════════════
+
+Descriptor:
+  Name: SpyCloud.Promptbook.UserInvestigation
+  DisplayName: "SpyCloud — Full User Dark Web Investigation"
+  Description: >-
+    Comprehensive investigation of a user's dark web exposure across all 
+    SpyCloud data sources. Checks credential exposures, PII, device 
+    infections, remediation status, social media, identity graph, and 
+    produces a prioritized threat assessment with MITRE ATT&CK mapping.
+
+Prompts:
+  - Name: Step1_CredentialExposure
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetUserExposures
+    Content: "Search SpyCloud exposures for {{email}}"
+    Inputs:
+      - Name: email
+        Description: "Email address to investigate"
+        Required: true
+
+  - Name: Step2_PIIProfile
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetUserFullPIIProfile
+    Content: "Get full PII profile for {{email}}"
+
+  - Name: Step3_PasswordAnalysis
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetExposedPasswords
+    Content: "Show exposed passwords for {{email}} — types and crackability"
+
+  - Name: Step4_DeviceCorrelation
+    PromptType: Prompt
+    Content: >-
+      Based on the SpyCloud exposure data above, identify any infected 
+      devices linked to {{email}}. For each device, show the machine ID, 
+      hostname, OS, AV installed, infection path, and infection date. 
+      Are any of these devices still active and not isolated?
+
+  - Name: Step5_RemediationStatus
+    PromptType: Prompt
+    Content: >-
+      Check the remediation status for {{email}}:
+      1. Was the password forcibly reset via Conditional Access?
+      2. Were active sessions revoked?
+      3. Were any linked devices isolated in MDE?
+      4. Is the user in a Conditional Access restriction group?
+      Identify any HIGH-SEVERITY exposures that have NO remediation action.
+
+  - Name: Step6_ThreatAssessment
+    PromptType: Prompt
+    Content: >-
+      Synthesize all findings from the previous steps into a structured 
+      threat assessment for {{email}}:
+
+      1. THREAT LEVEL: 🔴 CRITICAL / 🟠 HIGH / 🟡 MEDIUM / 🟢 LOW with justification
+      2. KEY METRICS: Total exposures, severity breakdown, plaintext passwords, devices infected
+      3. ATTACK SURFACE: What could an attacker do with this data? Map to MITRE ATT&CK techniques.
+      4. REMEDIATION GAPS: What was auto-fixed vs what needs manual action?
+      5. COMPLIANCE: If PII (SSN, financial, health) is exposed, which regulations apply?
+      6. RECOMMENDED ACTIONS: Prioritized by urgency (NOW / URGENT / SOON / SCHEDULED)
+      7. FOLLOW-UP: 5 specific next investigation steps
+
+      Be thorough. Be actionable. The SOC team needs to act on this immediately.

@@ -1,0 +1,61 @@
+Descriptor:
+  Name: SpyCloud.Promptbook.ThreatHunt
+  DisplayName: "SpyCloud — Proactive Threat Hunt"
+  Description: >-
+    Proactive threat hunting across all SpyCloud data. Identifies infostealer 
+    campaign patterns, credential stuffing indicators, MFA bypass risk from 
+    stolen cookies, lateral movement potential, and undetected compromises.
+
+Prompts:
+  - Name: Step1_HighSeverity
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetHighSeverityExposures
+    Content: "Show all high-severity infostealer exposures (severity 20+)"
+
+  - Name: Step2_StuffingRisk
+    PromptType: Prompt
+    Content: >-
+      From the SpyCloud data, identify credentials with the highest credential 
+      stuffing risk: sighting count >= 3 (observed in multiple breach sources), 
+      especially those with plaintext passwords. List the top 20 accounts by 
+      stuffing risk with their sighting counts and affected domains.
+
+  - Name: Step3_MFABypass
+    PromptType: Prompt
+    Content: >-
+      Hunt for MFA bypass risk: Find all severity 25 exposures where session 
+      cookies or tokens were stolen. These enable attackers to completely bypass 
+      MFA. List affected users, target domains, and whether sessions were revoked.
+
+  - Name: Step4_AdminExposure
+    PromptType: Prompt
+    Content: >-
+      Hunt for compromised privileged accounts: Search for any exposed credentials 
+      where the email contains admin, svc, service, root, or where job title 
+      indicates administrator, engineer, or DevOps roles. These enable lateral 
+      movement and privilege escalation.
+
+  - Name: Step5_UnremediatedGaps
+    PromptType: Prompt
+    Content: >-
+      Identify the most dangerous unremediated gaps: Find all severity 20+ 
+      exposures where the user has NOT had a password reset AND the device 
+      has NOT been isolated. These are active threats with no response.
+
+  - Name: Step6_HuntReport
+    PromptType: Prompt
+    Content: >-
+      Compile a threat hunting report from ALL findings:
+
+      HUNT SUMMARY: Total findings, critical discoveries, patterns detected
+      CAMPAIGN PATTERNS: Clusters of infections sharing source, path, or timeframe
+      CREDENTIAL STUFFING: Accounts at highest risk of automated attack
+      MFA BYPASS: Stolen cookies/sessions enabling authentication bypass
+      LATERAL MOVEMENT: Compromised admin/service accounts
+      UNREMEDIATED: Active threats with no response action
+      MITRE ATT&CK: Techniques identified with evidence
+      RECOMMENDED ACTIONS: Prioritized by urgency and impact
+      IOCs: Any indicators of compromise for blocking/detection
+
+      Format for a threat hunting team — detailed, technical, actionable.
