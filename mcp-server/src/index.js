@@ -16,6 +16,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import express from "express";
+import cors from "cors";
 import { z } from "zod";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -719,6 +720,25 @@ Produce a board-ready summary with: overall risk score (1-10), key metrics dashb
 
 const app = express();
 
+// Body parsing & CORS
+app.use(express.json());
+app.use(cors({
+  origin: process.env.CORS_ALLOWED_ORIGINS
+    ? process.env.CORS_ALLOWED_ORIGINS.split(",")
+    : "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-API-Key"],
+}));
+
+// API key authentication middleware for MCP endpoints
+const MCP_API_KEY = process.env.MCP_API_KEY || "";
+function requireAuth(req, res, next) {
+  if (!MCP_API_KEY) return next(); // No key configured — open access
+  const provided = req.headers["x-api-key"] || req.headers["authorization"]?.replace("Bearer ", "");
+  if (provided === MCP_API_KEY) return next();
+  return res.status(401).json({ error: "Unauthorized — provide X-API-Key header or Bearer token" });
+}
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({
@@ -734,8 +754,22 @@ app.get("/health", (req, res) => {
 
 // SSE endpoint for MCP connections
 const transports = {};
-app.get("/sse", async (req, res) => {
+
+// Session cleanup interval — evict stale sessions every 5 minutes
+const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, transport] of Object.entries(transports)) {
+    if (transport._createdAt && now - transport._createdAt > SESSION_TTL_MS) {
+      try { transport.close?.(); } catch { /* ignore */ }
+      delete transports[id];
+    }
+  }
+}, 5 * 60 * 1000);
+
+app.get("/sse", requireAuth, async (req, res) => {
   const transport = new SSEServerTransport("/messages", res);
+  transport._createdAt = Date.now();
   transports[transport.sessionId] = transport;
   
   res.on("close", () => {
@@ -745,10 +779,11 @@ app.get("/sse", async (req, res) => {
   await server.connect(transport);
 });
 
-app.post("/messages", async (req, res) => {
+app.post("/messages", requireAuth, async (req, res) => {
   const sessionId = req.query.sessionId;
   const transport = transports[sessionId];
   if (transport) {
+    transport._createdAt = Date.now(); // refresh TTL on activity
     await transport.handlePostMessage(req, res);
   } else {
     res.status(404).json({ error: "Session not found" });

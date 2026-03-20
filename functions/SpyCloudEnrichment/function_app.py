@@ -17,10 +17,19 @@ import azure.functions as func
 import json
 import logging
 import os
+import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+
 import requests
+
+try:
+    from azure.data.tables import TableServiceClient
+    _HAS_TABLE_STORAGE = True
+except ImportError:
+    _HAS_TABLE_STORAGE = False
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -40,12 +49,120 @@ ENV_KEYS = {
     "idlink": "SPYCLOUD_IDLINK_KEY",
 }
 
-# Rate limiting (in-memory, resets on cold start)
-_call_counts = {}
+# Rate limiting — persisted to Azure Table Storage when available, file-based fallback
 DAILY_LIMIT = int(os.environ.get("ENRICHMENT_DAILY_LIMIT", "200"))
+_RATE_LIMIT_TABLE = "SpyCloudRateLimits"
+_RATE_LIMIT_FILE = "/tmp/spycloud_rate_limits.json"
+
+
+def _get_table_client():
+    """Return Azure Table Storage client if connection string is configured."""
+    conn_str = os.environ.get("AZURE_STORAGE_CONNECTION_STRING", "")
+    if conn_str and _HAS_TABLE_STORAGE:
+        try:
+            svc = TableServiceClient.from_connection_string(conn_str)
+            svc.create_table_if_not_exists(_RATE_LIMIT_TABLE)
+            return svc.get_table_client(_RATE_LIMIT_TABLE)
+        except Exception as e:
+            logging.warning(f"Table Storage unavailable, using file fallback: {e}")
+    return None
+
+
+def _get_call_count(today: str) -> int:
+    """Read today's call count from Table Storage or local file."""
+    tc = _get_table_client()
+    if tc:
+        try:
+            entity = tc.get_entity(partition_key="rate_limit", row_key=today)
+            return int(entity.get("count", 0))
+        except Exception:
+            return 0
+    # File-based fallback
+    try:
+        with open(_RATE_LIMIT_FILE, "r") as f:
+            data = json.load(f)
+        return data.get(today, 0)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 0
+
+
+def _increment_call_count(today: str) -> None:
+    """Increment today's call count in Table Storage or local file."""
+    tc = _get_table_client()
+    if tc:
+        try:
+            current = _get_call_count(today)
+            tc.upsert_entity({
+                "PartitionKey": "rate_limit",
+                "RowKey": today,
+                "count": current + 1,
+            })
+            return
+        except Exception as e:
+            logging.warning(f"Table Storage write failed: {e}")
+    # File-based fallback
+    try:
+        with open(_RATE_LIMIT_FILE, "r") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = {}
+    data[today] = data.get(today, 0) + 1
+    with open(_RATE_LIMIT_FILE, "w") as f:
+        json.dump(data, f)
 
 LOG_ANALYTICS_WORKSPACE_ID = os.environ.get("LOG_ANALYTICS_WORKSPACE_ID", "")
 LOG_ANALYTICS_KEY = os.environ.get("LOG_ANALYTICS_SHARED_KEY", "")
+
+
+def _query_log_analytics(workspace_id: str, query: str) -> list:
+    """Execute a KQL query against Log Analytics using the REST API.
+
+    Uses the Log Analytics Query API with shared key authentication.
+    Returns the rows as a list of dicts (column_name -> value).
+    """
+    url = f"https://api.loganalytics.io/v1/workspaces/{workspace_id}/query"
+    headers = {"Content-Type": "application/json"}
+
+    # Prefer managed identity via azure-identity if available
+    try:
+        from azure.identity import DefaultAzureCredential
+        credential = DefaultAzureCredential()
+        token = credential.get_token("https://api.loganalytics.io/.default")
+        headers["Authorization"] = f"Bearer {token.token}"
+    except Exception:
+        # Fall back to shared key if managed identity unavailable
+        shared_key = LOG_ANALYTICS_KEY
+        if not shared_key:
+            logging.warning("No Log Analytics credentials available")
+            return []
+        headers["X-Api-Key"] = shared_key
+
+    try:
+        resp = requests.post(url, headers=headers, json={"query": query.strip()}, timeout=60)
+        if resp.status_code != 200:
+            logging.error(f"Log Analytics query failed: {resp.status_code} {resp.text[:200]}")
+            return []
+        body = resp.json()
+        tables = body.get("tables", [])
+        if not tables:
+            return []
+        columns = [col["name"] for col in tables[0].get("columns", [])]
+        rows = tables[0].get("rows", [])
+        return [dict(zip(columns, row)) for row in rows]
+    except Exception as e:
+        logging.error(f"Log Analytics query error: {e}")
+        return []
+
+# Email validation regex (RFC 5322 simplified)
+_EMAIL_RE = re.compile(
+    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
+    r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+)
+
+
+def _validate_email(email: str) -> bool:
+    """Validate email format."""
+    return bool(email and _EMAIL_RE.match(email) and len(email) <= 254)
 
 
 def get_api_key(product: str = "enterprise") -> Optional[str]:
@@ -64,8 +181,7 @@ def call_spycloud(endpoint: str, product: str = "enterprise",
 
     # Rate limiting
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    _call_counts.setdefault(today, 0)
-    if _call_counts[today] >= DAILY_LIMIT:
+    if _get_call_count(today) >= DAILY_LIMIT:
         return {"error": "Daily API call limit reached", "hits": 0, "results": []}
 
     base = SPYCLOUD_INVESTIGATIONS_URL if "investigations" in endpoint else SPYCLOUD_BASE_URL
@@ -77,7 +193,7 @@ def call_spycloud(endpoint: str, product: str = "enterprise",
             start = time.time()
             resp = requests.get(url, headers=headers, params=params, timeout=timeout)
             duration_ms = int((time.time() - start) * 1000)
-            _call_counts[today] += 1
+            _increment_call_count(today)
 
             if resp.status_code == 200:
                 data = resp.json()
@@ -320,6 +436,8 @@ def risk_score(req: func.HttpRequest) -> func.HttpResponse:
         email = body.get("email", "")
         if not email:
             return func.HttpResponse(json.dumps({"error": "email required"}), status_code=400)
+        if not _validate_email(email):
+            return func.HttpResponse(json.dumps({"error": "invalid email format"}), status_code=400)
 
         # Fetch exposures from SpyCloud
         exposures_resp = call_spycloud(f"/breach/data/emails/{email}")
@@ -343,18 +461,34 @@ def risk_score(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="risk-score/batch", methods=["POST"])
 def risk_score_batch(req: func.HttpRequest) -> func.HttpResponse:
-    """Batch risk scoring for up to 100 users."""
+    """Batch risk scoring for up to 100 users (parallel execution)."""
     try:
         body = req.get_json()
         emails = body.get("emails", [])[:100]
-        results = []
+        # Validate all emails up front
+        invalid = [e for e in emails if not _validate_email(e)]
+        if invalid:
+            return func.HttpResponse(
+                json.dumps({"error": f"Invalid email(s): {', '.join(invalid[:5])}"}),
+                status_code=400,
+            )
 
-        for email in emails:
+        def _score_one(email: str) -> dict:
             exposures_resp = call_spycloud(f"/breach/data/emails/{email}")
             exposures = exposures_resp.get("results", [])
             score = compute_risk_score(exposures)
             score["email"] = email
-            results.append(score)
+            return score
+
+        results = []
+        max_workers = min(len(emails), 10)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(_score_one, em): em for em in emails}
+            for future in as_completed(futures):
+                try:
+                    results.append(future.result())
+                except Exception as exc:
+                    results.append({"email": futures[future], "error": str(exc)})
 
         return func.HttpResponse(json.dumps({"results": results, "count": len(results)}),
                                   mimetype="application/json")
@@ -416,6 +550,8 @@ def enrich_email(req: func.HttpRequest) -> func.HttpResponse:
     try:
         body = req.get_json()
         email = body.get("email", "")
+        if not _validate_email(email):
+            return func.HttpResponse(json.dumps({"error": "invalid email format"}), status_code=400)
         resp = call_spycloud(f"/breach/data/emails/{email}")
         exposures = resp.get("results", [])
         score = compute_risk_score(exposures)
@@ -500,6 +636,8 @@ def enrich_sip_cookies(req: func.HttpRequest) -> func.HttpResponse:
     try:
         body = req.get_json()
         email = body.get("email", "")
+        if not _validate_email(email):
+            return func.HttpResponse(json.dumps({"error": "invalid email format"}), status_code=400)
         if not get_api_key("sip"):
             return func.HttpResponse(json.dumps({"error": "SIP API key not configured"}), status_code=400)
 
@@ -546,6 +684,8 @@ def investigate_full(req: func.HttpRequest) -> func.HttpResponse:
         email = body.get("email", "")
         if not email:
             return func.HttpResponse(json.dumps({"error": "email required"}), status_code=400)
+        if not _validate_email(email):
+            return func.HttpResponse(json.dumps({"error": "invalid email format"}), status_code=400)
 
         report = {"email": email, "timestamp": datetime.now(timezone.utc).isoformat()}
 
@@ -638,23 +778,127 @@ def _generate_investigation_report(email: str, data: dict) -> str:
 
 @app.route(route="report/daily", methods=["GET"])
 def report_daily(req: func.HttpRequest) -> func.HttpResponse:
-    """Daily SOC brief data."""
-    return func.HttpResponse(json.dumps({
-        "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "status": "Report endpoint ready — connects to Log Analytics for live data",
-        "note": "Wire this to a scheduled Logic App for Teams/email delivery"
-    }), mimetype="application/json")
+    """Daily SOC brief — query Log Analytics for today's metrics."""
+    try:
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        workspace_id = LOG_ANALYTICS_WORKSPACE_ID
+        if not workspace_id:
+            return func.HttpResponse(
+                json.dumps({"error": "LOG_ANALYTICS_WORKSPACE_ID not configured"}),
+                status_code=500, mimetype="application/json",
+            )
+
+        metrics = _query_log_analytics(workspace_id, f"""
+            let today = datetime({today});
+            let new_exposures = SpyCloudBreachData_CL
+                | where TimeGenerated >= today
+                | summarize NewExposures=count(),
+                            CriticalCount=countif(severity_d >= 20),
+                            PlaintextCount=countif(isnotempty(password_plaintext_s)),
+                            UniqueEmails=dcount(email_s);
+            let remediations = SpyCloudEnrichmentAudit_CL
+                | where TimeGenerated >= today
+                | where action_s in ("ForcePasswordReset", "RevokeSessions", "IsolateDevice")
+                | summarize RemediationActions=count();
+            let api_calls = SpyCloudEnrichmentAudit_CL
+                | where TimeGenerated >= today
+                | summarize ApiCalls=count(), AvgLatencyMs=avg(duration_ms_d);
+            new_exposures | extend placeholder=1
+            | join kind=fullouter (remediations | extend placeholder=1) on placeholder
+            | join kind=fullouter (api_calls | extend placeholder=1) on placeholder
+            | project NewExposures, CriticalCount, PlaintextCount, UniqueEmails,
+                      RemediationActions, ApiCalls, AvgLatencyMs
+        """)
+
+        row = metrics[0] if metrics else {}
+        report = {
+            "date": today,
+            "newExposures": row.get("NewExposures", 0),
+            "criticalExposures": row.get("CriticalCount", 0),
+            "plaintextCredentials": row.get("PlaintextCount", 0),
+            "uniqueAffectedUsers": row.get("UniqueEmails", 0),
+            "remediationActions": row.get("RemediationActions", 0),
+            "apiCalls": row.get("ApiCalls", 0),
+            "avgLatencyMs": round(row.get("AvgLatencyMs", 0), 1),
+            "generatedAt": datetime.now(timezone.utc).isoformat(),
+        }
+        return func.HttpResponse(json.dumps(report), mimetype="application/json")
+    except Exception as e:
+        logging.error(f"report_daily error: {e}")
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500)
 
 
 @app.route(route="report/executive", methods=["GET"])
 def report_executive(req: func.HttpRequest) -> func.HttpResponse:
-    """Executive dashboard data."""
-    period = req.params.get("period", "30d")
-    return func.HttpResponse(json.dumps({
-        "period": period,
-        "status": "Executive report endpoint ready — connects to Log Analytics for live data",
-        "note": "Wire this to a scheduled Logic App for monthly reporting"
-    }), mimetype="application/json")
+    """Executive dashboard — trend data over configurable period."""
+    try:
+        period = req.params.get("period", "30d")
+        days = int(period.rstrip("d")) if period.endswith("d") else 30
+        days = min(days, 365)  # cap at 1 year
+        workspace_id = LOG_ANALYTICS_WORKSPACE_ID
+        if not workspace_id:
+            return func.HttpResponse(
+                json.dumps({"error": "LOG_ANALYTICS_WORKSPACE_ID not configured"}),
+                status_code=500, mimetype="application/json",
+            )
+
+        trend = _query_log_analytics(workspace_id, f"""
+            SpyCloudBreachData_CL
+            | where TimeGenerated >= ago({days}d)
+            | summarize
+                TotalExposures=count(),
+                CriticalExposures=countif(severity_d >= 20),
+                InfostealerExposures=countif(severity_d >= 20),
+                PlaintextCredentials=countif(isnotempty(password_plaintext_s)),
+                UniqueUsers=dcount(email_s),
+                UniqueDomains=dcount(target_domain_s),
+                UniqueDevices=dcount(infected_machine_id_s)
+                by bin(TimeGenerated, 1d)
+            | order by TimeGenerated asc
+        """)
+
+        # Compute summary from trend data
+        total_exposures = sum(r.get("TotalExposures", 0) for r in trend)
+        total_critical = sum(r.get("CriticalExposures", 0) for r in trend)
+        total_plaintext = sum(r.get("PlaintextCredentials", 0) for r in trend)
+
+        # Determine trend direction from first vs second half
+        mid = len(trend) // 2
+        first_half = sum(r.get("TotalExposures", 0) for r in trend[:mid]) if mid > 0 else 0
+        second_half = sum(r.get("TotalExposures", 0) for r in trend[mid:]) if mid > 0 else 0
+        if first_half == 0:
+            direction = "stable"
+        elif second_half > first_half * 1.1:
+            direction = "degrading"
+        elif second_half < first_half * 0.9:
+            direction = "improving"
+        else:
+            direction = "stable"
+
+        report = {
+            "period": period,
+            "days": days,
+            "summary": {
+                "totalExposures": total_exposures,
+                "criticalExposures": total_critical,
+                "plaintextCredentials": total_plaintext,
+                "trendDirection": direction,
+            },
+            "dailyTrend": [
+                {
+                    "date": r.get("TimeGenerated", "")[:10] if isinstance(r.get("TimeGenerated"), str) else "",
+                    "exposures": r.get("TotalExposures", 0),
+                    "critical": r.get("CriticalExposures", 0),
+                    "uniqueUsers": r.get("UniqueUsers", 0),
+                }
+                for r in trend
+            ],
+            "generatedAt": datetime.now(timezone.utc).isoformat(),
+        }
+        return func.HttpResponse(json.dumps(report), mimetype="application/json")
+    except Exception as e:
+        logging.error(f"report_executive error: {e}")
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500)
 
 
 # ================================================================
@@ -694,7 +938,7 @@ def health(req: func.HttpRequest) -> func.HttpResponse:
 def audit_usage(req: func.HttpRequest) -> func.HttpResponse:
     """API usage audit — daily call count vs limit."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    used = _call_counts.get(today, 0)
+    used = _get_call_count(today)
     return func.HttpResponse(json.dumps({
         "date": today,
         "callsUsed": used,

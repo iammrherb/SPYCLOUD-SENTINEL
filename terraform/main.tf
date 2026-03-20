@@ -41,13 +41,23 @@ locals {
   )
 }
 
+# ─── Fetch ARM template from URL when no local path provided ─────────────────
+data "http" "arm_template" {
+  count = var.arm_template_local_path == "" ? 1 : 0
+  url   = local.template_url
+
+  request_headers = {
+    Accept = "application/json"
+  }
+}
+
 # ─── ARM Template Deployment ──────────────────────────────────────────────────
 resource "azurerm_resource_group_template_deployment" "spycloud" {
   name                = "spycloud-sentinel-${formatdate("YYYYMMDDhhmmss", timestamp())}"
   resource_group_name = local.resource_group_name
   deployment_mode     = "Incremental"
 
-  template_content = var.arm_template_local_path != "" ? file(var.arm_template_local_path) : null
+  template_content = var.arm_template_local_path != "" ? file(var.arm_template_local_path) : data.http.arm_template[0].response_body
 
   parameters_content = jsonencode({
     workspace = {
@@ -125,6 +135,6 @@ data "azurerm_monitor_data_collection_endpoint" "spycloud" {
 
 data "azurerm_monitor_data_collection_rule" "spycloud" {
   depends_on          = [azurerm_resource_group_template_deployment.spycloud]
-  name                = "dcr-ccf-${var.workspace_name}"
+  name                = "dcr-spycloud-${var.workspace_name}"
   resource_group_name = local.resource_group_name
 }
