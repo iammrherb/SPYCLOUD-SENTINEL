@@ -1,4 +1,4 @@
-# SpyCloud Sentinel Supreme — ISV & Marketplace Strategy v12.10
+# SpyCloud Identity Exposure Intelligence for Sentinel — ISV & Marketplace Strategy v12.10
 
 **Date:** March 19, 2026
 **Purpose:** Comprehensive architecture decisions for marketplace-ready production deployment

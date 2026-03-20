@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #===============================================================================
-#  SpyCloud Sentinel Supreme - QA Testing & Simulation Framework
+#  SpyCloud Identity Exposure Intelligence for Sentinel - QA Testing & Simulation Framework
 #  Version: 2.0.0
 #
 #  Menu-driven tool for Cloud Shell. Covers:
@@ -43,7 +43,7 @@ done
 banner() {
   echo ""
   echo -e "${BOLD}============================================================${NC}"
-  echo -e "${BOLD}  SpyCloud Sentinel Supreme -- QA Testing Framework v2.0   ${NC}"
+  echo -e "${BOLD}  SpyCloud Identity Exposure Intelligence for Sentinel -- QA Testing Framework v2.0   ${NC}"
   echo -e "${BOLD}============================================================${NC}"
 }
 

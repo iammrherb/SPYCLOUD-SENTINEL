@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# SpyCloud Sentinel Supreme — Deep Dive Evaluation & Enhancement Report
+# SpyCloud Identity Exposure Intelligence for Sentinel — Deep Dive Evaluation & Enhancement Report
 # SCORCH Agent v2.0 — Holistic Identity Threat Intelligence
 # ═══════════════════════════════════════════════════════════════════════
 # Date:     2026-03-19
@@ -12,7 +12,7 @@
 ## EXECUTIVE SUMMARY
 
 This report documents a comprehensive audit, enhancement, and upgrade of the 
-SpyCloud Sentinel Supreme Security Copilot agent ecosystem. The upgrade moves 
+SpyCloud Identity Exposure Intelligence for Sentinel Security Copilot agent ecosystem. The upgrade moves 
 from a technically-capable-but-personality-flat agent (v1.x) to a fully realized 
 **Holistic Identity Threat Hunting & Exposure Intelligence Conversational Agent** 
 (v2.0) codenamed **SCORCH** — featuring a grumpy, sarcastic, comedic overworked 

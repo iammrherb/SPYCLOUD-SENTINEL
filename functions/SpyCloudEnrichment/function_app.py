@@ -18,6 +18,7 @@ import json
 import logging
 import os
 import re
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
@@ -53,6 +54,7 @@ ENV_KEYS = {
 DAILY_LIMIT = int(os.environ.get("ENRICHMENT_DAILY_LIMIT", "200"))
 _RATE_LIMIT_TABLE = "SpyCloudRateLimits"
 _RATE_LIMIT_FILE = "/tmp/spycloud_rate_limits.json"
+_rate_limit_lock = threading.Lock()
 
 
 def _get_table_client():
@@ -179,10 +181,11 @@ def call_spycloud(endpoint: str, product: str = "enterprise",
     if not key:
         return {"error": f"No API key configured for {product}", "hits": 0, "results": []}
 
-    # Rate limiting
+    # Rate limiting (thread-safe)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    if _get_call_count(today) >= DAILY_LIMIT:
-        return {"error": "Daily API call limit reached", "hits": 0, "results": []}
+    with _rate_limit_lock:
+        if _get_call_count(today) >= DAILY_LIMIT:
+            return {"error": "Daily API call limit reached", "hits": 0, "results": []}
 
     base = SPYCLOUD_INVESTIGATIONS_URL if "investigations" in endpoint else SPYCLOUD_BASE_URL
     url = f"{base}{endpoint}"
@@ -193,7 +196,8 @@ def call_spycloud(endpoint: str, product: str = "enterprise",
             start = time.time()
             resp = requests.get(url, headers=headers, params=params, timeout=timeout)
             duration_ms = int((time.time() - start) * 1000)
-            _increment_call_count(today)
+            with _rate_limit_lock:
+                _increment_call_count(today)
 
             if resp.status_code == 200:
                 data = resp.json()
@@ -482,6 +486,9 @@ def risk_score_batch(req: func.HttpRequest) -> func.HttpResponse:
 
         results = []
         max_workers = min(len(emails), 10)
+        if max_workers == 0:
+            return func.HttpResponse(json.dumps({"results": [], "count": 0}),
+                                      mimetype="application/json")
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(_score_one, em): em for em in emails}
             for future in as_completed(futures):

@@ -1,4 +1,4 @@
-# SpyCloud Sentinel Supreme — Product-Grouped Architecture & Redeployment Strategy
+# SpyCloud Identity Exposure Intelligence for Sentinel — Product-Grouped Architecture & Redeployment Strategy
 
 **Version:** 12.0 Product Catalog
 **Date:** March 18, 2026

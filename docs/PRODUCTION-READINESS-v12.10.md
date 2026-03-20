@@ -1,4 +1,4 @@
-# SpyCloud Sentinel Supreme — Production Readiness Assessment v12.10
+# SpyCloud Identity Exposure Intelligence for Sentinel — Production Readiness Assessment v12.10
 
 ## Executive Summary
 

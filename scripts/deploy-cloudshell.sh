@@ -28,7 +28,7 @@ RG="" ; WS="" ; API_KEY="" ; LOCATION="eastus" ; CREATE_RG=false
 banner() {
   echo -e "${CYAN}${BOLD}"
   echo "============================================================"
-  echo "     SpyCloud Sentinel Supreme — Cloud Shell Deployer"
+  echo "     SpyCloud Identity Exposure Intelligence for Sentinel — Cloud Shell Deployer"
   echo "                   Version ${VERSION}"
   echo "============================================================"
   echo -e "${NC}"
