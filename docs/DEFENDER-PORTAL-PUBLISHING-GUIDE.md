@@ -52,8 +52,8 @@ The SpyCloud integration includes multiple plugin types:
 4. When prompted for authentication:
    - Select **API Key** authentication
    - Enter your SpyCloud API key
-   - Header name: `Authorization`
-   - Header value: `Bearer <your-api-key>`
+   - Header name: `X-API-Key`
+   - Header value: `<your-api-key>` (the raw key value, no prefix)
 5. Click **Save**
 
 ### 2d. Upload OpenAPI Specification (Optional)
@@ -189,7 +189,7 @@ Set up notification routing for critical findings:
 |---|---|
 | Plugin not appearing | Verify you have Security Administrator role; clear browser cache |
 | "No data found" responses | Check Sentinel workspace connection and custom table population |
-| API authentication failures | Verify API key is valid; check `Authorization: Bearer` header format |
+| API authentication failures | Verify API key is valid; check `X-API-Key` header format (raw key, no Bearer prefix) |
 | Agent timeout | Reduce concurrent sub-agent count; check network connectivity |
 | Skills not loading | Re-upload the YAML file; verify YAML syntax with `yamllint` |
 

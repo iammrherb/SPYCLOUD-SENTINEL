@@ -209,10 +209,10 @@ def call_spycloud(endpoint: str, product: str = "enterprise",
             start = time.time()
             resp = requests.get(url, headers=headers, params=params, timeout=timeout)
             duration_ms = int((time.time() - start) * 1000)
-            with _rate_limit_lock:
-                _increment_call_count(today)
 
             if resp.status_code == 200:
+                with _rate_limit_lock:
+                    _increment_call_count(today)
                 data = resp.json()
                 data["_meta"] = {
                     "statusCode": 200,
