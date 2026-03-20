@@ -157,7 +157,7 @@ jobs:
         shell: pwsh
         run: |
           Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
-          $results = Test-AzTemplate -TemplatePath ./azuredeploy.json -Skip "URIs-Should-Be-Properly-Constructed"
+          $results = Test-AzTemplate -TemplatePath ./azuredeploy.json
           $failed = $results | Where-Object { -not $_.Passed }
           if ($failed.Count -gt 0) {
             Write-Host "ARM-TTK found $($failed.Count) issues:"
@@ -170,7 +170,7 @@ jobs:
         shell: pwsh
         run: |
           Import-Module /tmp/arm-ttk/arm-ttk/arm-ttk.psd1
-          $results = Test-AzTemplate -TemplatePath ./mainTemplate.json -Skip "URIs-Should-Be-Properly-Constructed"
+          $results = Test-AzTemplate -TemplatePath ./mainTemplate.json
           $failed = $results | Where-Object { -not $_.Passed }
           if ($failed.Count -gt 0) {
             Write-Host "ARM-TTK found $($failed.Count) issues:"
@@ -186,7 +186,7 @@ jobs:
           $playbooks = Get-ChildItem -Path ./playbooks -Filter *.json -ErrorAction SilentlyContinue
           foreach ($pb in $playbooks) {
             Write-Host "Testing $($pb.Name)..."
-            $results = Test-AzTemplate -TemplatePath $pb.FullName -Skip "URIs-Should-Be-Properly-Constructed"
+            $results = Test-AzTemplate -TemplatePath $pb.FullName
             $failed = $results | Where-Object { -not $_.Passed }
             if ($failed.Count -gt 0) {
               Write-Host "  WARN: $($failed.Count) issues in $($pb.Name)"
@@ -196,12 +196,74 @@ jobs:
           }
 
   # ---------------------------------------------------------------------------
-  # Job 3: Package Solution
+  # Job 3: Validate Function App
+  # ---------------------------------------------------------------------------
+  validate-function-app:
+    name: Validate Function App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Function App dependencies
+        run: |
+          pip install -r functions/SpyCloudEnrichment/requirements.txt
+
+      - name: Validate Function App imports
+        run: |
+          python3 -c "
+          import azure.functions
+          import requests
+          import msal
+          import azure.identity
+          import azure.keyvault.secrets
+          import azure.monitor.ingestion
+          import azure.data.tables
+          print('All Function App dependencies imported successfully')
+          "
+
+      - name: Syntax check function_app.py
+        run: |
+          python3 -m py_compile functions/SpyCloudEnrichment/function_app.py
+          echo "function_app.py compiles successfully"
+
+  # ---------------------------------------------------------------------------
+  # Job 4: Validate MCP Server
+  # ---------------------------------------------------------------------------
+  validate-mcp-server:
+    name: Validate MCP Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install MCP server dependencies
+        working-directory: mcp-server
+        run: npm install
+
+      - name: Syntax check MCP server
+        working-directory: mcp-server
+        run: |
+          node --check src/index.js
+          echo "MCP server syntax check passed"
+
+  # ---------------------------------------------------------------------------
+  # Job 5: Package Solution
   # ---------------------------------------------------------------------------
   package-solution:
     name: Package Solution Artifacts
     runs-on: ubuntu-latest
-    needs: [validate-templates, arm-ttk-tests]
+    needs: [validate-templates, arm-ttk-tests, validate-function-app, validate-mcp-server]
     if: always() && needs.validate-templates.result == 'success'
     steps:
       - name: Checkout repository
@@ -273,7 +335,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [package-solution]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     environment:
       name: staging
       url: https://portal.azure.com
@@ -326,7 +388,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [deploy-staging]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     environment:
       name: production
       url: https://portal.azure.com

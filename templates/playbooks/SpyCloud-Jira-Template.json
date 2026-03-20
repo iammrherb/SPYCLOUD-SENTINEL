@@ -1,0 +1,267 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "templateMetadata": {
+    "templateVersion": "1.0.0",
+    "templateId": "spycloud-jira-ticket",
+    "category": "ITSM",
+    "requiredPermissions": [
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.Logic/workflows/write",
+      "Microsoft.Web/connections/write"
+    ],
+    "requiredLicenses": [
+      "Microsoft Sentinel"
+    ],
+    "connectorAssociation": [
+      "azuresentinel"
+    ],
+    "deployAsTemplate": true
+  },
+  "metadata": {
+    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "title": "SpyCloud - Jira Ticket Creation",
+    "description": "Automatically creates Jira issues when SpyCloud identity threat incidents are created in Microsoft Sentinel. Maps Sentinel severity to Jira priority and includes full incident context with entity details.",
+    "prerequisites": [
+      "Microsoft Sentinel workspace",
+      "Jira Cloud or Server instance with REST API access",
+      "Jira API token and project key"
+    ],
+    "lastUpdateTime": "2026-03-20T00:00:00.000Z",
+    "support": { "tier": "community" },
+    "author": { "name": "SpyCloud" },
+    "categories": { "domains": ["Security - Threat Protection"] }
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-Jira",
+      "metadata": { "description": "Name of the Logic App playbook" }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": { "description": "Azure Subscription ID" }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": { "description": "Resource group for this deployment" }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": { "description": "Microsoft Sentinel workspace name" }
+    },
+    "jiraInstanceUrl": {
+      "type": "string",
+      "metadata": { "description": "Jira instance URL (e.g., https://yourorg.atlassian.net)" }
+    },
+    "jiraEmail": {
+      "type": "string",
+      "metadata": { "description": "Jira account email for API authentication" }
+    },
+    "jiraApiToken": {
+      "type": "securestring",
+      "metadata": { "description": "Jira API token" }
+    },
+    "jiraProjectKey": {
+      "type": "string",
+      "metadata": { "description": "Jira project key (e.g., SEC)" }
+    },
+    "jiraIssueType": {
+      "type": "string",
+      "defaultValue": "Task",
+      "metadata": { "description": "Jira issue type for created tickets" }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "solution": "SpyCloud-Sentinel",
+        "component": "itsm-jira",
+        "version": "13.12.0"
+      },
+      "identity": { "type": "SystemAssigned" },
+      "dependsOn": ["[variables('sentinelConnectionId')]"],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": { "type": "Object", "defaultValue": {} },
+            "jiraInstanceUrl": { "type": "String" },
+            "jiraEmail": { "type": "String" },
+            "jiraApiToken": { "type": "SecureString" },
+            "jiraProjectKey": { "type": "String" },
+            "jiraIssueType": { "type": "String" }
+          },
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                "body": { "callback_url": "@listCallbackUrl()" },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Extract_Entities": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                "method": "post",
+                "path": "/entities/get",
+                "body": { "incidentArmId": "@triggerBody()?['object']?['id']" }
+              },
+              "runAfter": {}
+            },
+            "Map_Severity_To_Priority": {
+              "type": "Compose",
+              "inputs": "@if(equals(triggerBody()?['object']?['properties']?['severity'], 'High'), 'High', if(equals(triggerBody()?['object']?['properties']?['severity'], 'Medium'), 'Medium', if(equals(triggerBody()?['object']?['properties']?['severity'], 'Low'), 'Low', 'Medium')))",
+              "runAfter": { "Extract_Entities": ["Succeeded"] }
+            },
+            "Build_Issue_Description": {
+              "type": "Compose",
+              "inputs": "h2. Microsoft Sentinel Incident #@{triggerBody()?['object']?['properties']?['incidentNumber']}\n\n||Property||Value||\n|Severity|@{triggerBody()?['object']?['properties']?['severity']}|\n|Status|@{triggerBody()?['object']?['properties']?['status']}|\n|Created|@{triggerBody()?['object']?['properties']?['createdTimeUtc']}|\n|Alerts|@{triggerBody()?['object']?['properties']?['additionalData']?['alertsCount']}|\n|Entities|@{length(body('Extract_Entities')?['entities'])}|\n\nh3. Description\n@{triggerBody()?['object']?['properties']?['description']}\n\nh3. Sentinel Link\n[View Incident|@{triggerBody()?['object']?['properties']?['incidentUrl']}]",
+              "runAfter": { "Map_Severity_To_Priority": ["Succeeded"] }
+            },
+            "Scope_Create_Jira_Issue": {
+              "type": "Scope",
+              "actions": {
+                "Create_Jira_Issue": {
+                  "type": "Http",
+                  "inputs": {
+                    "method": "POST",
+                    "uri": "@{parameters('jiraInstanceUrl')}/rest/api/3/issue",
+                    "headers": {
+                      "Content-Type": "application/json",
+                      "Accept": "application/json"
+                    },
+                    "authentication": {
+                      "type": "Basic",
+                      "username": "@parameters('jiraEmail')",
+                      "password": "@parameters('jiraApiToken')"
+                    },
+                    "body": {
+                      "fields": {
+                        "project": { "key": "@{parameters('jiraProjectKey')}" },
+                        "summary": "[SpyCloud] @{triggerBody()?['object']?['properties']?['title']}",
+                        "description": {
+                          "type": "doc",
+                          "version": 1,
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                { "type": "text", "text": "@{outputs('Build_Issue_Description')}" }
+                              ]
+                            }
+                          ]
+                        },
+                        "issuetype": { "name": "@{parameters('jiraIssueType')}" },
+                        "priority": { "name": "@{outputs('Map_Severity_To_Priority')}" },
+                        "labels": ["spycloud", "sentinel", "credential-exposure", "security"]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Parse_Jira_Response": {
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Create_Jira_Issue')",
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "key": { "type": "string" },
+                        "self": { "type": "string" }
+                      }
+                    }
+                  },
+                  "runAfter": { "Create_Jira_Issue": ["Succeeded"] }
+                },
+                "Add_Comment_Issue_Created": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "method": "post",
+                    "path": "/incident-comments",
+                    "body": {
+                      "incidentArmId": "@triggerBody()?['object']?['id']",
+                      "message": "<p><strong>SpyCloud Jira Integration:</strong> Jira issue created successfully.<br><strong>Issue Key:</strong> @{body('Parse_Jira_Response')?['key']}<br><strong>Issue URL:</strong> @{parameters('jiraInstanceUrl')}/browse/@{body('Parse_Jira_Response')?['key']}</p>"
+                    }
+                  },
+                  "runAfter": { "Parse_Jira_Response": ["Succeeded"] }
+                }
+              },
+              "runAfter": { "Build_Issue_Description": ["Succeeded"] }
+            },
+            "Scope_Jira_Catch": {
+              "type": "Scope",
+              "actions": {
+                "Add_Comment_Issue_Failure": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "method": "post",
+                    "path": "/incident-comments",
+                    "body": {
+                      "incidentArmId": "@triggerBody()?['object']?['id']",
+                      "message": "<p><strong>SpyCloud Jira Integration:</strong> Failed to create Jira issue. Please check the playbook run history for details and verify Jira connectivity.</p>"
+                    }
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": { "Scope_Create_Jira_Issue": ["Failed", "TimedOut"] }
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": { "authentication": { "type": "ManagedServiceIdentity" } }
+              }
+            }
+          },
+          "jiraInstanceUrl": { "value": "[parameters('jiraInstanceUrl')]" },
+          "jiraEmail": { "value": "[parameters('jiraEmail')]" },
+          "jiraApiToken": { "value": "[parameters('jiraApiToken')]" },
+          "jiraProjectKey": { "value": "[parameters('jiraProjectKey')]" },
+          "jiraIssueType": { "value": "[parameters('jiraIssueType')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": { "type": "string", "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]" },
+    "logicAppPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]" }
+  }
+}

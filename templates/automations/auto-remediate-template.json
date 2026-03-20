@@ -88,7 +88,15 @@
             {
               "conditionType": "Property",
               "conditionProperties": {
-                "propertyName": "IncidentProviderName",
+                "propertyName": "IncidentTitle",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentLabel",
                 "operator": "Contains",
                 "propertyValues": ["SpyCloud"]
               }
@@ -141,7 +149,15 @@
             {
               "conditionType": "Property",
               "conditionProperties": {
-                "propertyName": "IncidentProviderName",
+                "propertyName": "IncidentTitle",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentLabel",
                 "operator": "Contains",
                 "propertyValues": ["SpyCloud"]
               }
@@ -202,7 +218,15 @@
             {
               "conditionType": "Property",
               "conditionProperties": {
-                "propertyName": "IncidentProviderName",
+                "propertyName": "IncidentTitle",
+                "operator": "Contains",
+                "propertyValues": ["SpyCloud"]
+              }
+            },
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentLabel",
                 "operator": "Contains",
                 "propertyValues": ["SpyCloud"]
               }

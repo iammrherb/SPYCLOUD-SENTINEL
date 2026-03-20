@@ -593,6 +593,34 @@
                                     "Skipped"
                                 ]
                             }
+                        },
+                        "Catch_Summary_Comment_Failure": {
+                            "type": "Scope",
+                            "actions": {
+                                "Fallback_Incident_Comment": {
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/Incidents/Comment",
+                                        "body": {
+                                            "incidentArmId": "@triggerBody()?['object']?['id']",
+                                            "message": "<p><strong>SpyCloud-FullRemediation:</strong> Remediation workflow completed but failed to post detailed summary. Please review the Logic App run history for details.</p>"
+                                        }
+                                    },
+                                    "runAfter": {}
+                                }
+                            },
+                            "runAfter": {
+                                "Add_Remediation_Summary_Comment": [
+                                    "Failed",
+                                    "TimedOut"
+                                ]
+                            }
                         }
                     },
                     "outputs": {}

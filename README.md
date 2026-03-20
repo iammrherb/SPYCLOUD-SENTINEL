@@ -6,9 +6,9 @@
 
 ### The Most Powerful Darknet Identity Threat Intelligence Platform for Microsoft Sentinel
 
-[![Version](https://img.shields.io/badge/version-13.12.0-00D4AA?style=for-the-badge)](#) [![ARM Resources](https://img.shields.io/badge/ARM_Resources-144-0097A7?style=for-the-badge)](#) [![Analytics Rules](https://img.shields.io/badge/Analytics_Rules-38+-E91E63?style=for-the-badge)](#) [![Playbooks](https://img.shields.io/badge/Playbooks-32-9C27B0?style=for-the-badge)](#) [![AI Skills](https://img.shields.io/badge/Copilot_Skills-28+-FF9800?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/version-13.12.0-00D4AA?style=for-the-badge)](#) [![ARM Resources](https://img.shields.io/badge/ARM_Resources-48-0097A7?style=for-the-badge)](#) [![Analytics Rules](https://img.shields.io/badge/Analytics_Rules-38+-E91E63?style=for-the-badge)](#) [![Playbooks](https://img.shields.io/badge/Playbooks-19-9C27B0?style=for-the-badge)](#) [![AI Skills](https://img.shields.io/badge/Copilot_Skills-93+-FF9800?style=for-the-badge)](#)
 
-**173 files** · **144 ARM resources** · **57 content templates** · **32 playbooks** · **4 workbooks** · **13 workbook templates** · **3 notebooks** · **16 scripts** · **5 promptbooks** · **MCP server** · **Terraform module** · **13 test data sets**
+**173 files** · **48 ARM resources** · **43 content templates** · **19 playbooks** · **4 workbooks** · **13 workbook templates** · **3 notebooks** · **16 scripts** · **5 promptbooks** · **MCP server** · **Terraform module** · **14 test data sets**
 
 ---
 
@@ -30,7 +30,7 @@ Every 39 seconds, an infostealer malware infection steals an employee's credenti
 | Detect anomalies after the fact | **Quantify identity risk** with a 0-100 composite score |
 | Require manual investigation | **Auto-remediate** — isolate devices, reset passwords, revoke sessions |
 | Provide generic threat intel | Deliver **device-specific forensics** — exactly which apps, cookies, and tokens were stolen |
-| Offer basic playbooks | Deploy **32 playbooks** with autonomous AI agent investigation |
+| Offer basic playbooks | Deploy **19 playbooks** with autonomous AI agent investigation |
 | Static dashboards | **4 workbooks + 13 templates** for SOC, executives, IR, and threat intel |
 | Simple API lookups | **17-endpoint Function App** with centralized Key Vault and risk scoring |
 | No AI integration | **SCORCH Agent** — autonomous Security Copilot AI that investigates, scores, and recommends |
@@ -68,7 +68,7 @@ Every 39 seconds, an infostealer malware infection steals an employee's credenti
                 │                         │                        │
                 ▼                         ▼                        ▼
     ╔═══════════════════╗   ╔══════════════════════╗   ╔════════════════════╗
-    ║  CCF POLLERS (13)  ║   ║  FUNCTION APP (17)    ║   ║  LOGIC APPS (32)    ║
+    ║  CCF POLLERS (13)  ║   ║  FUNCTION APP (17)    ║   ║  LOGIC APPS (19)    ║
     ║                   ║   ║                      ║   ║                    ║
     ║ Bulk scheduled    ║   ║ • Risk Score Engine  ║   ║ Response:          ║
     ║ data ingestion    ║   ║ • 7 Enrichment APIs  ║   ║ • MDE Isolate      ║
@@ -96,7 +96,7 @@ Every 39 seconds, an infostealer malware infection steals an employee's credenti
     ║  │ Tables       │ │ Rule         │ │ + 13       │ │                 │  ║
     ║  │              │ │ Templates    │ │ Templates  │ │ Autonomous AI   │  ║
     ║  │ 600B+        │ │              │ │            │ │ investigation   │  ║
-    ║  │ recaptured   │ │ Core         │ │ SOC Ops    │ │ with 28+ skills │  ║
+    ║  │ recaptured   │ │ Core         │ │ SOC Ops    │ │ with 93+ skills │  ║
     ║  │ records      │ │ IdP Corr     │ │ Executive  │ │ 5 promptbooks   │  ║
     ║  │              │ │ Network      │ │ Defender   │ │ Risk scoring    │  ║
     ║  │              │ │ UEBA Fusion  │ │ Threat Int │ │ Remediation rec │  ║
@@ -187,7 +187,7 @@ Every 39 seconds, an infostealer malware infection steals an employee's credenti
 ┌────────────────────────────────────────────────────────────────────┐
 │                         SCORCH AGENT                               │
 │                                                                    │
-│  28+ KQL Skills            5 Promptbooks           AI Engine       │
+│  93+ Skills                5 Promptbooks           AI Engine       │
 │  ─────────────             ──────────────           ─────────      │
 │  • User Exposures          • Incident Triage       • Risk Scoring  │
 │  • Device Forensics        • Threat Hunting        • Prioritization│
@@ -225,12 +225,12 @@ Every 39 seconds, an infostealer malware infection steals an employee's credenti
 
 ## 📦 What's In The Box — Complete Inventory
 
-### ARM Template (144 Resources)
+### ARM Template (48 Resources)
 
 | Category | Count | Details |
 |----------|:-----:|---------|
 | **Custom Tables** | 15 | BreachWatchlist, BreachCatalog, CompassData, CompassDevices, CompassApplications, SipCookies, Investigations, IdLink, Exposure, CAP, DataPartnership, EnrichmentAudit, MDE_Logs, CA_Logs, IdentityExposure |
-| **Content Templates** | 57 | 38 analytics rules + 16 hunting queries + 1 workbook + 2 connector templates |
+| **Content Templates** | 43 | 18 playbook templates + 13 workbook templates + 8 analytics YAML + 4 automation templates |
 | **Logic App Playbooks** | 13 | 5 response + 8 enrichment (all with SpyCloud Sentinel tags) |
 | **Function App Stack** | 7 | Function App + Storage + App Insights + App Service Plan + Key Vault + 4 secrets |
 | **Analytics Rules** | 6 | 5 standalone + 1 risk score rule |
@@ -260,7 +260,7 @@ Every 39 seconds, an infostealer malware infection steals an employee's credenti
 | **Function App** | 3 | Python enrichment backend + risk score engine |
 | **Terraform** | 4 | Alternative IaC deployment |
 | **Scripts** | 16 | Deploy, test, audit, grant permissions, generate data |
-| **Test Data** | 14 | Realistic sample data for all 13 tables + ingestion script |
+| **Test Data** | 14 | Realistic sample data for all custom tables + ingestion script |
 
 ---
 
@@ -379,7 +379,7 @@ See [Cross-Ecosystem Integration Map](docs/CROSS-ECOSYSTEM-INTEGRATION-MAP-v12.1
 
 ### Content Hub Ready
 
-All 57 content templates are registered in the Content Package with proper dependencies. Install from Content Hub → everything appears in the Sentinel UI:
+All 43 content templates are registered in the Content Package with proper dependencies. Install from Content Hub → everything appears in the Sentinel UI:
 
 - **Analytics** → Rule Templates → 38 SpyCloud rules
 - **Hunting** → Queries → 16 SpyCloud queries
