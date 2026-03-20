@@ -1,0 +1,371 @@
+# ═══════════════════════════════════════════════════════════════════════
+# SpyCloud Sentinel Supreme — Logic App Plugin for Security Copilot
+# ═══════════════════════════════════════════════════════════════════════
+# Version:  2.0.0
+# Date:     2026-03-19
+# Purpose:  Exposes SpyCloud Logic App playbooks as invokable skills
+#           within Security Copilot agents and prompts. Enables the
+#           SCORCH agent to trigger real remediation actions directly.
+# Spec:     https://learn.microsoft.com/en-us/copilot/security/developer/plugin-logic-apps
+# ═══════════════════════════════════════════════════════════════════════
+
+Descriptor:
+  Name: SpyCloud.LogicApps.Remediation
+  DisplayName: SpyCloud Remediation Actions (Logic Apps)
+  Description: >-
+    Invokable Security Copilot skills backed by SpyCloud Logic App playbooks.
+    Enables the SCORCH agent and analysts to trigger real remediation actions
+    directly from Security Copilot — enrichment lookups, device isolation,
+    password resets, session revocation, Teams/Slack notifications, and
+    ServiceNow ticket creation. Each skill maps to a deployed Logic App
+    with an HTTP Request trigger.
+  Settings:
+    - Name: SubscriptionId
+      Description: Azure Subscription ID containing the Logic Apps
+      HintText: Enter your Azure Subscription ID
+      SettingType: string
+      Required: true
+    - Name: ResourceGroup
+      Description: Resource Group containing the SpyCloud Logic Apps
+      HintText: Enter the Resource Group name
+      SettingType: string
+      Required: true
+  SupportedAuthTypes:
+    - AAD
+
+SkillGroups:
+
+  # ─── ENRICHMENT LOGIC APPS (call SpyCloud API + write to Sentinel) ───
+
+  - Format: LogicApp
+    Skills:
+      - Name: EnrichEmailExposure
+        DisplayName: "Enrich incident with SpyCloud email exposure data"
+        Description: >-
+          Triggers the SpyCloud-Enrich-Email Logic App to query all breach 
+          records for an email address via the SpyCloud API, then writes a 
+          structured enrichment comment to the Sentinel incident. Returns 
+          total exposures, severity distribution, plaintext password count, 
+          target domains, breach sources, and infection timestamps.
+        DescriptionForModel: >-
+          Use this skill when the analyst wants to enrich a Sentinel incident 
+          with SpyCloud exposure data for a specific email address. This 
+          calls the live SpyCloud API and writes results back to the incident.
+        Inputs:
+          - Name: email
+            Description: Email address to enrich
+            Required: true
+          - Name: incidentId
+            Description: Sentinel incident ARM ID to add the enrichment comment to
+            Required: false
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-Enrich-Email
+          TriggerName: manual
+
+      - Name: EnrichDomainExposure
+        DisplayName: "Enrich incident with SpyCloud domain exposure data"
+        Description: >-
+          Triggers the SpyCloud-Enrich-Domain Logic App to query all breach 
+          records for a corporate domain. Returns total exposed users, severity 
+          breakdown, top accounts, breach source list, and organizational posture.
+        Inputs:
+          - Name: domain
+            Description: Domain to enrich
+            Required: true
+          - Name: incidentId
+            Description: Sentinel incident ARM ID
+            Required: false
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-Enrich-Domain
+          TriggerName: manual
+
+      - Name: EnrichIPExposure
+        DisplayName: "Enrich incident with SpyCloud IP exposure data"
+        Description: >-
+          Triggers the SpyCloud-Enrich-IP Logic App to query breach records 
+          associated with an IP address. Returns infected devices, affected 
+          users, malware families, infection dates.
+        Inputs:
+          - Name: ip
+            Description: IP address to enrich
+            Required: true
+          - Name: incidentId
+            Description: Sentinel incident ARM ID
+            Required: false
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-Enrich-IP
+          TriggerName: manual
+
+      - Name: EnrichCatalogContext
+        DisplayName: "Enrich incident with breach source context"
+        Description: >-
+          Triggers the SpyCloud-Enrich-Catalog Logic App to retrieve full 
+          breach source metadata — title, description, confidence, record 
+          count, acquisition date, malware family.
+        Inputs:
+          - Name: sourceId
+            Description: SpyCloud breach source ID
+            Required: true
+          - Name: incidentId
+            Description: Sentinel incident ARM ID
+            Required: false
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-Enrich-Catalog
+          TriggerName: manual
+
+  # ─── RESPONSE LOGIC APPS (take remediation action) ───────────────
+
+      - Name: IsolateDeviceInMDE
+        DisplayName: "Isolate infected device in Microsoft Defender"
+        Description: >-
+          Triggers the SpyCloud-MDE-Remediation Logic App to isolate an 
+          infected device in Microsoft Defender for Endpoint. Supports 
+          full or selective isolation based on severity. Also tags the 
+          device and submits IOCs.
+        DescriptionForModel: >-
+          Use this skill when the analyst confirms a device needs to be 
+          isolated in MDE after SpyCloud infostealer findings. Requires 
+          MDE P2 license and Machine.Isolate permission.
+        Inputs:
+          - Name: deviceId
+            Description: MDE device ID or SpyCloud infected_machine_id
+            Required: true
+          - Name: isolationType
+            Description: "full or selective (default: full for sev 25, selective for sev 20)"
+            Required: false
+          - Name: incidentId
+            Description: Sentinel incident ARM ID
+            Required: false
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-MDE-Remediation
+          TriggerName: manual
+
+      - Name: ResetUserPasswordViaCA
+        DisplayName: "Force password reset and revoke sessions via Entra ID"
+        Description: >-
+          Triggers the SpyCloud-CA-Remediation Logic App to force a 
+          password reset on next sign-in, revoke all active sessions, 
+          and optionally add the user to a Conditional Access security 
+          group for restricted access.
+        DescriptionForModel: >-
+          Use this skill when the analyst confirms a user's credentials 
+          are compromised and needs password reset + session revocation.
+          Requires Entra ID P1+ and Graph API User.ReadWrite.All.
+        Inputs:
+          - Name: userEmail
+            Description: Email/UPN of the user to remediate
+            Required: true
+          - Name: disableAccount
+            Description: "Also disable the account (for critical severity)"
+            Required: false
+          - Name: incidentId
+            Description: Sentinel incident ARM ID
+            Required: false
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-CA-Remediation
+          TriggerName: manual
+
+      - Name: SendSOCNotification
+        DisplayName: "Send SpyCloud alert to Teams/Slack SOC channel"
+        Description: >-
+          Triggers the SpyCloud-CredResponse Logic App to send a formatted 
+          alert notification to the configured Teams webhook and/or Slack 
+          webhook with exposure details and recommended actions.
+        Inputs:
+          - Name: alertSummary
+            Description: Brief summary of the exposure for the notification
+            Required: true
+          - Name: severity
+            Description: "Alert severity: Critical, High, Medium, Low"
+            Required: true
+          - Name: affectedEntity
+            Description: Email, device, or domain affected
+            Required: true
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-CredResponse
+          TriggerName: manual
+
+  # ─── COPILOT-TRIGGERED INVESTIGATION LOGIC APPS ─────────────────
+
+      - Name: RunFullInvestigation
+        DisplayName: "Run full SpyCloud investigation playbook"
+        Description: >-
+          Triggers the comprehensive investigation Logic App that calls 
+          multiple SpyCloud API endpoints (email, catalog, exposure stats, 
+          compass, SIP), cross-references with Sentinel data, and produces 
+          a complete investigation report written as incident comments.
+          Adapts based on available API keys (graceful degradation).
+        DescriptionForModel: >-
+          Use this skill for a comprehensive automated investigation that 
+          combines live SpyCloud API calls with Sentinel KQL queries into 
+          a complete dossier. Takes 2-5 minutes to complete.
+        Inputs:
+          - Name: email
+            Description: Email address to investigate
+            Required: true
+          - Name: incidentId
+            Description: Sentinel incident ARM ID to enrich
+            Required: false
+        Settings:
+          SubscriptionId: '{{SubscriptionId}}'
+          ResourceGroup: '{{ResourceGroup}}'
+          WorkflowName: SpyCloud-FullInvestigation
+          TriggerName: manual
+
+---
+
+# ═══════════════════════════════════════════════════════════════════════
+# SpyCloud Sentinel Supreme — MCP Server Architecture Design
+# ═══════════════════════════════════════════════════════════════════════
+#
+# PURPOSE: Design document for a SpyCloud MCP (Model Context Protocol)
+# server that can be connected to Security Copilot agents, Copilot Studio,
+# Claude, VS Code, and other MCP-compatible AI systems.
+#
+# STATUS: Architecture & Design (not yet implemented)
+#
+# REFERENCE:
+# - https://learn.microsoft.com/en-us/copilot/security/plugin-mcp
+# - https://learn.microsoft.com/en-us/azure/sentinel/datalake/sentinel-mcp-use-tool-security-copilot
+# - https://modelcontextprotocol.io/
+#
+# ═══════════════════════════════════════════════════════════════════════
+
+# MCP SERVER DESIGN: spycloud-mcp-server
+
+# ARCHITECTURE:
+#
+# ┌─────────────────────────────────────────────────────┐
+# │            MCP Client (Security Copilot,            │
+# │            Claude, VS Code, Copilot Studio)         │
+# └──────────────────┬──────────────────────────────────┘
+#                    │ SSE/WebSocket (MCP Protocol)
+#                    ▼
+# ┌─────────────────────────────────────────────────────┐
+# │           SpyCloud MCP Server                        │
+# │  (Node.js / Python — hosted on Azure App Service)   │
+# │                                                     │
+# │  TOOLS:                                              │
+# │  ├── lookup_email_exposure                           │
+# │  ├── lookup_domain_exposure                          │
+# │  ├── lookup_ip_exposure                              │
+# │  ├── lookup_username_exposure                        │
+# │  ├── get_breach_catalog                              │
+# │  ├── get_breach_details                              │
+# │  ├── get_watchlist_identifiers                       │
+# │  ├── add_watchlist_identifier                        │
+# │  ├── get_compass_devices                             │
+# │  ├── get_compass_applications                        │
+# │  ├── get_sip_cookies                                 │
+# │  ├── get_exposure_stats_email                        │
+# │  ├── get_exposure_stats_domain                       │
+# │  ├── check_password_nist                             │
+# │  ├── investigate_email (deep)                        │
+# │  ├── investigate_machine_id (deep)                   │
+# │  ├── investigate_social_handle                       │
+# │  ├── get_idlink_graph                                │
+# │  ├── query_sentinel_kql                              │
+# │  └── run_remediation_playbook                        │
+# │                                                     │
+# │  RESOURCES:                                          │
+# │  ├── spycloud://breach-catalog                       │
+# │  ├── spycloud://watchlist-identifiers                │
+# │  ├── spycloud://severity-model                       │
+# │  └── spycloud://password-risk-model                  │
+# │                                                     │
+# │  PROMPTS:                                            │
+# │  ├── investigate-user                                │
+# │  ├── investigate-device                              │
+# │  ├── org-exposure-overview                           │
+# │  ├── threat-hunt                                     │
+# │  └── compliance-assessment                           │
+# └──────────────────┬──────────────────────────────────┘
+#                    │ HTTPS (REST API)
+#                    ▼
+# ┌─────────────────────────────────────────────────────┐
+# │  SpyCloud Enterprise API                             │
+# │  (api.spycloud.io / api.eu.spycloud.io)             │
+# └─────────────────────────────────────────────────────┘
+#                    │
+#                    ▼
+# ┌─────────────────────────────────────────────────────┐
+# │  Microsoft Sentinel (Log Analytics)                  │
+# │  (KQL queries for ingested data + remediation logs)  │
+# └─────────────────────────────────────────────────────┘
+
+# IMPLEMENTATION PLAN:
+#
+# Phase 1 — Core Tools (read-only):
+#   - All Enterprise API lookup tools
+#   - Breach catalog tools
+#   - Exposure metrics tools
+#   - Severity model + password risk model as resources
+#
+# Phase 2 — Extended Tools:
+#   - Compass + SIP tools (requires license)
+#   - Investigations API tools (requires license)
+#   - IdLink identity graph tools (requires license)
+#   - NIST password check tool
+#
+# Phase 3 — Action Tools:
+#   - Watchlist management (add/remove identifiers)
+#   - Sentinel KQL query execution
+#   - Remediation playbook triggering
+#   - Incident comment writing
+#
+# Phase 4 — Advanced:
+#   - Streaming resources for real-time breach notifications
+#   - Custom MCP prompts with SCORCH personality
+#   - Multi-tenant support
+#   - EU region support
+
+# SECURITY COPILOT MCP INTEGRATION:
+#
+# To connect to Security Copilot:
+# 1. Deploy MCP server to Azure App Service with managed identity
+# 2. Configure SpyCloud API key in Azure Key Vault
+# 3. In Security Copilot → Sources → Custom → Add Plugin → MCP
+# 4. Enter MCP server SSE endpoint URL
+# 5. Tools automatically appear as available skills
+# 6. Add tools to SCORCH agent via "Add Tool" in agent builder
+#
+# YAML for Security Copilot MCP plugin:
+# Descriptor:
+#   Name: SpyCloud.MCP.ThreatIntelligence
+#   DisplayName: SpyCloud MCP Server
+#   Description: SpyCloud threat intelligence via Model Context Protocol
+# SkillGroups:
+#   - Format: MCP
+#     Settings:
+#       Url: https://spycloud-mcp.azurewebsites.net/sse
+#       TransportType: SSE
+
+# HOSTING OPTIONS:
+#
+# Option A: Azure App Service (recommended for Security Copilot)
+#   Pros: Managed identity, Key Vault integration, auto-scale, SSE support
+#   Cons: Monthly cost (~$50-150/mo for B1/B2)
+#
+# Option B: Azure Container Apps
+#   Pros: Serverless scaling, lower idle cost, container flexibility
+#   Cons: Cold start latency, more complex deployment
+#
+# Option C: Azure Functions (HTTP trigger)
+#   Pros: Pay-per-execution, lowest cost for sporadic use
+#   Cons: Timeout limits, SSE streaming limitations
+#
+# RECOMMENDED: Azure App Service B2 with managed identity + Key Vault
