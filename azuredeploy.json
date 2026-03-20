@@ -982,7 +982,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "REQUIRED — Your primary corporate domain to monitor across all SpyCloud APIs (e.g., 'example.com'). Used by Investigations, IDLINK, Data Partnership, Exposure, and CAP connectors to query domain-scoped data. Also used by SIP if sipCookieDomain is not set separately."
+        "description": "Your primary corporate email domain (e.g., contoso.com). Optional — only needed for SIP Cookies, Investigations, IdLink, Exposure Stats, CAP, and Data Partnership pollers. Leave blank if you only need Enterprise Watchlist + Breach Catalog + Compass (these use SpyCloud's server-side watchlist configuration and do not require a domain)."
       }
     },
     "apiKey": {
@@ -1185,7 +1185,7 @@
   "variables": {
     "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
     "_solutionName": "SpyCloud Sentinel Supreme",
-    "_solutionVersion": "11.0.0",
+    "_solutionVersion": "12.0.0",
     "_solutionAuthor": "SpyCloud",
     "_solutionId": "spycloud-sentinel-supreme-11.0.0",
     "dataConnectorVersionConnectorDefinition": "1.2.0",
@@ -1284,7 +1284,42 @@
     "enrichCookiesPlaybookName": "[concat('SpyCloud-Enrich-Cookies-', take(parameters('workspace'), 20))]",
     "enrichInvestigationPlaybookName": "[concat('SpyCloud-Investigate-', take(parameters('workspace'), 20))]",
     "fullInvestigationPlaybookName": "[concat('SpyCloud-FullInvestigation-', take(parameters('workspace'), 20))]",
-    "spycloudApiBaseUrl": "https://api.spycloud.io/enterprise-v2"
+    "spycloudApiBaseUrl": "https://api.spycloud.io/enterprise-v2",
+    "workbookContentId1": "781f7b5b-a62b-5259-b5b8-d5e5c7c62353",
+    "workbookVersion1": "2.0.0",
+    "workbookTemplateNameSoc": "[concat(take(parameters('workspace'), 30),'-wb-',uniqueString('781f7b5b-a62b-5259-b5b8-d5e5c7c62353'))]",
+    "huntingQueryContentId1": "43dbce2d-dccf-5342-8d60-a303a96b41e7",
+    "huntingQueryVersion1": "2.0.0",
+    "huntingQueryContentId2": "a99fcc72-6a71-555f-96a8-e2d2c9a9bb38",
+    "huntingQueryVersion2": "2.0.0",
+    "huntingQueryContentId3": "ada67ddd-beb8-5b19-a595-f0aaab9ab650",
+    "huntingQueryVersion3": "2.0.0",
+    "huntingQueryContentId4": "b9eb5f5b-6ece-5342-8f6b-dd049e0c289f",
+    "huntingQueryVersion4": "2.0.0",
+    "huntingQueryContentId5": "74caa716-fbbd-50aa-b6bc-cd5edc34211c",
+    "huntingQueryVersion5": "2.0.0",
+    "huntingQueryContentId6": "83e1d864-3e84-50a5-beff-fd53b0f7e327",
+    "huntingQueryVersion6": "2.0.0",
+    "huntingQueryContentId7": "69f6d170-80df-576f-8f51-1911c1c22eb9",
+    "huntingQueryVersion7": "2.0.0",
+    "huntingQueryContentId8": "29b20d87-a954-50f0-9324-61d3d499128d",
+    "huntingQueryVersion8": "2.0.0",
+    "huntingQueryContentId9": "a864ae00-8e3c-5fa4-b520-6050d52b0fbb",
+    "huntingQueryVersion9": "2.0.0",
+    "huntingQueryContentId10": "c1268934-6de5-5050-ab72-488e738fb575",
+    "huntingQueryVersion10": "2.0.0",
+    "huntingQueryContentId11": "e7bdca58-93a7-5d84-839e-cdbbcff7383c",
+    "huntingQueryVersion11": "2.0.0",
+    "huntingQueryContentId12": "82b3deab-f217-55d6-bf0f-a2f688cabd3a",
+    "huntingQueryVersion12": "2.0.0",
+    "huntingQueryContentId13": "0328c65e-3cab-589a-9694-a4d7db8e73e1",
+    "huntingQueryVersion13": "2.0.0",
+    "huntingQueryContentId14": "eeffda5d-5868-5908-82b1-fada9fc14516",
+    "huntingQueryVersion14": "2.0.0",
+    "huntingQueryContentId15": "02fc448a-aeef-5c18-913e-a8e0762633b0",
+    "huntingQueryVersion15": "2.0.0",
+    "huntingQueryContentId16": "f31120ff-b5dc-5679-a98d-a34cfb499d7a",
+    "huntingQueryVersion16": "2.0.0"
   },
   "resources": [
     {
@@ -5235,6 +5270,281 @@
               "kind": "DataConnector",
               "contentId": "[variables('_dataConnectorContentIdConnectorDefinition')]",
               "version": "[variables('dataConnectorVersionConnectorDefinition')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId1')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId2')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId3')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId4')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId5')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId6')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId7')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId8')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId9')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId10')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId11')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId12')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId13')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId14')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId15')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId16')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId17')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId18')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId19')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId20')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId21')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId22')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId23')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId24')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId25')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId26')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId27')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId28')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId29')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId30')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId31')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId32')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId33')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId34')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId35')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId36')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId37')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('analyticRuleContentId38')]",
+              "version": "[variables('_solutionVersion')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId1')]",
+              "version": "[variables('huntingQueryVersion1')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId2')]",
+              "version": "[variables('huntingQueryVersion2')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId3')]",
+              "version": "[variables('huntingQueryVersion3')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId4')]",
+              "version": "[variables('huntingQueryVersion4')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId5')]",
+              "version": "[variables('huntingQueryVersion5')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId6')]",
+              "version": "[variables('huntingQueryVersion6')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId7')]",
+              "version": "[variables('huntingQueryVersion7')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId8')]",
+              "version": "[variables('huntingQueryVersion8')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId9')]",
+              "version": "[variables('huntingQueryVersion9')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId10')]",
+              "version": "[variables('huntingQueryVersion10')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId11')]",
+              "version": "[variables('huntingQueryVersion11')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId12')]",
+              "version": "[variables('huntingQueryVersion12')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId13')]",
+              "version": "[variables('huntingQueryVersion13')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId14')]",
+              "version": "[variables('huntingQueryVersion14')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId15')]",
+              "version": "[variables('huntingQueryVersion15')]"
+            },
+            {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('huntingQueryContentId16')]",
+              "version": "[variables('huntingQueryVersion16')]"
+            },
+            {
+              "kind": "Workbook",
+              "contentId": "[variables('workbookContentId1')]",
+              "version": "[variables('workbookVersion1')]"
             }
           ]
         },
@@ -6445,7 +6755,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudSipCookiesConnector')]",
-              "condition": "[greater(length(parameters('sipApiKey')), 0)]",
+              "condition": "[and(greater(length(parameters('sipApiKey')), 0), greater(length(parameters('monitoredDomain')), 0))]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudIdentityIntelligence",
@@ -6546,7 +6856,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudInvestigationsConnector')]",
-              "condition": "[greater(length(parameters('investigationsApiKey')), 0)]",
+              "condition": "[and(greater(length(parameters('investigationsApiKey')), 0), greater(length(parameters('monitoredDomain')), 0))]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudIdentityIntelligence",
@@ -6597,7 +6907,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudIdLinkConnector')]",
-              "condition": "[greater(length(parameters('idlinkApiKey')), 0)]",
+              "condition": "[and(greater(length(parameters('idlinkApiKey')), 0), greater(length(parameters('monitoredDomain')), 0))]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudIdentityIntelligence",
@@ -6648,7 +6958,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudDataPartnershipConnector')]",
-              "condition": "[greater(length(parameters('dataPartnershipApiKey')), 0)]",
+              "condition": "[and(greater(length(parameters('dataPartnershipApiKey')), 0), greater(length(parameters('monitoredDomain')), 0))]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudIdentityIntelligence",
@@ -6699,7 +7009,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudExposureConnector')]",
-              "condition": "[greater(length(parameters('exposureApiKey')), 0)]",
+              "condition": "[and(greater(length(parameters('exposureApiKey')), 0), greater(length(parameters('monitoredDomain')), 0))]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudIdentityIntelligence",
@@ -6750,7 +7060,7 @@
               "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
               "apiVersion": "2023-12-01-preview",
               "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', 'SpyCloudCAPConnector')]",
-              "condition": "[greater(length(parameters('capApiKey')), 0)]",
+              "condition": "[and(greater(length(parameters('capApiKey')), 0), greater(length(parameters('monitoredDomain')), 0))]",
               "kind": "RestApiPoller",
               "properties": {
                 "connectorDefinitionName": "SpyCloudIdentityIntelligence",
@@ -6831,9 +7141,7 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('mdePlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": {
-        "solution": "SpyCloud-Sentinel"
-      },
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-MDE-DeviceIsolation', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -7279,9 +7587,7 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('caPlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": {
-        "solution": "SpyCloud-Sentinel"
-      },
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-CA-IdentityProtection', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -9196,9 +9502,7 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('credResponsePlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": {
-        "solution": "SpyCloud-Sentinel"
-      },
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-CredentialResponse', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -9782,9 +10086,7 @@
       "apiVersion": "2019-05-01",
       "name": "[variables('mdeBlocklistPlaybookName')]",
       "location": "[variables('_effectiveWorkspaceLocation')]",
-      "tags": {
-        "solution": "SpyCloud-Sentinel"
-      },
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-MDE-Blocklist', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -12956,7 +13258,7 @@
       "name": "SpyCloud-TI-Enrichment",
       "location": "[parameters('deploymentRegion')]",
       "condition": "[parameters('enableTiEnrichmentPlaybook')]",
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-TI-Enrichment', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -13670,7 +13972,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Enrich-Email', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -13933,7 +14235,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Enrich-Domain', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14196,7 +14498,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Enrich-IP', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14459,7 +14761,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Enrich-Username', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14722,7 +15024,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Enrich-Catalog', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -14985,7 +15287,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Enrich-Compass', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -15248,7 +15550,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Enrich-StolenCookies', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -15511,7 +15813,7 @@
         "[resourceId('Microsoft.Web/connections', variables('sentinelConnectionName'))]",
         "[resourceId('Microsoft.Web/connections', variables('spycloudConnectionName'))]"
       ],
-      "tags": "[variables('allTags')]",
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-Investigate-Deep', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
       "identity": {
         "type": "SystemAssigned"
       },
@@ -15760,6 +16062,1128 @@
               }
             }
           }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('workbookContentId1'), variables('workbookVersion1'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('workbookContentId1')]",
+        "displayName": "SpyCloud Threat Intelligence Dashboard",
+        "contentKind": "Workbook",
+        "version": "[variables('workbookVersion1')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','wb','-', uniqueString(concat(variables('_solutionId'),'-','Workbook','-',variables('workbookContentId1'),'-', variables('workbookVersion1'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('workbookVersion1')]",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Insights/workbooks",
+              "apiVersion": "2022-04-01",
+              "name": "[concat(parameters('workspace'), '-spycloud-soc-', uniqueString(resourceGroup().id))]",
+              "location": "[variables('_effectiveWorkspaceLocation')]",
+              "kind": "shared",
+              "properties": {
+                "displayName": "SpyCloud Threat Intelligence Dashboard",
+                "description": "Real-time visibility into darknet exposure, credential compromise, device infections, and automated remediation status from SpyCloud data.",
+                "category": "sentinel",
+                "sourceId": "[variables('workspaceResourceId')]",
+                "serializedData": "{\"version\": \"Notebook/1.0\", \"items\": [{\"type\": 1, \"content\": {\"json\": \"# SpyCloud Threat Intelligence Dashboard\\n**Darknet exposure monitoring** - breach credentials, infostealer infections, phished accounts, and automated remediation.\\n\\n> Charts show *no data* until the SpyCloud connector is activated and data begins flowing (5-10 min after Connect).\\n\\n---\"}, \"name\": \"title\"}, {\"type\": 9, \"content\": {\"version\": \"KqlParameterItem/1.0\", \"parameters\": [{\"id\": \"time_range\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"TimeRange\", \"type\": 4, \"isRequired\": true, \"value\": {\"durationMs\": 2592000000}, \"typeSettings\": {\"selectableValues\": [{\"durationMs\": 3600000}, {\"durationMs\": 14400000}, {\"durationMs\": 86400000}, {\"durationMs\": 259200000}, {\"durationMs\": 604800000}, {\"durationMs\": 2592000000}, {\"durationMs\": 7776000000}], \"allowCustom\": true}, \"label\": \"Time Range\"}, {\"id\": \"sev_filter\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"SeverityFilter\", \"type\": 2, \"isRequired\": false, \"multiSelect\": true, \"quote\": \"\", \"delimiter\": \",\", \"query\": \"SpyCloudBreachWatchlist_CL | distinct severity | order by severity desc\", \"typeSettings\": {\"additionalResourceOptions\": [\"value::all\"]}, \"defaultValue\": \"value::all\", \"label\": \"Severity\"}]}, \"name\": \"params\"}, {\"type\": 11, \"content\": {\"version\": \"LinkItem/1.0\", \"style\": \"tabs\", \"links\": [{\"id\": \"t1\", \"cellValue\": \"overview\", \"linkTarget\": \"parameter\", \"linkLabel\": \"Overview\", \"subTarget\": \"selectedTab\", \"style\": \"link\"}, {\"id\": \"t2\", \"cellValue\": \"credentials\", \"linkTarget\": \"parameter\", \"linkLabel\": \"Credential Exposure\", \"subTarget\": \"selectedTab\", \"style\": \"link\"}, {\"id\": \"t3\", \"cellValue\": \"devices\", \"linkTarget\": \"parameter\", \"linkLabel\": \"Device Forensics\", \"subTarget\": \"selectedTab\", \"style\": \"link\"}, {\"id\": \"t4\", \"cellValue\": \"remediation\", \"linkTarget\": \"parameter\", \"linkLabel\": \"Remediation\", \"subTarget\": \"selectedTab\", \"style\": \"link\"}, {\"id\": \"t5\", \"cellValue\": \"catalog\", \"linkTarget\": \"parameter\", \"linkLabel\": \"Breach Catalog\", \"subTarget\": \"selectedTab\", \"style\": \"link\"}, {\"id\": \"t6\", \"cellValue\": \"compass\", \"linkTarget\": \"parameter\", \"linkLabel\": \"Compass\", \"subTarget\": \"selectedTab\", \"style\": \"link\"}, {\"id\": \"t7\", \"cellValue\": \"health\", \"linkTarget\": \"parameter\", \"linkLabel\": \"Health\", \"subTarget\": \"selectedTab\", \"style\": \"link\"}]}, \"name\": \"tabLinks\"}, {\"type\": 12, \"content\": {\"version\": \"GroupItem/1.0\", \"groupType\": 0, \"items\": [{\"type\": 1, \"content\": {\"json\": \"## Executive Summary\\nReal-time exposure metrics across all SpyCloud data sources.\"}, \"name\": \"overviewHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"let w = SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange};\\nlet mde = Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange};\\nlet ca = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange};\\nunion\\n(w | summarize v=count() | extend Label=\\\"Total Exposures\\\", Order=1),\\n(w | summarize v=dcount(email) | extend Label=\\\"Unique Users\\\", Order=2),\\n(w | where severity >= 20 | summarize v=dcount(infected_machine_id) | extend Label=\\\"Infected Devices\\\", Order=3),\\n(w | where severity == 25 | summarize v=count() | extend Label=\\\"Critical (Sev 25)\\\", Order=4),\\n(w | where severity == 20 | summarize v=count() | extend Label=\\\"High (Sev 20)\\\", Order=5),\\n(w | where isnotempty(password_plaintext) | summarize v=count() | extend Label=\\\"Plaintext Passwords\\\", Order=6),\\n(mde | summarize v=count() | extend Label=\\\"MDE Actions\\\", Order=7),\\n(ca | summarize v=count() | extend Label=\\\"CA Actions\\\", Order=8)\\n| project Label, Value=v, Order\\n| order by Order asc\", \"size\": 4, \"title\": \"Exposure Metrics\", \"queryType\": 0, \"visualization\": \"tiles\", \"tileSettings\": {\"titleContent\": {\"columnMatch\": \"Label\", \"formatter\": 1}, \"leftContent\": {\"columnMatch\": \"Value\", \"formatter\": 12, \"formatOptions\": {\"palette\": \"auto\"}}}}, \"name\": \"exposureTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Count=count() by bin(TimeGenerated, 1d), tostring(severity)\\n| extend SeverityLabel = case(severity == \\\"25\\\", \\\"P1 Critical\\\", severity == \\\"20\\\", \\\"P1 High\\\", severity == \\\"5\\\", \\\"P3 Standard\\\", severity == \\\"2\\\", \\\"P4 Low\\\", strcat(\\\"Other (\\\", severity, \\\")\\\"))\\n| project TimeGenerated, SeverityLabel, Count\", \"size\": 0, \"title\": \"Exposure Trend by Severity\", \"queryType\": 0, \"visualization\": \"areachart\", \"chartSettings\": {\"seriesLabelSettings\": [{\"seriesName\": \"P1 Critical\", \"color\": \"redBright\"}, {\"seriesName\": \"P1 High\", \"color\": \"orange\"}, {\"seriesName\": \"P3 Standard\", \"color\": \"yellow\"}, {\"seriesName\": \"P4 Low\", \"color\": \"blue\"}]}}, \"name\": \"exposureTrend\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| extend SeverityLabel = case(severity == 25, \\\"P1 Critical\\\", severity == 20, \\\"P1 High\\\", severity == 5, \\\"P3 Standard\\\", severity == 2, \\\"P4 Low\\\", strcat(\\\"Other (\\\", tostring(severity), \\\")\\\"))\\n| summarize Count=count() by SeverityLabel\", \"size\": 3, \"title\": \"Severity Distribution\", \"queryType\": 0, \"visualization\": \"piechart\", \"chartSettings\": {\"seriesLabelSettings\": [{\"seriesName\": \"P1 Critical\", \"color\": \"redBright\"}, {\"seriesName\": \"P1 High\", \"color\": \"orange\"}, {\"seriesName\": \"P3 Standard\", \"color\": \"yellow\"}, {\"seriesName\": \"P4 Low\", \"color\": \"blue\"}]}}, \"name\": \"severityPie\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and isnotempty(breach_category)\\n| summarize Count=count() by tostring(breach_category)\", \"size\": 3, \"title\": \"Breach Category Breakdown\", \"queryType\": 0, \"visualization\": \"piechart\"}, \"name\": \"breachCategoryPie\"}]}, \"conditionalVisibility\": {\"parameterName\": \"selectedTab\", \"comparison\": \"isEqualTo\", \"value\": \"overview\"}, \"name\": \"tab_overview\"}, {\"type\": 12, \"content\": {\"version\": \"GroupItem/1.0\", \"groupType\": 0, \"items\": [{\"type\": 1, \"content\": {\"json\": \"## Credential Exposure Analysis\\nIdentify the most exposed users, password types, and targeted domains.\"}, \"name\": \"credHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and isnotempty(email)\\n| summarize\\n    Exposures = count(),\\n    MaxSev = max(severity),\\n    PlaintextPWs = countif(isnotempty(password_plaintext)),\\n    Domains = dcount(target_domain),\\n    Sources = dcount(source_id),\\n    Latest = max(TimeGenerated)\\n  by email\\n| top 25 by MaxSev desc, Exposures desc\\n| extend SevIndicator = case(MaxSev == 25, \\\"CRITICAL\\\", MaxSev == 20, \\\"HIGH\\\", MaxSev == 5, \\\"STANDARD\\\", \\\"LOW\\\")\\n| project email, SevIndicator, Exposures, PlaintextPWs, Domains, Sources, Latest\", \"size\": 0, \"title\": \"Top 25 Most Exposed Users\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"topUsers\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| extend PwType = case(\\n    isnotempty(password_plaintext), \\\"Plaintext\\\",\\n    isnotempty(password), \\\"Hashed\\\",\\n    \\\"No Password Data\\\")\\n| summarize Count=count() by PwType\\n| order by Count desc\", \"size\": 1, \"title\": \"Password Type Distribution\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"passwordTypes\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and isnotempty(target_domain)\\n| summarize Exposures=count(), UniqueUsers=dcount(email) by tostring(target_domain)\\n| order by Exposures desc\\n| take 20\", \"size\": 1, \"title\": \"Top Targeted Domains\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"targetDomains\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and isnotempty(email_domain)\\n| summarize Exposures=count(), UniqueUsers=dcount(email) by tostring(email_domain)\\n| order by Exposures desc\\n| take 15\", \"size\": 1, \"title\": \"Top Exposed Email Domains\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"emailDomains\"}]}, \"conditionalVisibility\": {\"parameterName\": \"selectedTab\", \"comparison\": \"isEqualTo\", \"value\": \"credentials\"}, \"name\": \"tab_credentials\"}, {\"type\": 12, \"content\": {\"version\": \"GroupItem/1.0\", \"groupType\": 0, \"items\": [{\"type\": 1, \"content\": {\"json\": \"## Infostealer & Device Forensics\\nInfected device analysis, malware families, and geographic distribution.\"}, \"name\": \"deviceHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and severity >= 20 and isnotempty(infected_machine_id)\\n| summarize Users=dcount(email), MaxSev=max(severity), Domains=dcount(target_domain), Latest=max(TimeGenerated) by tostring(infected_machine_id), tostring(user_hostname)\\n| top 25 by MaxSev desc, Users desc\\n| extend SevIndicator = case(MaxSev == 25, \\\"CRITICAL\\\", MaxSev == 20, \\\"HIGH\\\", \\\"OTHER\\\")\\n| project infected_machine_id, user_hostname, SevIndicator, Users, Domains, Latest\", \"size\": 0, \"title\": \"Top 25 Infected Devices\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"infectedDevices\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachCatalog_CL\\n| where TimeGenerated {TimeRange} and isnotempty(breach_title)\\n| summarize Count=count() by tostring(breach_title)\\n| order by Count desc\\n| take 15\", \"size\": 1, \"title\": \"Top Malware Families / Breach Sources\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"malwareFamilies\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and severity >= 20 and isnotempty(country_code)\\n| summarize Devices=dcount(infected_machine_id), Users=dcount(email) by tostring(country_code)\\n| order by Devices desc\\n| take 20\", \"size\": 1, \"title\": \"Infections by Country\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"geoChart\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange} and severity >= 20 and isnotempty(user_os)\\n| summarize Devices=dcount(infected_machine_id) by tostring(user_os)\\n| order by Devices desc\\n| take 10\", \"size\": 3, \"title\": \"Infected Device OS Distribution\", \"queryType\": 0, \"visualization\": \"piechart\"}, \"name\": \"osDistribution\"}, {\"type\": 1, \"content\": {\"json\": \"### PII & Identity Exposure\"}, \"name\": \"piiSubHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachWatchlist_CL\\n| where TimeGenerated {TimeRange}\\n| summarize\\n    Emails = dcountif(email, isnotempty(email)),\\n    Phones = countif(isnotempty(phone)),\\n    SSNs = countif(isnotempty(national_id)),\\n    DOBs = countif(isnotempty(dob)),\\n    Addresses = countif(isnotempty(address_1)),\\n    FullNames = countif(isnotempty(full_name))\\n| project-rename\\n    ['Email Addresses'] = Emails,\\n    ['Phone Numbers'] = Phones,\\n    ['National IDs/SSNs'] = SSNs,\\n    ['Dates of Birth'] = DOBs,\\n    ['Physical Addresses'] = Addresses,\\n    ['Full Names'] = FullNames\", \"size\": 0, \"title\": \"PII Types Exposed\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"piiExposure\"}]}, \"conditionalVisibility\": {\"parameterName\": \"selectedTab\", \"comparison\": \"isEqualTo\", \"value\": \"devices\"}, \"name\": \"tab_devices\"}, {\"type\": 12, \"content\": {\"version\": \"GroupItem/1.0\", \"groupType\": 0, \"items\": [{\"type\": 1, \"content\": {\"json\": \"## Automated Remediation\\nMDE device isolation and Conditional Access enforcement activity.\"}, \"name\": \"remHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union\\n(Spycloud_MDE_Logs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\\\"MDE Isolations\\\", Order=1),\\n(SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\\\"CA Resets/Revokes\\\", Order=2),\\n(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | summarize v=dcount(email) | extend Label=\\\"High-Sev Users\\\", Order=3),\\n(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity == 25 | summarize v=dcount(infected_machine_id) | extend Label=\\\"Critical Devices\\\", Order=4)\\n| project Label, Value=v, Order\\n| order by Order asc\", \"size\": 4, \"title\": \"Remediation Summary\", \"queryType\": 0, \"visualization\": \"tiles\", \"tileSettings\": {\"titleContent\": {\"columnMatch\": \"Label\", \"formatter\": 1}, \"leftContent\": {\"columnMatch\": \"Value\", \"formatter\": 12, \"formatOptions\": {\"palette\": \"auto\"}}}}, \"name\": \"remediationTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"Spycloud_MDE_Logs_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Actions=count() by bin(TimeGenerated, 1d)\", \"size\": 0, \"title\": \"MDE Device Isolation Timeline\", \"queryType\": 0, \"visualization\": \"areachart\", \"chartSettings\": {\"seriesLabelSettings\": [{\"seriesName\": \"Actions\", \"color\": \"redBright\"}]}}, \"name\": \"mdeTimeline\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloud_ConditionalAccessLogs_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Actions=count() by bin(TimeGenerated, 1d)\", \"size\": 0, \"title\": \"CA Remediation Timeline\", \"queryType\": 0, \"visualization\": \"areachart\", \"chartSettings\": {\"seriesLabelSettings\": [{\"seriesName\": \"Actions\", \"color\": \"blue\"}]}}, \"name\": \"caTimeline\"}]}, \"conditionalVisibility\": {\"parameterName\": \"selectedTab\", \"comparison\": \"isEqualTo\", \"value\": \"remediation\"}, \"name\": \"tab_remediation\"}, {\"type\": 12, \"content\": {\"version\": \"GroupItem/1.0\", \"groupType\": 0, \"items\": [{\"type\": 1, \"content\": {\"json\": \"## Breach Catalog Intelligence\\nMetadata about breach sources tracked by SpyCloud.\"}, \"name\": \"catalogHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudBreachCatalog_CL\\n| where TimeGenerated {TimeRange}\\n| summarize arg_max(TimeGenerated, *) by uuid\\n| project uuid, short_title, breach_main_category, site_description, TimeGenerated\\n| order by TimeGenerated desc\\n| take 50\", \"size\": 0, \"title\": \"Recent Breach Catalog Entries\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"catalogTable\"}]}, \"conditionalVisibility\": {\"parameterName\": \"selectedTab\", \"comparison\": \"isEqualTo\", \"value\": \"catalog\"}, \"name\": \"tab_catalog\"}, {\"type\": 12, \"content\": {\"version\": \"GroupItem/1.0\", \"groupType\": 0, \"items\": [{\"type\": 1, \"content\": {\"json\": \"## Compass Consumer Intelligence\\nConsumer/partner identity exposures from SpyCloud Compass. *Requires Enterprise+ license.*\"}, \"name\": \"compassHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudCompassData_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Exposures=count(), Users=dcount(email), Devices=dcount(infected_machine_id), MaxSev=max(severity) by breach_category\\n| order by Exposures desc\", \"size\": 1, \"title\": \"Compass Exposures by Category\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"compassByCategory\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudCompassDevices_CL\\n| where TimeGenerated {TimeRange}\\n| summarize Infections=count(), AvgApps=avg(application_count) by user_hostname, user_os\\n| top 20 by Infections desc\", \"size\": 0, \"title\": \"Top Compass Infected Devices\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"compassDevices\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"SpyCloudCompassData_CL\\n| where TimeGenerated {TimeRange} and severity >= 20\\n| join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | distinct email) on email\\n| summarize CompassHits=count(), Domains=dcount(target_domain) by email\\n| top 15 by CompassHits desc\", \"size\": 0, \"title\": \"Compass + Corporate Overlap (Shared Users)\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"compassCorporateOverlap\"}]}, \"conditionalVisibility\": {\"parameterName\": \"selectedTab\", \"comparison\": \"isEqualTo\", \"value\": \"compass\"}, \"name\": \"tab_compass\"}, {\"type\": 12, \"content\": {\"version\": \"GroupItem/1.0\", \"groupType\": 0, \"items\": [{\"type\": 1, \"content\": {\"json\": \"## Connector Health\\nData pipeline status across all SpyCloud tables.\"}, \"name\": \"healthHeader\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"let tables = dynamic([\\\"SpyCloudBreachWatchlist_CL\\\",\\\"SpyCloudBreachCatalog_CL\\\",\\\"Spycloud_MDE_Logs_CL\\\",\\\"SpyCloud_ConditionalAccessLogs_CL\\\",\\\"SpyCloudCompassData_CL\\\",\\\"SpyCloudCompassDevices_CL\\\"]);\\nunion isfuzzy=true\\n(SpyCloudBreachWatchlist_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\\\"SpyCloudBreachWatchlist_CL\\\"),\\n(SpyCloudBreachCatalog_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\\\"SpyCloudBreachCatalog_CL\\\"),\\n(Spycloud_MDE_Logs_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\\\"Spycloud_MDE_Logs_CL\\\"),\\n(SpyCloud_ConditionalAccessLogs_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\\\"SpyCloud_ConditionalAccessLogs_CL\\\"),\\n(SpyCloudCompassData_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\\\"SpyCloudCompassData_CL\\\"),\\n(SpyCloudCompassDevices_CL | summarize Records=count(), Latest=max(TimeGenerated), Earliest=min(TimeGenerated) | extend Table=\\\"SpyCloudCompassDevices_CL\\\")\\n| extend AgeHours = datetime_diff('hour', now(), Latest)\\n| extend Status = case(AgeHours <= 1, \\\"Active\\\", AgeHours <= 6, \\\"Delayed\\\", AgeHours <= 24, \\\"Stale\\\", \\\"No Data\\\")\\n| project Table, Records, Status, Latest, Earliest, AgeHours\\n| order by Records desc\", \"size\": 0, \"title\": \"Data Pipeline Health\", \"queryType\": 0, \"visualization\": \"table\"}, \"name\": \"healthTable\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} | summarize Count=count() by bin(TimeGenerated, 1d) | extend Table=\\\"Watchlist\\\"),\\n(SpyCloudBreachCatalog_CL | where TimeGenerated {TimeRange} | summarize Count=count() by bin(TimeGenerated, 1d) | extend Table=\\\"Catalog\\\")\", \"size\": 0, \"title\": \"Daily Ingestion Volume\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"ingestionVolume\"}]}, \"conditionalVisibility\": {\"parameterName\": \"selectedTab\", \"comparison\": \"isEqualTo\", \"value\": \"health\"}, \"name\": \"tab_health\"}], \"defaultResourceIds\": [], \"$schema\": \"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\"}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId1'), variables('huntingQueryVersion1'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId1')]",
+        "displayName": "SpyCloud Hunt — Exposed Users with Active Sign-Ins",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion1')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId1'),'-', variables('huntingQueryVersion1'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-ExposedUserswithA')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Exposed Users with Active Sign-Ins",
+                "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(7d) and severity >= 5 | distinct email, severity, breach_title;\nSigninLogs | where TimeGenerated > ago(2d) and ResultType == 0 | where UserPrincipalName in~ (exposed | project email) | join kind=inner exposed on $left.UserPrincipalName == $right.email | summarize SignIns=count(), Apps=dcount(AppDisplayName), IPs=dcount(IPAddress) by UserPrincipalName, severity, breach_title | order by severity desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Finds users whose credentials were exposed in SpyCloud AND who have successful Entra ID sign-ins in the last 48 hours. These are the highest-priority accounts — an attacker may already be using the stolen credentials."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "CredentialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1078"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId2'), variables('huntingQueryVersion2'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId2')]",
+        "displayName": "SpyCloud Hunt — Infected IPs Across All Network Logs",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion2')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId2'),'-', variables('huntingQueryVersion2'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-InfectedIPsAcross')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Infected IPs Across All Network Logs",
+                "query": "let ips = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | mv-expand ip = ip_addresses | extend src_ip = tostring(ip) | where isnotempty(src_ip) | distinct src_ip;\nunion isfuzzy=true\n(DeviceNetworkEvents | where TimeGenerated > ago(7d) | where RemoteIP in (ips) | summarize Hits=count() by RemoteIP, DeviceName | extend Source=\"MDE\"),\n(DnsEvents | where TimeGenerated > ago(7d) | where ClientIP in (ips) | summarize Hits=count() by ClientIP | extend Source=\"DNS\"),\n(CommonSecurityLog | where TimeGenerated > ago(7d) | where SourceIP in (ips) or DestinationIP in (ips) | summarize Hits=count() by SourceIP, DestinationIP | extend Source=\"Firewall\"),\n(ThreatIntelligenceIndicator | where TimeGenerated > ago(30d) | where NetworkIP in (ips) | summarize Hits=count() by NetworkIP, ThreatType | extend Source=\"TI\")\n| order by Hits desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Sweeps MDE network events, DNS, firewall (CEF), and Threat Intelligence feeds for any IP addresses associated with SpyCloud infostealer infections. Comprehensive network-level threat hunt."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "CommandAndControl"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1071"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId3'), variables('huntingQueryVersion3'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId3')]",
+        "displayName": "SpyCloud Hunt — Password Reuse Across Domains",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion3')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId3'),'-', variables('huntingQueryVersion3'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-PasswordReuseAcro')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Password Reuse Across Domains",
+                "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) and isnotempty(password) | summarize Domains=dcount(target_domain), DomainList=make_set(target_domain, 10), Exposures=count(), MaxSev=max(severity) by email, password | where Domains >= 3 | project email, Domains, DomainList, Exposures, MaxSev | order by Domains desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Identifies users whose same password hash appears across 3+ different target domains — indicating dangerous password reuse. These users are vulnerable to credential stuffing attacks across all their accounts."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "CredentialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1110"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId4'), variables('huntingQueryVersion4'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId4')]",
+        "displayName": "SpyCloud Hunt — Devices Infected Multiple Times",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion4')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId4'),'-', variables('huntingQueryVersion4'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-DevicesInfectedMu')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Devices Infected Multiple Times",
+                "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(90d) and isnotempty(infected_machine_id) | summarize Infections=count(), Sources=dcount(source_id), Users=dcount(email), FirstSeen=min(spycloud_publish_date), LastSeen=max(spycloud_publish_date) by infected_machine_id, user_hostname, user_os | where Infections > 1 | order by Infections desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Finds devices that appear in SpyCloud data across multiple breach sources or time periods — indicating the device was not properly remediated after the first infection, or the user continues risky behavior."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "Persistence"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1547"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId5'), variables('huntingQueryVersion5'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId5')]",
+        "displayName": "SpyCloud Hunt — Plaintext Passwords by Domain",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion5')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId5'),'-', variables('huntingQueryVersion5'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-PlaintextPassword')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Plaintext Passwords by Domain",
+                "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) and isnotempty(password_plaintext) | summarize PlaintextCount=count(), Users=dcount(email), Domains=dcount(target_domain), MaxSev=max(severity) by email_domain | order by PlaintextCount desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Aggregates all plaintext (cleartext) password exposures by email domain. These credentials can be used immediately by attackers without any cracking. Priority for password reset and user notification."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "CredentialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1552"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId6'), variables('huntingQueryVersion6'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId6')]",
+        "displayName": "SpyCloud Hunt — Compass Consumer + Corporate Overlap",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion6')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId6'),'-', variables('huntingQueryVersion6'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-CompassConsumerandC')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Compass Consumer + Corporate Overlap",
+                "query": "SpyCloudCompassData_CL | where TimeGenerated > ago(30d) and severity >= 20 | join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | distinct email, severity) on email | summarize CompassHits=count(), CorporateMaxSev=max(severity1), CompassMaxSev=max(severity), Domains=dcount(target_domain) by email | order by CorporateMaxSev desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Cross-references SpyCloud Compass (consumer identity) data with corporate watchlist data. Users appearing in both datasets are reusing personal credentials for corporate accounts — a major risk vector."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "CredentialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1078"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId7'), variables('huntingQueryVersion7'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId7')]",
+        "displayName": "SpyCloud Hunt — Unremediated High-Severity Exposures",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion7')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId7'),'-', variables('huntingQueryVersion7'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-UnremediatedHigh-')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Unremediated High-Severity Exposures",
+                "query": "let remediated = SpyCloud_ConditionalAccessLogs_CL | where TimeGenerated > ago(14d) | distinct tolower(Email);\nSpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | where tolower(email) !in (remediated) | summarize Exposures=count(), MaxSev=max(severity), Domains=dcount(target_domain), LatestExposure=max(TimeGenerated) by email | order by MaxSev desc, Exposures desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Identifies high-severity (20+) exposures that have NOT been remediated by the CA playbook. These are the most urgent action items — exposed credentials without a password reset."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "InitialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1078"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId8'), variables('huntingQueryVersion8'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId8')]",
+        "displayName": "SpyCloud Hunt — Risk Score Dashboard",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion8')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId8'),'-', variables('huntingQueryVersion8'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-RiskScoreDashboar')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Risk Score Dashboard",
+                "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(30d) | summarize Exposures=count(), MaxSev=max(severity), PlaintextPWs=countif(isnotempty(password_plaintext)), Devices=dcountif(infected_machine_id, isnotempty(infected_machine_id)), Domains=dcount(target_domain), DaysSince=datetime_diff('day',now(),max(TimeGenerated)) by email | extend Score = Exposures*2 + MaxSev*3 + PlaintextPWs*10 + Devices*15 + iff(DaysSince<7,20,iff(DaysSince<30,10,0)) | extend Risk=case(Score>=100,\"CRITICAL\",Score>=50,\"HIGH\",Score>=20,\"MEDIUM\",\"LOW\") | order by Score desc | take 100",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Calculates a composite risk score for every exposed user based on severity, plaintext passwords, device infections, target domain count, and recency. Use to prioritize remediation efforts."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "InitialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1078"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId9'), variables('huntingQueryVersion9'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId9')]",
+        "displayName": "SpyCloud Hunt — Stolen Session Cookies Used for MFA Bypass",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion9')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId9'),'-', variables('huntingQueryVersion9'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-StolenSessionCookies')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Stolen Session Cookies Used for MFA Bypass",
+                "query": "let stolen_sessions = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | where isnotempty(infected_machine_id) and (isnotempty(cookie_domain) or log_id contains \"cookie\" or log_id contains \"session\") | distinct email, infected_machine_id, target_domain, severity;\nSigninLogs | where TimeGenerated > ago(7d) and ResultType == 0 | where AuthenticationRequirement == \"singleFactorAuthentication\" or TokenIssuerType == \"AzureAD\" | where UserPrincipalName in~ (stolen_sessions | project email) | join kind=inner stolen_sessions on $left.UserPrincipalName == $right.email | summarize SessionReuses=count(), UniqueIPs=dcount(IPAddress), Countries=dcount(LocationDetails.countryOrRegion) by UserPrincipalName, severity, target_domain | where UniqueIPs > 1 | order by SessionReuses desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Identifies users with stolen session cookies (from SpyCloud infostealer data) who have recent sign-ins bypassing MFA. Multiple unique IPs suggest token replay attacks."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "DefenseEvasion,CredentialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1539,T1550"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId10'), variables('huntingQueryVersion10'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId10')]",
+        "displayName": "SpyCloud Hunt — Lateral Movement from Compromised Accounts",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion10')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId10'),'-', variables('huntingQueryVersion10'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-LateralMovement')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Lateral Movement from Compromised Accounts",
+                "query": "let compromised = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email;\nIdentityLogonEvents | where TimeGenerated > ago(7d) | where AccountUpn in~ (compromised) | where LogonType in (\"RemoteInteractive\", \"Network\", \"CachedRemoteInteractive\") | summarize UniqueTargets=dcount(DestinationDeviceName), Logons=count(), LogonTypes=make_set(LogonType) by AccountUpn, SourceDeviceName = DeviceName | where UniqueTargets > 2 | order by UniqueTargets desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Hunts for lateral movement by compromised users — accounts with SpyCloud exposure that authenticated to 3+ different machines via RDP, SMB, or remote logons. Indicates active use of stolen credentials."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "LateralMovement"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1021"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId11'), variables('huntingQueryVersion11'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId11')]",
+        "displayName": "SpyCloud Hunt — Data Exfiltration After Credential Exposure",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion11')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId11'),'-', variables('huntingQueryVersion11'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-DataExfilAfterExposure')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Data Exfiltration After Credential Exposure",
+                "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email, spycloud_publish_date;\nCloudAppEvents | where TimeGenerated > ago(7d) | where ActionType in (\"FileDownloaded\", \"FileSyncDownloadedFull\", \"FileModifiedExtended\", \"FileCopied\") | where AccountObjectId != \"\" | join kind=inner (IdentityInfo | where TimeGenerated > ago(14d) | distinct AccountUPN, AccountObjectId) on AccountObjectId | where AccountUPN in~ (exposed | project email) | summarize Downloads=count(), UniqueFiles=dcount(ObjectName), DataVolumeMB=sum(toint(RawEventData.FileSizeBytes))/1048576 by AccountUPN, ActionType | where Downloads > 50 | order by Downloads desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Detects mass file downloads or data exfiltration from cloud apps by users whose credentials were exposed in SpyCloud. Tracks download volume and unique files to identify data theft post-compromise."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "Exfiltration"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1530"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId12'), variables('huntingQueryVersion12'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId12')]",
+        "displayName": "SpyCloud Hunt — Mailbox Compromise and Forwarding Rules",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion12')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId12'),'-', variables('huntingQueryVersion12'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-MailboxCompromise')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Mailbox Compromise and Forwarding Rules",
+                "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 5 | distinct email;\nOfficeActivity | where TimeGenerated > ago(7d) | where Operation in (\"New-InboxRule\", \"Set-InboxRule\", \"Set-Mailbox\", \"Set-TransportRule\") | where UserId in~ (exposed) | extend RuleDetails = tostring(Parameters) | where RuleDetails contains \"Forward\" or RuleDetails contains \"Redirect\" or RuleDetails contains \"Delete\" | project TimeGenerated, UserId, Operation, RuleDetails, ClientIP | order by TimeGenerated desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Searches for mailbox forwarding rules, redirect rules, or deletion rules created by users with SpyCloud credential exposure. Common BEC and account takeover technique — attacker sets auto-forward to external mailbox."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "Collection,Exfiltration"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1114,T1020"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId13'), variables('huntingQueryVersion13'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId13')]",
+        "displayName": "SpyCloud Hunt — Privilege Escalation by Compromised Users",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion13')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId13'),'-', variables('huntingQueryVersion13'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-PrivEscalation')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Privilege Escalation by Compromised Users",
+                "query": "let exposed = SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(14d) and severity >= 20 | distinct email;\nAuditLogs | where TimeGenerated > ago(7d) | where OperationName in (\"Add member to role\", \"Add eligible member to role\", \"Add owner to group\", \"Add member to group\", \"Consent to application\", \"Add app role assignment to service principal\") | where InitiatedBy.user.userPrincipalName in~ (exposed) | project TimeGenerated, InitiatedBy=tostring(InitiatedBy.user.userPrincipalName), Operation=OperationName, Target=tostring(TargetResources[0].displayName), Role=tostring(TargetResources[0].modifiedProperties[0].newValue) | order by TimeGenerated desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Detects privilege escalation activities by users whose credentials were exposed in SpyCloud — role assignments, group additions, app consents, and service principal modifications. May indicate an attacker using stolen credentials to elevate access."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "PrivilegeEscalation,Persistence"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1098,T1078"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId14'), variables('huntingQueryVersion14'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId14')]",
+        "displayName": "SpyCloud Hunt — Malware Family Trends and Campaign Tracking",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion14')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId14'),'-', variables('huntingQueryVersion14'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-MalwareFamilyTrends')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Malware Family Trends and Campaign Tracking",
+                "query": "SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(90d) and severity >= 20 | where isnotempty(infected_path) or isnotempty(infected_machine_id) | extend malware_family = case(infected_path contains \"redline\", \"RedLine\", infected_path contains \"raccoon\", \"Raccoon\", infected_path contains \"vidar\", \"Vidar\", infected_path contains \"lumma\", \"LummaC2\", infected_path contains \"stealc\", \"StealC\", infected_path contains \"aurora\", \"Aurora\", infected_path contains \"meta\", \"MetaStealer\", infected_path contains \"titan\", \"TitanStealer\", \"Unknown\") | summarize Victims=dcount(email), Devices=dcount(infected_machine_id), FirstSeen=min(spycloud_publish_date), LastSeen=max(spycloud_publish_date), Domains=dcount(target_domain) by malware_family | order by Victims desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Tracks infostealer malware family trends from SpyCloud data — which malware families are targeting your organization, victim counts, device infections, and campaign timelines. Essential for threat intelligence reporting."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "Collection"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1005"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId15'), variables('huntingQueryVersion15'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId15')]",
+        "displayName": "SpyCloud Hunt — Third-Party Breach Impact Assessment",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion15')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId15'),'-', variables('huntingQueryVersion15'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-SpyCloudHunt-ThirdPartyBreachImpact')]",
+              "properties": {
+                "category": "SpyCloud Hunting",
+                "displayName": "SpyCloud Hunt — Third-Party Breach Impact Assessment",
+                "query": "SpyCloudBreachCatalog_CL | where TimeGenerated > ago(90d) | join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated > ago(90d) | summarize AffectedUsers=dcount(email), MaxSev=max(severity), PlaintextPWs=countif(isnotempty(password_plaintext)), HasCookies=countif(isnotempty(infected_machine_id)) by source_id) on source_id | project BreachTitle=title, BreachDate=breach_date, AffectedUsers, MaxSev, PlaintextPWs, HasCookies, Description=description | order by AffectedUsers desc",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Assesses the organizational impact of each third-party breach or infostealer campaign in the SpyCloud catalog. Shows which breaches affect the most users, have plaintext passwords, or involve device infections."
+                  },
+                  {
+                    "name": "tactics",
+                    "value": "InitialAccess"
+                  },
+                  {
+                    "name": "techniques",
+                    "value": "T1078"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('huntingQueryContentId16'), variables('huntingQueryVersion16'))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+      ],
+      "properties": {
+        "contentId": "[variables('huntingQueryContentId16')]",
+        "displayName": "SpyCloud Enriched Data Parser",
+        "contentKind": "HuntingQuery",
+        "version": "[variables('huntingQueryVersion16')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('_solutionVersion')]",
+        "packageName": "[variables('_solutionName')]",
+        "packageId": "[variables('_solutionId')]",
+        "contentProductId": "[concat(take(variables('_solutionId'), 50),'-','hq','-', uniqueString(concat(variables('_solutionId'),'-','HuntingQuery','-',variables('huntingQueryContentId16'),'-', variables('huntingQueryVersion16'))))]",
+        "source": {
+          "kind": "Solution",
+          "name": "[variables('_solutionName')]",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
+        },
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "apiVersion": "2022-10-01",
+              "name": "[concat(parameters('workspace'), '/SpyCloud-EnrichedDataParser')]",
+              "properties": {
+                "category": "Microsoft Sentinel Parser",
+                "displayName": "SpyCloud Enriched Data Parser",
+                "functionAlias": "get_Spycloud_enriched_data",
+                "functionParameters": "lookback:timespan=1d",
+                "query": "let _lookback = coalesce(lookback, 1d);\nlet LatestBreachCatalog =\n    SpyCloudBreachCatalog_CL\n    | summarize arg_max(TimeGenerated, short_title, site_description, breach_main_category) by uuid\n    | project\n        uuid,\n        catalog_title = short_title,\n        catalog_description = site_description,\n        catalog_category = breach_main_category;\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated >= ago(_lookback)\n| extend source_uuid = tostring(source_id)\n| join kind=leftouter LatestBreachCatalog on $left.source_uuid == $right.uuid\n| project-away source_uuid, uuid",
+                "version": 2,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "Joins SpyCloud Watchlist exposures with Breach Catalog metadata. Use: get_Spycloud_enriched_data(7d)"
+                  }
+                ]
+              }
+            }
+          ]
         }
       }
     }
