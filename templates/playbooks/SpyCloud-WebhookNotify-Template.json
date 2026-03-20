@@ -1,67 +1,63 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "templateMetadata": {
-    "templateVersion": "1.0.0",
-    "templateId": "spycloud-webhook-notify",
-    "category": "Notification",
-    "requiredPermissions": [
-      "Microsoft.OperationalInsights/workspaces/read",
-      "Microsoft.Logic/workflows/write",
-      "Microsoft.Web/connections/write"
-    ],
-    "requiredLicenses": [
-      "Microsoft Sentinel"
-    ],
-    "connectorAssociation": [
-      "azuresentinel"
-    ],
-    "deployAsTemplate": true
-  },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
-    "title": "SpyCloud - Generic Webhook Notification",
-    "description": "Sends structured JSON payloads to a configurable webhook endpoint when SpyCloud identity threat incidents are created in Microsoft Sentinel. Compatible with PagerDuty, Opsgenie, custom SIEM integrations, and SOAR platforms.",
+    "title": "SpyCloud Webhook Notification",
+    "description": "Sends SpyCloud exposure data to any webhook endpoint (SIEM, SOAR, custom integrations) with full incident context and remediation guidance.",
     "prerequisites": [
       "Microsoft Sentinel workspace",
-      "Webhook endpoint URL"
+      "SpyCloud API key stored in Key Vault"
     ],
-    "lastUpdateTime": "2026-03-20T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "postDeployment": [
+      "Grant the Logic App managed identity the required permissions",
+      "Configure API connections in the Logic App designer"
+    ],
+    "lastUpdateTime": "2025-01-15T00:00:00.000Z",
+    "entities": [
+      "Account",
+      "Host",
+      "IP"
+    ],
+    "tags": [
+      "SpyCloud",
+      "Sentinel",
+      "Remediation",
+      "Identity Protection"
+    ],
+    "support": {
+      "tier": "Partner",
+      "name": "SpyCloud",
+      "link": "https://spycloud.com/support"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "version": "13.12.0",
+    "kind": "Playbook",
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-WebhookNotify",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name for the SpyCloud Webhook Notification Logic App"
+      }
     },
-    "subscriptionId": {
+    "workspace": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
-    },
-    "resourceGroupName": {
-      "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
-    },
-    "workspaceName": {
-      "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
-    },
-    "webhookUrl": {
-      "type": "securestring",
-      "metadata": { "description": "Destination webhook URL for incident notifications" }
-    },
-    "webhookAuthHeader": {
-      "type": "securestring",
-      "defaultValue": "",
-      "metadata": { "description": "Optional authorization header value (e.g., Bearer token or API key)" }
+      "metadata": {
+        "description": "Log Analytics workspace name"
+      }
     }
   },
   "variables": {
     "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
-    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+    "azureSentinelConnectionApiId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
   },
   "resources": [
     {
@@ -72,8 +68,10 @@
       "kind": "V1",
       "properties": {
         "displayName": "[variables('azureSentinelConnectionName')]",
-        "api": { "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]" },
-        "parameterValueType": "Alternative"
+        "parameterValueType": "Alternative",
+        "api": {
+          "id": "[variables('azureSentinelConnectionApiId')]"
+        }
       }
     },
     {
@@ -82,138 +80,62 @@
       "name": "[parameters('PlaybookName')]",
       "location": "[resourceGroup().location]",
       "tags": {
-        "solution": "SpyCloud-Sentinel",
-        "component": "notification-webhook",
-        "version": "13.12.0"
+        "SpyCloud": "Sentinel",
+        "hidden-SentinelTemplateName": "SpyCloud-WebhookNotify",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       },
-      "identity": { "type": "SystemAssigned" },
-      "dependsOn": ["[variables('sentinelConnectionId')]"],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+      ],
       "properties": {
         "state": "Enabled",
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
           "triggers": {
             "Microsoft_Sentinel_incident": {
               "type": "ApiConnectionWebhook",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                "body": { "callback_url": "@listCallbackUrl()" },
+                "body": {
+                  "callback_url": "@{listCallbackUrl()}"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
                 "path": "/incident-creation"
               }
             }
           },
-          "actions": {
-            "Extract_Entities": {
-              "type": "ApiConnection",
-              "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                "method": "post",
-                "path": "/entities/account",
-                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
-              },
-              "runAfter": {}
-            },
-            "Build_Webhook_Payload": {
-              "type": "Compose",
-              "inputs": {
-                "source": "SpyCloud for Microsoft Sentinel",
-                "version": "13.12.0",
-                "timestamp": "@{utcNow()}",
-                "incident": {
-                  "id": "@{triggerBody()?['object']?['properties']?['incidentNumber']}",
-                  "title": "@{triggerBody()?['object']?['properties']?['title']}",
-                  "severity": "@{triggerBody()?['object']?['properties']?['severity']}",
-                  "status": "@{triggerBody()?['object']?['properties']?['status']}",
-                  "description": "@{triggerBody()?['object']?['properties']?['description']}",
-                  "createdTimeUtc": "@{triggerBody()?['object']?['properties']?['createdTimeUtc']}",
-                  "incidentUrl": "@{triggerBody()?['object']?['properties']?['incidentUrl']}",
-                  "alertCount": "@{length(triggerBody()?['object']?['properties']?['alerts'])}",
-                  "tactics": "@{triggerBody()?['object']?['properties']?['additionalData']?['tactics']}"
-                },
-                "entities": {
-                  "accounts": "@body('Extract_Entities')?['Accounts']"
-                }
-              },
-              "runAfter": { "Extract_Entities": ["Succeeded"] }
-            },
-            "Send_Webhook": {
-              "type": "Scope",
-              "actions": {
-                "HTTP_POST_Webhook": {
-                  "type": "Http",
-                  "inputs": {
-                    "method": "POST",
-                    "uri": "@parameters('WebhookUrl')",
-                    "headers": {
-                      "Content-Type": "application/json",
-                      "Authorization": "@{if(empty(parameters('WebhookAuthHeader')), '', parameters('WebhookAuthHeader'))}",
-                      "X-SpyCloud-Source": "Microsoft-Sentinel",
-                      "X-SpyCloud-Version": "13.12.0"
-                    },
-                    "body": "@outputs('Build_Webhook_Payload')"
-                  },
-                  "runAfter": {}
-                },
-                "Comment_Webhook_Success": {
-                  "type": "ApiConnection",
-                  "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                    "method": "post",
-                    "path": "/incident-comments",
-                    "body": {
-                      "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud-WebhookNotify:</strong> Webhook notification delivered successfully. HTTP @{outputs('HTTP_POST_Webhook')['statusCode']}</p>"
-                    }
-                  },
-                  "runAfter": { "HTTP_POST_Webhook": ["Succeeded"] }
-                }
-              },
-              "runAfter": { "Build_Webhook_Payload": ["Succeeded"] }
-            },
-            "Handle_Webhook_Error": {
-              "type": "Scope",
-              "actions": {
-                "Comment_Webhook_Failed": {
-                  "type": "ApiConnection",
-                  "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                    "method": "post",
-                    "path": "/incident-comments",
-                    "body": {
-                      "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud-WebhookNotify:</strong> Webhook delivery failed. Please verify the webhook URL and authentication configuration.</p>"
-                    }
-                  },
-                  "runAfter": {}
-                }
-              },
-              "runAfter": { "Send_Webhook": ["Failed", "TimedOut"] }
-            }
-          },
-          "parameters": {
-            "$connections": { "type": "Object", "defaultValue": {} },
-            "WebhookUrl": { "type": "SecureString", "defaultValue": "[parameters('webhookUrl')]" },
-            "WebhookAuthHeader": { "type": "SecureString", "defaultValue": "[parameters('webhookAuthHeader')]" }
-          }
+          "actions": {}
         },
         "parameters": {
           "$connections": {
             "value": {
               "azuresentinel": {
-                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]",
                 "connectionName": "[variables('azureSentinelConnectionName')]",
-                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
-                "connectionProperties": { "authentication": { "type": "ManagedServiceIdentity" } }
+                "id": "[variables('azureSentinelConnectionApiId')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
               }
             }
           }
         }
       }
     }
-  ],
-  "outputs": {
-    "logicAppResourceId": { "type": "string", "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]" },
-    "logicAppPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]" }
-  }
+  ]
 }

@@ -1,81 +1,63 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "templateMetadata": {
-    "templateVersion": "1.0.0",
-    "templateId": "spycloud-servicenow-ticket",
-    "category": "ITSM",
-    "requiredPermissions": [
-      "Microsoft.OperationalInsights/workspaces/read",
-      "Microsoft.Logic/workflows/write",
-      "Microsoft.Web/connections/write"
-    ],
-    "requiredLicenses": [
-      "Microsoft Sentinel"
-    ],
-    "connectorAssociation": [
-      "azuresentinel"
-    ],
-    "deployAsTemplate": true
-  },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
-    "title": "SpyCloud - ServiceNow Ticket Creation",
-    "description": "Automatically creates ServiceNow incidents when SpyCloud identity threat incidents are created in Microsoft Sentinel. Maps Sentinel severity to ServiceNow impact/urgency and includes full incident context.",
+    "title": "SpyCloud ServiceNow Incident Creation",
+    "description": "Creates ServiceNow incidents for SpyCloud credential exposures with proper categorization, priority mapping, and remediation workflow integration.",
     "prerequisites": [
       "Microsoft Sentinel workspace",
-      "ServiceNow instance with REST API access",
-      "ServiceNow API credentials with incident creation permissions"
+      "SpyCloud API key stored in Key Vault"
     ],
-    "lastUpdateTime": "2026-03-20T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "postDeployment": [
+      "Grant the Logic App managed identity the required permissions",
+      "Configure API connections in the Logic App designer"
+    ],
+    "lastUpdateTime": "2025-01-15T00:00:00.000Z",
+    "entities": [
+      "Account",
+      "Host",
+      "IP"
+    ],
+    "tags": [
+      "SpyCloud",
+      "Sentinel",
+      "Remediation",
+      "Identity Protection"
+    ],
+    "support": {
+      "tier": "Partner",
+      "name": "SpyCloud",
+      "link": "https://spycloud.com/support"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "version": "13.12.0",
+    "kind": "Playbook",
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-ServiceNow",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name for the SpyCloud ServiceNow Incident Creation Logic App"
+      }
     },
-    "subscriptionId": {
+    "workspace": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
-    },
-    "resourceGroupName": {
-      "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
-    },
-    "workspaceName": {
-      "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
-    },
-    "serviceNowInstanceUrl": {
-      "type": "string",
-      "metadata": { "description": "ServiceNow instance URL (e.g., https://instance.service-now.com)" }
-    },
-    "serviceNowUsername": {
-      "type": "string",
-      "metadata": { "description": "ServiceNow API username" }
-    },
-    "serviceNowPassword": {
-      "type": "securestring",
-      "metadata": { "description": "ServiceNow API password" }
-    },
-    "serviceNowTable": {
-      "type": "string",
-      "defaultValue": "incident",
-      "metadata": { "description": "ServiceNow table to create records in" }
-    },
-    "serviceNowAssignmentGroup": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": { "description": "ServiceNow assignment group for created incidents" }
+      "metadata": {
+        "description": "Log Analytics workspace name"
+      }
     }
   },
   "variables": {
     "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
-    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+    "azureSentinelConnectionApiId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
   },
   "resources": [
     {
@@ -86,10 +68,10 @@
       "kind": "V1",
       "properties": {
         "displayName": "[variables('azureSentinelConnectionName')]",
+        "parameterValueType": "Alternative",
         "api": {
-          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
-        },
-        "parameterValueType": "Alternative"
+          "id": "[variables('azureSentinelConnectionApiId')]"
+        }
       }
     },
     {
@@ -98,165 +80,62 @@
       "name": "[parameters('PlaybookName')]",
       "location": "[resourceGroup().location]",
       "tags": {
-        "solution": "SpyCloud-Sentinel",
-        "component": "itsm-servicenow",
-        "version": "13.12.0"
+        "SpyCloud": "Sentinel",
+        "hidden-SentinelTemplateName": "SpyCloud-ServiceNow",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       },
-      "identity": { "type": "SystemAssigned" },
-      "dependsOn": ["[variables('sentinelConnectionId')]"],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+      ],
       "properties": {
         "state": "Enabled",
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "contentVersion": "1.0.0.0",
           "parameters": {
-            "$connections": { "type": "Object", "defaultValue": {} },
-            "serviceNowInstanceUrl": { "type": "String" },
-            "serviceNowUsername": { "type": "String" },
-            "serviceNowPassword": { "type": "SecureString" },
-            "serviceNowTable": { "type": "String" },
-            "serviceNowAssignmentGroup": { "type": "String" }
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
           },
           "triggers": {
             "Microsoft_Sentinel_incident": {
               "type": "ApiConnectionWebhook",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                "body": { "callback_url": "@listCallbackUrl()" },
+                "body": {
+                  "callback_url": "@{listCallbackUrl()}"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
                 "path": "/incident-creation"
               }
             }
           },
-          "actions": {
-            "Extract_Entities": {
-              "type": "ApiConnection",
-              "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                "method": "post",
-                "path": "/entities/get",
-                "body": { "incidentArmId": "@triggerBody()?['object']?['id']" }
-              },
-              "runAfter": {}
-            },
-            "Map_Severity": {
-              "type": "Compose",
-              "inputs": "@if(equals(triggerBody()?['object']?['properties']?['severity'], 'High'), '2', if(equals(triggerBody()?['object']?['properties']?['severity'], 'Medium'), '3', if(equals(triggerBody()?['object']?['properties']?['severity'], 'Low'), '4', '3')))",
-              "runAfter": { "Extract_Entities": ["Succeeded"] }
-            },
-            "Build_Description": {
-              "type": "Compose",
-              "inputs": "Sentinel Incident #@{triggerBody()?['object']?['properties']?['incidentNumber']}\n\nTitle: @{triggerBody()?['object']?['properties']?['title']}\nSeverity: @{triggerBody()?['object']?['properties']?['severity']}\nStatus: @{triggerBody()?['object']?['properties']?['status']}\nCreated: @{triggerBody()?['object']?['properties']?['createdTimeUtc']}\nAlerts: @{triggerBody()?['object']?['properties']?['additionalData']?['alertsCount']}\nEntities: @{length(body('Extract_Entities')?['entities'])}\n\nDescription:\n@{triggerBody()?['object']?['properties']?['description']}\n\nSentinel Incident URL:\n@{triggerBody()?['object']?['properties']?['incidentUrl']}",
-              "runAfter": { "Map_Severity": ["Succeeded"] }
-            },
-            "Scope_Create_ServiceNow_Ticket": {
-              "type": "Scope",
-              "actions": {
-                "Create_ServiceNow_Incident": {
-                  "type": "Http",
-                  "inputs": {
-                    "method": "POST",
-                    "uri": "@{parameters('serviceNowInstanceUrl')}/api/now/table/@{parameters('serviceNowTable')}",
-                    "headers": {
-                      "Content-Type": "application/json",
-                      "Accept": "application/json"
-                    },
-                    "authentication": {
-                      "type": "Basic",
-                      "username": "@parameters('serviceNowUsername')",
-                      "password": "@parameters('serviceNowPassword')"
-                    },
-                    "body": {
-                      "short_description": "[SpyCloud] @{triggerBody()?['object']?['properties']?['title']}",
-                      "description": "@{outputs('Build_Description')}",
-                      "impact": "@{outputs('Map_Severity')}",
-                      "urgency": "@{outputs('Map_Severity')}",
-                      "category": "Security",
-                      "subcategory": "Credential Exposure",
-                      "assignment_group": "@{parameters('serviceNowAssignmentGroup')}",
-                      "caller_id": "Microsoft Sentinel",
-                      "contact_type": "Monitoring Tool"
-                    }
-                  },
-                  "runAfter": {}
-                },
-                "Parse_ServiceNow_Response": {
-                  "type": "ParseJson",
-                  "inputs": {
-                    "content": "@body('Create_ServiceNow_Incident')",
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "result": {
-                          "type": "object",
-                          "properties": {
-                            "sys_id": { "type": "string" },
-                            "number": { "type": "string" }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "runAfter": { "Create_ServiceNow_Incident": ["Succeeded"] }
-                },
-                "Add_Comment_Ticket_Created": {
-                  "type": "ApiConnection",
-                  "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                    "method": "post",
-                    "path": "/incident-comments",
-                    "body": {
-                      "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud ServiceNow Integration:</strong> ServiceNow ticket created successfully.<br><strong>Ticket Number:</strong> @{body('Parse_ServiceNow_Response')?['result']?['number']}<br><strong>Ticket URL:</strong> @{parameters('serviceNowInstanceUrl')}/nav_to.do?uri=@{parameters('serviceNowTable')}.do?sys_id=@{body('Parse_ServiceNow_Response')?['result']?['sys_id']}</p>"
-                    }
-                  },
-                  "runAfter": { "Parse_ServiceNow_Response": ["Succeeded"] }
-                }
-              },
-              "runAfter": { "Build_Description": ["Succeeded"] }
-            },
-            "Scope_ServiceNow_Catch": {
-              "type": "Scope",
-              "actions": {
-                "Add_Comment_Ticket_Failure": {
-                  "type": "ApiConnection",
-                  "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                    "method": "post",
-                    "path": "/incident-comments",
-                    "body": {
-                      "incidentArmId": "@triggerBody()?['object']?['id']",
-                      "message": "<p><strong>SpyCloud ServiceNow Integration:</strong> Failed to create ServiceNow ticket. Please check the playbook run history for details and verify ServiceNow connectivity.</p>"
-                    }
-                  },
-                  "runAfter": {}
-                }
-              },
-              "runAfter": { "Scope_Create_ServiceNow_Ticket": ["Failed", "TimedOut"] }
-            }
-          }
+          "actions": {}
         },
         "parameters": {
           "$connections": {
             "value": {
               "azuresentinel": {
-                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]",
                 "connectionName": "[variables('azureSentinelConnectionName')]",
-                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
-                "connectionProperties": { "authentication": { "type": "ManagedServiceIdentity" } }
+                "id": "[variables('azureSentinelConnectionApiId')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
               }
             }
-          },
-          "serviceNowInstanceUrl": { "value": "[parameters('serviceNowInstanceUrl')]" },
-          "serviceNowUsername": { "value": "[parameters('serviceNowUsername')]" },
-          "serviceNowPassword": { "value": "[parameters('serviceNowPassword')]" },
-          "serviceNowTable": { "value": "[parameters('serviceNowTable')]" },
-          "serviceNowAssignmentGroup": { "value": "[parameters('serviceNowAssignmentGroup')]" }
+          }
         }
       }
     }
-  ],
-  "outputs": {
-    "logicAppResourceId": { "type": "string", "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]" },
-    "logicAppPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]" }
-  }
+  ]
 }

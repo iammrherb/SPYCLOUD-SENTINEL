@@ -5,21 +5,37 @@
     "title": "SpyCloud - Email SOC Notification",
     "description": "Sends HTML-formatted email notifications via Office 365 when SpyCloud identity threat incidents are created in Microsoft Sentinel.",
     "version": "10.0.0",
-    "author": "SpyCloud, Inc."
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-EmailNotify",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "notificationEmail": {
       "type": "string",
-      "metadata": { "description": "Email address for SOC alert notifications" }
+      "metadata": {
+        "description": "Email address for SOC alert notifications"
+      }
     }
   },
   "variables": {
@@ -37,7 +53,9 @@
       "kind": "V1",
       "properties": {
         "displayName": "[variables('azureSentinelConnectionName')]",
-        "api": { "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]" },
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
         "parameterValueType": "Alternative"
       }
     },
@@ -49,7 +67,9 @@
       "kind": "V1",
       "properties": {
         "displayName": "[variables('office365ConnectionName')]",
-        "api": { "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'office365')]" }
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'office365')]"
+        }
       }
     },
     {
@@ -60,9 +80,13 @@
       "tags": {
         "solution": "SpyCloud-Sentinel",
         "component": "notification-email",
-        "version": "10.0.0"
+        "version": "10.0.0",
+        "hidden-SentinelTemplateName": "SpyCloud-EmailNotify",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       },
-      "identity": { "type": "SystemAssigned" },
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "dependsOn": [
         "[variables('sentinelConnectionId')]",
         "[variables('office365ConnectionId')]"
@@ -76,8 +100,14 @@
             "Microsoft_Sentinel_incident": {
               "type": "ApiConnectionWebhook",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                "body": { "callback_url": "@listCallbackUrl()" },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
                 "path": "/incident-creation"
               }
             }
@@ -86,7 +116,11 @@
             "Extract_Entities": {
               "type": "ApiConnection",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
                 "method": "post",
                 "path": "/entities/account",
                 "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
@@ -99,7 +133,11 @@
                 "from": "@body('Extract_Entities')?['Accounts']",
                 "select": "@concat(item()?['Name'], if(not(empty(item()?['UPNSuffix'])), concat('@', item()?['UPNSuffix']), ''))"
               },
-              "runAfter": { "Extract_Entities": ["Succeeded"] }
+              "runAfter": {
+                "Extract_Entities": [
+                  "Succeeded"
+                ]
+              }
             },
             "Send_Email_Scope": {
               "type": "Scope",
@@ -107,7 +145,11 @@
                 "Send_Email": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['office365']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['office365']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/v2/Mail",
                     "body": {
@@ -122,7 +164,11 @@
                 "Comment_Email_Success": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/incident-comments",
                     "body": {
@@ -130,10 +176,18 @@
                       "message": "<p><strong>SpyCloud-EmailNotify:</strong> Email notification sent to @{parameters('NotificationEmail')}.</p>"
                     }
                   },
-                  "runAfter": { "Send_Email": ["Succeeded"] }
+                  "runAfter": {
+                    "Send_Email": [
+                      "Succeeded"
+                    ]
+                  }
                 }
               },
-              "runAfter": { "Build_User_List": ["Succeeded"] }
+              "runAfter": {
+                "Build_User_List": [
+                  "Succeeded"
+                ]
+              }
             },
             "Handle_Email_Error": {
               "type": "Scope",
@@ -141,7 +195,11 @@
                 "Comment_Email_Failed": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/incident-comments",
                     "body": {
@@ -152,12 +210,23 @@
                   "runAfter": {}
                 }
               },
-              "runAfter": { "Send_Email_Scope": ["Failed", "TimedOut"] }
+              "runAfter": {
+                "Send_Email_Scope": [
+                  "Failed",
+                  "TimedOut"
+                ]
+              }
             }
           },
           "parameters": {
-            "$connections": { "type": "Object", "defaultValue": {} },
-            "NotificationEmail": { "type": "String", "defaultValue": "[parameters('notificationEmail')]" }
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "NotificationEmail": {
+              "type": "String",
+              "defaultValue": "[parameters('notificationEmail')]"
+            }
           }
         },
         "parameters": {
@@ -167,7 +236,11 @@
                 "connectionId": "[variables('sentinelConnectionId')]",
                 "connectionName": "[variables('azureSentinelConnectionName')]",
                 "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
-                "connectionProperties": { "authentication": { "type": "ManagedServiceIdentity" } }
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
               },
               "office365": {
                 "connectionId": "[variables('office365ConnectionId')]",
@@ -181,7 +254,13 @@
     }
   ],
   "outputs": {
-    "logicAppResourceId": { "type": "string", "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]" },
-    "logicAppPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]" }
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
   }
 }

@@ -20,7 +20,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Block IP on Firewall",
     "description": "Blocks malicious IP addresses associated with SpyCloud breach data on Azure Firewall or a supported third-party firewall. Extracts IPs from incident entities and adds them to a deny list.",
     "prerequisites": [
@@ -28,37 +31,57 @@
       "Managed Identity with Network Contributor role or firewall API access"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Network Security"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Network Security"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-BlockFirewall",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "FirewallResourceId": {
       "type": "string",
       "defaultValue": "",
-      "metadata": { "description": "Resource ID of the Azure Firewall (leave empty if using third-party firewall API)" }
+      "metadata": {
+        "description": "Resource ID of the Azure Firewall (leave empty if using third-party firewall API)"
+      }
     },
     "FirewallRuleCollectionName": {
       "type": "string",
       "defaultValue": "SpyCloud-BlockList",
-      "metadata": { "description": "Name of the firewall rule collection for blocked IPs" }
+      "metadata": {
+        "description": "Name of the firewall rule collection for blocked IPs"
+      }
     }
   },
   "variables": {
@@ -178,7 +201,9 @@
                         "value": "@items('Process_Each_IP')?['Address']"
                       },
                       "runAfter": {
-                        "Add_IP_To_TI": ["Succeeded"]
+                        "Add_IP_To_TI": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -194,13 +219,20 @@
                     }
                   },
                   "runAfter": {
-                    "Block_IP_Scope": ["Failed", "TimedOut"]
+                    "Block_IP_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_IPs": ["Succeeded"],
-                "Initialize_BlockedIPs": ["Succeeded"]
+                "Entities_-_Get_IPs": [
+                  "Succeeded"
+                ],
+                "Initialize_BlockedIPs": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Summary_Comment": {
@@ -219,7 +251,9 @@
                 }
               },
               "runAfter": {
-                "Process_Each_IP": ["Succeeded"]
+                "Process_Each_IP": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -250,6 +284,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-BlockFirewall-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

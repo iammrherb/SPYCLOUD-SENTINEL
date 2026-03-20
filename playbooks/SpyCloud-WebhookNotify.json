@@ -5,26 +5,44 @@
     "title": "SpyCloud - Generic Webhook Notification",
     "description": "Sends structured JSON payloads to a configurable webhook endpoint when SpyCloud identity threat incidents are created in Microsoft Sentinel. Compatible with any webhook-capable platform including PagerDuty, Opsgenie, custom SIEM integrations, and SOAR platforms.",
     "version": "10.0.0",
-    "author": "SpyCloud, Inc."
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-WebhookNotify",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "webhookUrl": {
       "type": "securestring",
-      "metadata": { "description": "Destination webhook URL for incident notifications" }
+      "metadata": {
+        "description": "Destination webhook URL for incident notifications"
+      }
     },
     "webhookAuthHeader": {
       "type": "securestring",
       "defaultValue": "",
-      "metadata": { "description": "Optional authorization header value (e.g., Bearer token or API key)" }
+      "metadata": {
+        "description": "Optional authorization header value (e.g., Bearer token or API key)"
+      }
     }
   },
   "variables": {
@@ -40,7 +58,9 @@
       "kind": "V1",
       "properties": {
         "displayName": "[variables('azureSentinelConnectionName')]",
-        "api": { "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]" },
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
         "parameterValueType": "Alternative"
       }
     },
@@ -52,10 +72,16 @@
       "tags": {
         "solution": "SpyCloud-Sentinel",
         "component": "notification-webhook",
-        "version": "10.0.0"
+        "version": "10.0.0",
+        "hidden-SentinelTemplateName": "SpyCloud-WebhookNotify",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       },
-      "identity": { "type": "SystemAssigned" },
-      "dependsOn": ["[variables('sentinelConnectionId')]"],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]"
+      ],
       "properties": {
         "state": "Enabled",
         "definition": {
@@ -65,8 +91,14 @@
             "Microsoft_Sentinel_incident": {
               "type": "ApiConnectionWebhook",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
-                "body": { "callback_url": "@listCallbackUrl()" },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
                 "path": "/incident-creation"
               }
             }
@@ -75,7 +107,11 @@
             "Extract_Entities": {
               "type": "ApiConnection",
               "inputs": {
-                "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
                 "method": "post",
                 "path": "/entities/account",
                 "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
@@ -103,7 +139,11 @@
                   "accounts": "@body('Extract_Entities')?['Accounts']"
                 }
               },
-              "runAfter": { "Extract_Entities": ["Succeeded"] }
+              "runAfter": {
+                "Extract_Entities": [
+                  "Succeeded"
+                ]
+              }
             },
             "Send_Webhook": {
               "type": "Scope",
@@ -126,7 +166,11 @@
                 "Comment_Webhook_Success": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/incident-comments",
                     "body": {
@@ -134,10 +178,18 @@
                       "message": "<p><strong>SpyCloud-WebhookNotify:</strong> Webhook notification delivered successfully. HTTP @{outputs('HTTP_POST_Webhook')['statusCode']}</p>"
                     }
                   },
-                  "runAfter": { "HTTP_POST_Webhook": ["Succeeded"] }
+                  "runAfter": {
+                    "HTTP_POST_Webhook": [
+                      "Succeeded"
+                    ]
+                  }
                 }
               },
-              "runAfter": { "Build_Webhook_Payload": ["Succeeded"] }
+              "runAfter": {
+                "Build_Webhook_Payload": [
+                  "Succeeded"
+                ]
+              }
             },
             "Handle_Webhook_Error": {
               "type": "Scope",
@@ -145,7 +197,11 @@
                 "Comment_Webhook_Failed": {
                   "type": "ApiConnection",
                   "inputs": {
-                    "host": { "connection": { "name": "@parameters('$connections')['azuresentinel']['connectionId']" } },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                      }
+                    },
                     "method": "post",
                     "path": "/incident-comments",
                     "body": {
@@ -156,13 +212,27 @@
                   "runAfter": {}
                 }
               },
-              "runAfter": { "Send_Webhook": ["Failed", "TimedOut"] }
+              "runAfter": {
+                "Send_Webhook": [
+                  "Failed",
+                  "TimedOut"
+                ]
+              }
             }
           },
           "parameters": {
-            "$connections": { "type": "Object", "defaultValue": {} },
-            "WebhookUrl": { "type": "SecureString", "defaultValue": "[parameters('webhookUrl')]" },
-            "WebhookAuthHeader": { "type": "SecureString", "defaultValue": "[parameters('webhookAuthHeader')]" }
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "WebhookUrl": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('webhookUrl')]"
+            },
+            "WebhookAuthHeader": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('webhookAuthHeader')]"
+            }
           }
         },
         "parameters": {
@@ -172,7 +242,11 @@
                 "connectionId": "[variables('sentinelConnectionId')]",
                 "connectionName": "[variables('azureSentinelConnectionName')]",
                 "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
-                "connectionProperties": { "authentication": { "type": "ManagedServiceIdentity" } }
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
               }
             }
           }
@@ -181,7 +255,13 @@
     }
   ],
   "outputs": {
-    "logicAppResourceId": { "type": "string", "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]" },
-    "logicAppPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]" }
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
   }
 }

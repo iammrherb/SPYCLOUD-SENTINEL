@@ -21,7 +21,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Enforce MFA",
     "description": "Enforces multi-factor authentication for compromised accounts by adding them to an MFA-required Conditional Access group. Ensures accounts exposed in breaches have additional authentication requirements.",
     "prerequisites": [
@@ -30,31 +33,49 @@
       "Pre-configured Azure AD security group for MFA enforcement"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-EnforceMFA",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "MFAGroupObjectId": {
       "type": "string",
-      "metadata": { "description": "Object ID of the Azure AD group that enforces MFA via Conditional Access" }
+      "metadata": {
+        "description": "Object ID of the Azure AD group that enforces MFA via Conditional Access"
+      }
     }
   },
   "variables": {
@@ -159,7 +180,9 @@
                         }
                       },
                       "runAfter": {
-                        "Get_User_From_Graph": ["Succeeded"]
+                        "Get_User_From_Graph": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Add_Comment_MFA_Success": {
@@ -178,7 +201,9 @@
                         }
                       },
                       "runAfter": {
-                        "Add_User_To_MFA_Group": ["Succeeded"]
+                        "Add_User_To_MFA_Group": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -206,12 +231,17 @@
                     }
                   },
                   "runAfter": {
-                    "Enforce_MFA_Scope": ["Failed", "TimedOut"]
+                    "Enforce_MFA_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -242,6 +272,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-EnforceMFA-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

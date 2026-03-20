@@ -21,7 +21,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Revoke Sessions",
     "description": "Revokes all active sessions and refresh tokens for compromised accounts identified by SpyCloud. Forces re-authentication across all applications.",
     "prerequisites": [
@@ -29,27 +32,43 @@
       "Managed Identity with User.ReadWrite.All permissions on Microsoft Graph"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-RevokeSessions",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     }
   },
   "variables": {
@@ -148,7 +167,9 @@
                         }
                       },
                       "runAfter": {
-                        "Get_User_From_Graph": ["Succeeded"]
+                        "Get_User_From_Graph": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Add_Comment_Revoke_Success": {
@@ -167,7 +188,9 @@
                         }
                       },
                       "runAfter": {
-                        "Revoke_All_Sign_In_Sessions": ["Succeeded"]
+                        "Revoke_All_Sign_In_Sessions": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -195,12 +218,17 @@
                     }
                   },
                   "runAfter": {
-                    "Revoke_Sessions_Scope": ["Failed", "TimedOut"]
+                    "Revoke_Sessions_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -227,6 +255,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-RevokeSessions-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

@@ -5,31 +5,45 @@
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-AddToSecurityGroup",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "CompromisedUsersGroupId": {
       "type": "string",
-      "metadata": { "description": "Azure AD security group ID for compromised users requiring restricted access" }
+      "metadata": {
+        "description": "Azure AD security group ID for compromised users requiring restricted access"
+      }
     },
     "HighRiskGroupId": {
       "type": "string",
-      "metadata": { "description": "Azure AD security group ID for high-risk users (severity >= 25)" }
+      "metadata": {
+        "description": "Azure AD security group ID for high-risk users (severity >= 25)"
+      }
     },
     "MediumRiskGroupId": {
       "type": "string",
-      "metadata": { "description": "Azure AD security group ID for medium-risk users (severity >= 20)" }
+      "metadata": {
+        "description": "Azure AD security group ID for medium-risk users (severity >= 20)"
+      }
     }
   },
   "variables": {
@@ -102,7 +116,9 @@
               "type": "Compose",
               "inputs": "@coalesce(triggerBody()?['object']?['properties']?['additionalData']?['SpyCloudSeverity'], '20')",
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             },
             "Initialize_Results": {
@@ -117,7 +133,9 @@
                 ]
               },
               "runAfter": {
-                "Parse_SpyCloud_Severity": ["Succeeded"]
+                "Parse_SpyCloud_Severity": [
+                  "Succeeded"
+                ]
               }
             },
             "Determine_Target_Groups": {
@@ -128,7 +146,9 @@
                 "addToMediumRisk": "@and(greaterOrEquals(int(outputs('Parse_SpyCloud_Severity')), 20), less(int(outputs('Parse_SpyCloud_Severity')), 25))"
               },
               "runAfter": {
-                "Initialize_Results": ["Succeeded"]
+                "Initialize_Results": [
+                  "Succeeded"
+                ]
               }
             },
             "Process_Each_Account": {
@@ -167,7 +187,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_User": ["Succeeded"]
+                        "Resolve_User": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Check_High_Risk_Group": {
@@ -175,7 +197,10 @@
                       "expression": {
                         "and": [
                           {
-                            "greaterOrEquals": ["@int(outputs('Parse_SpyCloud_Severity'))", 25]
+                            "greaterOrEquals": [
+                              "@int(outputs('Parse_SpyCloud_Severity'))",
+                              25
+                            ]
                           }
                         ]
                       },
@@ -206,7 +231,10 @@
                             "expression": {
                               "and": [
                                 {
-                                  "greaterOrEquals": ["@int(outputs('Parse_SpyCloud_Severity'))", 20]
+                                  "greaterOrEquals": [
+                                    "@int(outputs('Parse_SpyCloud_Severity'))",
+                                    20
+                                  ]
                                 }
                               ]
                             },
@@ -235,7 +263,9 @@
                         }
                       },
                       "runAfter": {
-                        "Add_To_Compromised_Users_Group": ["Succeeded"]
+                        "Add_To_Compromised_Users_Group": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Get_User_Group_Memberships": {
@@ -249,7 +279,9 @@
                         }
                       },
                       "runAfter": {
-                        "Check_High_Risk_Group": ["Succeeded"]
+                        "Check_High_Risk_Group": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_Success": {
@@ -265,7 +297,9 @@
                         }
                       },
                       "runAfter": {
-                        "Get_User_Group_Memberships": ["Succeeded"]
+                        "Get_User_Group_Memberships": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -288,12 +322,17 @@
                     }
                   },
                   "runAfter": {
-                    "Add_To_Groups_Scope": ["Failed", "TimedOut"]
+                    "Add_To_Groups_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Determine_Target_Groups": ["Succeeded"]
+                "Determine_Target_Groups": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Summary_Comment": {
@@ -312,7 +351,10 @@
                 }
               },
               "runAfter": {
-                "Process_Each_Account": ["Succeeded", "Failed"]
+                "Process_Each_Account": [
+                  "Succeeded",
+                  "Failed"
+                ]
               }
             },
             "Log_To_Custom_Table": {
@@ -331,7 +373,9 @@
                 }
               },
               "runAfter": {
-                "Add_Summary_Comment": ["Succeeded"]
+                "Add_Summary_Comment": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -370,6 +414,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-AddToSecurityGroup",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -381,6 +429,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }

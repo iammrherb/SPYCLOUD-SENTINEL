@@ -21,7 +21,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Block via Conditional Access",
     "description": "Blocks compromised accounts by adding them to a Conditional Access block group. Prevents all sign-ins until the account is remediated and removed from the group.",
     "prerequisites": [
@@ -30,31 +33,49 @@
       "Pre-configured Azure AD security group linked to a block Conditional Access policy"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-BlockConditionalAccess",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "BlockGroupObjectId": {
       "type": "string",
-      "metadata": { "description": "Object ID of the Azure AD group linked to a block Conditional Access policy" }
+      "metadata": {
+        "description": "Object ID of the Azure AD group linked to a block Conditional Access policy"
+      }
     }
   },
   "variables": {
@@ -159,7 +180,9 @@
                         }
                       },
                       "runAfter": {
-                        "Get_User_From_Graph": ["Succeeded"]
+                        "Get_User_From_Graph": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Revoke_Sessions_After_Block": {
@@ -173,7 +196,9 @@
                         }
                       },
                       "runAfter": {
-                        "Add_User_To_Block_Group": ["Succeeded"]
+                        "Add_User_To_Block_Group": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Add_Comment_Block_Success": {
@@ -192,7 +217,9 @@
                         }
                       },
                       "runAfter": {
-                        "Revoke_Sessions_After_Block": ["Succeeded"]
+                        "Revoke_Sessions_After_Block": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -220,12 +247,17 @@
                     }
                   },
                   "runAfter": {
-                    "Block_Access_Scope": ["Failed", "TimedOut"]
+                    "Block_Access_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -256,6 +288,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-BlockConditionalAccess-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

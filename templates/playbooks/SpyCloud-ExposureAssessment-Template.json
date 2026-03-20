@@ -20,7 +20,10 @@
     "deployAsTemplate": true
   },
   "metadata": {
-    "_generator": { "name": "SpyCloud Sentinel Integration", "version": "1.0.0" },
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
     "title": "SpyCloud - Exposure Assessment",
     "description": "Uses the SpyCloud Exposure API to perform a risk assessment of compromised accounts. Evaluates exposure severity, breach recency, credential types, and malware infection indicators to generate a composite risk score.",
     "prerequisites": [
@@ -29,36 +32,56 @@
       "Managed Identity with Sentinel Responder role"
     ],
     "lastUpdateTime": "2026-03-11T00:00:00.000Z",
-    "support": { "tier": "community" },
-    "author": { "name": "SpyCloud" },
-    "categories": { "domains": ["Security - Threat Protection"] }
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
   },
   "parameters": {
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-ExposureAssessment",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     },
     "SpyCloudApiKey": {
       "type": "securestring",
-      "metadata": { "description": "SpyCloud API key" }
+      "metadata": {
+        "description": "SpyCloud API key"
+      }
     },
     "SpyCloudApiUrl": {
       "type": "string",
       "defaultValue": "https://api.spycloud.io/enterprise-v2",
-      "metadata": { "description": "SpyCloud Enterprise API base URL" }
+      "metadata": {
+        "description": "SpyCloud Enterprise API base URL"
+      }
     }
   },
   "variables": {
@@ -160,7 +183,9 @@
                   {
                     "name": "IncidentTags",
                     "type": "array",
-                    "value": ["SpyCloud-Exposure-Assessed"]
+                    "value": [
+                      "SpyCloud-Exposure-Assessed"
+                    ]
                   }
                 ]
               },
@@ -193,7 +218,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_Email": ["Succeeded"]
+                        "Resolve_Email": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Parse_Exposure_Response": {
@@ -203,20 +230,38 @@
                         "schema": {
                           "type": "object",
                           "properties": {
-                            "hits": { "type": "integer" },
+                            "hits": {
+                              "type": "integer"
+                            },
                             "results": {
                               "type": "array",
                               "items": {
                                 "type": "object",
                                 "properties": {
-                                  "severity": { "type": "integer" },
-                                  "email": { "type": "string" },
-                                  "document_id": { "type": "string" },
-                                  "spycloud_publish_date": { "type": "string" },
-                                  "infected_machine_id": { "type": "string" },
-                                  "password_type": { "type": "string" },
-                                  "sighting": { "type": "integer" },
-                                  "source_id": { "type": "integer" }
+                                  "severity": {
+                                    "type": "integer"
+                                  },
+                                  "email": {
+                                    "type": "string"
+                                  },
+                                  "document_id": {
+                                    "type": "string"
+                                  },
+                                  "spycloud_publish_date": {
+                                    "type": "string"
+                                  },
+                                  "infected_machine_id": {
+                                    "type": "string"
+                                  },
+                                  "password_type": {
+                                    "type": "string"
+                                  },
+                                  "sighting": {
+                                    "type": "integer"
+                                  },
+                                  "source_id": {
+                                    "type": "integer"
+                                  }
                                 }
                               }
                             }
@@ -224,7 +269,9 @@
                         }
                       },
                       "runAfter": {
-                        "Query_Exposure_API": ["Succeeded"]
+                        "Query_Exposure_API": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Calculate_User_Risk_Score": {
@@ -235,14 +282,18 @@
                         "hasRecentExposure": "@greater(body('Parse_Exposure_Response')?['hits'], 0)"
                       },
                       "runAfter": {
-                        "Parse_Exposure_Response": ["Succeeded"]
+                        "Parse_Exposure_Response": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Determine_Risk_Level": {
                       "type": "Compose",
                       "inputs": "@if(greaterOrEquals(outputs('Calculate_User_Risk_Score')?['baseScore'], 100), 'Critical', if(greaterOrEquals(outputs('Calculate_User_Risk_Score')?['baseScore'], 50), 'High', if(greaterOrEquals(outputs('Calculate_User_Risk_Score')?['baseScore'], 20), 'Medium', 'Low')))",
                       "runAfter": {
-                        "Calculate_User_Risk_Score": ["Succeeded"]
+                        "Calculate_User_Risk_Score": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Add_Risk_Tags": {
@@ -250,7 +301,10 @@
                       "expression": {
                         "and": [
                           {
-                            "equals": ["@outputs('Calculate_User_Risk_Score')?['hasMalware']", true]
+                            "equals": [
+                              "@outputs('Calculate_User_Risk_Score')?['hasMalware']",
+                              true
+                            ]
                           }
                         ]
                       },
@@ -264,9 +318,13 @@
                           "runAfter": {}
                         }
                       },
-                      "else": { "actions": {} },
+                      "else": {
+                        "actions": {}
+                      },
                       "runAfter": {
-                        "Determine_Risk_Level": ["Succeeded"]
+                        "Determine_Risk_Level": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_Assessment_Result": {
@@ -282,7 +340,9 @@
                         }
                       },
                       "runAfter": {
-                        "Add_Risk_Tags": ["Succeeded"]
+                        "Add_Risk_Tags": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -304,15 +364,26 @@
                     }
                   },
                   "runAfter": {
-                    "Exposure_Scope": ["Failed", "TimedOut"]
+                    "Exposure_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"],
-                "Initialize_AssessmentResults": ["Succeeded"],
-                "Initialize_OverallRiskScore": ["Succeeded"],
-                "Initialize_IncidentTags": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ],
+                "Initialize_AssessmentResults": [
+                  "Succeeded"
+                ],
+                "Initialize_OverallRiskScore": [
+                  "Succeeded"
+                ],
+                "Initialize_IncidentTags": [
+                  "Succeeded"
+                ]
               }
             },
             "Update_Incident_With_Assessment": {
@@ -333,7 +404,9 @@
                 }
               },
               "runAfter": {
-                "Process_Each_Account": ["Succeeded"]
+                "Process_Each_Account": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Assessment_Comment": {
@@ -352,7 +425,9 @@
                 }
               },
               "runAfter": {
-                "Update_Incident_With_Assessment": ["Succeeded"]
+                "Update_Incident_With_Assessment": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -387,6 +462,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-ExposureAssessment-Template",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],

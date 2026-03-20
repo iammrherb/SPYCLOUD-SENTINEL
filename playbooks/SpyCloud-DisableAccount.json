@@ -5,19 +5,27 @@
     "PlaybookName": {
       "type": "string",
       "defaultValue": "SpyCloud-DisableAccount",
-      "metadata": { "description": "Name of the Logic App playbook" }
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
     },
     "subscriptionId": {
       "type": "string",
-      "metadata": { "description": "Azure Subscription ID" }
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
     },
     "resourceGroupName": {
       "type": "string",
-      "metadata": { "description": "Resource group for this deployment" }
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
     },
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "Microsoft Sentinel workspace name" }
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
     }
   },
   "variables": {
@@ -98,7 +106,9 @@
                 ]
               },
               "runAfter": {
-                "Entities_-_Get_Accounts": ["Succeeded"]
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
               }
             },
             "Process_Each_Account": {
@@ -137,7 +147,9 @@
                         }
                       },
                       "runAfter": {
-                        "Resolve_User": ["Succeeded"]
+                        "Resolve_User": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Revoke_All_Sessions": {
@@ -151,7 +163,9 @@
                         }
                       },
                       "runAfter": {
-                        "Disable_User_Account": ["Succeeded"]
+                        "Disable_User_Account": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Revoke_App_Consent_Grants": {
@@ -165,7 +179,9 @@
                         }
                       },
                       "runAfter": {
-                        "Revoke_All_Sessions": ["Succeeded"]
+                        "Revoke_All_Sessions": [
+                          "Succeeded"
+                        ]
                       }
                     },
                     "Append_Success": {
@@ -182,7 +198,9 @@
                         }
                       },
                       "runAfter": {
-                        "Revoke_App_Consent_Grants": ["Succeeded"]
+                        "Revoke_App_Consent_Grants": [
+                          "Succeeded"
+                        ]
                       }
                     }
                   },
@@ -205,12 +223,17 @@
                     }
                   },
                   "runAfter": {
-                    "Disable_Account_Scope": ["Failed", "TimedOut"]
+                    "Disable_Account_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
                   }
                 }
               },
               "runAfter": {
-                "Initialize_Results": ["Succeeded"]
+                "Initialize_Results": [
+                  "Succeeded"
+                ]
               }
             },
             "Add_Summary_Comment": {
@@ -229,7 +252,10 @@
                 }
               },
               "runAfter": {
-                "Process_Each_Account": ["Succeeded", "Failed"]
+                "Process_Each_Account": [
+                  "Succeeded",
+                  "Failed"
+                ]
               }
             },
             "Update_Incident_Severity": {
@@ -248,14 +274,20 @@
                   "status": "Active",
                   "tagsToAdd": {
                     "TagsToAdd": [
-                      { "Tag": "SpyCloud-AccountDisabled" },
-                      { "Tag": "RequiresReEnablement" }
+                      {
+                        "Tag": "SpyCloud-AccountDisabled"
+                      },
+                      {
+                        "Tag": "RequiresReEnablement"
+                      }
                     ]
                   }
                 }
               },
               "runAfter": {
-                "Add_Summary_Comment": ["Succeeded"]
+                "Add_Summary_Comment": [
+                  "Succeeded"
+                ]
               }
             }
           },
@@ -282,6 +314,10 @@
             }
           }
         }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-DisableAccount",
+        "hidden-SentinelTemplateVersion": "13.12.0"
       }
     }
   ],
@@ -293,6 +329,19 @@
     "logicAppPrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
     }
   }
 }
