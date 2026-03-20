@@ -5952,6 +5952,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -7456,6 +7465,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -8492,6 +8510,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -8647,6 +8674,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -8732,6 +8768,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -8817,6 +8862,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -8913,6 +8967,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9010,6 +9073,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9096,6 +9168,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9182,6 +9263,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9267,6 +9357,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9353,6 +9452,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9444,6 +9552,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9515,6 +9632,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9582,6 +9708,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9677,6 +9812,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9772,6 +9916,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9867,6 +10020,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -9953,6 +10115,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -10959,6 +11130,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11045,6 +11225,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11131,6 +11320,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11218,6 +11416,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11304,6 +11511,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11418,6 +11634,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11520,6 +11745,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11613,6 +11847,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11697,6 +11940,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11781,6 +12033,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11863,6 +12124,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -11947,6 +12217,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12029,6 +12308,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12120,6 +12408,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12202,6 +12499,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12284,6 +12590,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12366,6 +12681,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12458,6 +12782,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12540,6 +12873,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12631,6 +12973,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
@@ -12722,6 +13073,15 @@
           "kind": "Solution",
           "name": "[variables('_solutionName')]",
           "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "[variables('_solutionAuthor')]"
+        },
+        "support": {
+          "name": "[variables('_solutionAuthor')]",
+          "tier": "[variables('_solutionTier')]",
+          "email": "[variables('_solutionEmail')]",
+          "link": "[variables('_solutionLink')]"
         }
       }
     },
