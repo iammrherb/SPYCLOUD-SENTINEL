@@ -1,0 +1,63 @@
+Descriptor:
+  Name: SpyCloud.Promptbook.OrgExposureOverview
+  DisplayName: "SpyCloud — Organization Exposure Overview"
+  Description: >-
+    Organization-wide dark web exposure assessment. Generates an executive-ready 
+    report with severity distribution, top exposed users, infected devices, 
+    password analysis, remediation KPIs, and trend assessment.
+
+Prompts:
+  - Name: Step1_HealthCheck
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetSpyCloudHealthStatus
+    Content: "Check SpyCloud data ingestion health across all tables"
+
+  - Name: Step2_SeverityBreakdown
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetExposureSummaryBySeverity
+    Content: "Summarize exposure distribution by severity level"
+
+  - Name: Step3_DomainBreakdown
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetExposureSummaryByDomain
+    Content: "Summarize exposure by corporate email domain"
+
+  - Name: Step4_PlaintextPasswords
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetPlaintextPasswordExposures
+    Content: "Find all plaintext password exposures"
+
+  - Name: Step5_InfectedDevices
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetInfectedDevices
+    Content: "List all infected devices"
+
+  - Name: Step6_RemediationKPIs
+    PromptType: Prompt
+    Content: >-
+      Compile remediation KPIs from the previous data:
+      1. MDE device remediation: How many infected devices were isolated vs total infected?
+      2. CA identity remediation: How many exposed users had password resets?
+      3. Remediation gap: How many severity 20+ exposures have NO remediation action?
+      4. Mean time to remediate (if timestamps available)
+      5. Overall remediation coverage percentage
+
+  - Name: Step7_ExecutiveSummary
+    PromptType: Prompt
+    Content: >-
+      Generate an executive summary from ALL findings above:
+
+      RISK SCORE: 1-10 with one-paragraph justification
+      KEY METRICS: Total exposures, unique users, unique devices, critical findings
+      TOP 3 RISKS: With business impact and recommended action
+      TREND: Improving / Stable / Degrading based on data freshness and volume
+      REMEDIATION RATE: Percentage auto-remediated, gaps remaining
+      COMPLIANCE: Any PII exposure requiring notification?
+      STRATEGIC RECOMMENDATIONS: 3-5 prioritized items
+
+      Format for a CISO audience — business risk language, not raw technical data.

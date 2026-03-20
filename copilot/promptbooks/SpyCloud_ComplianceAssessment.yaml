@@ -1,0 +1,63 @@
+Descriptor:
+  Name: SpyCloud.Promptbook.ComplianceAssessment
+  DisplayName: "SpyCloud — Breach Notification Compliance Assessment"
+  Description: >-
+    Identifies PII exposure requiring breach notification under GDPR, CCPA, 
+    HIPAA, PCI-DSS, and state laws. Produces a compliance evidence package 
+    with affected individuals, data categories, deadlines, and remediation proof.
+
+Prompts:
+  - Name: Step1_SensitivePII
+    PromptType: Prompt
+    PluginName: SpyCloud Sentinel Threat Intelligence
+    SkillName: GetSensitivePIIExposures
+    Content: "Find all exposures with SSN, financial data, and health information"
+
+  - Name: Step2_AffectedCount
+    PromptType: Prompt
+    Content: >-
+      From the PII exposure data above, calculate:
+      - Total unique individuals with sensitive PII exposed
+      - Breakdown by data category: SSN, bank accounts, tax IDs, health insurance IDs, DOB
+      - Breakdown by state/country (for notification jurisdiction)
+      - Severity distribution of these exposures
+
+  - Name: Step3_RegulatoryMapping
+    PromptType: Prompt
+    Content: >-
+      Map the exposed data to applicable regulations:
+
+      GDPR (if EU residents): 72-hour supervisory authority notification, individual notification
+      CCPA/CPRA (if CA residents): 30-day individual notification, AG filing if 500+
+      HIPAA (if health data): 60-day individual notification, 60-day HHS if 500+
+      PCI-DSS (if payment data): Immediate card brand notification
+      State Laws: Per-state requirements for SSN, financial, health exposure
+
+      For each applicable regulation, specify: deadline, notification method, required content.
+
+  - Name: Step4_RemediationEvidence
+    PromptType: Prompt
+    Content: >-
+      Document the remediation evidence chain:
+      - When was the exposure first detected? (SpyCloud publish date)
+      - When was it ingested into Sentinel? (TimeGenerated)
+      - What automated remediation was triggered? (CA password reset, MDE isolation)
+      - Timestamps for each remediation action
+      - Any gaps — exposures detected but not remediated
+
+  - Name: Step5_CompliancePackage
+    PromptType: Prompt
+    Content: >-
+      Generate a formal compliance evidence package:
+
+      INCIDENT SUMMARY: What happened, when, scope
+      DATA CLASSIFICATION: Types of PII exposed with counts
+      AFFECTED INDIVIDUALS: Count by jurisdiction
+      APPLICABLE REGULATIONS: With specific deadlines from today
+      DETECTION TIMELINE: Exposure → detection → remediation with timestamps
+      REMEDIATION ACTIONS: Automated and manual steps taken
+      EVIDENCE CHAIN: Data sources, query timestamps, action logs
+      OUTSTANDING ITEMS: What still needs attention
+      RECOMMENDATIONS: Process improvements to prevent recurrence
+
+      Tone: Formal, precise, legally defensible. No personality. Just facts.

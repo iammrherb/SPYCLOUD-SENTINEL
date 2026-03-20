@@ -1,0 +1,29 @@
+# ═══════════════════════════════════════════════════════════════════
+# SpyCloud MCP Plugin for Microsoft Security Copilot
+# Connects Security Copilot to the SpyCloud MCP Server
+# ═══════════════════════════════════════════════════════════════════
+
+Descriptor:
+  Name: SpyCloud.MCP.ThreatIntelligence
+  DisplayName: SpyCloud MCP — Identity Threat Intelligence
+  Description: >-
+    Connects to the SpyCloud MCP Server for dark web identity threat 
+    intelligence. Provides 20 tools for breach lookup, device forensics, 
+    identity graph mapping, stolen cookie detection, NIST password 
+    checking, and investigation workflows across all 8 SpyCloud API 
+    products (65.7B+ recaptured records). Tools are auto-discovered 
+    from the MCP server catalog.
+  Settings:
+    - Name: McpServerUrl
+      Description: "URL of the SpyCloud MCP Server SSE endpoint (e.g. https://spycloud-mcp.azurewebsites.net/sse)"
+      HintText: "https://your-spycloud-mcp.azurewebsites.net/sse"
+      SettingType: string
+      Required: true
+  SupportedAuthTypes:
+    - None
+
+SkillGroups:
+  - Format: MCP
+    Settings:
+      Url: "{{McpServerUrl}}"
+      TransportType: SSE
