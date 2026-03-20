@@ -1,0 +1,7 @@
+azure-functions
+azure-identity
+azure-keyvault-secrets
+azure-monitor-ingestion
+azure-mgmt-loganalytics
+requests>=2.31.0
+msal>=1.24.0

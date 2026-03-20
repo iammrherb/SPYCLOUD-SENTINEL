@@ -1180,6 +1180,13 @@
       "metadata": {
         "description": "Maximum number of enrichment API calls per day across all playbooks. Prevents exceeding SpyCloud API quotas. Default: 200 (handles ~50-100 incidents/day). Increase for high-volume environments after confirming with SpyCloud support."
       }
+    },
+    "enableFunctionApp": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy the SpyCloud Enrichment Function App. Provides centralized API enrichment with risk scoring, rate limiting, and Key Vault integration. Recommended for production deployments."
+      }
     }
   },
   "variables": {
@@ -1319,7 +1326,13 @@
     "huntingQueryContentId15": "02fc448a-aeef-5c18-913e-a8e0762633b0",
     "huntingQueryVersion15": "2.0.0",
     "huntingQueryContentId16": "f31120ff-b5dc-5679-a98d-a34cfb499d7a",
-    "huntingQueryVersion16": "2.0.0"
+    "huntingQueryVersion16": "2.0.0",
+    "functionAppName": "[concat('spycloud-fn-', take(parameters('workspace'), 20))]",
+    "functionStorageName": "[concat('scfn', uniqueString(resourceGroup().id))]",
+    "functionAppInsightsName": "[concat('spycloud-fn-ai-', take(parameters('workspace'), 20))]",
+    "functionHostingPlanName": "[concat('spycloud-fn-plan-', take(parameters('workspace'), 20))]",
+    "keyVaultName": "[concat('sc-kv-', take(uniqueString(resourceGroup().id), 10))]",
+    "riskScoreFunctionName": "SpyCloudRiskScore"
   },
   "resources": [
     {
@@ -17186,6 +17199,267 @@
           ]
         }
       }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('functionStorageName')]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "condition": "[parameters('enableFunctionApp')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "tags": "[variables('allTags')]",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "minimumTlsVersion": "TLS1_2"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('functionAppInsightsName')]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "condition": "[parameters('enableFunctionApp')]",
+      "kind": "web",
+      "tags": "[variables('allTags')]",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('functionHostingPlanName')]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "condition": "[parameters('enableFunctionApp')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic",
+        "size": "Y1",
+        "family": "Y"
+      },
+      "kind": "functionapp",
+      "tags": "[variables('allTags')]",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-07-01",
+      "name": "[variables('keyVaultName')]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "condition": "[parameters('enableFunctionApp')]",
+      "tags": "[variables('allTags')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "enableRbacAuthorization": true,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7,
+        "enabledForTemplateDeployment": true
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[concat(variables('keyVaultName'), '/spycloud-enterprise-key')]",
+      "condition": "[and(parameters('enableFunctionApp'), greater(length(parameters('apiKey')), 0))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('apiKey')]",
+        "contentType": "SpyCloud API Key"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[concat(variables('keyVaultName'), '/spycloud-compass-key')]",
+      "condition": "[and(parameters('enableFunctionApp'), greater(length(parameters('compassApiKey')), 0))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('compassApiKey')]",
+        "contentType": "SpyCloud API Key"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[concat(variables('keyVaultName'), '/spycloud-sip-key')]",
+      "condition": "[and(parameters('enableFunctionApp'), greater(length(parameters('sipApiKey')), 0))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('sipApiKey')]",
+        "contentType": "SpyCloud API Key"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[concat(variables('keyVaultName'), '/spycloud-investigations-key')]",
+      "condition": "[and(parameters('enableFunctionApp'), greater(length(parameters('investigationsApiKey')), 0))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('investigationsApiKey')]",
+        "contentType": "SpyCloud API Key"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('functionAppName')]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "condition": "[parameters('enableFunctionApp')]",
+      "kind": "functionapp,linux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": "[union(variables('allTags'), createObject('hidden-SentinelTemplateName', 'SpyCloud-EnrichmentFunctionApp', 'hidden-SentinelTemplateVersion', '1.0.0'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('functionHostingPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('functionStorageName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('functionAppInsightsName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('functionHostingPlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "PYTHON|3.11",
+          "appSettings": [
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('functionStorageName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('functionStorageName')), '2023-01-01').keys[0].value)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "python"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('functionAppInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('functionAppInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            {
+              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+              "value": "true"
+            },
+            {
+              "name": "SPYCLOUD_ENTERPRISE_KEY",
+              "value": "[if(parameters('enableFunctionApp'), concat('@Microsoft.KeyVault(SecretUri=', reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'spycloud-enterprise-key'), '2023-07-01').secretUri, ')'), '')]"
+            },
+            {
+              "name": "ENRICHMENT_DAILY_LIMIT",
+              "value": "[string(parameters('enrichmentDailyLimit'))]"
+            },
+            {
+              "name": "LOG_ANALYTICS_WORKSPACE_ID",
+              "value": "[if(parameters('createNewWorkspace'), reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), '2022-10-01').customerId, parameters('workspace'))]"
+            }
+          ]
+        },
+        "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspace'), '/SpyCloudRiskScoreFunction')]",
+      "dependsOn": [
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+      ],
+      "properties": {
+        "etag": "*",
+        "displayName": "SpyCloud Identity Risk Score",
+        "category": "SpyCloud Functions",
+        "functionAlias": "SpyCloudRiskScore",
+        "functionParameters": "email:string",
+        "query": "let targetEmail = email;\nlet exposures = SpyCloudBreachWatchlist_CL\n    | where email =~ targetEmail\n    | where TimeGenerated > ago(365d);\nlet sev_score = toscalar(exposures\n    | summarize s2=min(countif(severity==2),5)*1, s5=min(countif(severity==5),8)*2, s20=min(countif(severity>=20 and severity<25),4)*5, s25=min(countif(severity>=25),4)*8\n    | project score=min(s2+s5+s20+s25, 30));\nlet cred_score = toscalar(exposures\n    | summarize pt=countif(isnotempty(password_plaintext))>0, wh=countif(password_type in(\"md5\",\"sha1\",\"ntlm\"))>0, dp=dcount(password_plaintext), dd=dcount(target_domain)\n    | project score=min(iff(pt,15,iff(wh,8,2))+iff(dp>1,5,0)+iff(dd>=3,5,0), 25));\nlet dev_score = toscalar(exposures | where isnotempty(infected_machine_id) | summarize dc=dcount(infected_machine_id) | project score=min(dc*3, 10));\nlet most_recent = toscalar(exposures | summarize max(TimeGenerated));\nlet age_d = datetime_diff('day', now(), most_recent);\nlet temporal = case(age_d<=1,1.0, age_d<=7,0.9, age_d<=30,0.7, age_d<=90,0.5, age_d<=365,0.3, 0.2);\nlet rem_credit = toscalar(SpyCloud_ConditionalAccessLogs_CL | where UserEmail=~targetEmail | where TimeGenerated>ago(30d) | summarize pr=countif(ForcedPasswordResetOnNextSignIn==true), sr=countif(UserSessionsRevoked==true) | project c=-(min(pr,1)*10+min(sr,1)*5));\nlet raw = (sev_score+cred_score+dev_score)*temporal+rem_credit;\nlet final_score = min(toreal(100), max(toreal(0), raw));\nlet tier = case(final_score<=20,\"LOW\", final_score<=40,\"MODERATE\", final_score<=60,\"HIGH\", final_score<=80,\"CRITICAL\", \"EMERGENCY\");\nprint Email=targetEmail, RiskScore=toint(final_score), RiskTier=tier, SeverityPts=sev_score, CredentialPts=cred_score, DevicePts=dev_score, Temporal=temporal, RemediationCredit=rem_credit, MostRecent=most_recent, AgeDays=age_d",
+        "version": 2
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-02-01-preview",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/SpyCloud-RiskScore-Critical')]",
+      "kind": "Scheduled",
+      "dependsOn": [
+        "[if(parameters('createNewWorkspace'), resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspace'), ')')))]"
+      ],
+      "properties": {
+        "displayName": "SpyCloud — Identity Risk Score Exceeds Critical Threshold",
+        "description": "Detects users whose SpyCloud Identity Risk Score exceeds 60 (CRITICAL or EMERGENCY tier). The risk score combines exposure severity, credential availability, stolen session cookies, device infections, temporal decay, and remediation credit into a single 0-100 composite metric. Users at CRITICAL/EMERGENCY require immediate response: password reset, session revocation, device isolation, and investigation.",
+        "severity": "High",
+        "enabled": true,
+        "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated > ago(7d)\n| summarize\n    ExposureCount = count(),\n    MaxSeverity = max(severity),\n    HasPlaintext = countif(isnotempty(password_plaintext)) > 0,\n    HasCookies = countif(severity >= 25) > 0,\n    DeviceCount = dcount(infected_machine_id),\n    DomainCount = dcount(target_domain),\n    MostRecent = max(TimeGenerated)\n    by email\n| extend AgeDays = datetime_diff('day', now(), MostRecent)\n| extend SevScore = min_of(\n    iff(MaxSeverity >= 25, 24, iff(MaxSeverity >= 20, 15, iff(MaxSeverity >= 5, 6, 3))), 30)\n| extend CredScore = iff(HasPlaintext, 15, 5) + iff(DomainCount >= 3, 5, 0)\n| extend DevScore = min_of(DeviceCount * 3, 10)\n| extend Temporal = case(AgeDays <= 1, 1.0, AgeDays <= 7, 0.9, AgeDays <= 30, 0.7, AgeDays <= 90, 0.5, 0.3)\n| extend RiskScore = min_of(100, max_of(0, toint((SevScore + CredScore + DevScore) * Temporal)))\n| extend RiskTier = case(\n    RiskScore <= 20, \"LOW\",\n    RiskScore <= 40, \"MODERATE\",\n    RiskScore <= 60, \"HIGH\",\n    RiskScore <= 80, \"CRITICAL\",\n    \"EMERGENCY\")\n| where RiskScore > 60\n| project email, RiskScore, RiskTier, ExposureCount, MaxSeverity,\n          HasPlaintext, HasCookies, DeviceCount, DomainCount, MostRecent, AgeDays\n| sort by RiskScore desc",
+        "queryFrequency": "PT6H",
+        "queryPeriod": "P7D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "tactics": [
+          "CredentialAccess",
+          "InitialAccess",
+          "Persistence"
+        ],
+        "techniques": [
+          "T1078",
+          "T1110",
+          "T1539",
+          "T1550"
+        ],
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "SpyCloud Risk Score {{RiskTier}} — {{email}} (Score: {{RiskScore}})",
+          "alertDescriptionFormat": "User {{email}} has a SpyCloud risk score of {{RiskScore}}/100 ({{RiskTier}}). {{ExposureCount}} exposures found, max severity {{MaxSeverity}}, plaintext passwords: {{HasPlaintext}}, stolen cookies: {{HasCookies}}, {{DeviceCount}} infected devices across {{DomainCount}} domains. Most recent exposure: {{MostRecent}} ({{AgeDays}} days ago).",
+          "alertSeverityColumnName": null,
+          "alertTacticsColumnName": null
+        },
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "email"
+              }
+            ]
+          }
+        ],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": true,
+            "lookbackDuration": "PT24H",
+            "matchingMethod": "Selected",
+            "groupByEntities": [
+              "Account"
+            ]
+          }
+        }
+      }
     }
   ],
   "outputs": {
@@ -17474,6 +17748,18 @@
         "enrichInvestigation": "[variables('enrichInvestigationPlaybookName')]",
         "auditTable": "SpyCloudEnrichmentAudit_CL",
         "note": "All enrichment playbooks are deployed ENABLED. They trigger automatically via Sentinel automation rules when incidents are created with matching entity types."
+      }
+    },
+    "functionApp": {
+      "condition": "[parameters('enableFunctionApp')]",
+      "type": "object",
+      "value": {
+        "functionAppName": "[variables('functionAppName')]",
+        "functionAppUrl": "[concat('https://', variables('functionAppName'), '.azurewebsites.net')]",
+        "keyVaultName": "[variables('keyVaultName')]",
+        "healthEndpoint": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api/health')]",
+        "riskScoreEndpoint": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api/risk-score')]",
+        "note": "Deploy the Function App code from functions/SpyCloudEnrichment/ using az functionapp deployment or GitHub Actions."
       }
     }
   }
