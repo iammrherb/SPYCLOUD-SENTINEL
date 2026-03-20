@@ -1032,77 +1032,13 @@
                         "defaultValue": true
                     },
                     {
-                        "name": "sectionApiKeys",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Optional SpyCloud Product API Keys",
-                        "visible": "[steps('enrichmentConfig').enableEnrichmentPlaybooks]",
-                        "elements": [
-                            {
-                                "name": "apiKeysInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": true,
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "Enter API keys for additional SpyCloud products you are licensed for. Each key is entered ONCE here and automatically shared with both the CCF data pollers and the enrichment playbooks for that product. Leave blank for products you do not have."
-                                }
-                            },
-                            {
-                                "name": "compassApiKey",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Compass API Key (optional — leave blank if not licensed)"
-                                },
-                                "toolTip": "SpyCloud Compass (Endpoint Threat Protection) API key. Enables Compass data pollers + Compass enrichment playbooks. Provides post-infection device forensics, application-level stolen credentials, and consumer exposure data.",
-                                "constraints": {
-                                    "required": false
-                                },
-                                "options": {
-                                    "hideConfirmation": true
-                                }
-                            },
-                            {
-                                "name": "sipApiKey",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "SIP API Key (optional — leave blank if not licensed)"
-                                },
-                                "toolTip": "SpyCloud SIP (Session Identity Protection) API key. Enables stolen session cookie detection — critical for MFA bypass defense. May be the same as your Enterprise key depending on your license.",
-                                "constraints": {
-                                    "required": false
-                                },
-                                "options": {
-                                    "hideConfirmation": true
-                                }
-                            },
-                            {
-                                "name": "investigationsApiKey",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Investigations API Key (optional — separate license)"
-                                },
-                                "toolTip": "SpyCloud Investigations API key. Provides full database access for threat hunting and attribution. Rate limits are typically lower — enrichment playbooks use this judiciously.",
-                                "constraints": {
-                                    "required": false
-                                },
-                                "options": {
-                                    "hideConfirmation": true
-                                }
-                            },
-                            {
-                                "name": "idlinkApiKey",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "IdLink API Key (optional — leave blank if not licensed)"
-                                },
-                                "toolTip": "SpyCloud IdLink API key. Enables identity correlation and linking across personas, emails, and usernames.",
-                                "constraints": {
-                                    "required": false
-                                },
-                                "options": {
-                                    "hideConfirmation": true
-                                }
-                            }
-                        ]
+                        "name": "apiKeyInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                            "icon": "Info",
+                            "text": "API keys for all SpyCloud products (Compass, SIP, Investigations, etc.) are entered on the Data Connector page after deployment — not here. The connector page stores keys persistently and you can update them at any time without redeploying. This step only controls which enrichment playbooks to deploy."
+                        }
                     },
                     {
                         "name": "sectionEnterprise",
@@ -1918,9 +1854,6 @@
             "workspacePricingTier": "[steps('workspaceConfig').sectionWorkspace.workspaceSku]",
             "retentionInDays": "[steps('workspaceConfig').sectionWorkspace.dataRetention]",
             "apiKey": "[if(steps('dataConnector').sectionApiConfig.enableEnterprise, steps('dataConnector').sectionApiConfig.enterpriseApiKey, '')]",
-            "sipApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.sipApiKey, '')]",
-            "investigationsApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.investigationsApiKey, '')]",
-            "idlinkApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.idlinkApiKey, '')]",
             "dataPartnershipApiKey": "[if(steps('dataConnector').sectionApiConfig.enableDataPartnershipProduct, steps('dataConnector').sectionApiConfig.dataPartnershipProductApiKey, '')]",
             "exposureApiKey": "[if(steps('dataConnector').sectionApiConfig.enableExposureProduct, steps('dataConnector').sectionApiConfig.exposureProductApiKey, '')]",
             "capApiKey": "[if(steps('dataConnector').sectionApiConfig.enableCapProduct, steps('dataConnector').sectionApiConfig.capProductApiKey, '')]",
@@ -2006,8 +1939,7 @@
             "enableEnrichCompass": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionCompass.enableEnrichCompass, false)]",
             "enableEnrichStolenCookies": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionSip.enableEnrichStolenCookies, false)]",
             "enableEnrichInvestigation": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionInvestigations.enableEnrichInvestigation, false)]",
-            "enrichmentDailyLimit": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionRateLimits.enrichmentDailyLimit, 200)]",
-            "compassApiKey": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionApiKeys.compassApiKey, '')]"
+            "enrichmentDailyLimit": "[if(steps('enrichmentConfig').enableEnrichmentPlaybooks, steps('enrichmentConfig').sectionRateLimits.enrichmentDailyLimit, 200)]"
         }
     }
 }
