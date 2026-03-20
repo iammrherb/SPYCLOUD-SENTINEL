@@ -5851,6 +5851,20 @@
           },
           "instructionSteps": [
             {
+              "title": "Step 1: Grant Playbook Permissions",
+              "description": "After deployment, grant API permissions to the Logic App managed identities. Go to **Entra ID → Enterprise Applications → filter 'SpyCloud'** to find each playbook's managed identity.",
+              "instructions": [
+                {
+                  "type": "InstructionStepsGroup",
+                  "parameters": {
+                    "title": "Required Permissions",
+                    "description": "**MDE Isolation Playbook:**\n- Machine.Isolate (Application)\n- Machine.ReadWrite.All (Application)\n\n**CA Password Reset Playbook:**\n- User.ReadWrite.All (Application)\n- Directory.ReadWrite.All (Application)\n\n**All Enrichment Playbooks:**\n- Microsoft Sentinel Responder role on the workspace\n- (Auto-granted if you have Sentinel Contributor on the RG)\n\n**How to grant:**\n1. Go to Entra ID → App Registrations → API Permissions\n2. Add the permissions listed above\n3. Click 'Grant admin consent'\n4. Or use: scripts/grant-permissions.sh",
+                    "canCollapseAllSections": true
+                  }
+                }
+              ]
+            },
+            {
               "title": "Prerequisites",
               "description": "",
               "instructions": [
@@ -8143,7 +8157,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8292,7 +8307,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8371,7 +8387,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8450,7 +8467,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8540,7 +8558,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8631,7 +8650,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8711,7 +8731,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8791,7 +8812,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8870,7 +8892,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -8950,7 +8973,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9035,7 +9059,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9100,7 +9125,8 @@
                 },
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9161,7 +9187,8 @@
                 },
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9250,7 +9277,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9339,7 +9367,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9428,7 +9457,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -9508,7 +9538,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10508,7 +10539,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10588,7 +10620,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10668,7 +10701,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10749,7 +10783,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10829,7 +10864,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT12H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -10937,7 +10973,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11033,7 +11070,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11120,7 +11158,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11198,7 +11237,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11276,7 +11316,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11352,7 +11393,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11430,7 +11472,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11506,7 +11549,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11591,7 +11635,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11667,7 +11712,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11743,7 +11789,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11819,7 +11866,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11905,7 +11953,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -11981,7 +12030,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -12066,7 +12116,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT1H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
@@ -12151,7 +12202,8 @@
                 ],
                 "status": "Available",
                 "suppressionDuration": "PT6H",
-                "suppressionEnabled": true
+                "suppressionEnabled": true,
+                "enabled": true
               }
             }
           ]
