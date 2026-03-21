@@ -307,12 +307,12 @@ def apply_purview_sensitivity_label(
 
     if entity_type == "incident":
         endpoint = f"/security/incidents/{entity_id}"
-        update_body = {
-            "customTags": [
-                f"PurviewLabel:{label_id}",
-                f"SpyCloud:{sensitivity_level}",
-            ]
-        }
+        # Read existing tags first to avoid overwriting them
+        existing = call_graph(endpoint)
+        existing_tags = existing.get("customTags", []) if "error" not in existing else []
+        new_tags = [f"PurviewLabel:{label_id}", f"SpyCloud:{sensitivity_level}"]
+        merged_tags = list(set(existing_tags + new_tags))
+        update_body = {"customTags": merged_tags}
         return call_graph(endpoint, method="PATCH", body=update_body)
 
     if entity_type == "file":
@@ -1441,10 +1441,10 @@ def ai_purview_classify(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
         )
 
-    incident_id = body.get("incidentId", "").strip()
+    incident_id = (body.get("incidentId") or "").strip()
     raw_apply_label = body.get("applyLabel", False)
     apply_label = raw_apply_label if isinstance(raw_apply_label, bool) else str(raw_apply_label).lower() == "true"
-    override_label_id = body.get("sensitivityLabelId", "").strip()
+    override_label_id = (body.get("sensitivityLabelId") or "").strip()
 
     # Get exposure data
     encoded_email = requests.utils.quote(email, safe="")
