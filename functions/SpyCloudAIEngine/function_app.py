@@ -282,11 +282,17 @@ def get_purview_sensitivity_labels() -> list:
 
 
 def apply_purview_sensitivity_label(
-    entity_type: str, entity_id: str, label_id: str, justification: str
+    entity_type: str,
+    entity_id: str,
+    label_id: str,
+    justification: str,
+    sensitivity_level: str = "Highly Confidential",
 ) -> dict:
     """Apply a Purview sensitivity label to a Sentinel incident or file.
 
     Uses Microsoft Graph Information Protection API to apply labels.
+    The sensitivity_level parameter controls the custom tag applied to
+    incidents so the tag reflects the actual classification result.
     """
     if not label_id:
         label_id = PURVIEW_SENSITIVITY_LABEL_ID
@@ -304,7 +310,7 @@ def apply_purview_sensitivity_label(
         update_body = {
             "customTags": [
                 f"PurviewLabel:{label_id}",
-                "SpyCloud:HighlyConfidential",
+                f"SpyCloud:{sensitivity_level}",
             ]
         }
         return call_graph(endpoint, method="PATCH", body=update_body)
@@ -409,17 +415,17 @@ def classify_pii_exposure(exposures: list) -> dict:
     health_fields = {"ip_addresses", "infected_machine_id"}
     has_health = bool(detected_fields & health_fields) and classification["regulatory_impact"]["hipaa"]["affected"]
 
-    if has_financial or has_sensitive:
-        classification["sensitivity_level"] = "Highly Confidential"
-        classification["recommended_label"] = "Highly Confidential"
-        classification["regulatory_impact"]["soc2"]["affected"] = True
-        classification["regulatory_impact"]["soc2"]["description"] = (
-            "Critical breach: financial/sensitive PII exposed — "
-            "impacts Confidentiality and Privacy trust criteria"
-        )
-    elif has_health:
+    if has_health:
         classification["sensitivity_level"] = "Highly Confidential"
         classification["recommended_label"] = "Highly Confidential — PHI"
+        classification["regulatory_impact"]["soc2"]["affected"] = True
+        classification["regulatory_impact"]["soc2"]["description"] = (
+            "Critical breach: PHI/health data exposed — "
+            "impacts Confidentiality and Privacy trust criteria"
+        )
+    elif has_financial or has_sensitive:
+        classification["sensitivity_level"] = "Highly Confidential"
+        classification["recommended_label"] = "Highly Confidential"
     elif detected_fields:
         classification["sensitivity_level"] = "Confidential"
         classification["recommended_label"] = "Confidential"
@@ -1453,6 +1459,7 @@ def ai_purview_classify(req: func.HttpRequest) -> func.HttpResponse:
             entity_id=incident_id,
             label_id=PURVIEW_SENSITIVITY_LABEL_ID,
             justification=justification,
+            sensitivity_level=classification["sensitivity_level"],
         )
 
     return func.HttpResponse(
