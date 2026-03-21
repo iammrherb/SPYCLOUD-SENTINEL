@@ -20,6 +20,7 @@ import os
 import re
 import threading
 import time
+from urllib.parse import quote as _urlencode
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -457,13 +458,13 @@ def risk_score(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(json.dumps({"error": "invalid email format"}), status_code=400)
 
         # Fetch exposures from SpyCloud
-        exposures_resp = call_spycloud(f"/breach/data/emails/{email}")
+        exposures_resp = call_spycloud(f"/breach/data/emails/{_urlencode(email, safe='')}")
         exposures = exposures_resp.get("results", [])
 
         # Fetch SIP cookies if key available
         cookies = []
         if get_api_key("sip"):
-            cookies_resp = call_spycloud(f"/sip/cookies/emails/{email}", product="sip")
+            cookies_resp = call_spycloud(f"/sip/cookies/emails/{_urlencode(email, safe='')}", product="sip")
             cookies = cookies_resp.get("results", [])
 
         # Compute score
@@ -491,7 +492,7 @@ def risk_score_batch(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         def _score_one(email: str) -> dict:
-            exposures_resp = call_spycloud(f"/breach/data/emails/{email}")
+            exposures_resp = call_spycloud(f"/breach/data/emails/{_urlencode(email, safe='')}")
             exposures = exposures_resp.get("results", [])
             score = compute_risk_score(exposures)
             score["email"] = email
@@ -527,7 +528,7 @@ def risk_score_domain(req: func.HttpRequest) -> func.HttpResponse:
         if not domain:
             return func.HttpResponse(json.dumps({"error": "domain required"}), status_code=400)
 
-        domain_resp = call_spycloud(f"/breach/data/domains/{domain}", params={"limit": 1000})
+        domain_resp = call_spycloud(f"/breach/data/domains/{_urlencode(domain, safe='')}", params={"limit": 1000})
         all_exposures = domain_resp.get("results", [])
 
         # Group by email
@@ -572,7 +573,7 @@ def enrich_email(req: func.HttpRequest) -> func.HttpResponse:
         email = body.get("email", "")
         if not _validate_email(email):
             return func.HttpResponse(json.dumps({"error": "invalid email format"}), status_code=400)
-        resp = call_spycloud(f"/breach/data/emails/{email}")
+        resp = call_spycloud(f"/breach/data/emails/{_urlencode(email, safe='')}")
         exposures = resp.get("results", [])
         score = compute_risk_score(exposures)
 
@@ -596,7 +597,7 @@ def enrich_domain(req: func.HttpRequest) -> func.HttpResponse:
     try:
         body = req.get_json()
         domain = body.get("domain", "")
-        resp = call_spycloud(f"/breach/data/domains/{domain}", params={"limit": 100})
+        resp = call_spycloud(f"/breach/data/domains/{_urlencode(domain, safe='')}", params={"limit": 100})
 
         results = resp.get("results", [])
         severity_dist = {}
@@ -621,7 +622,7 @@ def enrich_ip(req: func.HttpRequest) -> func.HttpResponse:
     try:
         body = req.get_json()
         ip = body.get("ip", "")
-        resp = call_spycloud(f"/breach/data/ips/{ip}")
+        resp = call_spycloud(f"/breach/data/ips/{_urlencode(ip, safe='')}")
         return func.HttpResponse(json.dumps({
             "ip": ip,
             "hits": resp.get("hits", 0),
@@ -640,7 +641,7 @@ def enrich_compass_device(req: func.HttpRequest) -> func.HttpResponse:
         if not get_api_key("compass"):
             return func.HttpResponse(json.dumps({"error": "Compass API key not configured"}), status_code=400)
 
-        resp = call_spycloud(f"/compass/devices/{machine_id}", product="compass")
+        resp = call_spycloud(f"/compass/devices/{_urlencode(machine_id, safe='')}", product="compass")
         return func.HttpResponse(json.dumps({
             "machineId": machine_id,
             "hits": resp.get("hits", 0),
@@ -661,7 +662,7 @@ def enrich_sip_cookies(req: func.HttpRequest) -> func.HttpResponse:
         if not get_api_key("sip"):
             return func.HttpResponse(json.dumps({"error": "SIP API key not configured"}), status_code=400)
 
-        resp = call_spycloud(f"/sip/cookies/emails/{email}", product="sip")
+        resp = call_spycloud(f"/sip/cookies/emails/{_urlencode(email, safe='')}", product="sip")
         cookies = resp.get("results", [])
 
         valid_count = sum(1 for c in cookies
@@ -686,7 +687,7 @@ def enrich_catalog(req: func.HttpRequest) -> func.HttpResponse:
     try:
         body = req.get_json()
         source_id = body.get("sourceId", "")
-        resp = call_spycloud(f"/breach/catalog/{source_id}")
+        resp = call_spycloud(f"/breach/catalog/{_urlencode(str(source_id), safe='')}")
         return func.HttpResponse(json.dumps(resp), mimetype="application/json")
     except Exception as e:
         return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500)
@@ -710,7 +711,7 @@ def investigate_full(req: func.HttpRequest) -> func.HttpResponse:
         report = {"email": email, "timestamp": datetime.now(timezone.utc).isoformat()}
 
         # Step 1: Enterprise breach data
-        ent_resp = call_spycloud(f"/breach/data/emails/{email}")
+        ent_resp = call_spycloud(f"/breach/data/emails/{_urlencode(email, safe='')}")
         report["enterprise"] = {
             "hits": ent_resp.get("hits", 0),
             "maxSeverity": max((r.get("severity", 0) for r in ent_resp.get("results", [])), default=0),
@@ -719,7 +720,7 @@ def investigate_full(req: func.HttpRequest) -> func.HttpResponse:
 
         # Step 2: Compass (if available)
         if get_api_key("compass"):
-            comp_resp = call_spycloud(f"/compass/data/emails/{email}", product="compass")
+            comp_resp = call_spycloud(f"/compass/data/emails/{_urlencode(email, safe='')}", product="compass")
             report["compass"] = {
                 "hits": comp_resp.get("hits", 0),
                 "devices": len(set(r.get("infected_machine_id", "") for r in comp_resp.get("results", []))),
@@ -728,7 +729,7 @@ def investigate_full(req: func.HttpRequest) -> func.HttpResponse:
         # Step 3: SIP cookies (if available)
         cookies = []
         if get_api_key("sip"):
-            sip_resp = call_spycloud(f"/sip/cookies/emails/{email}", product="sip")
+            sip_resp = call_spycloud(f"/sip/cookies/emails/{_urlencode(email, safe='')}", product="sip")
             cookies = sip_resp.get("results", [])
             valid = sum(1 for c in cookies
                         if c.get("cookie_expiry") and c["cookie_expiry"] > datetime.now(timezone.utc).isoformat())
