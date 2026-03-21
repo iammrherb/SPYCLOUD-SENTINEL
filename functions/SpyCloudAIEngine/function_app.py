@@ -1293,13 +1293,12 @@ def ai_compliance_assessment(req: func.HttpRequest) -> func.HttpResponse:
         period_days = 30
 
     # Step 1: Query SpyCloud for domain exposures
-    encoded_domain = requests.utils.quote(domain, safe="")
     since_epoch = int(
         (datetime.now(timezone.utc) - timedelta(days=period_days)).timestamp()
     )
     data = call_spycloud_api(
         f"/breach/data/watchlist",
-        params={"domain": encoded_domain, "since": since_epoch},
+        params={"domain": domain, "since": since_epoch},
     )
     exposures = data.get("results", [])
 
@@ -1445,6 +1444,7 @@ def ai_purview_classify(req: func.HttpRequest) -> func.HttpResponse:
     incident_id = body.get("incidentId", "").strip()
     raw_apply_label = body.get("applyLabel", False)
     apply_label = raw_apply_label if isinstance(raw_apply_label, bool) else str(raw_apply_label).lower() == "true"
+    override_label_id = body.get("sensitivityLabelId", "").strip()
 
     # Get exposure data
     encoded_email = requests.utils.quote(email, safe="")
@@ -1466,7 +1466,7 @@ def ai_purview_classify(req: func.HttpRequest) -> func.HttpResponse:
         label_result = apply_purview_sensitivity_label(
             entity_type="incident",
             entity_id=incident_id,
-            label_id=PURVIEW_SENSITIVITY_LABEL_ID,
+            label_id=override_label_id or PURVIEW_SENSITIVITY_LABEL_ID,
             justification=justification,
             sensitivity_level=classification["sensitivity_level"],
         )

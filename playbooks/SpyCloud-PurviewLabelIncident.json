@@ -209,7 +209,8 @@
                         "body": {
                           "email": "@{outputs('Compose_Email_Address')}",
                           "incidentId": "@{triggerBody()?['object']?['properties']?['incidentNumber']}",
-                          "applyLabel": true
+                          "applyLabel": true,
+                          "sensitivityLabelId": "@{parameters('sensitivityLabelId')}"
                         }
                       },
                       "runAfter": {
