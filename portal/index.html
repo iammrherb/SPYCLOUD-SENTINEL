@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpyCloud Identity Exposure Intelligence for Sentinel</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png">
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <img src="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png" alt="SpyCloud" class="header-logo">
+  <div class="header-title">SpyCloud <span>Identity Exposure Intelligence</span> for Sentinel <span class="header-version">v2.0.0</span></div>
+  <div class="header-links">
+    <a href="https://github.com/iammrherb/SPYCLOUD-SENTINEL" target="_blank">&#128279; GitHub</a>
+    <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" target="_blank">&#9729; Deploy to Azure</a>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section">Overview</div>
+  <div class="sidebar-item active" data-page="dashboard" onclick="showPage('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </div>
+  <div class="sidebar-item" data-page="architecture" onclick="showPage('architecture')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.5-6.5l-2.8 2.8m-5.4 5.4l-2.8 2.8m0-11l2.8 2.8m5.4 5.4l2.8 2.8"/></svg>
+    Architecture
+  </div>
+
+  <div class="sidebar-section">Content Hub</div>
+  <div class="sidebar-item" data-page="analytics" onclick="showPage('analytics')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Analytics Rules <span class="sidebar-badge">38</span>
+  </div>
+  <div class="sidebar-item" data-page="playbooks" onclick="showPage('playbooks')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Playbooks <span class="sidebar-badge">23</span>
+  </div>
+  <div class="sidebar-item" data-page="workbooks" onclick="showPage('workbooks')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    Workbooks <span class="sidebar-badge">3</span>
+  </div>
+  <div class="sidebar-item" data-page="connector" onclick="showPage('connector')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    Data Connector
+  </div>
+  <div class="sidebar-item" data-page="notebooks" onclick="showPage('notebooks')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    Notebooks <span class="sidebar-badge">3</span>
+  </div>
+
+  <div class="sidebar-section">Deployment</div>
+  <div class="sidebar-item" data-page="deploy" onclick="showPage('deploy')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    Deploy Guide
+  </div>
+  <div class="sidebar-item" data-page="postdeploy" onclick="showPage('postdeploy')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+    Post-Deploy Config
+  </div>
+
+  <div class="sidebar-section">Toolkit</div>
+  <div class="sidebar-item" data-page="healthcheck" onclick="showPage('healthcheck')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Health Check
+  </div>
+  <div class="sidebar-item" data-page="simulation" onclick="showPage('simulation')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Simulation &amp; QA
+  </div>
+  <div class="sidebar-item" data-page="apitest" onclick="showPage('apitest')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    API Testing
+  </div>
+
+  <div class="sidebar-section">Intelligence</div>
+  <div class="sidebar-item" data-page="copilot" onclick="showPage('copilot')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+    Copilot &amp; Agents
+  </div>
+  <div class="sidebar-item" data-page="graph" onclick="showPage('graph')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><line x1="8.6" y1="7.4" x2="15.4" y2="16.6"/><line x1="15.4" y1="7.4" x2="8.6" y2="16.6"/></svg>
+    Graph Analysis
+  </div>
+  <div class="sidebar-item" data-page="purview" onclick="showPage('purview')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Purview
+  </div>
+
+  <div class="sidebar-section">Documentation</div>
+  <div class="sidebar-item" data-page="usecases" onclick="showPage('usecases')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Use Cases
+  </div>
+  <div class="sidebar-item" data-page="troubleshoot" onclick="showPage('troubleshoot')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Troubleshooting
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main" id="main-content">
+
+<!-- DASHBOARD PAGE -->
+<div class="page active" id="page-dashboard">
+  <div class="hero">
+    <img src="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png" alt="SpyCloud" style="height:80px;margin-bottom:16px;">
+    <h1>SpyCloud <span>Identity Exposure Intelligence</span></h1>
+    <p>Enterprise-grade darknet intelligence integration for Microsoft Sentinel. Detect compromised credentials, automate remediation, and protect your organization from identity-based attacks.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a class="btn btn-primary" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" target="_blank">&#9729; Deploy to Azure</a>
+      <a class="btn btn-secondary" href="https://github.com/iammrherb/SPYCLOUD-SENTINEL" target="_blank">&#128279; View on GitHub</a>
+      <button class="btn btn-secondary" onclick="showPage('deploy')">&#128214; Deployment Guide</button>
+    </div>
+  </div>
+
+  <div class="grid grid-4">
+    <div class="stat-card"><div class="stat-value">38</div><div class="stat-label">Analytics Rules</div></div>
+    <div class="stat-card"><div class="stat-value">23</div><div class="stat-label">Playbooks</div></div>
+    <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Workbooks</div></div>
+    <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Notebooks</div></div>
+  </div>
+
+  <div style="margin-top:24px;" class="grid grid-3">
+    <div class="stat-card"><div class="stat-value">11</div><div class="stat-label">Custom Log Tables</div></div>
+    <div class="stat-card"><div class="stat-value">7</div><div class="stat-label">SpyCloud API Products</div></div>
+    <div class="stat-card"><div class="stat-value">26</div><div class="stat-label">SCORCH Sub-Agents</div></div>
+  </div>
+
+  <div class="card" style="margin-top:24px;">
+    <div class="card-title">Content Hub Package Contents</div>
+    <div class="card-subtitle">Everything included in the mainTemplate.json for Content Hub / Marketplace deployment</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Content Type</th><th>Count</th><th>Status</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Analytics Rules</td><td>38</td><td><span class="tag tag-green">Included</span></td><td>Scheduled detection rules for infostealer, breach, CAP, MDE, and identity correlation</td></tr>
+          <tr><td>Playbook Templates</td><td>23</td><td><span class="tag tag-green">Included</span></td><td>Logic App automation for remediation, enrichment, notification, and compliance</td></tr>
+          <tr><td>Workbooks</td><td>3</td><td><span class="tag tag-green">Included</span></td><td>Executive dashboard, investigation workbook, graph analysis</td></tr>
+          <tr><td>Notebooks</td><td>3</td><td><span class="tag tag-green">Included</span></td><td>Jupyter notebooks for deep investigation, graph analysis, simulation scenarios</td></tr>
+          <tr><td>Data Connector</td><td>1</td><td><span class="tag tag-green">Included</span></td><td>SpyCloud API connector with configurable polling and multi-product support</td></tr>
+          <tr><td>Hunting Queries</td><td>1</td><td><span class="tag tag-green">Included</span></td><td>Proactive threat hunting for exposed credentials</td></tr>
+          <tr><td>Parsers</td><td>0</td><td><span class="tag tag-orange">Planned</span></td><td>KQL parsers for normalizing SpyCloud data to ASIM format</td></tr>
+          <tr><td>Watchlists</td><td>0</td><td><span class="tag tag-orange">Planned</span></td><td>Monitored domains, VIP users, excluded accounts</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Infrastructure Resources (azuredeploy.json only)</div>
+    <div class="card-subtitle">These resources require the full ARM deployment and cannot be included in Content Hub</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Resource</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Azure Key Vault</td><td>Stores SpyCloud API keys and secrets securely</td></tr>
+          <tr><td>Function App</td><td>SpyCloud API enrichment engine with rate limiting</td></tr>
+          <tr><td>AI Engine Function App</td><td>OpenAI/Azure AI powered investigation and reporting</td></tr>
+          <tr><td>Data Collection Endpoint</td><td>Log ingestion endpoint for custom tables</td></tr>
+          <tr><td>Data Collection Rules</td><td>Routes data from SpyCloud APIs to custom tables</td></tr>
+          <tr><td>11 Custom Log Tables</td><td>SpyCloudBreachWatchlist_CL, SpyCloudBreachCatalog_CL, etc.</td></tr>
+          <tr><td>Logic App API Connections</td><td>Sentinel, Office 365, Teams connectors</td></tr>
+          <tr><td>RBAC Role Assignments</td><td>Function App Key Vault access, DCR permissions</td></tr>
+          <tr><td>Automation Rules</td><td>Auto-trigger playbooks on SpyCloud incidents</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE PAGE -->
+<div class="page" id="page-architecture">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:24px;">Solution Architecture</h2>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab(this, 'arch-overview')">Overview</div>
+    <div class="tab" onclick="showTab(this, 'arch-dataflow')">Data Flow</div>
+    <div class="tab" onclick="showTab(this, 'arch-deployment')">Deployment Paths</div>
+  </div>
+
+  <div class="tab-content active" id="arch-overview">
+    <div class="arch-diagram" style="height:600px;">
+      <svg width="100%" height="100%" id="arch-svg-overview"></svg>
+    </div>
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">Architecture Components</div>
+      <div class="grid grid-2">
+        <div>
+          <h4 style="color:var(--sc-accent);margin-bottom:8px;">Data Ingestion Layer</h4>
+          <ul style="list-style:none;font-size:14px;line-height:2;">
+            <li>&#9679; SpyCloud Enterprise API (7 products)</li>
+            <li>&#9679; Azure Function App (polling + enrichment)</li>
+            <li>&#9679; Data Collection Endpoint &amp; Rules</li>
+            <li>&#9679; 11 Custom Log Analytics Tables</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:var(--sc-accent);margin-bottom:8px;">Detection &amp; Response Layer</h4>
+          <ul style="list-style:none;font-size:14px;line-height:2;">
+            <li>&#9679; 38 Analytics Rules (scheduled)</li>
+            <li>&#9679; 23 Automated Playbooks</li>
+            <li>&#9679; Automation Rules (incident triggers)</li>
+            <li>&#9679; SCORCH AI Agent (26 sub-agents)</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:var(--sc-accent);margin-bottom:8px;">Intelligence Layer</h4>
+          <ul style="list-style:none;font-size:14px;line-height:2;">
+            <li>&#9679; AI Engine (OpenAI / Azure AI)</li>
+            <li>&#9679; Graph Analysis (identity relationships)</li>
+            <li>&#9679; Security Copilot Integration</li>
+            <li>&#9679; MCP Server (tool orchestration)</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:var(--sc-accent);margin-bottom:8px;">Compliance &amp; Reporting</h4>
+          <ul style="list-style:none;font-size:14px;line-height:2;">
+            <li>&#9679; Purview Integration (PII classification)</li>
+            <li>&#9679; Executive Reports (AI-generated)</li>
+            <li>&#9679; 3 Interactive Workbooks</li>
+            <li>&#9679; 3 Jupyter Investigation Notebooks</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="arch-dataflow">
+    <div class="arch-diagram" style="height:550px;">
+      <svg width="100%" height="100%" id="arch-svg-dataflow"></svg>
+    </div>
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">Data Flow Details</div>
+      <div class="card-subtitle">How data moves from SpyCloud APIs through to Sentinel incidents and automated response</div>
+      <ol style="font-size:14px;line-height:2.2;padding-left:20px;">
+        <li><strong>SpyCloud API Polling</strong> &mdash; Function App polls 7 SpyCloud API products on configurable schedule (default: every 6 hours)</li>
+        <li><strong>Data Ingestion</strong> &mdash; Raw breach/exposure data sent to Data Collection Endpoint via DCR</li>
+        <li><strong>Table Storage</strong> &mdash; Data lands in 11 custom Log Analytics tables (SpyCloudBreachWatchlist_CL, etc.)</li>
+        <li><strong>Detection</strong> &mdash; 38 analytics rules run scheduled KQL queries against the tables</li>
+        <li><strong>Incident Creation</strong> &mdash; Matching rules create Sentinel incidents with entity mappings</li>
+        <li><strong>Automation</strong> &mdash; Automation rules trigger playbooks based on incident properties</li>
+        <li><strong>Remediation</strong> &mdash; Playbooks execute actions: password reset, device isolation, MFA enforcement, etc.</li>
+        <li><strong>Enrichment</strong> &mdash; AI Engine adds threat context, executive summaries, and remediation plans</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="tab-content" id="arch-deployment">
+    <div class="card">
+      <div class="card-title">Deployment Architecture: Two-Template Design</div>
+      <div class="card-subtitle">Why we use two templates and what each one contains</div>
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card" style="border-color:var(--sc-accent);">
+          <div class="card-title" style="color:var(--sc-accent);">mainTemplate.json</div>
+          <div class="tag tag-blue" style="margin-bottom:12px;">Content Hub / Marketplace</div>
+          <p style="font-size:14px;margin-bottom:12px;">Deployed via Content Hub. Contains ONLY content items that Sentinel can manage as templates.</p>
+          <ul style="font-size:13px;line-height:2;padding-left:16px;">
+            <li>38 Analytics Rule Templates</li>
+            <li>23 Playbook Templates</li>
+            <li>3 Workbook Templates</li>
+            <li>3 Notebook Templates</li>
+            <li>1 Data Connector Definition</li>
+            <li>1 Hunting Query</li>
+            <li>1 Solution Package Metadata</li>
+          </ul>
+          <p style="font-size:13px;color:var(--sc-gray);margin-top:12px;"><strong>71 resources total</strong></p>
+        </div>
+        <div class="card" style="border-color:var(--sc-orange);">
+          <div class="card-title" style="color:var(--sc-orange);">azuredeploy.json</div>
+          <div class="tag tag-orange" style="margin-bottom:12px;">Deploy to Azure Button</div>
+          <p style="font-size:14px;margin-bottom:12px;">Full infrastructure deployment via ARM. Includes everything above PLUS all Azure resources.</p>
+          <ul style="font-size:13px;line-height:2;padding-left:16px;">
+            <li>All Content Hub items (above)</li>
+            <li>Azure Key Vault + RBAC</li>
+            <li>Function App (enrichment engine)</li>
+            <li>AI Engine Function App</li>
+            <li>Data Collection Endpoint + Rules</li>
+            <li>11 Custom Log Tables</li>
+            <li>Logic App API Connections</li>
+            <li>Automation Rules</li>
+          </ul>
+          <p style="font-size:13px;color:var(--sc-gray);margin-top:12px;"><strong>158+ resources total</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS RULES PAGE -->
+<div class="page" id="page-analytics">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Analytics Rules</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">38 scheduled detection rules covering infostealer infections, breach exposure, credential compromise, and identity correlation.</p>
+
+  <div class="search-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search analytics rules..." oninput="filterRules(this.value)">
+  </div>
+
+  <div id="rules-list">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- PLAYBOOKS PAGE -->
+<div class="page" id="page-playbooks">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Playbooks</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">23 automated Logic App playbooks for incident response, enrichment, notification, and compliance.</p>
+
+  <div class="grid grid-3" id="playbooks-grid">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- WORKBOOKS PAGE -->
+<div class="page" id="page-workbooks">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Workbooks</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">3 interactive Azure Workbooks for monitoring, investigation, and graph analysis.</p>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-title">&#128202; Executive Dashboard</div>
+      <div class="tag tag-blue" style="margin-bottom:12px;">SpyCloud-Executive-Dashboard</div>
+      <p style="font-size:14px;">High-level overview of exposure metrics, breach trends, severity distribution, and remediation status. Designed for CISO and executive reporting.</p>
+      <ul style="font-size:13px;line-height:2;padding-left:16px;margin-top:12px;">
+        <li>Exposure trend over time</li>
+        <li>Top affected domains</li>
+        <li>Severity heatmap</li>
+        <li>Remediation completion rate</li>
+        <li>Active infostealer infections</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128269; Investigation Workbook</div>
+      <div class="tag tag-green" style="margin-bottom:12px;">SpyCloud-Investigation</div>
+      <p style="font-size:14px;">Deep-dive investigation tool for SOC analysts. Search by email, domain, IP, or machine ID to trace exposure history and correlate identities.</p>
+      <ul style="font-size:13px;line-height:2;padding-left:16px;margin-top:12px;">
+        <li>Email/domain lookup</li>
+        <li>Breach timeline visualization</li>
+        <li>Malware family analysis</li>
+        <li>Credential reuse detection</li>
+        <li>Entity relationship mapping</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128300; Graph Analysis</div>
+      <div class="tag tag-orange" style="margin-bottom:12px;">SpyCloud-Graph-Analysis</div>
+      <p style="font-size:14px;">Identity graph visualization showing relationships between compromised accounts, devices, and breach sources. Powered by Sentinel custom graphs.</p>
+      <ul style="font-size:13px;line-height:2;padding-left:16px;margin-top:12px;">
+        <li>Identity relationship graph</li>
+        <li>Shared credential detection</li>
+        <li>Device-to-account mapping</li>
+        <li>Breach source clustering</li>
+        <li>Risk propagation paths</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- DATA CONNECTOR PAGE -->
+<div class="page" id="page-connector">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Data Connector</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">SpyCloud API data connector with multi-product support, configurable polling, and health monitoring.</p>
+
+  <div class="card">
+    <div class="card-title">SpyCloud API Products</div>
+    <div class="card-subtitle">The connector supports all 7 SpyCloud API product families</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>API Product</th><th>Target Table</th><th>Data Type</th><th>Polling</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Breach Watchlist</strong></td><td>SpyCloudBreachWatchlist_CL</td><td>Monitored domain exposures</td><td>Every 6h</td></tr>
+          <tr><td><strong>Breach Catalog</strong></td><td>SpyCloudBreachCatalog_CL</td><td>Breach source metadata</td><td>Daily</td></tr>
+          <tr><td><strong>Compass (Infostealer)</strong></td><td>SpyCloudIdentityExposure_CL</td><td>Infostealer malware logs</td><td>Every 6h</td></tr>
+          <tr><td><strong>SIP (Cookies)</strong></td><td>SpyCloudSipCookies_CL</td><td>Stolen session cookies</td><td>Every 6h</td></tr>
+          <tr><td><strong>Investigations</strong></td><td>SpyCloudInvestigations_CL</td><td>Deep investigation data</td><td>On-demand</td></tr>
+          <tr><td><strong>Identity Links</strong></td><td>SpyCloudIdLink_CL</td><td>Cross-identity correlation</td><td>Daily</td></tr>
+          <tr><td><strong>Data Partnership</strong></td><td>SpyCloudDataPartnership_CL</td><td>Partner data feeds</td><td>Daily</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Additional Data Tables</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Table</th><th>Source</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Spycloud_MDE_Logs_CL</td><td>MDE Integration</td><td>Defender for Endpoint correlation data</td></tr>
+          <tr><td>SpyCloud_ConditionalAccessLogs_CL</td><td>CA Policies</td><td>Conditional Access policy enforcement logs</td></tr>
+          <tr><td>SpyCloudExposure_CL</td><td>Enrichment Engine</td><td>Aggregated exposure assessments</td></tr>
+          <tr><td>SpyCloudCAP_CL</td><td>CAP Response</td><td>Credential Assessment Program results</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Connector Configuration</div>
+    <div class="card-subtitle">Required settings for the data connector</div>
+    <div class="grid grid-2">
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">Required Parameters</h4>
+        <ul style="font-size:14px;line-height:2;padding-left:16px;">
+          <li><strong>SpyCloud API Key</strong> &mdash; Enterprise API key from SpyCloud portal</li>
+          <li><strong>Monitored Domains</strong> &mdash; Comma-separated list of domains to watch</li>
+          <li><strong>Workspace ID</strong> &mdash; Log Analytics workspace ID</li>
+          <li><strong>Workspace Key</strong> &mdash; Log Analytics shared key</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">Optional Settings</h4>
+        <ul style="font-size:14px;line-height:2;padding-left:16px;">
+          <li><strong>Polling Interval</strong> &mdash; Default: 6 hours (configurable)</li>
+          <li><strong>Severity Threshold</strong> &mdash; Minimum severity for alerts (default: 2)</li>
+          <li><strong>API Products</strong> &mdash; Select which products to enable</li>
+          <li><strong>Batch Size</strong> &mdash; Records per API call (default: 1000)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTEBOOKS PAGE -->
+<div class="page" id="page-notebooks">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Jupyter Notebooks</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">3 investigation notebooks for deep analysis, graph exploration, and attack simulation.</p>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-title">&#128270; Deep Investigation</div>
+      <div class="tag tag-blue" style="margin-bottom:12px;">SpyCloud-Investigation.ipynb</div>
+      <p style="font-size:14px;">Comprehensive investigation notebook for analyzing SpyCloud exposure data. Includes timeline analysis, entity correlation, and automated report generation.</p>
+      <a class="btn btn-secondary" style="margin-top:12px;" href="https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/notebooks/SpyCloud-Investigation.ipynb" target="_blank">View Notebook</a>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128300; Graph Analysis</div>
+      <div class="tag tag-green" style="margin-bottom:12px;">SpyCloud-Graph-Analysis.ipynb</div>
+      <p style="font-size:14px;">Identity graph exploration notebook. Visualize relationships between compromised accounts, devices, and breach sources using networkx and pyvis.</p>
+      <a class="btn btn-secondary" style="margin-top:12px;" href="https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/notebooks/SpyCloud-Graph-Analysis.ipynb" target="_blank">View Notebook</a>
+    </div>
+    <div class="card">
+      <div class="card-title">&#127919; Simulation Scenarios</div>
+      <div class="tag tag-red" style="margin-bottom:12px;">SpyCloud-Scenarios.ipynb</div>
+      <p style="font-size:14px;">Attack simulation and purple team notebook. Generate realistic test data, simulate breach scenarios, and validate detection rules and playbook triggers.</p>
+      <a class="btn btn-secondary" style="margin-top:12px;" href="https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/notebooks/SpyCloud-Scenarios.ipynb" target="_blank">View Notebook</a>
+    </div>
+  </div>
+</div>
+
+<!-- DEPLOY GUIDE PAGE -->
+<div class="page" id="page-deploy">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Deployment Guide</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Multiple deployment options for different environments and requirements.</p>
+
+  <div class="grid grid-3" style="margin-bottom:24px;">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">&#9729;</div>
+      <div class="card-title">Deploy to Azure</div>
+      <p style="font-size:14px;margin-bottom:16px;">One-click deployment with the full ARM template. Includes all infrastructure, content, and configuration.</p>
+      <a class="btn btn-primary" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json" target="_blank">Deploy Now</a>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">&#128230;</div>
+      <div class="card-title">Content Hub</div>
+      <p style="font-size:14px;margin-bottom:16px;">Install via Sentinel Content Hub for managed content updates. Includes analytics rules, playbooks, workbooks.</p>
+      <a class="btn btn-secondary" href="https://portal.azure.com/#blade/Microsoft_Azure_Security_Insights/ContentHubBlade" target="_blank">Open Content Hub</a>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">&#128187;</div>
+      <div class="card-title">Azure CloudShell</div>
+      <p style="font-size:14px;margin-bottom:16px;">Automated deployment via CloudShell script. Clone repo, configure parameters, deploy with full validation.</p>
+      <button class="btn btn-secondary" onclick="showCloudShellInstructions()">View Instructions</button>
+    </div>
+  </div>
+
+  <div class="card" id="cloudshell-instructions" style="display:none;">
+    <div class="card-title">CloudShell Deployment</div>
+    <div class="code-block">
+<span class="comment"># 1. Open Azure CloudShell (bash)</span>
+<span class="comment"># 2. Clone the repository</span>
+<span class="keyword">git</span> clone https://github.com/iammrherb/SPYCLOUD-SENTINEL.git
+<span class="keyword">cd</span> SPYCLOUD-SENTINEL
+
+<span class="comment"># 3. Run the deployment script</span>
+<span class="keyword">chmod</span> +x scripts/deploy-cloudshell.sh
+<span class="keyword">./scripts/deploy-cloudshell.sh</span> \
+  --resource-group <span class="string">"your-rg"</span> \
+  --workspace <span class="string">"your-sentinel-workspace"</span> \
+  --spycloud-api-key <span class="string">"your-api-key"</span> \
+  --domains <span class="string">"yourdomain.com,other.com"</span>
+
+<span class="comment"># 4. Run post-deployment configuration</span>
+<span class="keyword">./scripts/post-deploy.sh</span> \
+  --resource-group <span class="string">"your-rg"</span> \
+  --workspace <span class="string">"your-sentinel-workspace"</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Deployment Prerequisites</div>
+    <div class="grid grid-2">
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">Azure Requirements</h4>
+        <ul style="font-size:14px;line-height:2;padding-left:16px;">
+          <li>Azure subscription with Contributor access</li>
+          <li>Microsoft Sentinel workspace (enabled)</li>
+          <li>Resource group for deployment</li>
+          <li>Microsoft.Logic resource provider registered</li>
+          <li>Microsoft.Web resource provider registered</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">SpyCloud Requirements</h4>
+        <ul style="font-size:14px;line-height:2;padding-left:16px;">
+          <li>SpyCloud Enterprise API key</li>
+          <li>At least one monitored domain configured</li>
+          <li>API access to desired products (Breach, Compass, SIP, etc.)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Step-by-Step Deployment</div>
+    <div id="deploy-steps">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- POST-DEPLOY PAGE -->
+<div class="page" id="page-postdeploy">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Post-Deployment Configuration</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">11-phase automated configuration script that handles permissions, RBAC, API connections, and health verification.</p>
+
+  <div class="card">
+    <div class="card-title">Post-Deploy Script Phases</div>
+    <div id="postdeploy-phases">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- HEALTH CHECK PAGE -->
+<div class="page" id="page-healthcheck">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Health Check</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Validate your deployment is working correctly. Run these checks after deployment.</p>
+
+  <div class="card">
+    <div class="card-title">Deployment Health Checklist</div>
+    <div id="health-checklist">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Quick Diagnostic Commands</div>
+    <div class="card-subtitle">Run these in Azure CloudShell to diagnose issues</div>
+    <div class="code-block">
+<span class="comment"># Check Function App status</span>
+<span class="keyword">az</span> functionapp show --name <span class="string">"spycloud-fn-XXXXX"</span> -g <span class="string">"your-rg"</span> --query <span class="string">"state"</span>
+
+<span class="comment"># Check Key Vault access</span>
+<span class="keyword">az</span> keyvault secret list --vault-name <span class="string">"sc-kv-XXXXX"</span> --query <span class="string">"[].name"</span>
+
+<span class="comment"># Check Logic App status</span>
+<span class="keyword">az</span> logic workflow list -g <span class="string">"your-rg"</span> --query <span class="string">"[?contains(name,'SpyCloud')].{name:name,state:state}"</span>
+
+<span class="comment"># Check custom tables exist</span>
+<span class="keyword">az</span> monitor log-analytics workspace table list \
+  --workspace-name <span class="string">"your-workspace"</span> -g <span class="string">"your-rg"</span> \
+  --query <span class="string">"[?contains(name,'SpyCloud')].name"</span>
+
+<span class="comment"># Run full health check</span>
+<span class="keyword">./scripts/post-deploy.sh</span> --resource-group <span class="string">"your-rg"</span> --workspace <span class="string">"your-workspace"</span>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULATION PAGE -->
+<div class="page" id="page-simulation">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Simulation &amp; QA Testing</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Generate test data, simulate attack scenarios, and validate detection rules and playbook triggers.</p>
+
+  <div class="card">
+    <div class="card-title">Test Scenarios</div>
+    <div class="grid grid-2" id="scenarios-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ISV / Marketplace Readiness Checklist</div>
+    <div id="isv-checklist">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- API TESTING PAGE -->
+<div class="page" id="page-apitest">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">API Testing</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Test SpyCloud API endpoints and validate data ingestion.</p>
+
+  <div class="card">
+    <div class="card-title">SpyCloud API Endpoints</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th><th>Test</th></tr></thead>
+        <tbody>
+          <tr><td>/breach/data/watchlist</td><td><span class="tag tag-green">GET</span></td><td>Retrieve breach watchlist data for monitored domains</td><td><button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="showApiTest('watchlist')">Test</button></td></tr>
+          <tr><td>/breach/catalog</td><td><span class="tag tag-green">GET</span></td><td>List available breach sources in the catalog</td><td><button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="showApiTest('catalog')">Test</button></td></tr>
+          <tr><td>/compass/data</td><td><span class="tag tag-green">GET</span></td><td>Retrieve infostealer/compass exposure data</td><td><button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="showApiTest('compass')">Test</button></td></tr>
+          <tr><td>/sip/data</td><td><span class="tag tag-green">GET</span></td><td>Retrieve stolen cookie/session data</td><td><button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="showApiTest('sip')">Test</button></td></tr>
+          <tr><td>/investigations/search</td><td><span class="tag tag-blue">POST</span></td><td>Deep investigation search</td><td><button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="showApiTest('investigations')">Test</button></td></tr>
+          <tr><td>/idlink/data</td><td><span class="tag tag-green">GET</span></td><td>Identity link correlation data</td><td><button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="showApiTest('idlink')">Test</button></td></tr>
+          <tr><td>/enrichment/email</td><td><span class="tag tag-green">GET</span></td><td>Enrich email with exposure data</td><td><button class="btn btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="showApiTest('enrichment')">Test</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="api-test-panel" style="display:none;">
+    <div class="card-title" id="api-test-title">API Test</div>
+    <div class="code-block" id="api-test-curl"></div>
+    <p style="font-size:13px;color:var(--sc-gray);margin-top:12px;">Copy this command and run it in your terminal with your actual API key.</p>
+  </div>
+</div>
+
+<!-- COPILOT PAGE -->
+<div class="page" id="page-copilot">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Copilot &amp; Agents</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">SCORCH Security Agent with 26 sub-agents, Security Copilot integration, and MCP server.</p>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">&#129302; SCORCH Security Agent</div>
+      <p style="font-size:14px;margin-bottom:12px;">AI-powered security investigation agent with 26 specialized sub-agents for automated threat analysis, remediation planning, and executive reporting.</p>
+      <h4 style="color:var(--sc-accent);margin:12px 0 8px;">Sub-Agent Categories</h4>
+      <ul style="font-size:13px;line-height:2;padding-left:16px;">
+        <li><strong>Investigation</strong> &mdash; BreachInvestigator, InfostealerAnalyst, IdentityCorrelator</li>
+        <li><strong>Remediation</strong> &mdash; PasswordResetAgent, DeviceIsolator, MFAEnforcer</li>
+        <li><strong>Enrichment</strong> &mdash; ThreatIntelEnricher, DarknetResearcher, MalwareAnalyst</li>
+        <li><strong>Reporting</strong> &mdash; ExecutiveReporter, ComplianceAssessor, RiskScorer</li>
+        <li><strong>Integration</strong> &mdash; DefenderAgent, PurviewAgent, GraphAnalyzer</li>
+      </ul>
+      <a class="btn btn-secondary" style="margin-top:12px;" href="https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/copilot/SpyCloud_Agent.yaml" target="_blank">View Agent Config</a>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128171; Security Copilot Integration</div>
+      <p style="font-size:14px;margin-bottom:12px;">Native integration with Microsoft Security Copilot for AI-assisted investigation and response within the Defender portal.</p>
+      <h4 style="color:var(--sc-accent);margin:12px 0 8px;">Copilot Skills</h4>
+      <ul style="font-size:13px;line-height:2;padding-left:16px;">
+        <li>Breach exposure lookup by email/domain</li>
+        <li>Infostealer infection analysis</li>
+        <li>Identity correlation and risk scoring</li>
+        <li>Automated remediation recommendations</li>
+        <li>Executive summary generation</li>
+        <li>Compliance impact assessment</li>
+      </ul>
+      <a class="btn btn-secondary" style="margin-top:12px;" href="https://github.com/iammrherb/SPYCLOUD-SENTINEL/blob/main/copilot/SecurityCopilotAgent.json" target="_blank">View Copilot Config</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <div class="card-title">MCP Server</div>
+    <div class="card-subtitle">Model Context Protocol server for tool orchestration and AI agent integration</div>
+    <div class="grid grid-3">
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">SpyCloud Tools</h4>
+        <ul style="font-size:13px;line-height:2;padding-left:16px;">
+          <li>breach_lookup</li>
+          <li>compass_search</li>
+          <li>identity_correlate</li>
+          <li>exposure_assess</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">Sentinel Tools</h4>
+        <ul style="font-size:13px;line-height:2;padding-left:16px;">
+          <li>kql_query</li>
+          <li>incident_enrich</li>
+          <li>playbook_trigger</li>
+          <li>watchlist_manage</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">Graph Tools</h4>
+        <ul style="font-size:13px;line-height:2;padding-left:16px;">
+          <li>graph_query</li>
+          <li>graph_materialize</li>
+          <li>graph_visualize</li>
+          <li>graph_analyze</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GRAPH PAGE -->
+<div class="page" id="page-graph">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Graph Analysis</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Sentinel custom graph integration for identity relationship analysis and threat correlation.</p>
+
+  <div class="card">
+    <div class="card-title">Graph Setup Guide</div>
+    <div id="graph-steps">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- PURVIEW PAGE -->
+<div class="page" id="page-purview">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Purview Integration</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Microsoft Purview integration for compliance assessment, PII classification, and DLP monitoring.</p>
+
+  <div class="card">
+    <div class="card-title">Purview Capabilities</div>
+    <div class="grid grid-2">
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">Compliance Assessment</h4>
+        <ul style="font-size:14px;line-height:2;padding-left:16px;">
+          <li>Automated PII detection in breach data</li>
+          <li>GDPR/CCPA/HIPAA notification timeline</li>
+          <li>Regulatory impact scoring</li>
+          <li>Breach notification requirement analysis</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--sc-accent);margin-bottom:8px;">Sensitivity Labels</h4>
+        <ul style="font-size:14px;line-height:2;padding-left:16px;">
+          <li>Auto-label incidents with PII exposure</li>
+          <li>Information Protection API integration</li>
+          <li>DLP policy correlation</li>
+          <li>Data classification reporting</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- USE CASES PAGE -->
+<div class="page" id="page-usecases">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Use Cases</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Real-world scenarios and deployment patterns for different customer types.</p>
+
+  <div id="usecases-list">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- TROUBLESHOOTING PAGE -->
+<div class="page" id="page-troubleshoot">
+  <h2 style="font-size:24px;font-weight:700;margin-bottom:8px;">Troubleshooting</h2>
+  <p style="color:var(--sc-gray);margin-bottom:24px;">Common issues and solutions for deployment and operation.</p>
+
+  <div id="troubleshoot-list">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
