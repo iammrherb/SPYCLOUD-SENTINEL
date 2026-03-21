@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════════════
-# SpyCloud Sentinel Supreme — Deployment Verification & Validation
+# SpyCloud Identity Exposure Intelligence for Sentinel — Deployment Verification & Validation
 # Run this AFTER deployment to verify every component is configured
 # Usage: ./verify-deployment.sh -g <resource-group> -w <workspace>
 # ═══════════════════════════════════════════════════════════════════════
@@ -43,7 +43,7 @@ SUB_NAME=$(az account show --query name -o tsv 2>/dev/null)
 
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║  🛡️  SpyCloud Sentinel Supreme — Deployment Verification        ║${NC}"
+echo -e "${CYAN}║  🛡️  SpyCloud Identity Exposure Intelligence for Sentinel — Deployment Verification        ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  Subscription: ${BOLD}$SUB_NAME${NC} ($SUB)"

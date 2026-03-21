@@ -1,4 +1,4 @@
-# SpyCloud Sentinel Supreme — Permissions, Managed Identities & Playbook Reference
+# SpyCloud Identity Exposure Intelligence for Sentinel — Permissions, Managed Identities & Playbook Reference
 
 ## 1. Managed Identity Summary
 

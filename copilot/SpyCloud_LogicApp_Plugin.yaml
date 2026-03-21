@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# SpyCloud Sentinel Supreme — Logic App Plugin for Security Copilot
+# SpyCloud Identity Exposure Intelligence for Sentinel — Logic App Plugin for Security Copilot
 # ═══════════════════════════════════════════════════════════════════════
 # Version:  2.0.0
 # Date:     2026-03-19
@@ -229,7 +229,7 @@ SkillGroups:
 ---
 
 # ═══════════════════════════════════════════════════════════════════════
-# SpyCloud Sentinel Supreme — MCP Server Architecture Design
+# SpyCloud Identity Exposure Intelligence for Sentinel — MCP Server Architecture Design
 # ═══════════════════════════════════════════════════════════════════════
 #
 # PURPOSE: Design document for a SpyCloud MCP (Model Context Protocol)

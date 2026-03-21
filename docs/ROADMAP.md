@@ -1,4 +1,4 @@
-# SpyCloud Sentinel Supreme — Roadmap
+# SpyCloud Identity Exposure Intelligence for Sentinel — Roadmap
 
 ## Released
 

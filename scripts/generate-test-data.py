@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SpyCloud Sentinel Supreme — Comprehensive Test Data Generator
+SpyCloud Identity Exposure Intelligence for Sentinel — Comprehensive Test Data Generator
 Generates realistic data for ALL 14 custom tables + simulated
 Azure/Sentinel events to trigger analytics rules and test Copilot skills.
 

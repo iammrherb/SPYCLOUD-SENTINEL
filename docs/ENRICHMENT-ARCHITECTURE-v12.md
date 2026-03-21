@@ -1,4 +1,4 @@
-# SpyCloud Sentinel Supreme — Complete Enrichment Architecture & Use Case Reference
+# SpyCloud Identity Exposure Intelligence for Sentinel — Complete Enrichment Architecture & Use Case Reference
 
 **Version:** 12.0 Planning Draft
 **Date:** March 18, 2026
@@ -25,7 +25,7 @@
 
 ## 1. Executive Summary
 
-This document defines the complete architecture for SpyCloud Sentinel Supreme v12.0, expanding from a CCF polling-only deployment to a full enrichment, investigation, and automated response platform. The key additions are:
+This document defines the complete architecture for SpyCloud Identity Exposure Intelligence for Sentinel v12.0, expanding from a CCF polling-only deployment to a full enrichment, investigation, and automated response platform. The key additions are:
 
 - **SpyCloud Custom API Connector** — enables all Logic Apps to call SpyCloud API at incident time
 - **10+ enrichment playbooks** — real-time entity-specific lookups when incidents fire
@@ -748,4 +748,4 @@ GROUP 7: Advanced Settings
 
 ---
 
-*End of Architecture Document — SpyCloud Sentinel Supreme v12.0*
+*End of Architecture Document — SpyCloud Identity Exposure Intelligence for Sentinel v12.0*

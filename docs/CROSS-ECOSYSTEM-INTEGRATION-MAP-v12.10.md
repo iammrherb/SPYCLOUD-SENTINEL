@@ -1,4 +1,4 @@
-# SpyCloud Sentinel Supreme — Cross-Ecosystem Integration Map v12.10
+# SpyCloud Identity Exposure Intelligence for Sentinel — Cross-Ecosystem Integration Map v12.10
 
 **Date:** March 19, 2026
 **Purpose:** Exhaustive mapping of SpyCloud data to every security tool, service, and data source

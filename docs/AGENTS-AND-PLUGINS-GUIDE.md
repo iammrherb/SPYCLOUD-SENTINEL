@@ -343,7 +343,7 @@ User: "Investigate suspicious.user@company.com"
 | **Permissions** | Security Admin or Copilot Owner to upload plugins |
 | **SpyCloud Subscription** | Enterprise (standard) or Enterprise+ (for Compass) |
 
-### Step 1: Deploy SpyCloud Sentinel Solution
+### Step 1: Deploy SpyCloud Identity Exposure Intelligence for Sentinel
 
 If you haven't already deployed the base solution:
 

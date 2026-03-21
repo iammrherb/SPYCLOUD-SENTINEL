@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-white.png" alt="SpyCloud" width="400">
 
-# SENTINEL SUPREME v13.12.0
+# SpyCloud Identity Exposure Intelligence for Sentinel v13.12.0
 
 ### The Most Powerful Darknet Identity Threat Intelligence Platform for Microsoft Sentinel
 
@@ -12,7 +12,7 @@
 
 ---
 
-*When infostealers strike, SpyCloud knows what was stolen -- and Sentinel Supreme makes sure you act on it before the attackers do.*
+*When infostealers strike, SpyCloud knows what was stolen -- and SpyCloud Identity Exposure Intelligence for Sentinel makes sure you act on it before the attackers do.*
 
 </div>
 
@@ -20,7 +20,7 @@
 
 ## Table of Contents
 
-- [Why SpyCloud Sentinel Supreme?](#why-spycloud-sentinel-supreme)
+- [Why SpyCloud Identity Exposure Intelligence for Sentinel?](#why-spycloud-sentinel-supreme)
 - [Architecture](#architecture)
 - [Deployment](#deployment)
 - [Post-Deployment Setup](#post-deployment-setup)
@@ -40,7 +40,7 @@
 
 ---
 
-## Why SpyCloud Sentinel Supreme?
+## Why SpyCloud Identity Exposure Intelligence for Sentinel?
 
 Every 39 seconds, an infostealer malware infection steals an employee's credentials, session cookies, browser autofill, VPN tokens, and SSO sessions. Traditional EDR might catch the malware. **SpyCloud tells you exactly what was stolen and from whom** -- hours after exposure, straight from the criminal underground.
 

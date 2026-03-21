@@ -4,7 +4,7 @@
   "metadata": {
     "title": "SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel",
     "description": "Complete deployment of SpyCloud Darknet & Identity Threat Exposure Intelligence for Microsoft Sentinel v10.0. Dual-DCR architecture (primary: 10 streams, extended: 4 streams) to comply with Azure 10-dataFlow-per-DCR limit. Includes: CCF data connector (13 REST API pollers covering Enterprise Breach, Compass, SIP, Investigations, IDLINK, Data Partnership, Exposure, and CAP APIs), 14 custom Log Analytics tables, playbook templates (19 remediation playbooks), analytics rule templates (60+ rules), Fusion multistage ML detection, MSIC rules, UEBA/Anomaly settings, automation rule templates, 28 hunting queries, 4 watchlists, 14 focused workbooks, TI enrichment, Jupyter notebooks, and full Security Copilot integration (120+ KQL skills + 35+ API skills + 23 sub-agent investigation agent with 12 GPT-4o AI analysis skills).",
-    "version": "10.0.0",
+    "version": "13.12.0",
     "author": "SpyCloud"
   },
   "parameters": {
@@ -77,7 +77,7 @@
       "type": "object",
       "defaultValue": {
         "solution": "SpyCloud-ThreatIntel-Sentinel",
-        "version": "6.0",
+        "version": "13.12.0",
         "deployedBy": "SpyCloud-ARM-Template"
       },
       "metadata": {
@@ -13569,7 +13569,7 @@
         "displayName": "SpyCloud VIP/Executive Watchlist",
         "description": "Editable list of VIP and executive email addresses for elevated SpyCloud alerting. Add emails to this watchlist and Rule #20 (Executive/VIP Exposure) will dynamically match against it. Edit in Sentinel \u2192 Watchlists \u2192 SpyCloud-VIP-Watchlist.",
         "provider": "SpyCloud",
-        "source": "SpyCloud Sentinel Solution",
+        "source": "SpyCloud Identity Exposure Intelligence for Sentinel",
         "itemsSearchKey": "Email",
         "contentType": "Text/Csv",
         "rawContent": "Email,Name,Title,Priority\nceo@company.com,CEO,Chief Executive Officer,Critical\ncfo@company.com,CFO,Chief Financial Officer,Critical\ncto@company.com,CTO,Chief Technology Officer,Critical\nciso@company.com,CISO,Chief Information Security Officer,Critical\nadmin@company.com,IT Admin,Domain Administrator,High"
@@ -14050,7 +14050,7 @@
         "displayName": "SpyCloud IOC Blocklist",
         "description": "Indicators of Compromise collected from SpyCloud infostealer data \u2014 malicious IPs, domains, and URLs associated with credential theft infrastructure. Used by hunting queries and analytics rules for automated blocking. Add entries manually or via the MDE Blocklist playbook.",
         "provider": "SpyCloud",
-        "source": "SpyCloud Sentinel Solution",
+        "source": "SpyCloud Identity Exposure Intelligence for Sentinel",
         "itemsSearchKey": "Indicator",
         "contentType": "Text/Csv",
         "rawContent": "Indicator,Type,Severity,Source,DateAdded,Notes\n0.0.0.0,ip,High,SpyCloud-Seed,2024-01-01,Placeholder entry \u2014 replace with real IOCs"
@@ -14071,7 +14071,7 @@
         "displayName": "SpyCloud Approved/Corporate Domains",
         "description": "List of approved corporate email domains for SpyCloud monitoring scope. Analytics rules reference this watchlist to focus alerting on corporate accounts vs. personal accounts. Add all your organization's email domains here.",
         "provider": "SpyCloud",
-        "source": "SpyCloud Sentinel Solution",
+        "source": "SpyCloud Identity Exposure Intelligence for Sentinel",
         "itemsSearchKey": "Domain",
         "contentType": "Text/Csv",
         "rawContent": "Domain,Type,Priority,Notes\ncompany.com,Primary,Critical,Main corporate domain\ncompany.io,Secondary,High,Engineering domain"
@@ -14092,7 +14092,7 @@
         "displayName": "SpyCloud High-Value Assets",
         "description": "Critical servers, databases, and applications that require elevated monitoring when accessed by users with SpyCloud credential exposures. Used by hunting queries to prioritize investigation of compromised users accessing sensitive systems.",
         "provider": "SpyCloud",
-        "source": "SpyCloud Sentinel Solution",
+        "source": "SpyCloud Identity Exposure Intelligence for Sentinel",
         "itemsSearchKey": "AssetName",
         "contentType": "Text/Csv",
         "rawContent": "AssetName,AssetType,Criticality,Owner,Notes\nDC01,DomainController,Critical,IT-Infrastructure,Primary domain controller\nSQL-PROD,Database,Critical,DBA-Team,Production SQL server\nVPN-Gateway,Network,High,Network-Team,Corporate VPN concentrator\nAzureAD-Connect,Identity,Critical,Identity-Team,Entra ID Connect sync server"
