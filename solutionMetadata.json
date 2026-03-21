@@ -105,6 +105,121 @@
         "kind": "Notebook",
         "contentId": "SpyCloud-ThreatHunting",
         "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-6f59db8ec68b",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-3681cc3c54c0",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-fa8539edf483",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-efa76d553eac",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-46ad123d8f96",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-d4e7b9eeabe9",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-5e4a547a0495",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-a48c043f1b0a",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-1ba43c335baf",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-b64c0349bb88",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-277600bb4da8",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-814482d32eb6",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-daf36a813d8a",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-8bd79cff00f2",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-096e4604c382",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-3be1a5d5bdaf",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-91c95a0cdbbd",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-439e4191fbe0",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-21adfd32051a",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-23b2c10cea5b",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-416c6858301b",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-f488c82abe56",
+        "kind": "Playbook",
+        "version": "2.0.0"
+      },
+      {
+        "contentId": "spycloud-pb-7919baaa1828",
+        "kind": "Playbook",
+        "version": "2.0.0"
       }
     ]
   },
