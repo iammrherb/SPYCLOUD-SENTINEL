@@ -11,7 +11,9 @@
     "Investigation",
     "ThreatIntelligence",
     "IncidentResponse",
-    "Reporting"
+    "Reporting",
+    "Compliance",
+    "DataGovernance"
   ],
   "authentication": {
     "type": "ManagedIdentity",
@@ -19,7 +21,9 @@
       "SecurityEvents.Read.All",
       "SecurityIncident.ReadWrite.All",
       "User.Read.All",
-      "AuditLog.Read.All"
+      "AuditLog.Read.All",
+      "InformationProtectionPolicy.Read.All",
+      "ComplianceManager.Read.All"
     ]
   },
   "skills": [
@@ -202,6 +206,106 @@
           "context": "Perform blast radius analysis for this {entity_type} entity. Use Sentinel Graph to map all reachable assets, identify lateral movement paths, and calculate the exposure perimeter."
         }
       }
+    },
+    {
+      "name": "ComplianceAssessment",
+      "displayName": "Regulatory Compliance Assessment",
+      "description": "Assess SpyCloud exposure data against regulatory frameworks (GDPR, CCPA, HIPAA, PCI-DSS, SOC 2). Maps exposed PII to breach notification requirements, generates notification timelines, recommends Purview sensitivity labels, and provides compliance gap analysis.",
+      "inputs": [
+        {
+          "name": "domain",
+          "type": "string",
+          "description": "Organization domain to assess compliance for (e.g., company.com)",
+          "required": true
+        },
+        {
+          "name": "frameworks",
+          "type": "array",
+          "description": "Regulatory frameworks to assess: gdpr, ccpa, hipaa, pci_dss, soc2",
+          "required": false,
+          "default": ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"]
+        },
+        {
+          "name": "periodDays",
+          "type": "integer",
+          "description": "Assessment period in days (1-365, default 30)",
+          "required": false,
+          "default": 30
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/compliance-assessment",
+        "method": "POST",
+        "body": {
+          "domain": "{domain}",
+          "frameworks": "{frameworks}",
+          "periodDays": "{periodDays}",
+          "includeNotificationTemplates": true
+        }
+      }
+    },
+    {
+      "name": "PurviewClassifyExposure",
+      "displayName": "Classify & Label Exposure Data",
+      "description": "Classify SpyCloud exposure data for an email address against PII categories and regulatory frameworks. Optionally applies Microsoft Purview sensitivity labels to associated Sentinel incidents.",
+      "inputs": [
+        {
+          "name": "email",
+          "type": "string",
+          "description": "Email address to classify exposure data for",
+          "required": true
+        },
+        {
+          "name": "incidentId",
+          "type": "string",
+          "description": "Sentinel incident ID to apply Purview labels to (optional)",
+          "required": false
+        },
+        {
+          "name": "applyLabel",
+          "type": "boolean",
+          "description": "Whether to apply Purview sensitivity labels",
+          "required": false,
+          "default": false
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/purview/classify",
+        "method": "POST",
+        "body": {
+          "email": "{email}",
+          "incidentId": "{incidentId}",
+          "applyLabel": "{applyLabel}"
+        }
+      }
+    },
+    {
+      "name": "PurviewDLPStatus",
+      "displayName": "Purview DLP Policy Status",
+      "description": "Check Microsoft Purview DLP policy status for SpyCloud breach data protection. Analyzes DLP rule matches, sensitivity label events, and provides AI-powered recommendations for policy improvements.",
+      "inputs": [
+        {
+          "name": "domain",
+          "type": "string",
+          "description": "Domain to check DLP status for",
+          "required": true
+        },
+        {
+          "name": "periodDays",
+          "type": "integer",
+          "description": "Analysis period in days (1-365, default 30)",
+          "required": false,
+          "default": 30
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/purview/dlp-status",
+        "method": "POST",
+        "body": {
+          "domain": "{domain}",
+          "periodDays": "{periodDays}"
+        }
+      }
     }
   ],
   "promptExamples": [
@@ -212,7 +316,10 @@
     "Create a remediation plan for Sentinel incident INC-2026-0412",
     "Show me all severity 25 exposures from the last week",
     "How many users have plaintext passwords exposed on the dark web?",
-    "What are the top malware families targeting our organization?"
+    "What are the top malware families targeting our organization?",
+    "Assess GDPR compliance for our domain's exposed credentials",
+    "Classify PII exposure for user@contoso.com and recommend Purview labels",
+    "Check DLP policy status for breach data protection"
   ],
   "systemPrompt": "You are SCORCH (SpyCloud Orchestrated Response & Cyber Hunt), an expert identity threat intelligence analyst. You specialize in investigating dark web credential exposures, infostealer infections, and identity-based attacks. You have access to SpyCloud's recaptured darknet data integrated with Microsoft Sentinel, including breach watchlists, infostealer telemetry, session cookies, and identity correlation data across 14 custom log tables. You provide actionable analysis with MITRE ATT&CK mapping, severity-based prioritization (2=breach credential, 5=breach+PII, 20=infostealer credential, 25=infostealer+app data), and concrete remediation steps. You are thorough, precise, and security-focused.",
   "copilotStudioIntegration": {
@@ -236,7 +343,10 @@
         "GenerateExecutiveReport",
         "ThreatResearch",
         "IncidentReport",
-        "RemediationPlan"
+        "RemediationPlan",
+        "ComplianceAssessment",
+        "PurviewClassifyExposure",
+        "PurviewDLPStatus"
       ]
     }
   },
