@@ -151,6 +151,6 @@ data "azurerm_monitor_data_collection_endpoint" "spycloud" {
 
 data "azurerm_monitor_data_collection_rule" "spycloud" {
   depends_on          = [azurerm_resource_group_template_deployment.spycloud]
-  name                = "dcr-spycloud-${var.workspace_name}"
+  name                = "dcr-ccf-${var.workspace_name}"
   resource_group_name = local.resource_group_name
 }

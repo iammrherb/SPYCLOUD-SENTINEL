@@ -854,7 +854,7 @@ def report_executive(req: func.HttpRequest) -> func.HttpResponse:
     try:
         period = req.params.get("period", "30d")
         days = int(period.rstrip("d")) if period.endswith("d") else 30
-        days = min(days, 365)  # cap at 1 year
+        days = max(1, min(days, 365))  # cap between 1 day and 1 year
         workspace_id = LOG_ANALYTICS_WORKSPACE_ID
         if not workspace_id:
             return func.HttpResponse(
