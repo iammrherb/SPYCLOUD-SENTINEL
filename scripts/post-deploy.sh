@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
     -s|--subscription)SUB="$2";shift 2;;--skip-mde)SKIP_MDE=true;shift;;
     --skip-graph)SKIP_GRAPH=true;shift;;--skip-consent)SKIP_CONSENT=true;shift;;
     --dry-run)DRY=true;shift;;
-    -h|--help)head -15 "$0"|tail -14;exit 0;;*)err "Unknown: $1";exit 1;;
+    -h|--help)head -32 "$0"|tail -31;exit 0;;*)err "Unknown: $1";exit 1;;
   esac
 done
 [[ -z "$RG" || -z "$WS" ]] && { err "Required: -g <rg> -w <ws>"; exit 1; }
@@ -294,7 +294,7 @@ fi
 
 echo ""
 echo "  Custom Log Tables:"
-for TABLE in SpyCloud_BreachWatch_CL SpyCloud_BreachCatalog_CL SpyCloud_Compass_CL SpyCloud_SessionIP_CL SpyCloud_Investigations_CL SpyCloud_IDLink_CL SpyCloud_Exposure_CL SpyCloud_CAP_CL SpyCloud_DataPartnership_CL; do
+for TABLE in SpyCloudBreachWatchlist_CL SpyCloudBreachCatalog_CL Spycloud_MDE_Logs_CL SpyCloud_ConditionalAccessLogs_CL SpyCloudSipCookies_CL SpyCloudIdentityExposure_CL SpyCloudInvestigations_CL SpyCloudIdLink_CL SpyCloudDataPartnership_CL SpyCloudExposure_CL SpyCloudCAP_CL; do
   EXISTS=$(az monitor log-analytics workspace table show --workspace-name "$WS" -g "$RG" --name "$TABLE" --query "name" -o tsv 2>/dev/null||echo "")
   if [[ -n "$EXISTS" ]]; then
     echo -e "  ${GREEN}PASS${NC}  ${TABLE}"
