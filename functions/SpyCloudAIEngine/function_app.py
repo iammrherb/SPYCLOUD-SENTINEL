@@ -383,7 +383,7 @@ def classify_pii_exposure(exposures: list) -> dict:
         },
         "sensitivity_level": "Standard",
         "recommended_label": "Confidential",
-        "total_records_analyzed": len(exposures),
+        "total_records_analyzed": min(len(exposures), 200),
     }
 
     detected_fields = set()

@@ -192,6 +192,11 @@
                 "For_Each_Account": {
                   "type": "Foreach",
                   "foreach": "@body('Filter_Account_Entities')",
+                  "runtimeConfiguration": {
+                    "concurrency": {
+                      "repetitions": 1
+                    }
+                  },
                   "actions": {
                     "Compose_Email_Address": {
                       "type": "Compose",
