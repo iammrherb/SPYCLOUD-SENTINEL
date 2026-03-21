@@ -1,6 +1,6 @@
 # Publishing SpyCloud Agent to the Microsoft Defender Portal
 
-> **Version:** 13.12.0 | **Last Updated:** March 2026
+> **Version:** 2.0.0 | **Last Updated:** March 2026
 
 ## Overview
 
@@ -76,7 +76,7 @@ Upload the manifest file to register the agent:
 3. Upload `copilot/manifest.json`
 4. Review the agent configuration:
    - **Name:** SpyCloud SCORCH Agent
-   - **Version:** 13.12.0
+   - **Version:** 2.0.0
    - **Skills:** 267+ investigation capabilities
 
 ### 3b. Agent YAML

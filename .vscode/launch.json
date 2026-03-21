@@ -1,0 +1,118 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "SpyCloud Enrichment Function App",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "azure.functions",
+      "args": ["start", "--port", "7071"],
+      "cwd": "${workspaceFolder}/functions/SpyCloudEnrichment",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "python"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "preLaunchTask": "install-enrichment-deps"
+    },
+    {
+      "name": "SpyCloud AI Engine Function App",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "azure.functions",
+      "args": ["start", "--port", "7072"],
+      "cwd": "${workspaceFolder}/functions/SpyCloudAIEngine",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "python",
+        "AI_PROVIDER": "openai",
+        "OPENAI_API_KEY": "${env:OPENAI_API_KEY}",
+        "OPENAI_MODEL": "gpt-4o"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "preLaunchTask": "install-ai-engine-deps"
+    },
+    {
+      "name": "SpyCloud MCP Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-server/src/index.js",
+      "cwd": "${workspaceFolder}/mcp-server",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PORT": "3001",
+        "MCP_AUTH_TOKEN": "${env:MCP_AUTH_TOKEN}",
+        "SENTINEL_WORKSPACE_ID": "${env:SENTINEL_WORKSPACE_ID}"
+      },
+      "console": "integratedTerminal",
+      "preLaunchTask": "install-mcp-deps"
+    },
+    {
+      "name": "Run SpyCloud Toolkit (Health Check)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/spycloud-toolkit.sh",
+      "args": ["health-check"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Jupyter Notebook: Threat Hunting",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "jupyter",
+      "args": ["notebook", "--notebook-dir=${workspaceFolder}/notebooks"],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "preLaunchTask": "install-notebook-deps"
+    },
+    {
+      "name": "Run All Python Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "tests/",
+        "-v",
+        "--tb=short"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Validate ARM Templates",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/validate-arm.js",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "SpyCloud Enrichment + AI Engine (Compound)",
+      "type": "node",
+      "request": "launch",
+      "compounds": []
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (Enrichment + AI Engine + MCP)",
+      "configurations": [
+        "SpyCloud Enrichment Function App",
+        "SpyCloud AI Engine Function App",
+        "SpyCloud MCP Server"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "group": "full-stack",
+        "order": 1
+      }
+    }
+  ]
+}

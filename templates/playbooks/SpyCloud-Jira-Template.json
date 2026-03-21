@@ -32,7 +32,7 @@
     "author": {
       "name": "SpyCloud"
     },
-    "version": "13.12.0",
+    "version": "2.0.0",
     "kind": "Playbook",
     "categories": {
       "domains": [
@@ -82,7 +82,7 @@
       "tags": {
         "SpyCloud": "Sentinel",
         "hidden-SentinelTemplateName": "SpyCloud-Jira",
-        "hidden-SentinelTemplateVersion": "13.12.0"
+        "hidden-SentinelTemplateVersion": "2.0.0"
       },
       "identity": {
         "type": "SystemAssigned"

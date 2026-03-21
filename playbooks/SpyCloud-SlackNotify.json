@@ -81,7 +81,7 @@
         "component": "notification-slack",
         "version": "10.0.0",
         "hidden-SentinelTemplateName": "SpyCloud-SlackNotify",
-        "hidden-SentinelTemplateVersion": "13.12.0"
+        "hidden-SentinelTemplateVersion": "2.0.0"
       },
       "identity": {
         "type": "SystemAssigned"

@@ -6,7 +6,7 @@ Descriptor:
   Category: Other
   DescriptionDisplay: default
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
-  Version: 13.12.0
+  Version: 2.0.0
   Settings:
   - Name: TenantId
     Description: Azure Tenant ID (GUID format only, e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Do NOT enter a domain name or URL — only the GUID.
@@ -6593,7 +6593,7 @@ AgentDefinitions:
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other
-  Version: 13.12.0
+  Version: 2.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   RequiredSkillsets:
   - SpyCloud.ThreatIntelligence.SentinelAgent

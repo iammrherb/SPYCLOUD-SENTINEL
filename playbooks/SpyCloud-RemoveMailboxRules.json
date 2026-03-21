@@ -374,7 +374,7 @@
       },
       "tags": {
         "hidden-SentinelTemplateName": "SpyCloud-RemoveMailboxRules",
-        "hidden-SentinelTemplateVersion": "13.12.0"
+        "hidden-SentinelTemplateVersion": "2.0.0"
       }
     }
   ],

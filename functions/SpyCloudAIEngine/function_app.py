@@ -1605,7 +1605,7 @@ def ai_health(req: func.HttpRequest) -> func.HttpResponse:
     status = {
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "13.12.0",
+        "version": "2.0.0",
         "aiProvider": AI_PROVIDER,
         "aiConfigured": bool(_get_ai_headers()),
         "spycloudConfigured": bool(SPYCLOUD_API_KEY),

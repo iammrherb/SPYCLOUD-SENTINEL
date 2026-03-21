@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #===============================================================================
 #  SpyCloud Sentinel — Azure Cloud Shell Deployment Launcher
-#  Version: 13.12.0
+#  Version: 2.0.0
 #
 #  Fully automated deployment for Azure Cloud Shell.
 #  Clones the repo, detects environment, and runs guided or unattended setup.
@@ -19,7 +19,7 @@ CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
 
 REPO_URL="https://github.com/iammrherb/SPYCLOUD-SENTINEL.git"
 REPO_DIR="${HOME}/spycloud-sentinel"
-VERSION="13.12.0"
+VERSION="2.0.0"
 ANSWER_FILE=""
 LOG_FILE="/tmp/spycloud-deploy-$(date +%Y%m%d-%H%M%S).log"
 OPT_RG="" ; OPT_WS="" ; OPT_KEY="" ; OPT_LOC="" ; OPT_CLOUD=""
