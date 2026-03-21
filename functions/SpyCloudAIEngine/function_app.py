@@ -18,7 +18,7 @@ import azure.functions as func
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import requests
@@ -1263,15 +1263,30 @@ def ai_compliance_assessment(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
         )
 
-    frameworks = body.get("frameworks", ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"])
+    raw_frameworks = body.get("frameworks", ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"])
+    if isinstance(raw_frameworks, str):
+        frameworks = [f.strip() for f in raw_frameworks.split(",") if f.strip()]
+    elif isinstance(raw_frameworks, list):
+        expanded = []
+        for item in raw_frameworks:
+            if isinstance(item, str) and "," in item:
+                expanded.extend(f.strip() for f in item.split(",") if f.strip())
+            else:
+                expanded.append(item)
+        frameworks = expanded
+    else:
+        frameworks = ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"]
     include_templates = body.get("includeNotificationTemplates", True)
     period_days = min(int(body.get("periodDays", 30)), 365)
 
     # Step 1: Query SpyCloud for domain exposures
     encoded_domain = requests.utils.quote(domain, safe="")
+    since_epoch = int(
+        (datetime.now(timezone.utc) - timedelta(days=period_days)).timestamp()
+    )
     data = call_spycloud_api(
         f"/breach/data/watchlist",
-        params={"domain": encoded_domain, "since": f"{period_days}d"},
+        params={"domain": encoded_domain, "since": since_epoch},
     )
     exposures = data.get("results", [])
 
