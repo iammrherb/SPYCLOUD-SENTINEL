@@ -328,13 +328,13 @@ cd SPYCLOUD-SENTINEL
 
 # 3. Run the unified toolkit for health checks
 chmod +x scripts/spycloud-toolkit.sh
-./scripts/spycloud-toolkit.sh health-check
+./scripts/spycloud-toolkit.sh --health-check
 
 # 4. Grant playbook permissions
-./scripts/spycloud-toolkit.sh fix-permissions
+./scripts/spycloud-toolkit.sh --fix-permissions
 
 # 5. Generate a full deployment report
-./scripts/spycloud-toolkit.sh full-report
+./scripts/spycloud-toolkit.sh --full-report
 ```
 
 ---
@@ -461,7 +461,7 @@ Navigate to **Sentinel** > **Analytics** > **Rule Templates**, filter by source 
 ```bash
 # Automated permission grant via toolkit
 chmod +x scripts/spycloud-toolkit.sh
-./scripts/spycloud-toolkit.sh fix-permissions
+./scripts/spycloud-toolkit.sh --fix-permissions
 ```
 
 > **Managed Identity**: All playbooks use system-assigned managed identity. The deployment creates the identities; you only need to grant API permissions.
@@ -787,24 +787,24 @@ chmod +x scripts/spycloud-toolkit.sh
 
 | Command | Description |
 |---------|-------------|
-| `health-check` | Verify deployment health across all components |
-| `fix-permissions` | Auto-fix managed identity permissions for all playbooks |
-| `test-logic-apps` | Test all Logic App playbook triggers and connections |
-| `test-functions` | Verify Function App endpoints are responding |
-| `test-agent` | Test SCORCH agent connectivity and skills |
-| `generate-data` | Generate simulated breach data for testing |
-| `download-workbooks` | Download all workbook definitions |
-| `download-notebooks` | Download all Jupyter notebooks |
-| `download-plugins` | Download all Copilot plugins and agent configs |
-| `import-workbooks` | Import workbooks into Sentinel workspace |
-| `import-notebooks` | Import notebooks into Sentinel workspace |
-| `verify-connector` | Verify data connector status and ingestion |
-| `verify-tables` | Check all 14 custom tables exist and have data |
-| `verify-analytics` | Verify analytics rules are enabled and firing |
-| `check-isv` | Run ISV/Marketplace readiness verification |
-| `report` | Generate deployment status report |
-| `full-report` | Generate comprehensive HTML report with recommendations |
-| `deploy` | Deploy or update the solution |
+| `--health-check` | Verify deployment health across all components |
+| `--fix-permissions` | Auto-fix managed identity permissions for all playbooks |
+| `--test-logic-apps` | Test all Logic App playbook triggers and connections |
+| `--test-functions` | Verify Function App endpoints are responding |
+| `--test-agent` | Test SCORCH agent connectivity and skills |
+| `--generate-data` | Generate simulated breach data for testing |
+| `--download-workbooks` | Download all workbook definitions |
+| `--download-notebooks` | Download all Jupyter notebooks |
+| `--download-plugins` | Download all Copilot plugins and agent configs |
+| `--import-workbooks` | Import workbooks into Sentinel workspace |
+| `--import-notebooks` | Import notebooks into Sentinel workspace |
+| `--verify-connector` | Verify data connector status and ingestion |
+| `--verify-tables` | Check all 14 custom tables exist and have data |
+| `--verify-analytics` | Verify analytics rules are enabled and firing |
+| `--check-isv` | Run ISV/Marketplace readiness verification |
+| `--report` | Generate deployment status report |
+| `--full-report` | Generate comprehensive HTML report with recommendations |
+| `--deploy` | Deploy or update the solution |
 
 ---
 
@@ -814,7 +814,7 @@ chmod +x scripts/spycloud-toolkit.sh
 
 ```bash
 # Generate test data for all tables
-./scripts/spycloud-toolkit.sh generate-data
+./scripts/spycloud-toolkit.sh --generate-data
 ```
 
 ### Simulation Scenarios
@@ -886,7 +886,7 @@ Features:
 | Domain pollers fail | `monitoredDomain` blank | Enter domain on connector page |
 | Workbook shows no data | Tables not populated | Wait 15-30 min after first connect |
 | Function App 429 | Rate limit exceeded | Check `SpyCloudEnrichmentAudit_CL`; increase polling interval |
-| Key Vault access denied | Managed identity missing | Run `./scripts/spycloud-toolkit.sh fix-permissions` |
+| Key Vault access denied | Managed identity missing | Run `./scripts/spycloud-toolkit.sh --fix-permissions` |
 | Risk score not calculating | Watchlist table empty | Verify Enterprise API key is connected |
 | CA policies not enforcing | Custom attribute missing | Create `SpyCloudRiskScore` attribute in Entra ID |
 | Graph features unavailable | Preview not enabled | Run `scripts/setup-sentinel-graph.sh` |
@@ -911,8 +911,8 @@ SpyCloudEnrichmentAudit_CL
 ### Toolkit Diagnostics
 
 ```bash
-./scripts/spycloud-toolkit.sh health-check
-./scripts/spycloud-toolkit.sh full-report
+./scripts/spycloud-toolkit.sh --health-check
+./scripts/spycloud-toolkit.sh --full-report
 ```
 
 ---
