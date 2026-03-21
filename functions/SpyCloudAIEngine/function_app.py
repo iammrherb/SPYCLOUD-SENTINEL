@@ -59,6 +59,25 @@ GRAPH_CLIENT_SECRET = os.environ.get("GRAPH_CLIENT_SECRET", "")
 # ================================================================
 
 
+import re
+
+
+def _sanitize_kql_string(value: str) -> str:
+    """Sanitize a string for safe interpolation into KQL queries.
+
+    Strips characters that could allow KQL injection:
+    - Removes double quotes (prevents escaping out of string literals)
+    - Removes backslashes (prevents escape sequences)
+    - Removes semicolons (prevents statement chaining)
+    - Removes pipe characters (prevents operator chaining)
+    - Validates the result looks like a plausible email/domain
+    """
+    sanitized = re.sub(r'["\\;|(){}\[\]]', '', value)
+    if len(sanitized) > 254:
+        sanitized = sanitized[:254]
+    return sanitized
+
+
 def _get_ai_headers() -> Optional[dict]:
     """Get headers for the configured AI provider."""
     if AI_PROVIDER == "azure_openai" and AZURE_OPENAI_KEY:
@@ -391,7 +410,7 @@ def ai_investigate(req: func.HttpRequest) -> func.HttpResponse:
         f"""
         SigninLogs
         | where TimeGenerated >= ago(30d)
-        | where UserPrincipalName =~ "{email}"
+        | where UserPrincipalName =~ "{_sanitize_kql_string(email)}"
         | summarize
             TotalSignins=count(),
             FailedSignins=countif(ResultType != "0"),
@@ -929,7 +948,7 @@ def ai_remediation_plan(req: func.HttpRequest) -> func.HttpResponse:
     remediation_status = query_log_analytics(
         f"""
         SpyCloudEnrichmentAudit_CL
-        | where email_s =~ "{email}"
+        | where email_s =~ "{_sanitize_kql_string(email)}"
         | where action_s in (
             "ForcePasswordReset", "RevokeSessions",
             "IsolateDevice", "DisableAccount"

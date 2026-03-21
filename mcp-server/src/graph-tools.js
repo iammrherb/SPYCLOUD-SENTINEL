@@ -24,10 +24,13 @@ export function registerGraphTools(server, config) {
   } = config.sentinel || {};
 
   /**
-   * Acquire an Azure Management API token using client credentials.
+   * Acquire an OAuth token for a given scope using client credentials.
    * Uses AZURE_CLIENT_ID and AZURE_CLIENT_SECRET from environment.
+   *
+   * @param {string} scope - The OAuth scope to request (e.g., "https://management.azure.com/.default")
+   * @returns {string|null} Access token or null on failure
    */
-  async function getManagementToken() {
+  async function getTokenForScope(scope) {
     const clientId = process.env.AZURE_CLIENT_ID || "";
     const clientSecret = process.env.AZURE_CLIENT_SECRET || "";
 
@@ -40,7 +43,7 @@ export function registerGraphTools(server, config) {
       grant_type: "client_credentials",
       client_id: clientId,
       client_secret: clientSecret,
-      scope: "https://management.azure.com/.default",
+      scope,
     });
 
     try {
@@ -69,7 +72,7 @@ export function registerGraphTools(server, config) {
    * @returns {object} Query results or error
    */
   async function queryGraph(gql) {
-    const token = await getManagementToken();
+    const token = await getTokenForScope("https://management.azure.com/.default");
     if (!token) {
       return {
         error:
@@ -121,7 +124,7 @@ export function registerGraphTools(server, config) {
    * @returns {object} Query results or error
    */
   async function queryLogAnalytics(kql) {
-    const token = await getManagementToken();
+    const token = await getTokenForScope("https://api.loganalytics.io/.default");
     if (!token) {
       return { error: "Authentication failed" };
     }
@@ -473,7 +476,7 @@ export function registerGraphTools(server, config) {
         };
       }
 
-      const token = await getManagementToken();
+      const token = await getTokenForScope("https://management.azure.com/.default");
       if (!token) {
         return {
           content: [
