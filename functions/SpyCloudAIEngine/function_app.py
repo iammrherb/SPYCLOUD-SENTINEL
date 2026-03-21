@@ -361,9 +361,9 @@ def classify_pii_exposure(exposures: list) -> dict:
         "full_name": {"category": "Personal Identity", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
         "phone": {"category": "Contact Info", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
         "dob": {"category": "Sensitive PII", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
-        "ssn": {"category": "Government ID", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
-        "cc_number": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
-        "cc_expiration": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "social_security_number": {"category": "Government ID", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "credit_card_number": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "credit_card_expiration": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
         "bank_number": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
         "ip_addresses": {"category": "Network Identity", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
         "infected_machine_id": {"category": "Device Identity", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
@@ -407,10 +407,10 @@ def classify_pii_exposure(exposures: list) -> dict:
                 classification["regulatory_impact"][reg_key]["fields"].append(field_key)
 
     has_financial = any(
-        f in detected_fields for f in ("cc_number", "cc_expiration", "bank_number")
+        f in detected_fields for f in ("credit_card_number", "credit_card_expiration", "bank_number")
     )
     has_sensitive = any(
-        f in detected_fields for f in ("ssn", "dob", "password_plaintext")
+        f in detected_fields for f in ("social_security_number", "dob", "password_plaintext")
     )
     health_fields = {"ip_addresses", "infected_machine_id"}
     has_health = bool(detected_fields & health_fields) and classification["regulatory_impact"]["hipaa"]["affected"]
