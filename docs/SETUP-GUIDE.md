@@ -362,25 +362,214 @@ When SpyCloud detects an infostealer infection on a managed device:
 
 ## Purview Integration
 
-### Microsoft Purview for Data Governance
+### Microsoft Purview for Data Governance & Compliance
 
-SpyCloud exposure data can be classified and protected using Purview:
+SpyCloud exposure data contains sensitive PII (credentials, SSNs, financial data, health records) that requires proper classification, protection, and regulatory compliance tracking. The Purview integration provides:
 
-1. **Sensitivity Labels:**
-   - Create labels for SpyCloud incident data (Confidential, Highly Confidential)
-   - Apply to incident reports and executive summaries
+- **Automated PII classification** against 16 field types across 5 regulatory frameworks
+- **Sensitivity label application** via Microsoft Graph Information Protection API
+- **DLP policy monitoring** for breach data protection gaps
+- **Compliance assessment** with breach notification timelines and fine estimates
+- **Two dedicated playbooks** for automated classification and compliance checks
 
-2. **Data Loss Prevention:**
-   - Create DLP policy to prevent SpyCloud breach data from being shared externally
-   - Monitor for credential data in emails, Teams, SharePoint
+### Step 1: Create Sensitivity Labels
 
-3. **Compliance Manager:**
-   - Use SpyCloud exposure metrics in compliance assessments
-   - Track remediation progress against compliance frameworks
+1. Navigate to **Microsoft Purview Compliance Portal** → Information Protection → Labels
+2. Create the following labels:
 
-4. **Copilot Integration:**
-   - When Security Copilot summarizes incidents, Purview ensures sensitive data is properly labeled
-   - Purview audits all Copilot interactions with SpyCloud data
+| Label Name | Scope | Description | Color |
+|-----------|-------|-------------|-------|
+| `Confidential — SpyCloud Breach Data` | Items, Groups & sites | Standard credential exposures without sensitive PII | Orange |
+| `Highly Confidential — SpyCloud PII` | Items, Groups & sites | Exposures containing financial, government ID, or contact PII | Red |
+| `Highly Confidential — SpyCloud PHI` | Items, Groups & sites | Exposures containing health/medical data (HIPAA-regulated) | Dark Red |
+
+3. For each label, configure:
+   - **Encryption:** Encrypt content, co-author permissions for SOC analysts
+   - **Content marking:** Header "SpyCloud Breach Data — [Classification Level]"
+   - **Auto-labeling:** Enable for files containing SpyCloud exposure patterns
+
+4. Publish labels via a label policy:
+   ```
+   Policy name: SpyCloud-BreachData-Labels
+   Users/groups: Security Operations team, Compliance team
+   Default label: Confidential — SpyCloud Breach Data
+   ```
+
+5. Note the label GUIDs — you'll need them for the AI Engine configuration:
+   ```bash
+   # Get label IDs via Microsoft Graph
+   az rest --method GET \
+     --url "https://graph.microsoft.com/v1.0/informationProtection/policy/labels" \
+     --headers "Content-Type=application/json" | jq '.value[] | {id, name}'
+   ```
+
+### Step 2: Configure DLP Policies
+
+1. Navigate to **Purview Compliance Portal** → Data Loss Prevention → Policies
+2. Create policy: `SpyCloud-BreachData-DLP`
+
+   **Locations:** Exchange email, SharePoint sites, OneDrive accounts, Teams chat, Devices
+
+   **Sensitive info types** (custom):
+   | Type | Pattern | Description |
+   |------|---------|-------------|
+   | SpyCloud Breach Record | `source_id.*severity.*spycloud_publish_date` | Raw SpyCloud API response data |
+   | Exposed Credential | `password_plaintext\|password_type.*hash` | Credential exposure indicators |
+   | SpyCloud Report | `SpyCloud.*Exposure.*Intelligence\|SpyCloud.*Incident.*Report` | Generated reports containing breach data |
+
+   **Actions:**
+   - Block sharing externally with override for compliance officers
+   - Encrypt content automatically
+   - Notify compliance officer and data owner
+   - Generate audit log entry
+
+3. Create additional DLP rule for high-severity data:
+   ```
+   Rule: SpyCloud-HighSeverity-Block
+   Condition: Content contains SpyCloud data AND sensitivity label = "Highly Confidential"
+   Action: Block all external sharing (no override)
+   ```
+
+### Step 3: Configure Compliance Manager
+
+1. Navigate to **Purview Compliance Portal** → Compliance Manager → Assessments
+2. Create assessments for each applicable framework:
+   - **GDPR** — Data Protection Impact Assessment
+   - **CCPA** — Consumer Privacy Rights Assessment
+   - **HIPAA** — PHI Breach Notification Assessment
+   - **PCI-DSS** — Cardholder Data Protection Assessment
+   - **SOC 2** — Trust Services Criteria Assessment
+
+3. Map SpyCloud improvement actions:
+
+| Compliance Action | SpyCloud Integration | Framework |
+|-------------------|---------------------|-----------|
+| Monitor credential exposure | SpyCloud Enterprise API polling | All |
+| Classify breach PII | AI Engine `/api/ai/purview/classify` endpoint | GDPR, CCPA |
+| Track notification deadlines | AI Engine `/api/ai/compliance-assessment` | GDPR (72h), CCPA (30d) |
+| Protect cardholder data | DLP policy for financial PII | PCI-DSS |
+| Document remediation | SpyCloudEnrichmentAudit_CL logs | SOC 2 |
+
+### Step 4: Configure AI Engine Purview Settings
+
+Add the following environment variables to your AI Engine Function App:
+
+```bash
+az functionapp config appsettings set \
+  --name "func-spycloud-ai-engine" \
+  --resource-group "rg-sentinel" \
+  --settings \
+    PURVIEW_ACCOUNT_NAME="your-purview-account" \
+    PURVIEW_SENSITIVITY_LABEL_HIGH_CONFIDENTIAL="label-guid-from-step-1" \
+    PURVIEW_DLP_POLICY_NAME="SpyCloud-BreachData-DLP"
+```
+
+### Step 5: Grant API Permissions
+
+The AI Engine's managed identity needs Graph API permissions for Purview operations:
+
+```bash
+# Get the Function App's managed identity object ID
+APP_ID=$(az functionapp identity show \
+  --name "func-spycloud-ai-engine" \
+  --resource-group "rg-sentinel" \
+  --query principalId -o tsv)
+
+# Grant Microsoft Graph permissions
+# InformationProtectionPolicy.Read.All — Read sensitivity labels
+az ad app permission add --id $APP_ID \
+  --api 00000003-0000-0000-c000-000000000000 \
+  --api-permissions 19da66cb-0571-4f29-8d09-18e8268d5966=Role
+
+# ComplianceManager.Read.All — Read compliance assessments (if using Compliance Manager API)
+# Note: Some Compliance Manager operations require admin consent via Azure Portal
+```
+
+Grant admin consent:
+1. Navigate to **Entra ID** → App registrations → func-spycloud-ai-engine
+2. API permissions → Grant admin consent for your organization
+
+### Step 6: Deploy Purview Playbooks
+
+**SpyCloud-PurviewLabelIncident** — Automatically classifies and labels incidents:
+
+```bash
+az deployment group create \
+  --resource-group "rg-sentinel" \
+  --template-file playbooks/SpyCloud-PurviewLabelIncident.json \
+  --parameters \
+    PlaybookName="SpyCloud-PurviewLabelIncident" \
+    spycloudApiKey="@Microsoft.KeyVault(SecretUri=https://kv-spycloud.vault.azure.net/secrets/SpyCloudApiKey)" \
+    aiEngineUrl="https://func-spycloud-ai-engine.azurewebsites.net" \
+    sensitivityLabelId="label-guid-from-step-1" \
+    workspaceName="your-sentinel-workspace"
+```
+
+**SpyCloud-PurviewComplianceCheck** — Runs compliance assessment on High/Medium incidents:
+
+```bash
+az deployment group create \
+  --resource-group "rg-sentinel" \
+  --template-file playbooks/SpyCloud-PurviewComplianceCheck.json \
+  --parameters \
+    PlaybookName="SpyCloud-PurviewComplianceCheck" \
+    aiEngineUrl="https://func-spycloud-ai-engine.azurewebsites.net" \
+    notificationEmail="compliance-officer@company.com" \
+    workspaceName="your-sentinel-workspace"
+```
+
+### Step 7: Configure Automation Rules
+
+Create Sentinel automation rules to trigger Purview playbooks:
+
+1. **Auto-classify all SpyCloud incidents:**
+   - Trigger: Incident created, Provider contains "SpyCloud"
+   - Action: Run playbook `SpyCloud-PurviewLabelIncident`
+
+2. **Compliance check for high-severity incidents:**
+   - Trigger: Incident created, Severity = High or Medium, Provider contains "SpyCloud"
+   - Action: Run playbook `SpyCloud-PurviewComplianceCheck`
+
+### Step 8: Verify Purview Integration
+
+```bash
+# Check AI Engine Purview configuration
+curl -s https://func-spycloud-ai-engine.azurewebsites.net/api/ai/health | jq '.purviewConfigured'
+
+# Test PII classification
+curl -X POST https://func-spycloud-ai-engine.azurewebsites.net/api/ai/purview/classify \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@company.com", "applyLabel": false}'
+
+# Test compliance assessment
+curl -X POST https://func-spycloud-ai-engine.azurewebsites.net/api/ai/compliance-assessment \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "company.com", "frameworks": ["gdpr", "ccpa"], "periodDays": 30}'
+
+# Test DLP status
+curl -X POST https://func-spycloud-ai-engine.azurewebsites.net/api/ai/purview/dlp-status \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "company.com", "periodDays": 30}'
+```
+
+### PII Classification Framework
+
+The AI Engine classifies 16 PII field types across regulatory frameworks:
+
+| Category | Fields | GDPR | CCPA | HIPAA | PCI-DSS | SOC 2 |
+|----------|--------|------|------|-------|---------|-------|
+| Credentials | email, password, username | Art. 4(1) | 1798.140(v) | — | — | CC6.1 |
+| Financial | cc_number, bank_number, cc_exp | Art. 4(1) | 1798.140(v) | — | Req 3-4 | CC6.1 |
+| Government ID | ssn, national_id, dob | Art. 9 | 1798.140(v) | — | — | CC6.1 |
+| Contact | phone, full_name, address | Art. 4(1) | 1798.140(v) | — | — | CC6.1 |
+| Health | infected_machine_id, ip_address | Art. 9 | 1798.140(v) | 45 CFR 164 | — | CC6.1 |
+| Threat Intel | target_url, user_agent | — | — | — | — | CC7.2 |
+
+**Sensitivity level mapping:**
+- **Standard:** Credentials only → Purview label: `Confidential`
+- **Confidential:** Credentials + contact/government PII → Purview label: `Highly Confidential`
+- **Highly Confidential:** Financial/sensitive PII → Purview label: `Highly Confidential`
+- **Highly Confidential — PHI:** Health data present → Purview label: `Highly Confidential — PHI`
 
 ---
 
@@ -435,6 +624,9 @@ func azure functionapp publish "func-spycloud-ai-engine"
 | `/api/ai/threat-research` | POST | Threat actor/malware research |
 | `/api/ai/incident-report` | POST | Detailed incident documentation |
 | `/api/ai/remediation-plan` | POST | Prioritized remediation steps |
+| `/api/ai/compliance-assessment` | POST | Regulatory compliance assessment (GDPR, CCPA, HIPAA, PCI-DSS, SOC 2) |
+| `/api/ai/purview/classify` | POST | PII classification with Purview sensitivity label application |
+| `/api/ai/purview/dlp-status` | POST | DLP policy status and breach data protection gap analysis |
 | `/api/ai/health` | GET | Health check and configuration status |
 
 #### Supported AI Providers

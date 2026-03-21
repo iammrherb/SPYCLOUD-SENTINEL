@@ -18,7 +18,7 @@ import azure.functions as func
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import requests
@@ -52,6 +52,15 @@ LOG_ANALYTICS_WORKSPACE_ID = os.environ.get("LOG_ANALYTICS_WORKSPACE_ID", "")
 GRAPH_TENANT_ID = os.environ.get("AZURE_TENANT_ID", "")
 GRAPH_CLIENT_ID = os.environ.get("GRAPH_CLIENT_ID", "")
 GRAPH_CLIENT_SECRET = os.environ.get("GRAPH_CLIENT_SECRET", "")
+
+# Microsoft Purview Configuration
+PURVIEW_ACCOUNT_NAME = os.environ.get("PURVIEW_ACCOUNT_NAME", "")
+PURVIEW_SENSITIVITY_LABEL_ID = os.environ.get(
+    "PURVIEW_SENSITIVITY_LABEL_HIGH_CONFIDENTIAL", ""
+)
+PURVIEW_DLP_POLICY_NAME = os.environ.get(
+    "PURVIEW_DLP_POLICY_NAME", "SpyCloud-BreachData-DLP"
+)
 
 
 # ================================================================
@@ -223,25 +232,220 @@ def get_graph_token() -> Optional[str]:
     return None
 
 
-def call_graph(endpoint: str) -> dict:
+def call_graph(endpoint: str, method: str = "GET", body: Optional[dict] = None) -> dict:
     """Call Microsoft Graph API."""
     token = get_graph_token()
     if not token:
         return {"error": "Graph API token unavailable"}
     try:
-        resp = requests.get(
-            f"https://graph.microsoft.com/v1.0{endpoint}",
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Accept": "application/json",
-            },
-            timeout=15,
-        )
-        if resp.status_code == 200:
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+        if method.upper() == "POST" and body is not None:
+            resp = requests.post(
+                f"https://graph.microsoft.com/v1.0{endpoint}",
+                headers=headers,
+                json=body,
+                timeout=15,
+            )
+        elif method.upper() == "PATCH" and body is not None:
+            resp = requests.patch(
+                f"https://graph.microsoft.com/v1.0{endpoint}",
+                headers=headers,
+                json=body,
+                timeout=15,
+            )
+        else:
+            resp = requests.get(
+                f"https://graph.microsoft.com/v1.0{endpoint}",
+                headers=headers,
+                timeout=15,
+            )
+        if resp.status_code in (200, 201, 204):
+            if resp.status_code == 204:
+                return {"success": True}
             return resp.json()
         return {"error": f"Graph API returned {resp.status_code}"}
     except Exception as exc:
         return {"error": str(exc)}
+
+
+def get_purview_sensitivity_labels() -> list:
+    """Retrieve available sensitivity labels from Microsoft Purview via Graph API."""
+    result = call_graph("/security/informationProtection/sensitivityLabels")
+    if "error" in result:
+        logging.warning("Failed to fetch sensitivity labels: %s", result["error"])
+        return []
+    return result.get("value", [])
+
+
+def apply_purview_sensitivity_label(
+    entity_type: str,
+    entity_id: str,
+    label_id: str,
+    justification: str,
+    sensitivity_level: str = "Highly Confidential",
+) -> dict:
+    """Apply a Purview sensitivity label to a Sentinel incident or file.
+
+    Uses Microsoft Graph Information Protection API to apply labels.
+    The sensitivity_level parameter controls the custom tag applied to
+    incidents so the tag reflects the actual classification result.
+    """
+    if not label_id:
+        label_id = PURVIEW_SENSITIVITY_LABEL_ID
+    if not label_id:
+        return {"error": "No sensitivity label ID configured"}
+
+    body = {
+        "labelId": label_id,
+        "assignmentMethod": "privileged",
+        "justificationMessage": justification,
+    }
+
+    if entity_type == "incident":
+        # Return recommended tags for the calling playbook to apply.
+        # Sentinel incidents are tagged via the Sentinel API connection
+        # in the Logic App, not via the Graph Security API, because
+        # Sentinel incidentNumber != M365 Defender incident ID.
+        recommended_tags = [
+            f"PurviewLabel:{label_id}",
+            f"SpyCloud:{sensitivity_level}",
+        ]
+        return {
+            "success": True,
+            "method": "recommendation",
+            "recommendedTags": recommended_tags,
+            "justification": justification,
+        }
+
+    if entity_type == "file":
+        endpoint = f"/drives/items/{entity_id}/assignSensitivityLabel"
+        return call_graph(endpoint, method="POST", body=body)
+
+    return {"error": f"Unsupported entity type: {entity_type}"}
+
+
+def query_purview_audit_logs(domain: str, days: int = 30) -> list:
+    """Query Purview unified audit logs for DLP events related to SpyCloud data."""
+    safe_domain = _sanitize_kql_string(domain)
+    kql = f"""
+    let lookback = {min(days, 365)}d;
+    OfficeActivity
+    | where TimeGenerated >= ago(lookback)
+    | where Operation in (
+        "DlpRuleMatch", "SensitivityLabelApplied",
+        "SensitivityLabelRemoved", "SensitivityLabelUpdated",
+        "FileSensitivityLabelChanged"
+    )
+    | where UserId has "{safe_domain}" or SourceFileName has "SpyCloud"
+    | summarize
+        DlpMatches = countif(Operation == "DlpRuleMatch"),
+        LabelsApplied = countif(Operation == "SensitivityLabelApplied"),
+        LabelsChanged = countif(Operation in (
+            "SensitivityLabelRemoved", "SensitivityLabelUpdated",
+            "FileSensitivityLabelChanged"
+        )),
+        UniqueUsers = dcount(UserId),
+        LastEvent = max(TimeGenerated)
+    """
+    return query_log_analytics(kql)
+
+
+def classify_pii_exposure(exposures: list) -> dict:
+    """Classify exposed data types against regulatory frameworks.
+
+    Maps SpyCloud exposure fields to PII categories and regulatory
+    notification requirements for GDPR, CCPA, HIPAA, PCI-DSS, and SOC 2.
+    """
+    pii_fields = {
+        "email": {"category": "Contact Info", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "password": {"category": "Credential", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "password_plaintext": {"category": "Plaintext Credential", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "full_name": {"category": "Personal Identity", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "phone": {"category": "Contact Info", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "dob": {"category": "Sensitive PII", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "social_security_number": {"category": "Government ID", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "credit_card_number": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "credit_card_expiration": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "bank_number": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "ip_addresses": {"category": "Network Identity", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
+        "infected_machine_id": {"category": "Device Identity", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
+        "target_url": {"category": "Behavioral", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "user_browser": {"category": "Device Fingerprint", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "user_os": {"category": "Device Fingerprint", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+    }
+
+    classification = {
+        "exposed_pii_types": [],
+        "regulatory_impact": {
+            "gdpr": {"affected": False, "fields": [], "notification_hours": 72},
+            "ccpa": {"affected": False, "fields": [], "notification_days": 45},
+            "hipaa": {"affected": False, "fields": [], "notification_days": 60},
+            "pci_dss": {"affected": False, "fields": [], "notification": "immediate"},
+            "soc2": {"affected": False, "description": "Security breach impacts trust criteria"},
+        },
+        "sensitivity_level": "Standard",
+        "recommended_label": "Confidential",
+        "total_records_analyzed": min(len(exposures), 200),
+    }
+
+    detected_fields = set()
+    for record in exposures[:200]:
+        for field_key, field_info in pii_fields.items():
+            if record.get(field_key) or record.get(f"{field_key}_s"):
+                detected_fields.add(field_key)
+
+    for field_key in detected_fields:
+        if field_key not in pii_fields:
+            continue
+        info = pii_fields[field_key]
+        classification["exposed_pii_types"].append({
+            "field": field_key,
+            "category": info["category"],
+        })
+        for reg in ("gdpr", "ccpa", "hipaa", "pci"):
+            reg_key = "pci_dss" if reg == "pci" else reg
+            if info.get(reg):
+                classification["regulatory_impact"][reg_key]["affected"] = True
+                classification["regulatory_impact"][reg_key]["fields"].append(field_key)
+
+    has_financial = any(
+        f in detected_fields for f in ("credit_card_number", "credit_card_expiration", "bank_number")
+    )
+    has_sensitive = any(
+        f in detected_fields for f in ("social_security_number", "dob", "password_plaintext")
+    )
+    health_fields = {"ip_addresses", "infected_machine_id"}
+    has_health = bool(detected_fields & health_fields) and classification["regulatory_impact"]["hipaa"]["affected"]
+
+    if has_health:
+        classification["sensitivity_level"] = "Highly Confidential"
+        classification["recommended_label"] = "Highly Confidential — PHI"
+        classification["regulatory_impact"]["soc2"]["affected"] = True
+        classification["regulatory_impact"]["soc2"]["description"] = (
+            "Critical breach: PHI/health data exposed — "
+            "impacts Confidentiality and Privacy trust criteria"
+        )
+    elif has_financial or has_sensitive:
+        classification["sensitivity_level"] = "Highly Confidential"
+        classification["recommended_label"] = "Highly Confidential"
+        classification["regulatory_impact"]["soc2"]["affected"] = True
+        classification["regulatory_impact"]["soc2"]["description"] = (
+            "Critical breach: financial/sensitive PII exposed — "
+            "impacts Security and Confidentiality trust criteria"
+        )
+    elif detected_fields:
+        classification["sensitivity_level"] = "Confidential"
+        classification["recommended_label"] = "Confidential"
+        classification["regulatory_impact"]["soc2"]["affected"] = True
+        classification["regulatory_impact"]["soc2"]["description"] = (
+            "PII exposure impacts Security and Confidentiality trust criteria"
+        )
+
+    return classification
 
 
 def _build_exposure_summary(exposures: list) -> dict:
@@ -339,6 +543,28 @@ Always include:
 - 3-5 strategic recommendations with investment estimates
 - Regulatory/compliance implications
 - Board-ready risk statement (1 paragraph)"""
+
+COMPLIANCE_SYSTEM_PROMPT = """You are a senior compliance and data protection officer
+specializing in breach notification and regulatory compliance.
+You have deep expertise in:
+- GDPR (EU General Data Protection Regulation) — Article 33/34 breach notification
+- CCPA/CPRA (California Consumer Privacy Act) — breach notification requirements
+- HIPAA (Health Insurance Portability and Accountability Act) — PHI breach rules
+- PCI-DSS (Payment Card Industry Data Security Standard) — cardholder data requirements
+- SOC 2 Type II — Trust Services Criteria (Security, Availability, Confidentiality, Privacy)
+- NIST CSF 2.0 — Cybersecurity Framework
+- ISO 27001/27701 — Information security and privacy management
+- Microsoft Purview — Sensitivity labels, DLP, Compliance Manager, eDiscovery
+
+Your analysis must include:
+- Specific regulatory articles/sections that apply
+- Exact notification timelines with countdown from discovery
+- Required notification recipients (supervisory authorities, affected individuals, etc.)
+- Documentation requirements for each framework
+- Purview-specific actions: sensitivity labels to apply, DLP policies to create/update
+- Risk quantification with potential fine amounts
+- Remediation steps to achieve compliance
+- Template language for breach notification letters"""
 
 THREAT_RESEARCH_PROMPT = """You are a threat intelligence researcher with deep expertise in:
 - Dark web forums (XSS, BreachForums, Exploit.in), marketplaces, and paste sites
@@ -1014,6 +1240,365 @@ Generate a comprehensive plan with:
     )
 
 
+@app_ai.route(route="ai/compliance-assessment", methods=["POST"])
+def ai_compliance_assessment(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Generate AI-powered compliance assessment with Purview integration.
+
+    Analyzes SpyCloud exposure data against regulatory frameworks (GDPR,
+    CCPA, HIPAA, PCI-DSS, SOC 2) and generates a compliance report with
+    Purview sensitivity label recommendations, DLP policy actions, and
+    breach notification timelines.
+
+    Request body:
+        {
+            "domain": "company.com",
+            "frameworks": ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"],
+            "includeNotificationTemplates": true,
+            "periodDays": 30
+        }
+
+    Returns:
+        Comprehensive compliance assessment with regulatory mapping,
+        notification requirements, Purview actions, and AI analysis.
+    """
+    try:
+        body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid JSON body"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    domain = body.get("domain", "").strip()
+    if not domain or "." not in domain:
+        return func.HttpResponse(
+            json.dumps({"error": "Valid domain required (e.g., company.com)"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    raw_frameworks = body.get("frameworks", ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"])
+    if isinstance(raw_frameworks, str):
+        frameworks = [f.strip() for f in raw_frameworks.split(",") if f.strip()]
+    elif isinstance(raw_frameworks, list):
+        expanded = []
+        for item in raw_frameworks:
+            if isinstance(item, str) and "," in item:
+                expanded.extend(f.strip() for f in item.split(",") if f.strip())
+            else:
+                expanded.append(item)
+        frameworks = expanded
+    else:
+        frameworks = ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"]
+    include_templates = body.get("includeNotificationTemplates", True)
+    try:
+        period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
+    except (ValueError, TypeError):
+        period_days = 30
+
+    # Step 1: Query SpyCloud for domain exposures
+    since_epoch = int(
+        (datetime.now(timezone.utc) - timedelta(days=period_days)).timestamp()
+    )
+    data = call_spycloud_api(
+        f"/breach/data/watchlist",
+        params={"domain": domain, "since": since_epoch},
+    )
+    exposures = data.get("results", [])
+
+    # Step 2: Classify PII types against regulatory frameworks
+    pii_classification = classify_pii_exposure(exposures)
+
+    # Step 3: Query Sentinel for existing remediation status
+    safe_domain = _sanitize_kql_string(domain)
+    remediation_kql = f"""
+    SpyCloudEnrichmentAudit_CL
+    | where TimeGenerated >= ago({period_days}d)
+    | where email_s has "{safe_domain}"
+    | summarize
+        TotalActions = count(),
+        PasswordResets = countif(action_s == "ForcePasswordReset"),
+        SessionRevokes = countif(action_s == "RevokeSessions"),
+        DeviceIsolations = countif(action_s == "IsolateDevice"),
+        AccountDisables = countif(action_s == "DisableAccount"),
+        UniqueUsers = dcount(email_s),
+        LastAction = max(TimeGenerated)
+    """
+    remediation_status = query_log_analytics(remediation_kql)
+
+    # Step 4: Query Purview audit logs for DLP events
+    purview_audit = query_purview_audit_logs(domain, period_days)
+
+    # Step 5: Get available sensitivity labels
+    sensitivity_labels = get_purview_sensitivity_labels()
+
+    # Step 6: Build exposure statistics
+    exposure_stats = _build_exposure_summary(exposures)
+
+    # Step 7: Generate AI compliance analysis
+    user_prompt = f"""Generate a comprehensive compliance assessment for domain: {domain}
+
+**Exposure Summary ({period_days}-day window):**
+- Total exposures: {data.get('hits', 0)}
+- Severity distribution: {json.dumps(exposure_stats.get('severities', {}))}
+- Password types: {json.dumps(exposure_stats.get('password_types', {}))}
+- Plaintext passwords found: {exposure_stats.get('has_plaintext', False)}
+- Infected devices: {len(exposure_stats.get('infected_devices', []))}
+
+**PII Classification:**
+- Exposed PII types: {json.dumps(pii_classification['exposed_pii_types'], default=str)}
+- Sensitivity level: {pii_classification['sensitivity_level']}
+- Recommended Purview label: {pii_classification['recommended_label']}
+
+**Regulatory Impact:**
+{json.dumps(pii_classification['regulatory_impact'], indent=2, default=str)}
+
+**Remediation Status:**
+{json.dumps(remediation_status, indent=2, default=str) if remediation_status else 'No remediation actions found.'}
+
+**Purview Audit Events:**
+{json.dumps(purview_audit, indent=2, default=str) if purview_audit else 'No Purview DLP/label events found for this domain.'}
+
+**Available Sensitivity Labels:**
+{json.dumps([{'id': l.get('id'), 'name': l.get('name')} for l in sensitivity_labels[:10]], default=str) if sensitivity_labels else 'Unable to retrieve labels — Graph API may not be configured.'}
+
+**Requested Frameworks:** {', '.join(frameworks)}
+
+Generate a compliance assessment that includes:
+
+1. **Executive Summary** — Overall compliance posture and risk rating (Critical/High/Medium/Low)
+2. **Regulatory Analysis** — For each applicable framework:
+   - Specific articles/sections triggered by this exposure
+   - Whether breach notification is required (YES/NO with justification)
+   - Notification timeline (exact hours/days from discovery)
+   - Required recipients (authorities, individuals, partners)
+   - Documentation requirements
+   - Potential fine/penalty amounts
+3. **Microsoft Purview Actions:**
+   - Sensitivity labels to apply (with label IDs if available)
+   - DLP policies to create or update
+   - Compliance Manager assessment items to address
+   - eDiscovery holds to consider
+   - Audit log retention requirements
+4. **Notification Timeline** — Day-by-day action plan from discovery
+5. **Risk Quantification** — Estimated financial exposure (fines, remediation costs, reputation)
+6. **Remediation Gap Analysis** — What has been done vs. what still needs to happen
+{"7. **Notification Templates** — Draft notification letters for each required authority/individual" if include_templates else ""}
+8. **Purview Configuration Checklist** — Step-by-step Purview setup for ongoing protection"""
+
+    ai_report = call_ai(
+        COMPLIANCE_SYSTEM_PROMPT, user_prompt, temperature=0.2, max_tokens=6000
+    )
+
+    return func.HttpResponse(
+        json.dumps(
+            {
+                "domain": domain,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "periodDays": period_days,
+                "frameworks": frameworks,
+                "exposureCount": data.get("hits", 0),
+                "piiClassification": pii_classification,
+                "exposureSummary": exposure_stats,
+                "remediationStatus": remediation_status,
+                "purviewAudit": purview_audit,
+                "sensitivityLabels": [
+                    {"id": l.get("id"), "name": l.get("name")}
+                    for l in sensitivity_labels[:10]
+                ],
+                "aiAssessment": ai_report,
+            }
+        ),
+        mimetype="application/json",
+    )
+
+
+@app_ai.route(route="ai/purview/classify", methods=["POST"])
+def ai_purview_classify(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Classify SpyCloud exposure data and apply Purview sensitivity labels.
+
+    Request body:
+        {
+            "email": "user@company.com",
+            "incidentId": "optional-sentinel-incident-id",
+            "applyLabel": true
+        }
+
+    Returns:
+        PII classification with applied label status.
+    """
+    try:
+        body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid JSON body"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    email = body.get("email", "").strip()
+    if not email or "@" not in email:
+        return func.HttpResponse(
+            json.dumps({"error": "Valid email address required"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    incident_id = (body.get("incidentId") or "").strip()
+    raw_apply_label = body.get("applyLabel", False)
+    apply_label = raw_apply_label if isinstance(raw_apply_label, bool) else str(raw_apply_label).lower() == "true"
+    override_label_id = (body.get("sensitivityLabelId") or "").strip()
+
+    # Get exposure data
+    encoded_email = requests.utils.quote(email, safe="")
+    data = call_spycloud_api(f"/breach/data/emails/{encoded_email}")
+    exposures = data.get("results", [])
+
+    # Classify PII
+    classification = classify_pii_exposure(exposures)
+
+    # Apply sensitivity label if requested and incident ID provided
+    label_result = None
+    if apply_label and incident_id:
+        max_sev = max((e.get("severity", 0) for e in exposures), default=0)
+        justification = (
+            f"SpyCloud exposure detected for {email}: "
+            f"{data.get('hits', 0)} records, max severity {max_sev}, "
+            f"sensitivity level {classification['sensitivity_level']}"
+        )
+        label_result = apply_purview_sensitivity_label(
+            entity_type="incident",
+            entity_id=incident_id,
+            label_id=override_label_id or PURVIEW_SENSITIVITY_LABEL_ID,
+            justification=justification,
+            sensitivity_level=classification["sensitivity_level"],
+        )
+
+    return func.HttpResponse(
+        json.dumps(
+            {
+                "email": email,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "exposureCount": data.get("hits", 0),
+                "classification": classification,
+                "labelApplied": label_result,
+            }
+        ),
+        mimetype="application/json",
+    )
+
+
+@app_ai.route(route="ai/purview/dlp-status", methods=["POST"])
+def ai_purview_dlp_status(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Check Purview DLP policy status for SpyCloud breach data protection.
+
+    Request body:
+        {"domain": "company.com", "periodDays": 30}
+
+    Returns:
+        DLP event summary, policy violations, and recommendations.
+    """
+    try:
+        body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid JSON body"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    domain = body.get("domain", "").strip()
+    if not domain or "." not in domain:
+        return func.HttpResponse(
+            json.dumps({"error": "Valid domain required"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    try:
+        period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
+    except (ValueError, TypeError):
+        period_days = 30
+    safe_domain = _sanitize_kql_string(domain)
+
+    # Query DLP events from unified audit log
+    dlp_kql = f"""
+    OfficeActivity
+    | where TimeGenerated >= ago({period_days}d)
+    | where Operation == "DlpRuleMatch"
+    | where UserId has "{safe_domain}"
+    | extend PolicyName = tostring(parse_json(tostring(PolicyDetails))[0].PolicyName)
+    | extend RuleName = tostring(parse_json(tostring(PolicyDetails))[0].Rules[0].RuleName)
+    | extend Severity = tostring(parse_json(tostring(PolicyDetails))[0].Rules[0].Severity)
+    | summarize
+        TotalMatches = count(),
+        HighSeverity = countif(Severity == "High"),
+        MediumSeverity = countif(Severity == "Medium"),
+        LowSeverity = countif(Severity == "Low"),
+        UniqueUsers = dcount(UserId),
+        Policies = make_set(PolicyName),
+        Rules = make_set(RuleName),
+        LastMatch = max(TimeGenerated)
+    """
+    dlp_events = query_log_analytics(dlp_kql)
+
+    # Query sensitivity label events
+    label_kql = f"""
+    OfficeActivity
+    | where TimeGenerated >= ago({period_days}d)
+    | where Operation in (
+        "SensitivityLabelApplied", "SensitivityLabelRemoved",
+        "SensitivityLabelUpdated", "FileSensitivityLabelChanged"
+    )
+    | where UserId has "{safe_domain}"
+    | summarize
+        LabelsApplied = countif(Operation == "SensitivityLabelApplied"),
+        LabelsRemoved = countif(Operation == "SensitivityLabelRemoved"),
+        LabelsUpdated = countif(Operation in (
+            "SensitivityLabelUpdated", "FileSensitivityLabelChanged"
+        )),
+        UniqueFiles = dcount(SourceFileName),
+        LastEvent = max(TimeGenerated)
+    """
+    label_events = query_log_analytics(label_kql)
+
+    # Generate AI recommendations
+    user_prompt = f"""Analyze Purview DLP status for {domain} over {period_days} days:
+
+**DLP Events:** {json.dumps(dlp_events, indent=2, default=str) if dlp_events else 'No DLP matches found.'}
+
+**Sensitivity Label Events:** {json.dumps(label_events, indent=2, default=str) if label_events else 'No label events found.'}
+
+Provide:
+1. DLP policy effectiveness assessment
+2. Gaps in current DLP coverage for breach data
+3. Recommended DLP policy rules for SpyCloud exposure data
+4. Sensitivity label deployment recommendations
+5. Specific Purview Compliance Manager actions"""
+
+    ai_recommendations = call_ai(
+        COMPLIANCE_SYSTEM_PROMPT, user_prompt, temperature=0.2, max_tokens=3000
+    )
+
+    return func.HttpResponse(
+        json.dumps(
+            {
+                "domain": domain,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "periodDays": period_days,
+                "dlpEvents": dlp_events,
+                "labelEvents": label_events,
+                "aiRecommendations": ai_recommendations,
+            }
+        ),
+        mimetype="application/json",
+    )
+
+
 @app_ai.route(route="ai/health", methods=["GET"])
 def ai_health(req: func.HttpRequest) -> func.HttpResponse:
     """Health check for AI investigation engine."""
@@ -1026,12 +1611,16 @@ def ai_health(req: func.HttpRequest) -> func.HttpResponse:
         "spycloudConfigured": bool(SPYCLOUD_API_KEY),
         "sentinelConfigured": bool(LOG_ANALYTICS_WORKSPACE_ID),
         "graphConfigured": bool(GRAPH_TENANT_ID and GRAPH_CLIENT_ID),
+        "purviewConfigured": bool(PURVIEW_ACCOUNT_NAME),
         "endpoints": [
             "POST /api/ai/investigate — Full AI-powered investigation",
             "POST /api/ai/executive-report — Board-level executive report",
             "POST /api/ai/threat-research — Threat intelligence research",
             "POST /api/ai/incident-report — Sentinel incident analysis",
             "POST /api/ai/remediation-plan — Remediation & prevention plan",
+            "POST /api/ai/compliance-assessment — Regulatory compliance assessment",
+            "POST /api/ai/purview/classify — PII classification + label application",
+            "POST /api/ai/purview/dlp-status — DLP policy status & recommendations",
             "GET  /api/ai/health — This endpoint",
         ],
     }

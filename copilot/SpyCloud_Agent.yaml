@@ -4285,6 +4285,123 @@ SkillGroups:
     - GetInvestigationsByCategory
     - AnalyzeAndSummarize
     - BuildThreatNarrative
+  - Name: PurviewComplianceAgent
+    DisplayName: Purview Compliance & Data Governance Agent
+    Description: "Assesses regulatory compliance impact of SpyCloud credential exposures using Microsoft Purview integration. Classifies exposed PII against GDPR, CCPA, HIPAA, PCI-DSS, and SOC 2 frameworks. Applies sensitivity labels, monitors DLP policies, generates breach notification timelines, and provides compliance gap analysis with Purview Compliance Manager integration."
+    Interfaces:
+    - InteractiveAgent
+    Inputs:
+    - Name: UserRequest
+      Description: 'Your compliance or data governance request. Examples: a domain to assess for regulatory compliance, an email to classify PII exposure for, a request to check DLP policy status,
+        generate a breach notification timeline, or assess GDPR/CCPA/HIPAA impact of a specific exposure.'
+      DefaultValue: ''
+      Required: true
+    Settings:
+      OrchestratorSkill: DefaultAgentOrchestrator
+      Instructions: '# Identity & Personality
+
+        You are the Purview Compliance & Data Governance Agent — a specialist in regulatory compliance, data classification, and breach notification requirements. You bridge SpyCloud identity exposure intelligence with Microsoft Purview data governance to ensure organizations meet their regulatory obligations.
+
+
+        # Mission
+
+        Assess the compliance impact of SpyCloud credential and PII exposures. Classify exposed data against regulatory frameworks, apply appropriate Purview sensitivity labels, monitor DLP policy effectiveness, and generate actionable compliance reports with breach notification timelines.
+
+
+        # Core Capabilities
+
+        1. Classify SpyCloud exposure data against PII categories (credentials, financial, government IDs, health data, contact info)
+
+        2. Map PII exposure to regulatory frameworks: GDPR Article 33/34, CCPA breach notification, HIPAA PHI rules, PCI-DSS cardholder requirements
+
+        3. Generate breach notification timelines with exact deadlines from discovery date
+
+        4. Recommend Purview sensitivity labels based on data classification (Confidential, Highly Confidential, Highly Confidential — PHI)
+
+        5. Monitor DLP policy status and identify gaps in breach data protection
+
+        6. Assess Purview Compliance Manager items affected by exposures
+
+        7. Generate compliance-ready documentation for auditors and regulators
+
+
+        # Data Sources
+
+        - SpyCloudBreachWatchlist_CL: Credential exposures with PII fields (email, password, SSN, DOB, financial data)
+
+        - OfficeActivity: Purview DLP rule matches, sensitivity label events, audit log entries
+
+        - SpyCloudEnrichmentAudit_CL: Remediation action history (password resets, session revokes, device isolations)
+
+        - Microsoft Graph Information Protection API: Sensitivity labels, label policies
+
+        - AI Engine Purview endpoints: /api/ai/compliance-assessment, /api/ai/purview/classify, /api/ai/purview/dlp-status
+
+
+        # Investigation Workflows
+
+        ## Regulatory Compliance Assessment
+        1. Query SpyCloud for domain exposures within the assessment period
+        2. Classify all exposed PII types against regulatory categories
+        3. Determine which frameworks are triggered (GDPR, CCPA, HIPAA, PCI-DSS, SOC 2)
+        4. Calculate breach notification deadlines from discovery date
+        5. Check existing remediation actions against requirements
+        6. Generate compliance gap analysis with prioritized actions
+        7. Recommend Purview sensitivity labels and DLP policy updates
+
+        ## PII Classification & Labeling
+        1. Query SpyCloud for user-specific exposures
+        2. Map exposed fields to PII categories and sensitivity levels
+        3. Determine recommended Purview sensitivity label
+        4. Apply label to associated Sentinel incident if requested
+        5. Document classification rationale for audit trail
+
+        ## DLP Policy Monitoring
+        1. Query Purview audit logs for DLP rule matches
+        2. Analyze sensitivity label application trends
+        3. Identify gaps in DLP coverage for breach data
+        4. Recommend policy updates for SpyCloud exposure data
+        5. Assess Compliance Manager items that need attention
+
+
+        # Output Format
+
+        - Compliance Executive Summary: overall compliance posture (Compliant/At Risk/Non-Compliant) with risk rating
+
+        - Regulatory Impact Matrix: framework-by-framework analysis with triggered articles, notification requirements, and fine estimates
+
+        - Breach Notification Timeline: day-by-day action plan with exact deadlines
+
+        - Purview Actions: sensitivity labels to apply, DLP policies to create/update, Compliance Manager items
+
+        - Remediation Gap Analysis: completed actions vs outstanding requirements
+
+        - Documentation Checklist: required records for each applicable framework
+
+
+        # Rules
+
+        - NEVER return raw JSON — always interpret and format
+
+        - NEVER say "try again" or "I cannot help" — always provide value
+
+        - ALWAYS include specific regulatory article/section references (e.g., GDPR Art. 33(1), CCPA §1798.82)
+
+        - ALWAYS calculate notification deadlines from the current date
+
+        - Present findings in decreasing order of regulatory urgency
+
+        - When PII is detected, ALWAYS recommend the appropriate Purview sensitivity label
+
+        - Include financial risk quantification (potential fines) for each triggered framework'
+    ChildSkills:
+    - AIEnginePurviewComplianceAssessment
+    - AIEnginePurviewClassify
+    - AIEnginePurviewDLPStatus
+    - GetUserExposures
+    - GetHighSeverityExposures
+    - GetExposureSummaryByDomain
+    - AnalyzeAndSummarize
 - Format: GPT
   Skills:
   - Name: AnalyzeAndSummarize
@@ -6388,10 +6505,91 @@ SkillGroups:
           Content-Type: application/json
         Body: '{"domain": "{{domain}}"}'
 
+  # === Purview Compliance & Data Classification Skills ===
+  # These skills use the AI Engine's Purview integration for
+  # compliance assessment, PII classification, and DLP monitoring.
+
+  - Name: AIEnginePurviewComplianceAssessment
+    DisplayName: AI Engine — Purview Compliance Assessment
+    Description: "Generates a comprehensive regulatory compliance assessment (GDPR, CCPA, HIPAA, PCI-DSS, SOC 2) for SpyCloud exposure data. Includes breach notification timelines, Purview sensitivity label recommendations, DLP policy actions, fine estimates, and notification templates. Integrates with Microsoft Purview Information Protection and Compliance Manager."
+    Inputs:
+    - Name: domain
+      Description: "Organization domain to assess compliance for (e.g., company.com)"
+      Required: true
+    - Name: frameworks
+      Description: "Comma-separated regulatory frameworks to assess: gdpr,ccpa,hipaa,pci_dss,soc2 (default: all)"
+      Required: false
+      DefaultValue: "gdpr,ccpa,hipaa,pci_dss,soc2"
+    - Name: periodDays
+      Description: "Assessment period in days (1-365, default 30)"
+      Required: false
+      DefaultValue: "30"
+    - Name: includeNotificationTemplates
+      Description: "Include draft breach notification templates (true/false)"
+      Required: false
+      DefaultValue: "true"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEnginePurviewComplianceAssessment
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/compliance-assessment"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"domain": "{{domain}}", "frameworks": ["{{frameworks}}"], "periodDays": {{periodDays}}, "includeNotificationTemplates": {{includeNotificationTemplates}}}'
+
+  - Name: AIEnginePurviewClassify
+    DisplayName: AI Engine — Purview PII Classification
+    Description: "Classifies SpyCloud exposure data for an email address against PII categories and regulatory frameworks. Maps exposed fields (credentials, financial data, government IDs, contact info) to GDPR, CCPA, HIPAA, and PCI-DSS requirements. Optionally applies Purview sensitivity labels to associated Sentinel incidents."
+    Inputs:
+    - Name: email
+      Description: "Email address to classify exposure data for"
+      Required: true
+    - Name: incidentId
+      Description: "Optional Sentinel incident ID to apply Purview labels to"
+      Required: false
+    - Name: applyLabel
+      Description: "Whether to apply Purview sensitivity labels (true/false)"
+      Required: false
+      DefaultValue: "false"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEnginePurviewClassify
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/purview/classify"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"email": "{{email}}", "incidentId": "{{incidentId}}", "applyLabel": {{applyLabel}}}'
+
+  - Name: AIEnginePurviewDLPStatus
+    DisplayName: AI Engine — Purview DLP Status
+    Description: "Checks Microsoft Purview DLP policy status for SpyCloud breach data protection. Queries unified audit logs for DLP rule matches, sensitivity label events, and policy violations. Provides AI-powered recommendations for DLP policy improvements and gap analysis."
+    Inputs:
+    - Name: domain
+      Description: "Domain to check DLP status for"
+      Required: true
+    - Name: periodDays
+      Description: "Period to analyze in days (1-365, default 30)"
+      Required: false
+      DefaultValue: "30"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEnginePurviewDLPStatus
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/purview/dlp-status"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"domain": "{{domain}}", "periodDays": {{periodDays}}}'
+
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence across 9 SpyCloud APIs and 15 Sentinel tables with 29 specialized sub-agents, 18 GPT-4o AI analysis skills, 5 AI Engine endpoints, and 3 Sentinel Graph tools."
+  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence across 9 SpyCloud APIs and 15 Sentinel tables with 29 specialized sub-agents, 18 GPT-4o AI analysis skills, 8 AI Engine endpoints (including 3 Purview compliance endpoints), and 3 Sentinel Graph tools."
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other
