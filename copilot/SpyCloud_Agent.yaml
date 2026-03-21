@@ -6257,14 +6257,13 @@ SkillGroups:
     DisplayName: AI Engine — Executive Report
     Description: "Generates a board-ready executive summary of the organization's dark web exposure posture. Includes risk metrics, trend analysis, severity distribution, top exposures, remediation status, and strategic recommendations formatted for C-suite and board presentations."
     Inputs:
-    - Name: period
-      Description: "Reporting period: 7d, 30d, 90d"
+    - Name: domain
+      Description: "Organization domain to generate report for (e.g., company.com)"
+      Required: true
+    - Name: periodDays
+      Description: "Reporting period in days (1-365, default 30)"
       Required: false
-      DefaultValue: "30d"
-    - Name: format
-      Description: "Report format: summary, detailed, board-presentation"
-      Required: false
-      DefaultValue: "detailed"
+      DefaultValue: "30"
     Settings:
       OpenApiAuthType: None
       Definition:
@@ -6274,19 +6273,19 @@ SkillGroups:
         Method: POST
         Headers:
           Content-Type: application/json
-        Body: '{"period": "{{period}}", "format": "{{format}}"}'
+        Body: '{"domain": "{{domain}}", "periodDays": {{periodDays}}}'
 
   - Name: AIEngineRemediationPlan
     DisplayName: AI Engine — Remediation Plan
-    Description: "Creates a prioritized, step-by-step remediation plan for a Sentinel incident. Includes password resets, session revocation, device isolation, Conditional Access updates, user notification templates, and timeline with responsible parties."
+    Description: "Creates a prioritized, step-by-step remediation plan for an exposed user. Includes password resets, session revocation, device isolation, Conditional Access updates, user notification templates, and timeline with responsible parties."
     Inputs:
-    - Name: incident_id
-      Description: "Sentinel incident ID"
+    - Name: email
+      Description: "Email address of the exposed user to generate remediation plan for"
       Required: true
-    - Name: auto_execute
-      Description: "Whether to suggest automatic playbook execution"
+    - Name: includePrevention
+      Description: "Whether to include long-term prevention recommendations"
       Required: false
-      DefaultValue: "false"
+      DefaultValue: "true"
     Settings:
       OpenApiAuthType: None
       Definition:
@@ -6296,19 +6295,15 @@ SkillGroups:
         Method: POST
         Headers:
           Content-Type: application/json
-        Body: '{"incident_id": "{{incident_id}}", "auto_execute": {{auto_execute}}}'
+        Body: '{"email": "{{email}}", "includePrevention": {{includePrevention}}}'
 
   - Name: AIEngineIncidentReport
     DisplayName: AI Engine — Incident Report
     Description: "Generates a detailed incident report for a Sentinel incident including timeline reconstruction, affected entities, evidence chain, MITRE ATT&CK mapping, blast radius assessment, and remediation steps. Suitable for compliance documentation and post-incident review."
     Inputs:
-    - Name: incident_id
-      Description: "Sentinel incident ID"
+    - Name: incidentId
+      Description: "Sentinel incident number (numeric ID)"
       Required: true
-    - Name: include_remediation
-      Description: "Include detailed remediation plan in report"
-      Required: false
-      DefaultValue: "true"
     Settings:
       OpenApiAuthType: None
       Definition:
@@ -6318,7 +6313,7 @@ SkillGroups:
         Method: POST
         Headers:
           Content-Type: application/json
-        Body: '{"incident_id": "{{incident_id}}", "include_remediation": {{include_remediation}}}'
+        Body: '{"incidentId": "{{incidentId}}"}'
 
   # === Sentinel Graph MCP Skills ===
   # These skills use the MCP server's Sentinel Graph tools for
