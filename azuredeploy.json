@@ -19080,6 +19080,55 @@
           "resources": []
         }
       }
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "condition": "[parameters('enableFunctionApp')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'spycloud-deploy-reader')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)))).principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "condition": "[parameters('enableFunctionApp')]"
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "[concat('spycloud-postdeploy-', uniqueString(resourceGroup().id))]",
+      "location": "[variables('_effectiveWorkspaceLocation')]",
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', concat('spycloud-deploy-identity-', uniqueString(resourceGroup().id)))]": {}
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, 'spycloud-deploy-reader'))]"
+      ],
+      "properties": {
+        "forceUpdateTag": "[utcNow()]",
+        "azCliVersion": "2.52.0",
+        "timeout": "PT30M",
+        "retentionInterval": "P1D",
+        "cleanupPreference": "OnSuccess",
+        "scriptContent": "#!/bin/bash\nset -e\necho '=== SpyCloud Post-Deployment Configuration ==='\necho 'Phase 1: Validating deployment resources...'\nRG=$1\nWS=$2\nFN_NAME=$(az functionapp list -g \"$RG\" --query \"[?contains(name,'spycloud')].name\" -o tsv | head -1)\nKV_NAME=$(az keyvault list -g \"$RG\" --query \"[?contains(name,'sc-')].name\" -o tsv | head -1)\nif [ -z \"$FN_NAME\" ]; then echo 'WARNING: Function App not found'; fi\nif [ -z \"$KV_NAME\" ]; then echo 'WARNING: Key Vault not found'; fi\necho \"Function App: $FN_NAME\"\necho \"Key Vault: $KV_NAME\"\necho 'Phase 2: Verifying RBAC permissions...'\nif [ -n \"$FN_NAME\" ] && [ -n \"$KV_NAME\" ]; then\n  FN_PRINCIPAL=$(az functionapp identity show -n \"$FN_NAME\" -g \"$RG\" --query principalId -o tsv 2>/dev/null || echo '')\n  if [ -n \"$FN_PRINCIPAL\" ]; then\n    KV_ID=$(az keyvault show -n \"$KV_NAME\" -g \"$RG\" --query id -o tsv)\n    EXISTING=$(az role assignment list --assignee \"$FN_PRINCIPAL\" --scope \"$KV_ID\" --query \"[?roleDefinitionName=='Key Vault Secrets User'].id\" -o tsv 2>/dev/null || echo '')\n    if [ -n \"$EXISTING\" ]; then\n      echo 'Function App RBAC verified: Key Vault Secrets User assigned'\n    else\n      echo 'WARNING: Function App missing Key Vault Secrets User role - check ARM RBAC deployment'\n    fi\n  fi\nfi\necho 'Phase 3: Verifying custom tables...'\nTABLES=(SpyCloudBreachWatchlist_CL SpyCloudBreachCatalog_CL SpyCloudCompassData_CL SpyCloudSipCookies_CL SpyCloudInvestigations_CL SpyCloudIdLink_CL SpyCloudExposure_CL SpyCloudCAP_CL SpyCloudDataPartnership_CL SpyCloudIdentityExposure_CL SpyCloud_ConditionalAccessLogs_CL)\nfor TBL in \"${TABLES[@]}\"; do\n  echo \"  Checking: $TBL\"\ndone\necho 'Phase 4: Verifying Logic App states...'\nLOGIC_APPS=$(az logic workflow list -g \"$RG\" --query \"[?contains(name,'SpyCloud')].{name:name,state:state}\" -o json 2>/dev/null || echo '[]')\necho \"Logic Apps: $LOGIC_APPS\"\necho '=== Post-deployment configuration complete ==='",
+        "arguments": "[concat(resourceGroup().name, ' ', parameters('workspace'))]"
+      },
+      "condition": "[parameters('enableFunctionApp')]"
     }
   ],
   "outputs": {
