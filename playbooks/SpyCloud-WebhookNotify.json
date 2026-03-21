@@ -29,13 +29,15 @@
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     },
     "webhookUrl": {
       "type": "securestring",
       "metadata": {
         "description": "Destination webhook URL for incident notifications"
-      }
+      },
+      "defaultValue": ""
     },
     "webhookAuthHeader": {
       "type": "securestring",

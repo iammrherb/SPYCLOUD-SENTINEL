@@ -13,19 +13,22 @@
       "type": "string",
       "metadata": {
         "description": "Azure Subscription ID"
-      }
+      },
+      "defaultValue": "[subscription().subscriptionId]"
     },
     "resourceGroupName": {
       "type": "string",
       "metadata": {
         "description": "Resource group for this deployment"
-      }
+      },
+      "defaultValue": "[resourceGroup().name]"
     },
     "workspaceName": {
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     }
   },
   "variables": {

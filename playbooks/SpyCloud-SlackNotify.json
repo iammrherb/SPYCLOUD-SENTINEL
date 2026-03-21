@@ -29,13 +29,15 @@
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     },
     "slackWebhookUrl": {
       "type": "securestring",
       "metadata": {
         "description": "Slack Incoming Webhook URL for SOC notifications"
-      }
+      },
+      "defaultValue": ""
     },
     "slackChannel": {
       "type": "string",

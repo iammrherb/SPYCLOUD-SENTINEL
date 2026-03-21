@@ -13,9 +13,13 @@ on:
   push:
     branches: [ main ]
     paths:
-    - '**'
-    - '!.github/workflows/**'  # this filter prevents other workflow changes from triggering this workflow
+    # Only trigger on Sentinel content directories
+    - 'content/**'
+    - 'playbooks/**'
+    - 'workbooks/**'
+    - 'sentinel-deployment.config'
     - '.github/workflows/sentinel-deploy-03a1d12c-90ae-4f21-87fd-f401dd2e4bbb.yml'
+    - '.github/workflows/azure-sentinel-deploy-03a1d12c-90ae-4f21-87fd-f401dd2e4bbb.ps1'
 
 jobs:
   deploy-content:
