@@ -1506,12 +1506,12 @@
   },
   "variables": {
     "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
-    "_solutionName": "SpyCloud Darknet Identity Exposure Intelligence",
-    "_solutionVersion": "12.0.0",
+    "_solutionName": "SpyCloud Identity Exposure Intelligence for Sentinel",
+    "_solutionVersion": "2.0.0",
     "_solutionAuthor": "SpyCloud",
-    "_solutionId": "spycloud-darknet-identity-exposure-intelligence",
-    "dataConnectorVersionConnectorDefinition": "1.2.0",
-    "dataConnectorVersionConnections": "1.2.0",
+    "_solutionId": "spycloud.spycloud-sentinel-solution",
+    "dataConnectorVersionConnectorDefinition": "2.0.0",
+    "dataConnectorVersionConnections": "2.0.0",
     "_solutionTier": "Community",
     "_solutionEmail": "support@spycloud.com",
     "_solutionLink": "https://portal.spycloud.com",
@@ -18434,6 +18434,22 @@
           ]
         },
         "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), resourceId('Microsoft.Web/sites', variables('functionAppName')), '4633458b-17de-408a-b874-0445c86b69e6')]",
+      "condition": "[parameters('enableFunctionApp')]",
+      "scope": "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]",
+        "principalId": "[if(parameters('enableFunctionApp'), reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2023-01-01', 'Full').identity.principalId, '00000000-0000-0000-0000-000000000000')]",
+        "principalType": "ServicePrincipal"
       }
     },
     {
