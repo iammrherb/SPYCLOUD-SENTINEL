@@ -1435,7 +1435,8 @@ def ai_purview_classify(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     incident_id = body.get("incidentId", "").strip()
-    apply_label = body.get("applyLabel", False)
+    raw_apply_label = body.get("applyLabel", False)
+    apply_label = raw_apply_label if isinstance(raw_apply_label, bool) else str(raw_apply_label).lower() == "true"
 
     # Get exposure data
     encoded_email = requests.utils.quote(email, safe="")
