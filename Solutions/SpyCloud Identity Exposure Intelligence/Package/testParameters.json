@@ -1,0 +1,14 @@
+{
+    "location": {
+        "value": "westus2"
+    },
+    "workspace-location": {
+        "value": "westus2"
+    },
+    "workspace": {
+        "value": "test-workspace"
+    },
+    "workbook1-name": {
+        "value": "SpyCloudIdentityExposure"
+    }
+}

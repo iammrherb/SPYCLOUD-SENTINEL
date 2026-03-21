@@ -1,0 +1,275 @@
+# SpyCloud Investigations API Rule Templates
+# These templates detect threats using SpyCloud Investigations API data for deep-dive
+# identity and credential intelligence analysis.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
+
+templateVersion: "1.0.0"
+templateId: spycloud-investigations-templates
+category: SpyCloud Investigations
+deployAsTemplate: true
+requiredDataSources:
+  - SpyCloud Investigations
+  - Microsoft Entra ID Sign-in Logs
+  - Microsoft Sentinel UEBA
+requiredTables:
+  - SpyCloudInvestigations_CL
+  - SigninLogs
+  - BehaviorAnalytics
+  - AuditLogs
+  - OfficeActivity
+connectorAssociation:
+  - SpyCloud Investigations API
+
+---
+id: sc-050-investigation-high-risk-identity
+name: SpyCloud Investigations — High-Risk Identity Discovery
+description: |
+  Detects identities flagged as high-risk by the SpyCloud Investigations API.
+  These identities have extensive exposure across multiple breaches and infostealers,
+  representing significant organizational risk requiring immediate review.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Reconnaissance
+techniques:
+  - T1589
+  - T1589.001
+query: |
+  SpyCloudInvestigations_CL
+  | where TimeGenerated > ago(1h)
+  | where risk_score_d >= 80
+  | where isnotempty(email_s)
+  | summarize ExposureCount = count(), BreachSources = make_set(source_id_s), MaxRisk = max(risk_score_d), InfectedDevices = make_set(infected_machine_id_s) by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-051-investigation-darkweb-mention
+name: SpyCloud Investigations — Dark Web Credential Mention
+description: |
+  Detects organizational credentials discovered via SpyCloud Investigations on dark web forums,
+  marketplaces, or paste sites. Indicates active trading or distribution of stolen credentials.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - ResourceDevelopment
+techniques:
+  - T1589.001
+  - T1586
+query: |
+  SpyCloudInvestigations_CL
+  | where TimeGenerated > ago(1h)
+  | where source_type_s in ("darkweb_forum", "darkweb_marketplace", "paste_site", "telegram_channel")
+  | where isnotempty(email_s)
+  | summarize MentionCount = count(), Sources = make_set(source_type_s), Domains = make_set(target_domain_s) by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-052-investigation-identity-pivot
+name: SpyCloud Investigations — Identity Pivot Chain Detected
+description: |
+  Detects when SpyCloud Investigations reveals identity pivoting — multiple identities linked
+  through shared devices, IPs, or cookies. Indicates threat actor infrastructure or compromised
+  identity clusters requiring coordinated response.
+severity: High
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - LateralMovement
+techniques:
+  - T1078
+  - T1021
+query: |
+  SpyCloudInvestigations_CL
+  | where TimeGenerated > ago(24h)
+  | where isnotempty(infected_machine_id_s) and isnotempty(email_s)
+  | summarize LinkedIdentities = make_set(email_s), IdentityCount = dcount(email_s), Domains = make_set(email_domain_s) by infected_machine_id_s
+  | where IdentityCount >= 3
+  | mv-expand LinkedIdentity = LinkedIdentities
+  | extend AccountName = tostring(split(tostring(LinkedIdentity), "@")[0]), AccountDomain = tostring(split(tostring(LinkedIdentity), "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-053-investigation-credential-active-signin
+name: SpyCloud Investigations — Investigated Identity with Active Sign-in
+description: |
+  Correlates identities under SpyCloud Investigation with active Entra ID sign-ins.
+  When an identity under investigation shows active authentication, it may indicate
+  ongoing exploitation requiring immediate containment.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - CredentialAccess
+techniques:
+  - T1078
+  - T1078.004
+query: |
+  let investigatedUsers = SpyCloudInvestigations_CL
+  | where TimeGenerated > ago(7d)
+  | where risk_score_d >= 60
+  | summarize MaxRisk = max(risk_score_d), InvestigationTime = min(TimeGenerated) by email_s;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where ResultType == 0
+  | join kind=inner investigatedUsers on $left.UserPrincipalName == $right.email_s
+  | project TimeGenerated, UserPrincipalName, IPAddress, AppDisplayName, MaxRisk, InvestigationTime, Location, DeviceDetail
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-054-investigation-botnet-association
+name: SpyCloud Investigations — Botnet Log Association
+description: |
+  Detects organizational credentials found in botnet logs via SpyCloud Investigations.
+  Botnet association indicates the user's device was part of an active botnet,
+  suggesting ongoing malware infection and potential C2 activity.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CommandAndControl
+  - CredentialAccess
+techniques:
+  - T1071
+  - T1555
+query: |
+  SpyCloudInvestigations_CL
+  | where TimeGenerated > ago(1h)
+  | where source_type_s == "botnet_log" or category_s has "botnet"
+  | where isnotempty(email_s)
+  | summarize BotnetSources = make_set(source_id_s), DeviceCount = dcount(infected_machine_id_s), MalwareFamilies = make_set(malware_family_s) by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-055-investigation-financial-exposure
+name: SpyCloud Investigations — Financial/Banking Credential Exposure
+description: |
+  Detects exposure of financial or banking credentials discovered through SpyCloud Investigations.
+  Includes banking portals, payment platforms, and financial SaaS applications.
+  Requires urgent notification to finance and fraud teams.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Collection
+techniques:
+  - T1552
+  - T1005
+query: |
+  SpyCloudInvestigations_CL
+  | where TimeGenerated > ago(1h)
+  | where target_domain_s has_any ("bank", "paypal", "stripe", "plaid", "chase", "wellsfargo", "citi", "hsbc", "treasury", "quickbooks", "netsuite")
+     or category_s has_any ("financial", "banking", "payment")
+  | where isnotempty(email_s)
+  | summarize FinancialSites = make_set(target_domain_s), ExposureCount = count() by email_s, email_domain_s
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-056-investigation-ueba-correlation
+name: SpyCloud Investigations + UEBA — Investigated User Anomalous Behavior
+description: |
+  Correlates SpyCloud Investigations data with UEBA behavioral anomalies.
+  Investigated identities exhibiting anomalous behavior have a high probability of active compromise.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+  - T1036
+query: |
+  let investigatedUsers = SpyCloudInvestigations_CL
+  | where TimeGenerated > ago(7d)
+  | where risk_score_d >= 60
+  | distinct email_s;
+  BehaviorAnalytics
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (investigatedUsers)
+  | where ActivityInsights has_any ("FirstTimeUser", "InvestigationPriorityScore", "AnomalousActivity", "UncommonResourceAccess")
+  | project TimeGenerated, UserPrincipalName, ActivityType, ActivityInsights, SourceIPAddress, InvestigationPriority
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: SourceIPAddress

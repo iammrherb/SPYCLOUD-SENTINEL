@@ -1,0 +1,498 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "templateMetadata": {
+    "templateVersion": "1.0.0",
+    "templateId": "spycloud-idlink-correlation",
+    "category": "Investigation",
+    "requiredPermissions": [
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.Logic/workflows/write",
+      "Microsoft.Web/connections/write"
+    ],
+    "requiredLicenses": [
+      "Microsoft Sentinel",
+      "SpyCloud IDLINK API"
+    ],
+    "connectorAssociation": [
+      "azuresentinel"
+    ],
+    "deployAsTemplate": true
+  },
+  "metadata": {
+    "_generator": {
+      "name": "SpyCloud Sentinel Integration",
+      "version": "1.0.0"
+    },
+    "title": "SpyCloud - IDLINK Identity Correlation",
+    "description": "Uses the SpyCloud IDLINK API to correlate identities across breaches. Maps relationships between email addresses, usernames, passwords, and infected machines to identify linked accounts and lateral movement risk.",
+    "prerequisites": [
+      "Microsoft Sentinel workspace",
+      "SpyCloud IDLINK API key",
+      "Managed Identity with Sentinel Responder role"
+    ],
+    "lastUpdateTime": "2026-03-11T00:00:00.000Z",
+    "support": {
+      "tier": "community"
+    },
+    "author": {
+      "name": "SpyCloud"
+    },
+    "categories": {
+      "domains": [
+        "Security - Threat Protection"
+      ]
+    }
+  },
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-IdLinkCorrelation",
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
+    },
+    "SpyCloudApiKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SpyCloud API key with IDLINK access"
+      }
+    },
+    "SpyCloudApiUrl": {
+      "type": "string",
+      "defaultValue": "https://api.spycloud.io/enterprise-v2",
+      "metadata": {
+        "description": "SpyCloud API base URL"
+      }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Entities_-_Get_Accounts": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/entities/account",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Initialize_CorrelationResults": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "CorrelationResults",
+                    "type": "array",
+                    "value": []
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Initialize_LinkedIdentities": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "LinkedIdentities",
+                    "type": "array",
+                    "value": []
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Initialize_RiskScore": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "CorrelationRiskScore",
+                    "type": "integer",
+                    "value": 0
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Process_Each_Account": {
+              "type": "Foreach",
+              "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
+              "actions": {
+                "IdLink_Scope": {
+                  "type": "Scope",
+                  "actions": {
+                    "Resolve_Email": {
+                      "type": "Compose",
+                      "inputs": "@concat(items('Process_Each_Account')?['Name'], if(not(empty(items('Process_Each_Account')?['UPNSuffix'])), concat('@', items('Process_Each_Account')?['UPNSuffix']), ''))",
+                      "runAfter": {}
+                    },
+                    "Query_IDLINK_API": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "GET",
+                        "uri": "@{parameters('SpyCloudApiUrl')}/idlink/email/@{outputs('Resolve_Email')}",
+                        "headers": {
+                          "X-API-Key": "@parameters('SpyCloudApiKey')",
+                          "Accept": "application/json"
+                        }
+                      },
+                      "runAfter": {
+                        "Resolve_Email": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Parse_IDLINK_Response": {
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@body('Query_IDLINK_API')",
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "hits": {
+                              "type": "integer"
+                            },
+                            "results": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "email": {
+                                    "type": "string"
+                                  },
+                                  "linked_emails": {
+                                    "type": "array"
+                                  },
+                                  "linked_usernames": {
+                                    "type": "array"
+                                  },
+                                  "infected_machine_id": {
+                                    "type": "string"
+                                  },
+                                  "shared_credential_count": {
+                                    "type": "integer"
+                                  },
+                                  "confidence_score": {
+                                    "type": "number"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Query_IDLINK_API": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Process_Linked_Identities": {
+                      "type": "Foreach",
+                      "foreach": "@body('Parse_IDLINK_Response')?['results']",
+                      "actions": {
+                        "Collect_Linked_Emails": {
+                          "type": "If",
+                          "expression": {
+                            "and": [
+                              {
+                                "greater": [
+                                  "@length(coalesce(items('Process_Linked_Identities')?['linked_emails'], json('[]')))",
+                                  0
+                                ]
+                              }
+                            ]
+                          },
+                          "actions": {
+                            "Append_Linked_Identity": {
+                              "type": "AppendToArrayVariable",
+                              "inputs": {
+                                "name": "LinkedIdentities",
+                                "value": {
+                                  "sourceEmail": "@outputs('Resolve_Email')",
+                                  "linkedEmails": "@items('Process_Linked_Identities')?['linked_emails']",
+                                  "linkedUsernames": "@items('Process_Linked_Identities')?['linked_usernames']",
+                                  "sharedCredentials": "@items('Process_Linked_Identities')?['shared_credential_count']",
+                                  "confidence": "@items('Process_Linked_Identities')?['confidence_score']"
+                                }
+                              },
+                              "runAfter": {}
+                            }
+                          },
+                          "else": {
+                            "actions": {}
+                          },
+                          "runAfter": {}
+                        },
+                        "Update_Risk_For_Shared_Creds": {
+                          "type": "If",
+                          "expression": {
+                            "and": [
+                              {
+                                "greater": [
+                                  "@coalesce(items('Process_Linked_Identities')?['shared_credential_count'], 0)",
+                                  0
+                                ]
+                              }
+                            ]
+                          },
+                          "actions": {
+                            "Increase_Risk_Score": {
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "CorrelationRiskScore",
+                                "value": "@add(variables('CorrelationRiskScore'), mul(coalesce(items('Process_Linked_Identities')?['shared_credential_count'], 0), 10))"
+                              },
+                              "runAfter": {}
+                            }
+                          },
+                          "else": {
+                            "actions": {}
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "runAfter": {
+                        "Parse_IDLINK_Response": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Append_Correlation_Result": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "CorrelationResults",
+                        "value": {
+                          "email": "@outputs('Resolve_Email')",
+                          "totalLinkedIdentities": "@body('Parse_IDLINK_Response')?['hits']",
+                          "linkedAccountsFound": "@length(variables('LinkedIdentities'))"
+                        }
+                      },
+                      "runAfter": {
+                        "Process_Linked_Identities": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Catch_IdLink_Errors": {
+                  "type": "Scope",
+                  "actions": {
+                    "Append_IdLink_Error": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "CorrelationResults",
+                        "value": {
+                          "email": "@items('Process_Each_Account')?['Name']",
+                          "error": "Failed to query IDLINK API"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "IdLink_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
+                  }
+                }
+              },
+              "runAfter": {
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ],
+                "Initialize_CorrelationResults": [
+                  "Succeeded"
+                ],
+                "Initialize_LinkedIdentities": [
+                  "Succeeded"
+                ],
+                "Initialize_RiskScore": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Determine_Correlation_Severity": {
+              "type": "Compose",
+              "inputs": "@if(greaterOrEquals(variables('CorrelationRiskScore'), 50), 'High', if(greaterOrEquals(variables('CorrelationRiskScore'), 20), 'Medium', 'Informational'))",
+              "runAfter": {
+                "Process_Each_Account": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Update_Incident_With_Correlation": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "put",
+                "path": "/incident",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "tagsToAdd": {
+                    "TagsToAdd": [
+                      "SpyCloud-IDLINK-Correlated",
+                      "@{if(greater(length(variables('LinkedIdentities')), 0), 'SpyCloud-LinkedAccounts-Found', 'SpyCloud-No-Links')}"
+                    ]
+                  }
+                }
+              },
+              "runAfter": {
+                "Determine_Correlation_Severity": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Add_Correlation_Comment": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/incident-comments",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "message": "<p><strong>SpyCloud-IdLinkCorrelation:</strong> Identity correlation complete.<br/><strong>Correlation Risk Score:</strong> @{variables('CorrelationRiskScore')}<br/><strong>Linked Identities Found:</strong> @{length(variables('LinkedIdentities'))}<br/><strong>Risk Level:</strong> @{outputs('Determine_Correlation_Severity')}<br/><strong>Correlation Details:</strong><br/>@{string(variables('CorrelationResults'))}<br/><strong>Linked Accounts:</strong><br/>@{string(variables('LinkedIdentities'))}</p>"
+                }
+              },
+              "runAfter": {
+                "Update_Incident_With_Correlation": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "SpyCloudApiKey": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('SpyCloudApiKey')]"
+            },
+            "SpyCloudApiUrl": {
+              "type": "String",
+              "defaultValue": "[parameters('SpyCloudApiUrl')]"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-IdLinkCorrelation-Template",
+        "hidden-SentinelTemplateVersion": "2.0.0"
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  }
+}

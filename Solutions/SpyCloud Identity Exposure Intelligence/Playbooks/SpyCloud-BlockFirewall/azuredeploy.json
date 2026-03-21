@@ -1,0 +1,398 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-BlockFirewall",
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
+    },
+    "FortinetApiUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Fortinet FortiGate API base URL (e.g., https://firewall.example.com/api/v2)"
+      }
+    },
+    "FortinetApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Fortinet FortiGate API key"
+      }
+    },
+    "PaloAltoApiUrl": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Palo Alto Panorama/Firewall API URL"
+      }
+    },
+    "PaloAltoApiKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Palo Alto API key"
+      }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Entities_-_Get_IPs": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/entities/ip",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Initialize_BlockResults": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "BlockResults",
+                    "type": "array",
+                    "value": []
+                  }
+                ]
+              },
+              "runAfter": {
+                "Entities_-_Get_IPs": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Process_Each_IP": {
+              "type": "Foreach",
+              "foreach": "@body('Entities_-_Get_IPs')?['IPs']",
+              "actions": {
+                "Block_IP_Scope": {
+                  "type": "Scope",
+                  "actions": {
+                    "Block_On_Fortinet": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('FortinetApiUrl')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "Fortinet_Add_Address": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@{parameters('FortinetApiUrl')}/cmdb/firewall/address",
+                            "headers": {
+                              "Content-Type": "application/json",
+                              "Authorization": "Bearer @{parameters('FortinetApiKey')}"
+                            },
+                            "body": {
+                              "name": "SpyCloud-Block-@{items('Process_Each_IP')?['Address']}",
+                              "type": "ipmask",
+                              "subnet": "@{items('Process_Each_IP')?['Address']}/32",
+                              "comment": "Blocked by SpyCloud Sentinel playbook - Incident @{triggerBody()?['object']?['properties']?['incidentNumber']}"
+                            }
+                          },
+                          "runAfter": {}
+                        },
+                        "Fortinet_Add_To_Block_Group": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@{parameters('FortinetApiUrl')}/cmdb/firewall/addrgrp/SpyCloud-Blocked-IPs/member",
+                            "headers": {
+                              "Content-Type": "application/json",
+                              "Authorization": "Bearer @{parameters('FortinetApiKey')}"
+                            },
+                            "body": {
+                              "name": "SpyCloud-Block-@{items('Process_Each_IP')?['Address']}"
+                            }
+                          },
+                          "runAfter": {
+                            "Fortinet_Add_Address": [
+                              "Succeeded"
+                            ]
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {}
+                    },
+                    "Block_On_PaloAlto": {
+                      "type": "If",
+                      "expression": {
+                        "and": [
+                          {
+                            "not": {
+                              "equals": [
+                                "@parameters('PaloAltoApiUrl')",
+                                ""
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "actions": {
+                        "PaloAlto_Add_To_Block_List": {
+                          "type": "Http",
+                          "inputs": {
+                            "method": "POST",
+                            "uri": "@{parameters('PaloAltoApiUrl')}/restapi/v10.2/Objects/Addresses",
+                            "headers": {
+                              "Content-Type": "application/json",
+                              "X-PAN-KEY": "@{parameters('PaloAltoApiKey')}"
+                            },
+                            "queries": {
+                              "location": "vsys",
+                              "vsys": "vsys1",
+                              "name": "SpyCloud-Block-@{replace(items('Process_Each_IP')?['Address'], '.', '-')}"
+                            },
+                            "body": {
+                              "entry": {
+                                "@@name": "SpyCloud-Block-@{replace(items('Process_Each_IP')?['Address'], '.', '-')}",
+                                "ip-netmask": "@{items('Process_Each_IP')?['Address']}/32",
+                                "description": "Blocked by SpyCloud Sentinel - Incident @{triggerBody()?['object']?['properties']?['incidentNumber']}"
+                              }
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "runAfter": {}
+                    },
+                    "Append_Block_Success": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "BlockResults",
+                        "value": {
+                          "ip": "@items('Process_Each_IP')?['Address']",
+                          "status": "Blocked",
+                          "timestamp": "@utcNow()"
+                        }
+                      },
+                      "runAfter": {
+                        "Block_On_Fortinet": [
+                          "Succeeded",
+                          "Skipped"
+                        ],
+                        "Block_On_PaloAlto": [
+                          "Succeeded",
+                          "Skipped"
+                        ]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Catch_Block_Errors": {
+                  "type": "Scope",
+                  "actions": {
+                    "Append_Block_Failure": {
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "BlockResults",
+                        "value": {
+                          "ip": "@items('Process_Each_IP')?['Address']",
+                          "status": "Failed",
+                          "error": "Firewall API call failed"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "Block_IP_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
+                  }
+                }
+              },
+              "runAfter": {
+                "Initialize_BlockResults": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Add_Summary_Comment": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/incident-comments",
+                "body": {
+                  "incidentArmId": "@triggerBody()?['object']?['id']",
+                  "message": "<p><strong>SpyCloud-BlockFirewall:</strong> Firewall block actions completed.<br/>Results: @{variables('BlockResults')}</p>"
+                }
+              },
+              "runAfter": {
+                "Process_Each_IP": [
+                  "Succeeded",
+                  "Failed"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "FortinetApiUrl": {
+              "type": "String",
+              "defaultValue": "[parameters('FortinetApiUrl')]"
+            },
+            "FortinetApiKey": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('FortinetApiKey')]"
+            },
+            "PaloAltoApiUrl": {
+              "type": "String",
+              "defaultValue": "[parameters('PaloAltoApiUrl')]"
+            },
+            "PaloAltoApiKey": {
+              "type": "SecureString",
+              "defaultValue": "[parameters('PaloAltoApiKey')]"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-BlockFirewall",
+        "hidden-SentinelTemplateVersion": "2.0.0"
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
+  }
+}

@@ -1,0 +1,233 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "metadata": {
+        "title": "SpyCloud-Get-Email-Breach-Data-Playbook",
+        "description": "Runs on incident trigger, fetches Account entities (emails), retrieves breach data from SpyCloud API for each email, and adds results to incident comments.",
+        "prerequisites": [
+            "1. SpyCloud Custom Connector must be deployed first",
+            "2. SpyCloud API Key from portal.spycloud.com"
+        ],
+        "lastUpdateTime": "2026-03-21T00:00:00.000Z",
+        "entities": [
+            "Account"
+        ],
+        "tags": [
+            "SpyCloud",
+            "Breach",
+            "Identity",
+            "Enrichment"
+        ],
+        "support": {
+            "tier": "Partner",
+            "name": "SpyCloud",
+            "email": "integrations@spycloud.com",
+            "link": "https://portal.spycloud.com"
+        },
+        "author": {
+            "name": "SpyCloud"
+        }
+    },
+    "parameters": {
+        "PlaybookName": {
+            "defaultValue": "SpyCloud-Get-Email-Breach-Data-Playbook",
+            "type": "String",
+            "metadata": {
+                "description": "Name of the Logic App (SpyCloud-Get-Email-Breach-Data-Playbook)"
+            }
+        },
+        "SpyCloudConnectorName": {
+            "defaultValue": "SpyCloud-Identity-Exposure-Intelligence",
+            "type": "String",
+            "metadata": {
+                "description": "Name of the SpyCloud custom connector"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "azuresentinel",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "azuresentinel",
+                "customParameterValues": {},
+                "parameterValueType": "Alternative",
+                "api": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('SpyCloudConnectorName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "displayName": "[parameters('SpyCloudConnectorName')]",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/customApis/', parameters('SpyCloudConnectorName'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('PlaybookName')]",
+            "location": "[resourceGroup().location]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', 'azuresentinel')]",
+                "[resourceId('Microsoft.Web/connections', parameters('SpyCloudConnectorName'))]"
+            ],
+            "tags": {
+                "LogicAppsCategory": "security",
+                "hidden-SentinelTemplateName": "SpyCloud-Get-Email-Breach-Data-Playbook",
+                "hidden-SentinelTemplateVersion": "2.0"
+            },
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "Microsoft_Sentinel_incident": {
+                            "type": "ApiConnectionWebhook",
+                            "inputs": {
+                                "body": {
+                                    "callback_url": "@{listCallbackUrl()}"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "path": "/incident-creation"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Entities_-_Get_Accounts": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']",
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/entities/account"
+                            },
+                            "runAfter": {}
+                        },
+                        "For_Each_Entity": {
+                            "type": "Foreach",
+                            "foreach": "@body('Entities_-_Get_Accounts')?['accounts']",
+                            "actions": {
+                                "Call_SpyCloud_API": {
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['SpyCloudConnector']['connectionId']"
+                                            }
+                                        },
+                                        "method": "get",
+                                        "path": "/breach/data/emails/@{encodeURIComponent(items('For_Each_Entity')?['Name'])}"
+                                    },
+                                    "runAfter": {}
+                                },
+                                "Parse_SpyCloud_Response": {
+                                    "type": "ParseJson",
+                                    "inputs": {
+                                        "content": "@body('Call_SpyCloud_API')",
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "cursor": {
+                                                    "type": "string"
+                                                },
+                                                "hits": {
+                                                    "type": "integer"
+                                                },
+                                                "results": {
+                                                    "type": "array"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Call_SpyCloud_API": [
+                                            "Succeeded"
+                                        ]
+                                    }
+                                },
+                                "Add_Comment_To_Incident": {
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "body": {
+                                            "incidentArmId": "@triggerBody()?['object']?['id']",
+                                            "message": "<p><strong>SpyCloud Breach Data</strong><br>@{body('Parse_SpyCloud_Response')?['hits']} records found.<br><br>@{body('Parse_SpyCloud_Response')?['results']}</p>"
+                                        },
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/Incidents/Comment"
+                                    },
+                                    "runAfter": {
+                                        "Parse_SpyCloud_Response": [
+                                            "Succeeded"
+                                        ]
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Entities_-_Get_Accounts": [
+                                    "Succeeded"
+                                ]
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azuresentinel": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', 'azuresentinel')]",
+                                "connectionName": "azuresentinel",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]",
+                                "connectionProperties": {
+                                    "authentication": {
+                                        "type": "ManagedServiceIdentity"
+                                    }
+                                }
+                            },
+                            "SpyCloudConnector": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('SpyCloudConnectorName'))]",
+                                "connectionName": "[parameters('SpyCloudConnectorName')]",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/customApis/', parameters('SpyCloudConnectorName'))]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

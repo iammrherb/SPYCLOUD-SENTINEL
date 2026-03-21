@@ -1,0 +1,403 @@
+# SpyCloud Core Detection Rule Templates
+# These templates provide foundational SpyCloud breach and exposure detection rules.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
+
+templateVersion: "1.0.0"
+templateId: spycloud-core-detection-templates
+category: SpyCloud Core Detection
+deployAsTemplate: true
+requiredDataSources:
+  - SpyCloud Breach Watchlist
+  - SpyCloud Breach Catalog
+  - SpyCloud Conditional Access Logs
+requiredTables:
+  - SpyCloudBreachWatchlist_CL
+  - SpyCloudBreachCatalog_CL
+  - SpyCloud_ConditionalAccessLogs_CL
+connectorAssociation:
+  - SpyCloud Enterprise Protection API
+
+---
+id: sc-001-infostealer-credential-exposure
+name: SpyCloud — Infostealer Credential Exposure Detected
+description: |
+  Detects when employee credentials are exposed via infostealer malware (severity >= 20).
+  These are high-risk exposures where malware actively stole credentials from an infected device.
+  Correlates with SpyCloud breach watchlist data to identify users requiring immediate remediation.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1555
+  - T1078
+query: |
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(1h)
+  | where severity >= 20
+  | where isnotempty(email)
+  | summarize ExposureCount = count(), Domains = make_set(target_domain), PasswordTypes = make_set(password_type), MaxSeverity = max(severity), MachineIds = make_set(infected_machine_id) by email, email_domain
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-002-plaintext-password-exposure
+name: SpyCloud — Plaintext Password Exposure
+description: |
+  Detects when employee passwords are exposed in plaintext format, indicating the password
+  can be directly used by attackers without cracking. Requires immediate password reset.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+techniques:
+  - T1552
+  - T1552.001
+query: |
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(1h)
+  | where password_type == "plaintext" or isnotempty(password_plaintext)
+  | where isnotempty(email)
+  | summarize ExposureCount = count(), TargetDomains = make_set(target_domain), Sources = make_set(source_id) by email, email_domain
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-003-session-cookie-theft
+name: SpyCloud — Session Cookie Theft (MFA Bypass Risk)
+description: |
+  Detects severity 25 exposures indicating stolen session cookies or application tokens.
+  Attackers can use stolen cookies to bypass MFA entirely. Requires immediate session revocation.
+severity: High
+enabled: false
+queryFrequency: 30m
+queryPeriod: 30m
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - DefenseEvasion
+techniques:
+  - T1539
+  - T1550.004
+query: |
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(30m)
+  | where severity == 25
+  | where isnotempty(email)
+  | summarize CookieCount = count(), Applications = make_set(target_domain), MachineIds = make_set(infected_machine_id) by email, email_domain
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-004-pii-ssn-exposure
+name: SpyCloud — PII/SSN/National ID Exposure
+description: |
+  Detects exposure of personally identifiable information including SSN, national ID,
+  phone numbers, and physical addresses from breach or infostealer data.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 1h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Collection
+  - CredentialAccess
+techniques:
+  - T1005
+  - T1552
+query: |
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(1h)
+  | where severity >= 5
+  | where isnotempty(email)
+  | summarize ExposureCount = count(), MaxSev = max(severity), BreachSources = make_set(source_id) by email, email_domain
+  | where ExposureCount > 1
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-005-executive-vip-exposure
+name: SpyCloud — Executive/VIP User Credential Exposure
+description: |
+  Detects credential exposure for executive or VIP users tracked in the SpyCloud VIP watchlist.
+  These high-value targets require priority investigation and remediation.
+severity: High
+enabled: false
+queryFrequency: 30m
+queryPeriod: 30m
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1078
+  - T1589.001
+query: |
+  let vipUsers = _GetWatchlist('SpyCloud-VIP-Watchlist') | project SearchKey;
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(30m)
+  | where email in (vipUsers) or email_username in (vipUsers)
+  | summarize ExposureCount = count(), MaxSeverity = max(severity), PasswordTypes = make_set(password_type) by email, email_domain
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-006-multi-domain-credential-reuse
+name: SpyCloud — Multi-Domain Credential Reuse Detected
+description: |
+  Detects users whose credentials appear across multiple target domains, indicating
+  password reuse. If one domain is compromised, all accounts using the same password are at risk.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+techniques:
+  - T1110.004
+query: |
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(24h)
+  | where isnotempty(target_domain)
+  | summarize DomainCount = dcount(target_domain), Domains = make_set(target_domain), ExposureCount = count() by email
+  | where DomainCount >= 3
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-007-device-reinfection
+name: SpyCloud — Device Reinfection Pattern Detected
+description: |
+  Detects devices infected by infostealer malware multiple times, indicating persistent
+  compromise or inadequate remediation. These devices require full forensic investigation.
+severity: High
+enabled: false
+queryFrequency: 12h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - Execution
+techniques:
+  - T1547
+  - T1059
+query: |
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(30d)
+  | where isnotempty(infected_machine_id)
+  | summarize InfectionCount = dcount(source_id), InfectionDates = make_set(spycloud_publish_date), Users = make_set(email) by infected_machine_id, user_hostname
+  | where InfectionCount >= 2
+entityMappings:
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: user_hostname
+
+---
+id: sc-008-high-sighting-credential
+name: SpyCloud — High-Sighting Credential Alert
+description: |
+  Detects credentials with high sighting counts (>3), meaning the same credential
+  has been found in multiple breach sources. Indicates widely circulated credentials.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+techniques:
+  - T1078
+query: |
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(24h)
+  | where sighting > 3
+  | summarize MaxSighting = max(sighting), Sources = dcount(source_id), MaxSeverity = max(severity) by email, email_domain
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-009-new-malware-family
+name: SpyCloud — New Malware Family Targeting Organization
+description: |
+  Detects when a previously unseen malware family appears in SpyCloud breach catalog
+  data affecting your organization. Indicates new threat actor activity.
+severity: Medium
+enabled: false
+queryFrequency: 12h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Execution
+  - Collection
+techniques:
+  - T1204
+  - T1005
+query: |
+  let knownFamilies = SpyCloudBreachCatalog_CL
+  | where TimeGenerated < ago(24h)
+  | where isnotempty(malware_family)
+  | distinct malware_family;
+  SpyCloudBreachCatalog_CL
+  | where TimeGenerated > ago(24h)
+  | where isnotempty(malware_family)
+  | where malware_family !in (knownFamilies)
+  | project TimeGenerated, malware_family, short_title, breach_category, num_records, confidence
+
+---
+id: sc-010-stale-credential-no-remediation
+name: SpyCloud — Stale Exposure Without Remediation (>48h)
+description: |
+  Detects credential exposures older than 48 hours that have no corresponding
+  remediation action in the Conditional Access logs. Indicates remediation gap.
+severity: Medium
+enabled: false
+queryFrequency: 12h
+queryPeriod: 72h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+techniques:
+  - T1078
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated between (ago(72h) .. ago(48h))
+  | where severity >= 20
+  | distinct email;
+  let remediatedUsers = SpyCloud_ConditionalAccessLogs_CL
+  | where TimeGenerated > ago(72h)
+  | where ActionStatus == "Success"
+  | distinct Email;
+  exposedUsers
+  | where email !in (remediatedUsers)
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-011-corporate-email-consumer-breach
+name: SpyCloud — Corporate Email on Consumer Site Breach
+description: |
+  Detects corporate email addresses exposed in consumer site breaches (gaming, dating,
+  social media). Indicates employees using corporate credentials on personal accounts.
+severity: Medium
+enabled: false
+queryFrequency: 12h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1078
+  - T1078.004
+query: |
+  let approvedDomains = _GetWatchlist('SpyCloud-Approved-Domains') | project SearchKey;
+  SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(24h)
+  | where email_domain in (approvedDomains)
+  | where target_domain !in (approvedDomains)
+  | where isnotempty(target_domain)
+  | summarize ConsumerSites = make_set(target_domain), Count = count() by email, email_domain
+  | extend AccountName = tostring(split(email, "@")[0]), AccountDomain = tostring(split(email, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-012-exposure-volume-spike
+name: SpyCloud — Credential Exposure Volume Spike (Anomaly)
+description: |
+  Detects anomalous spikes in credential exposure volume compared to the 7-day baseline.
+  May indicate a new large-scale breach affecting your organization.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+techniques:
+  - T1078
+query: |
+  let baseline = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated between (ago(7d) .. ago(6h))
+  | summarize DailyAvg = count() / 7.0;
+  let current = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(6h)
+  | summarize CurrentCount = count();
+  baseline
+  | join current on $left.DailyAvg == $left.DailyAvg
+  | where CurrentCount > DailyAvg * 3
+  | project CurrentCount, DailyAvg, SpikeRatio = CurrentCount / DailyAvg

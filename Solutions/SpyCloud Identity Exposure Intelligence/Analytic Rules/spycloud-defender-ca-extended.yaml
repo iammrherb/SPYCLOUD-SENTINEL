@@ -1,0 +1,780 @@
+id: sc-050-defender-cloud-apps-exposed-user
+name: SpyCloud + Defender for Cloud Apps — Exposed User Suspicious Activity
+description: |
+  Correlates SpyCloud credential exposure with Microsoft Defender for Cloud Apps alerts.
+  Detects suspicious cloud app usage by users with compromised credentials, including
+  impossible travel, mass downloads, suspicious inbox rules, and anomalous admin activity.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - Collection
+techniques:
+  - T1078
+  - T1114
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SecurityAlert
+  | where TimeGenerated > ago(1h)
+  | where ProviderName == "MCAS" or ProviderName == "Microsoft Cloud App Security"
+  | extend UserPrincipalName = tostring(parse_json(ExtendedProperties).["User Principal Name"])
+  | where UserPrincipalName in (exposedUsers)
+  | project TimeGenerated, AlertName, AlertSeverity, UserPrincipalName, Description, RemediationSteps, ProviderName
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-051-defender-identity-lateral-movement
+name: SpyCloud + Defender for Identity — Exposed User Lateral Movement Alert
+description: |
+  Correlates SpyCloud credential exposure with Microsoft Defender for Identity alerts.
+  Detects pass-the-hash, pass-the-ticket, overpass-the-hash, and other credential-based
+  lateral movement attacks involving exposed users.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - LateralMovement
+  - CredentialAccess
+techniques:
+  - T1550
+  - T1550.002
+  - T1550.003
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SecurityAlert
+  | where TimeGenerated > ago(1h)
+  | where ProviderName == "Azure Advanced Threat Protection" or ProviderName == "Microsoft Defender for Identity"
+  | extend UserPrincipalName = tostring(parse_json(ExtendedProperties).["User Principal Name"])
+  | where UserPrincipalName in (exposedUsers) or Description has_any (exposedUsers)
+  | project TimeGenerated, AlertName, AlertSeverity, UserPrincipalName, Description, Tactics, Techniques
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-052-defender-xdr-multi-stage-incident
+name: SpyCloud + Defender XDR — Exposed User Multi-Stage Incident Correlation
+description: |
+  Correlates SpyCloud credential exposure with Microsoft 365 Defender XDR incidents.
+  Identifies multi-stage attack chains (initial access → persistence → exfiltration)
+  involving users whose credentials were found in infostealer data.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - Persistence
+  - Exfiltration
+techniques:
+  - T1078
+  - T1114
+  - T1530
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SecurityIncident
+  | where TimeGenerated > ago(1h)
+  | mv-expand AlertIds
+  | join kind=inner (
+    SecurityAlert
+    | extend UserPrincipalName = tostring(parse_json(ExtendedProperties).["User Principal Name"])
+    | where UserPrincipalName in (exposedUsers)
+  ) on $left.AlertIds == $right.SystemAlertId
+  | summarize AlertCount = dcount(AlertName), Alerts = make_set(AlertName), Tactics = make_set(Tactics) by IncidentNumber, Title, Severity, UserPrincipalName
+  | where AlertCount >= 2
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-053-ca-policy-failure-exposed-user
+name: SpyCloud + Conditional Access — Policy Evaluation Failures for Exposed Users
+description: |
+  Detects Conditional Access policy evaluation failures (reportOnlyFailure, failure) for
+  users with SpyCloud credential exposure. These may represent attempted access that
+  should have been blocked, or CA policy gaps allowing compromised access.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+  - InitialAccess
+techniques:
+  - T1078
+  - T1550
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (exposedUsers)
+  | mv-expand ConditionalAccessPolicies
+  | extend PolicyName = tostring(ConditionalAccessPolicies.displayName),
+           PolicyResult = tostring(ConditionalAccessPolicies.result),
+           GrantControls = tostring(ConditionalAccessPolicies.enforcedGrantControls),
+           SessionControls = tostring(ConditionalAccessPolicies.enforcedSessionControls)
+  | where PolicyResult in ("failure", "reportOnlyFailure", "reportOnlyNotApplied")
+  | summarize FailedPolicies = make_set(PolicyName), PolicyResults = make_set(PolicyResult) by UserPrincipalName, IPAddress, AppDisplayName, ResultType
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-054-ca-token-replay-exposed-user
+name: SpyCloud + Entra ID — Token Replay or Refresh Token Abuse from Exposed User
+description: |
+  Detects token replay attacks and suspicious refresh token usage from users with
+  SpyCloud credential exposure. Attackers with stolen cookies/tokens may replay
+  them from different IPs to bypass authentication.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - DefenseEvasion
+techniques:
+  - T1550.001
+  - T1539
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 25
+  | distinct email;
+  AADNonInteractiveUserSignInLogs
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (exposedUsers)
+  | where ResultType == 0
+  | summarize IPCount = dcount(IPAddress), IPs = make_set(IPAddress, 10), AppCount = dcount(AppDisplayName), Apps = make_set(AppDisplayName) by UserPrincipalName, bin(TimeGenerated, 15m)
+  | where IPCount >= 2
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-055-o365-teams-external-sharing
+name: SpyCloud + O365 — Exposed User External Sharing in Teams/SharePoint
+description: |
+  Detects external file sharing or guest invitations in Teams and SharePoint by users
+  with SpyCloud credential exposure. Attackers may exfiltrate data through sharing.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Exfiltration
+  - Collection
+techniques:
+  - T1567
+  - T1537
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where Operation in ("SharingSet", "AnonymousLinkCreated", "CompanyLinkCreated", "SecureLinkCreated", "AddedToSecureLink", "SharingInvitationCreated", "MemberAdded")
+  | where UserId in (exposedUsers)
+  | extend TargetUser = tostring(parse_json(tostring(ModifiedProperties))[0].NewValue)
+  | project TimeGenerated, UserId, Operation, OfficeObjectId, TargetUser, ClientIP, Site_Url = OfficeWorkload
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: ClientIP
+
+---
+id: sc-056-o365-power-platform-activity
+name: SpyCloud + O365 — Exposed User Power Platform/Power Automate Activity
+description: |
+  Detects Power Automate flow creation or Power Apps usage by users with SpyCloud exposure.
+  Attackers may create automated data exfiltration flows using compromised accounts.
+severity: Medium
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - Exfiltration
+techniques:
+  - T1098
+  - T1567
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where RecordType in (25, 26, 28, 40, 41, 42, 43, 44, 45)
+  | where UserId in (exposedUsers)
+  | project TimeGenerated, UserId, Operation, OfficeWorkload, ClientIP
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-057-mde-suspicious-process-exposed-device
+name: SpyCloud + Defender for Endpoint — Suspicious Process on Exposed Device
+description: |
+  Detects suspicious process execution (LOLBins, encoded PowerShell, credential dumping)
+  on devices identified by SpyCloud as infected by infostealer malware. Indicates ongoing
+  compromise or secondary tooling deployment.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Execution
+  - DefenseEvasion
+techniques:
+  - T1059.001
+  - T1218
+query: |
+  let infectedHosts = SpyCloudCompassDevices_CL
+  | where TimeGenerated > ago(30d)
+  | distinct user_hostname;
+  DeviceProcessEvents
+  | where TimeGenerated > ago(1h)
+  | where DeviceName in (infectedHosts)
+  | where FileName has_any ("powershell.exe", "cmd.exe", "wscript.exe", "cscript.exe", "mshta.exe", "regsvr32.exe", "certutil.exe", "bitsadmin.exe", "rundll32.exe")
+     or ProcessCommandLine has_any ("-enc", "-encoded", "downloadstring", "invoke-expression", "iex", "bypass", "hidden", "FromBase64")
+  | project TimeGenerated, DeviceName, FileName, ProcessCommandLine, AccountName, InitiatingProcessFileName, FolderPath
+  | extend HostName = DeviceName
+entityMappings:
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: HostName
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+
+---
+id: sc-058-dns-tunneling-exposed-device
+name: SpyCloud + DNS — DNS Tunneling Detection from Exposed Device
+description: |
+  Detects DNS tunneling patterns (high-entropy, long subdomains, high query volume) from
+  devices identified by SpyCloud as infected. Indicates potential data exfiltration or C2.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 30d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CommandAndControl
+  - Exfiltration
+techniques:
+  - T1071.004
+  - T1048.003
+query: |
+  let infectedHosts = SpyCloudCompassDevices_CL
+  | where TimeGenerated > ago(30d)
+  | distinct user_hostname;
+  DnsEvents
+  | where TimeGenerated > ago(1h)
+  | where Computer in (infectedHosts)
+  | extend SubdomainLength = strlen(tostring(split(Name, ".")[0]))
+  | where SubdomainLength > 30 or QueryType in ("TXT", "NULL", "CNAME")
+  | summarize QueryCount = count(), UniqueQueries = dcount(Name), AvgSubdomainLen = avg(SubdomainLength), SampleQueries = make_set(Name, 5) by Computer
+  | where QueryCount > 50 or AvgSubdomainLen > 25
+  | extend HostName = Computer
+entityMappings:
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: HostName
+
+---
+id: sc-059-aad-service-principal-creation
+name: SpyCloud + Azure AD — Exposed User Service Principal/App Registration Creation
+description: |
+  Detects service principal or app registration creation by users with SpyCloud credential
+  exposure. Attackers may create backdoor applications for persistent API access.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - PrivilegeEscalation
+techniques:
+  - T1098.001
+  - T1136.003
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AuditLogs
+  | where TimeGenerated > ago(1h)
+  | where OperationName has_any ("Add application", "Add service principal", "Add app role assignment", "Add delegated permission grant", "Add application credentials")
+  | extend InitiatorUPN = tostring(InitiatedBy.user.userPrincipalName)
+  | where InitiatorUPN in (exposedUsers)
+  | extend AppName = tostring(TargetResources[0].displayName), AppId = tostring(TargetResources[0].id)
+  | project TimeGenerated, InitiatorUPN, OperationName, AppName, AppId
+  | extend AccountName = tostring(split(InitiatorUPN, "@")[0]), AccountDomain = tostring(split(InitiatorUPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-060-defender-alert-suppression
+name: SpyCloud + Defender — Exposed User Suppressing Security Alerts
+description: |
+  Detects alert suppression, rule modification, or security configuration changes by users
+  with SpyCloud credential exposure. Attackers may try to hide their tracks by suppressing alerts.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+techniques:
+  - T1562.001
+  - T1562.004
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AuditLogs
+  | where TimeGenerated > ago(1h)
+  | where OperationName has_any ("Disable account", "Delete conditional access policy", "Update conditional access policy", "Update authorization policy", "Remove security defaults", "Disable security defaults")
+  | extend InitiatorUPN = tostring(InitiatedBy.user.userPrincipalName)
+  | where InitiatorUPN in (exposedUsers)
+  | project TimeGenerated, InitiatorUPN, OperationName, Result, TargetResources
+  | extend AccountName = tostring(split(InitiatorUPN, "@")[0]), AccountDomain = tostring(split(InitiatorUPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-061-o365-dlp-violation-exposed-user
+name: SpyCloud + O365 — Exposed User DLP Policy Violation
+description: |
+  Correlates SpyCloud credential exposure with Data Loss Prevention policy violations.
+  Compromised users triggering DLP alerts may indicate active data exfiltration attempts.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Exfiltration
+  - Collection
+techniques:
+  - T1048
+  - T1567
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where RecordType == 13 or Operation has_any ("DlpRuleMatch", "DLPRuleUndo")
+  | where UserId in (exposedUsers)
+  | project TimeGenerated, UserId, Operation, OfficeObjectId, ClientIP, OfficeWorkload
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-062-ca-legacy-auth-exposed-user
+name: SpyCloud + Conditional Access — Exposed User Legacy Authentication Attempt
+description: |
+  Detects legacy authentication protocol usage (IMAP, POP3, SMTP, Exchange ActiveSync)
+  by users with SpyCloud credential exposure. Legacy protocols often bypass MFA.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+  - T1110
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (exposedUsers)
+  | where ClientAppUsed in ("Exchange ActiveSync", "IMAP4", "POP3", "SMTP", "Authenticated SMTP", "Exchange Online PowerShell", "Other clients", "Exchange Web Services")
+     or isempty(AuthenticationRequirement) or AuthenticationRequirement == "singleFactorAuthentication"
+  | project TimeGenerated, UserPrincipalName, IPAddress, ClientAppUsed, AppDisplayName, ResultType, AuthenticationRequirement, ConditionalAccessStatus
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-063-defender-cloud-azure-resource
+name: SpyCloud + Defender for Cloud — Exposed User Azure Resource Manipulation
+description: |
+  Detects Azure resource creation, modification, or deletion by users with SpyCloud credential
+  exposure. Attackers with cloud admin credentials may deploy cryptominers, exfiltrate storage,
+  or create backdoor resources.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Impact
+  - Persistence
+techniques:
+  - T1496
+  - T1578
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AzureActivity
+  | where TimeGenerated > ago(1h)
+  | where Caller in (exposedUsers)
+  | where OperationNameValue has_any ("Microsoft.Compute/virtualMachines/write", "Microsoft.Storage/storageAccounts/write", "Microsoft.Network/networkSecurityGroups/write", "Microsoft.Authorization/roleAssignments/write", "Microsoft.KeyVault/vaults/write")
+  | project TimeGenerated, Caller, OperationNameValue, ResourceGroup, ActivityStatusValue, SubscriptionId
+  | extend AccountName = tostring(split(Caller, "@")[0]), AccountDomain = tostring(split(Caller, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-064-defender-endpoint-alert-exposed-user
+name: SpyCloud + Defender for Endpoint — Active Alert on Exposed User Device
+description: |
+  Correlates SpyCloud exposure data with active Microsoft Defender for Endpoint alerts.
+  When a device with an exposed user has active MDE alerts, it indicates confirmed compromise.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Execution
+  - CommandAndControl
+techniques:
+  - T1059
+  - T1071
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SecurityAlert
+  | where TimeGenerated > ago(1h)
+  | where ProviderName == "MDATP" or ProviderName == "Microsoft Defender Advanced Threat Protection"
+  | extend UserPrincipalName = tostring(parse_json(ExtendedProperties).["User Name"])
+  | where UserPrincipalName in (exposedUsers) or tostring(parse_json(Entities)) has_any (exposedUsers)
+  | project TimeGenerated, AlertName, AlertSeverity, UserPrincipalName, Description, CompromisedEntity, Tactics
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-065-ca-compliant-device-bypass
+name: SpyCloud + Conditional Access — Exposed User Non-Compliant Device Sign-in
+description: |
+  Detects successful sign-ins from non-compliant or unmanaged devices by users with
+  SpyCloud credential exposure. CA policies requiring compliant devices may not be enforced.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (exposedUsers)
+  | where ResultType == 0
+  | extend IsCompliant = tostring(DeviceDetail.isCompliant), IsManaged = tostring(DeviceDetail.isManaged), TrustType = tostring(DeviceDetail.trustType)
+  | where IsCompliant != "true" or IsManaged != "true"
+  | project TimeGenerated, UserPrincipalName, IPAddress, AppDisplayName, IsCompliant, IsManaged, TrustType, DeviceDetail, ConditionalAccessStatus
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-066-o365-exchange-transport-rule
+name: SpyCloud + O365 — Exposed User Exchange Transport Rule Modification
+description: |
+  Detects Exchange transport rule creation or modification by exposed users.
+  Attackers may create org-wide mail flow rules to BCC emails externally or
+  bypass spam filters for phishing campaigns.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Collection
+  - Persistence
+techniques:
+  - T1114.003
+  - T1098
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where OfficeWorkload == "Exchange"
+  | where Operation in ("New-TransportRule", "Set-TransportRule", "Enable-TransportRule", "New-InboxRule", "Set-InboxRule", "Set-Mailbox", "New-ManagementRoleAssignment")
+  | where UserId in (exposedUsers)
+  | project TimeGenerated, UserId, Operation, Parameters, ClientIP
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: ClientIP
+
+---
+id: sc-067-firewall-nsg-rule-change-exposed-user
+name: SpyCloud + Azure NSG — Exposed User Network Security Group Modification
+description: |
+  Detects Azure Network Security Group rule changes by users with SpyCloud credential exposure.
+  Attackers may open ports, remove deny rules, or create allow-all rules to enable lateral movement.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+  - Persistence
+techniques:
+  - T1562.004
+  - T1098
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AzureActivity
+  | where TimeGenerated > ago(1h)
+  | where OperationNameValue has_any ("Microsoft.Network/networkSecurityGroups/securityRules/write", "Microsoft.Network/networkSecurityGroups/securityRules/delete", "Microsoft.Network/networkSecurityGroups/write")
+  | where Caller in (exposedUsers)
+  | project TimeGenerated, Caller, OperationNameValue, ResourceGroup, ActivityStatusValue, Properties_d
+  | extend AccountName = tostring(split(Caller, "@")[0]), AccountDomain = tostring(split(Caller, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-068-defender-risky-user-exposed
+name: SpyCloud + Entra ID Protection — Exposed User Marked as Risky
+description: |
+  Correlates SpyCloud credential exposure with Entra ID Protection risky user state.
+  Users flagged by both SpyCloud (external threat intel) and Identity Protection (behavioral)
+  represent the highest confidence compromised accounts.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - CredentialAccess
+techniques:
+  - T1078
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | summarize MaxSev = max(severity), Sources = dcount(source_id) by email;
+  AADRiskyUsers
+  | where TimeGenerated > ago(1h)
+  | where RiskLevel in ("high", "medium")
+  | where RiskState == "atRisk" or RiskState == "confirmedCompromised"
+  | join kind=inner exposedUsers on $left.UserPrincipalName == $right.email
+  | project TimeGenerated, UserPrincipalName, RiskLevel, RiskState, RiskDetail, MaxSev, Sources
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-069-remediation-action-audit
+name: SpyCloud — Remediation Action Audit Trail
+description: |
+  Tracks all automated remediation actions taken by SpyCloud playbooks, including password resets,
+  session revocations, CA group additions, MFA enforcements, and device isolations. Provides a
+  complete audit trail for compliance and post-incident review.
+severity: Informational
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Impact
+techniques:
+  - T1531
+query: |
+  let passwordResets = AuditLogs
+  | where TimeGenerated > ago(24h)
+  | where OperationName has_any ("Reset user password", "Change user password")
+  | where InitiatedBy has "SpyCloud"
+  | extend ActionType = "PasswordReset", UPN = tostring(TargetResources[0].userPrincipalName);
+  let sessionRevocations = AuditLogs
+  | where TimeGenerated > ago(24h)
+  | where OperationName == "Revoke sign in sessions"
+  | extend ActionType = "SessionRevocation", UPN = tostring(TargetResources[0].userPrincipalName);
+  let groupAdditions = AuditLogs
+  | where TimeGenerated > ago(24h)
+  | where OperationName == "Add member to group"
+  | where TargetResources[0].displayName has_any ("SpyCloud", "Blocked", "Restricted", "Compromised")
+  | extend ActionType = "SecurityGroupAddition", UPN = tostring(TargetResources[0].userPrincipalName);
+  union passwordResets, sessionRevocations, groupAdditions
+  | project TimeGenerated, ActionType, UPN, OperationName, InitiatedBy
+  | extend AccountName = tostring(split(UPN, "@")[0]), AccountDomain = tostring(split(UPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
