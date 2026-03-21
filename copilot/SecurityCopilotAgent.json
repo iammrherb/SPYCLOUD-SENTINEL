@@ -57,26 +57,25 @@
       "description": "Create a board-ready executive summary of the organization's dark web exposure posture with risk metrics, trend analysis, and strategic recommendations.",
       "inputs": [
         {
-          "name": "period",
+          "name": "domain",
           "type": "string",
-          "description": "Reporting period: 7d, 30d, 90d",
-          "required": false,
-          "default": "30d"
+          "description": "Organization domain to generate report for (e.g., company.com)",
+          "required": true
         },
         {
-          "name": "format",
-          "type": "string",
-          "description": "Report format: summary, detailed, board-presentation",
+          "name": "periodDays",
+          "type": "integer",
+          "description": "Reporting period in days (1-365, default 30)",
           "required": false,
-          "default": "detailed"
+          "default": 30
         }
       ],
       "endpoint": {
         "uri": "{AI_ENGINE_URL}/api/ai/executive-report",
         "method": "POST",
         "body": {
-          "period": "{period}",
-          "format": "{format}"
+          "domain": "{domain}",
+          "periodDays": "{periodDays}"
         }
       }
     },
@@ -113,25 +112,17 @@
       "description": "Create a detailed incident report for a Sentinel incident including timeline, affected entities, MITRE ATT&CK mapping, and remediation steps.",
       "inputs": [
         {
-          "name": "incident_id",
+          "name": "incidentId",
           "type": "string",
-          "description": "Sentinel incident ID",
+          "description": "Sentinel incident number (numeric ID)",
           "required": true
-        },
-        {
-          "name": "include_remediation",
-          "type": "boolean",
-          "description": "Include detailed remediation plan",
-          "required": false,
-          "default": true
         }
       ],
       "endpoint": {
         "uri": "{AI_ENGINE_URL}/api/ai/incident-report",
         "method": "POST",
         "body": {
-          "incident_id": "{incident_id}",
-          "include_remediation": "{include_remediation}"
+          "incidentId": "{incidentId}"
         }
       }
     },
@@ -141,25 +132,25 @@
       "description": "Create a prioritized remediation plan with step-by-step actions for password resets, session revocation, device isolation, Conditional Access updates, and user notification.",
       "inputs": [
         {
-          "name": "incident_id",
+          "name": "email",
           "type": "string",
-          "description": "Sentinel incident ID to create remediation plan for",
+          "description": "Email address of the exposed user to generate remediation plan for",
           "required": true
         },
         {
-          "name": "auto_execute",
+          "name": "includePrevention",
           "type": "boolean",
-          "description": "Whether to suggest automatic execution of remediation playbooks",
+          "description": "Whether to include long-term prevention recommendations",
           "required": false,
-          "default": false
+          "default": true
         }
       ],
       "endpoint": {
         "uri": "{AI_ENGINE_URL}/api/ai/remediation-plan",
         "method": "POST",
         "body": {
-          "incident_id": "{incident_id}",
-          "auto_execute": "{auto_execute}"
+          "email": "{email}",
+          "includePrevention": "{includePrevention}"
         }
       }
     },

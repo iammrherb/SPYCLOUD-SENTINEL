@@ -24,6 +24,22 @@ export function registerGraphTools(server, config) {
   } = config.sentinel || {};
 
   /**
+   * Sanitize a value for safe interpolation into GQL single-quoted strings.
+   * Escapes backslashes first, then single quotes.
+   */
+  function sanitizeGql(value) {
+    return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  }
+
+  /**
+   * Sanitize a value for safe interpolation into KQL double-quoted strings.
+   * Escapes backslashes first, then double quotes.
+   */
+  function sanitizeKql(value) {
+    return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  }
+
+  /**
    * Acquire an OAuth token for a given scope using client credentials.
    * Uses AZURE_CLIENT_ID and AZURE_CLIENT_SECRET from environment.
    *
@@ -187,7 +203,7 @@ export function registerGraphTools(server, config) {
     async ({ entity, entity_type, depth }) => {
       // First try Sentinel Graph API
       const gql = `
-        MATCH path = (source:${entity_type} {name: '${entity.replace(/'/g, "\\'")}'})-[*1..${depth}]->(target)
+        MATCH path = (source:${entity_type} {name: '${sanitizeGql(entity)}'})-[*1..${depth}]->(target)
         RETURN path, target.name AS impacted_entity, target.type AS entity_type,
                length(path) AS distance
         ORDER BY distance ASC
@@ -199,7 +215,7 @@ export function registerGraphTools(server, config) {
       if (graphResult.error) {
         const kqlQuery = entity_type === "user"
           ? `
-            let targetUser = "${entity.replace(/"/g, '\\"')}";
+            let targetUser = "${sanitizeKql(entity)}";
             let exposedDevices = SpyCloudBreachWatchlist_CL
               | where email_s =~ targetUser
               | where isnotempty(infected_machine_id_s)
@@ -219,7 +235,7 @@ export function registerGraphTools(server, config) {
             | take 50
           `
           : `
-            let targetEntity = "${entity.replace(/"/g, '\\"')}";
+            let targetEntity = "${sanitizeKql(entity)}";
             SpyCloudBreachWatchlist_CL
             | where infected_machine_id_s == targetEntity or ip_address_s == targetEntity
             | summarize
@@ -297,7 +313,7 @@ export function registerGraphTools(server, config) {
     },
     async ({ source, target, max_hops }) => {
       const gql = `
-        MATCH path = (s {name: '${source.replace(/'/g, "\\'")}'})-[*1..${max_hops}]->(t {name: '${target.replace(/'/g, "\\'")}' })
+        MATCH path = (s {name: '${sanitizeGql(source)}'})-[*1..${max_hops}]->(t {name: '${sanitizeGql(target)}' })
         RETURN path, length(path) AS path_length,
                [node IN nodes(path) | node.name] AS path_nodes
         ORDER BY path_length ASC
@@ -308,8 +324,8 @@ export function registerGraphTools(server, config) {
       if (result.error) {
         // KQL fallback: find shared assets between source and target
         const kqlQuery = `
-          let sourceUser = "${source.replace(/"/g, '\\"')}";
-          let targetUser = "${target.replace(/"/g, '\\"')}";
+          let sourceUser = "${sanitizeKql(source)}";
+          let targetUser = "${sanitizeKql(target)}";
           let sourceDevices = SpyCloudBreachWatchlist_CL
             | where email_s =~ sourceUser
             | distinct infected_machine_id_s;
@@ -389,7 +405,7 @@ export function registerGraphTools(server, config) {
         : "WHERE target.is_internal = true";
 
       const gql = `
-        MATCH (source {name: '${entity.replace(/'/g, "\\'")}'})-[r]->(target)
+        MATCH (source {name: '${sanitizeGql(entity)}'})-[r]->(target)
         ${externalFilter}
         RETURN target.name AS asset, target.type AS asset_type,
                type(r) AS relationship, r.last_seen AS last_activity
@@ -401,7 +417,7 @@ export function registerGraphTools(server, config) {
       if (result.error) {
         // KQL fallback: build exposure from SpyCloud + SigninLogs
         const kqlQuery = `
-          let targetEntity = "${entity.replace(/"/g, '\\"')}";
+          let targetEntity = "${sanitizeKql(entity)}";
           let spycloudAssets = SpyCloudBreachWatchlist_CL
             | where email_s =~ targetEntity
             | summarize
@@ -642,7 +658,7 @@ export function registerGraphTools(server, config) {
     },
     async ({ domain, days }) => {
       const domainFilter = domain
-        ? `| where domain_s =~ "${domain.replace(/"/g, '\\"')}"`
+        ? `| where domain_s =~ "${sanitizeKql(domain)}"`
         : "";
 
       const kql = `
