@@ -261,7 +261,7 @@ flowchart LR
 - name: Health Check
   run: |
     chmod +x scripts/spycloud-toolkit.sh
-    ./scripts/spycloud-toolkit.sh health-check
+    ./scripts/spycloud-toolkit.sh --health-check
   env:
     AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     RESOURCE_GROUP: ${{ inputs.resource_group }}
@@ -324,7 +324,7 @@ az group delete --name rg-spycloud-sentinel --yes --no-wait
 | Step | Action | Command |
 |------|--------|---------|
 | 1 | Cancel running deployment | `az deployment group cancel -g <rg> -n <name>` |
-| 2 | Disable analytics rules | `./scripts/spycloud-toolkit.sh verify-analytics --disable` |
+| 2 | Disable analytics rules | `./scripts/spycloud-toolkit.sh --verify-analytics --disable` |
 | 3 | Disable automation rules | Via Sentinel portal > Automation |
 | 4 | Delete Logic Apps | `az logic workflow delete -g <rg> -n <name>` |
 | 5 | Delete Function App | `az functionapp delete -g <rg> -n <name>` |
