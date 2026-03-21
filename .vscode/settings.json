@@ -2,20 +2,140 @@
   "jupyter.jupyterServerType": "local",
   "jupyter.notebookFileRoot": "${workspaceFolder}/notebooks",
   "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "jupyter.interactiveWindow.creationMode": "perFile",
+  "jupyter.askForKernelRestart": false,
+
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.autoImportCompletions": true,
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/functions/SpyCloudEnrichment",
+    "${workspaceFolder}/functions/SpyCloudAIEngine"
+  ],
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests"],
+
   "notebook.cellToolbarLocation": {
     "default": "right",
     "jupyter-notebook": "left"
   },
   "notebook.output.textLineLimit": 500,
+  "notebook.output.scrolling": true,
+
   "editor.formatOnSave": true,
+  "editor.rulers": [120],
+  "editor.tabSize": 2,
+
   "files.associations": {
-    "*.ipynb": "jupyter-notebook"
+    "*.ipynb": "jupyter-notebook",
+    "*.json": "json",
+    "*.yaml": "yaml",
+    "*.yml": "yaml",
+    "host.json": "json",
+    "local.settings.json": "json",
+    "*.tf": "terraform"
   },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/node_modules": true,
+    "**/.venv": true
+  },
+
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    }
+  },
+  "[powershell]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true
+  },
+
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/Azure/azure-functions-host/dev/schemas/host-json-schema.json": "host.json",
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
+  },
+  "yaml.customTags": [
+    "!reference sequence"
+  ],
+
+  "azureFunctions.projectLanguage": "Python",
+  "azureFunctions.projectRuntime": "~4",
+  "azureFunctions.deploySubpath": "functions/SpyCloudEnrichment",
+  "azureFunctions.scmDoBuildDuringDeployment": true,
+
+  "rest-client.environmentVariables": {
+    "$shared": {
+      "spycloudApiBase": "https://api.spycloud.io/v2",
+      "aiEngineBase": "http://localhost:7072/api",
+      "enrichmentBase": "http://localhost:7071/api",
+      "mcpServerBase": "http://localhost:3001",
+      "graphApiBase": "https://graph.microsoft.com/v1.0",
+      "sentinelApiBase": "https://management.azure.com"
+    },
+    "local": {
+      "spycloudApiKey": "{{$dotenv SPYCLOUD_API_KEY}}",
+      "openaiApiKey": "{{$dotenv OPENAI_API_KEY}}",
+      "tenantId": "{{$dotenv AZURE_TENANT_ID}}",
+      "subscriptionId": "{{$dotenv AZURE_SUBSCRIPTION_ID}}"
+    },
+    "staging": {
+      "spycloudApiKey": "{{$dotenv SPYCLOUD_API_KEY}}",
+      "aiEngineBase": "https://func-spycloud-ai-staging.azurewebsites.net/api",
+      "enrichmentBase": "https://func-spycloud-enrichment-staging.azurewebsites.net/api"
+    }
+  },
+
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "json": true,
+    "markdown": true,
+    "python": true,
+    "javascript": true,
+    "powershell": true
+  },
+  "github.copilot.advanced": {
+    "authProvider": "github"
+  },
+
+  "terraform.languageServer.enable": true,
+  "terraform.experimentalFeatures.validateOnSave": true,
+
+  "markdown.mermaid.darkModeTheme": "dark",
+  "markdown.mermaid.lightModeTheme": "default",
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.venv": true,
+    "**/__pycache__": true
   }
 }

@@ -1,0 +1,301 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "install-enrichment-deps",
+      "type": "shell",
+      "command": "pip install -r requirements.txt",
+      "options": {
+        "cwd": "${workspaceFolder}/functions/SpyCloudEnrichment"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "install-ai-engine-deps",
+      "type": "shell",
+      "command": "pip install -r requirements.txt",
+      "options": {
+        "cwd": "${workspaceFolder}/functions/SpyCloudAIEngine"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "install-mcp-deps",
+      "type": "shell",
+      "command": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}/mcp-server"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "install-notebook-deps",
+      "type": "shell",
+      "command": "pip install -r requirements.txt",
+      "options": {
+        "cwd": "${workspaceFolder}/notebooks"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "install-all-deps",
+      "type": "shell",
+      "command": "echo 'Installing all dependencies...' && pip install -r functions/SpyCloudEnrichment/requirements.txt && pip install -r functions/SpyCloudAIEngine/requirements.txt && pip install -r notebooks/requirements.txt && cd mcp-server && npm install",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "start-enrichment-func",
+      "type": "shell",
+      "command": "func start --port 7071",
+      "options": {
+        "cwd": "${workspaceFolder}/functions/SpyCloudEnrichment",
+        "env": {
+          "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+          "FUNCTIONS_WORKER_RUNTIME": "python"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "start-ai-engine-func",
+      "type": "shell",
+      "command": "func start --port 7072",
+      "options": {
+        "cwd": "${workspaceFolder}/functions/SpyCloudAIEngine",
+        "env": {
+          "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+          "FUNCTIONS_WORKER_RUNTIME": "python"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "start-mcp-server",
+      "type": "shell",
+      "command": "node src/index.js",
+      "options": {
+        "cwd": "${workspaceFolder}/mcp-server"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "start-all-servers",
+      "dependsOn": [
+        "start-enrichment-func",
+        "start-ai-engine-func",
+        "start-mcp-server"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "validate-arm-templates",
+      "type": "shell",
+      "command": "python -c \"import json; [json.load(open(f)) for f in ['azuredeploy.json', 'mainTemplate.json', 'createUiDefinition.json', 'solutionMetadata.json']]; print('All ARM templates are valid JSON')\"",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "validate-analytics-rules",
+      "type": "shell",
+      "command": "python -c \"import json; data=json.load(open('analytics-rules.json')); print(f'Validated {len(data.get(\\\"rules\\\", data.get(\\\"analyticsRules\\\", [])))} analytics rules')\"",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "validate-playbooks",
+      "type": "shell",
+      "command": "python -c \"import json, glob; files=glob.glob('playbooks/*.json')+glob.glob('templates/playbooks/*.json'); [json.load(open(f)) for f in files]; print(f'Validated {len(files)} playbook files')\"",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "run-toolkit-health-check",
+      "type": "shell",
+      "command": "bash scripts/spycloud-toolkit.sh health-check",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "run-toolkit-permissions-check",
+      "type": "shell",
+      "command": "bash scripts/spycloud-toolkit.sh check-permissions",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "run-toolkit-data-simulation",
+      "type": "shell",
+      "command": "bash scripts/spycloud-toolkit.sh simulate-data",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "run-python-tests",
+      "type": "shell",
+      "command": "python -m pytest tests/ -v --tb=short",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "lint-python",
+      "type": "shell",
+      "command": "python -m black --check functions/ && python -m flake8 functions/ --max-line-length=120 --ignore=E501,W503",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "lint-javascript",
+      "type": "shell",
+      "command": "npx eslint src/",
+      "options": {
+        "cwd": "${workspaceFolder}/mcp-server"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "setup-python-venv",
+      "type": "shell",
+      "command": "python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip && pip install -r functions/SpyCloudEnrichment/requirements.txt && pip install -r functions/SpyCloudAIEngine/requirements.txt && pip install -r notebooks/requirements.txt && pip install black flake8 pytest",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "setup-copilot-agent",
+      "type": "shell",
+      "command": "echo '=== SpyCloud SCORCH Agent Setup ===' && echo '1. Upload copilot/SpyCloud_Agent.yaml to Security Copilot portal' && echo '2. Upload copilot/SpyCloud_Plugin.yaml as KQL plugin' && echo '3. Upload copilot/SpyCloud_API_Plugin.yaml as API plugin' && echo '4. Upload copilot/manifest.json for Content Hub registration' && echo '5. Configure MCP server URL in copilot/SecurityCopilotAgent.json' && echo '' && echo 'Files ready at:' && ls -la copilot/",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "setup-mcp-config",
+      "type": "shell",
+      "command": "echo '=== MCP Server Configuration ===' && echo 'Required environment variables:' && echo '  MCP_AUTH_TOKEN       - Authentication token for MCP endpoints' && echo '  SENTINEL_WORKSPACE_ID - Log Analytics workspace ID' && echo '  SENTINEL_WORKSPACE_KEY - Log Analytics workspace key' && echo '  AZURE_TENANT_ID      - Azure AD tenant ID' && echo '  AZURE_CLIENT_ID      - App registration client ID' && echo '  AZURE_CLIENT_SECRET   - App registration client secret' && echo '' && echo 'Available MCP Tools:' && echo '  - Blast Radius Analysis' && echo '  - Path Discovery (shortest path between entities)' && echo '  - Exposure Perimeter (attack surface analysis)' && echo '  - Graph Materialization (scheduled graph building)' && echo '' && echo 'Start server: cd mcp-server && node src/index.js'",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -21,7 +21,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Infostealer Credential Exposure Detected",
+        "displayName": "SpyCloud -- Infostealer Credential Exposure Detected",
         "description": "Detects new infostealer-sourced credential exposures (severity >= 20) from SpyCloud. These indicate a device was actively infected with malware that exfiltrated credentials, cookies, and session tokens. Severity 25 includes application-level data enabling MFA bypass. Requires immediate device investigation and credential reset.",
         "severity": "High",
         "enabled": false,
@@ -78,7 +78,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Plaintext Password Exposure (Critical Risk)",
+        "displayName": "SpyCloud -- Plaintext Password Exposure (Immediate Credential Reset Required)",
         "description": "Alerts when SpyCloud finds credentials with plaintext (unencrypted) passwords. These credentials can be used immediately by attackers without cracking. Highest priority for password reset.",
         "severity": "High",
         "enabled": false,
@@ -123,7 +123,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Stolen Session Cookies and Tokens (MFA Bypass Risk)",
+        "displayName": "SpyCloud -- Stolen Session Cookies Detected (MFA Bypass Risk)",
         "description": "Detects when stolen browser cookies or session tokens are found in SpyCloud data (severity 25). Attackers can replay authenticated sessions to bypass MFA entirely. Requires immediate session revocation and device investigation.",
         "severity": "High",
         "enabled": false,
@@ -180,7 +180,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - PII SSN National ID Financial Data Exposure",
+        "displayName": "SpyCloud -- Sensitive PII Exposure (SSN, Financial, or Health Data)",
         "description": "Detects exposure records containing sensitive PII such as Social Security numbers, bank account data, tax IDs, or health insurance IDs. May trigger breach notification obligations under HIPAA, PCI DSS, GDPR, or state privacy laws. Requires immediate compliance team notification.",
         "severity": "High",
         "enabled": false,
@@ -225,7 +225,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Executive VIP User Credential Exposure",
+        "displayName": "SpyCloud -- Executive or VIP User Credential Exposure",
         "description": "Detects credential exposures for users listed in the SpyCloud-VIP-Watchlist. These high-value accounts (executives, board members, IT admins) are prime targets for spear phishing and business email compromise. Escalate immediately to executive protection team.",
         "severity": "High",
         "enabled": false,
@@ -272,7 +272,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Multi-Domain Credential Reuse Detected",
+        "displayName": "SpyCloud -- Multi-Domain Credential Reuse Detected (5+ Services)",
         "description": "Detects when a single user has credentials exposed across 5 or more different target domains, indicating widespread credential reuse or a heavily infected device. High risk of account takeover across multiple services simultaneously.",
         "severity": "Medium",
         "enabled": false,
@@ -318,7 +318,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Device Re-Infection Detected",
+        "displayName": "SpyCloud -- Device Re-Infection After Previous Remediation",
         "description": "Detects when the same infected_machine_id appears in new SpyCloud exposures after previous remediation was logged in the MDE table. Indicates the device was re-compromised after initial cleanup, suggesting persistent malware, rootkit, or incomplete remediation.",
         "severity": "High",
         "enabled": false,
@@ -375,7 +375,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - High Sighting Credential Alert",
+        "displayName": "SpyCloud -- High-Sighting Credential (Actively Traded on Dark Web)",
         "description": "Detects credentials with a sighting count greater than 3, meaning the same email/password combination has been observed across multiple independent breach sources. Dramatically increases probability of active credential stuffing attacks using this pair.",
         "severity": "Medium",
         "enabled": false,
@@ -420,7 +420,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Password Reuse Across Critical Systems",
+        "displayName": "SpyCloud -- Password Reuse Across Critical Systems",
         "description": "Detects when the same password hash appears across multiple target domains for the same user, proving credential reuse. When combined with plaintext exposure on any one site, all sites sharing that password are immediately compromisable.",
         "severity": "High",
         "enabled": false,
@@ -467,7 +467,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - New Malware Family Detected in Breach Catalog",
+        "displayName": "SpyCloud -- New Malware Family Identified in Breach Catalog",
         "description": "Detects when a previously unseen malware family appears in the SpyCloud breach catalog. New malware families may indicate zero-day threats, new criminal toolkits, or emerging threat actor campaigns that require proactive hunting in your environment.",
         "severity": "Medium",
         "enabled": false,
@@ -512,7 +512,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Sensitive Source Breach Detection",
+        "displayName": "SpyCloud -- Sensitive Source Breach Detection",
         "description": "Detects breaches flagged as sensitive sources in the SpyCloud catalog. Sensitive sources often involve government, military, healthcare, or critical infrastructure data with restricted distribution under TLP protocols.",
         "severity": "High",
         "enabled": false,
@@ -559,7 +559,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Credential Exposure Volume Spike Anomaly",
+        "displayName": "SpyCloud -- Credential Exposure Volume Spike (Anomaly)",
         "description": "Detects when the daily credential exposure count exceeds 3 standard deviations above the 14-day rolling average, indicating a potential mass breach event, new watchlist domain being targeted, or bulk credential dump affecting your organization.",
         "severity": "Medium",
         "enabled": false,
@@ -592,7 +592,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - First-Time Domain Exposure Detected",
+        "displayName": "SpyCloud -- First-Time Domain Exposure Detected",
         "description": "Detects when credentials from a corporate email domain appear in SpyCloud for the first time. This is a leading indicator that a new breach has affected your organization or a previously unmonitored domain has been compromised.",
         "severity": "Medium",
         "enabled": false,
@@ -638,7 +638,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Stale Credential Without Remediation Over 30 Days",
+        "displayName": "SpyCloud -- Stale Credential Without Remediation (30+ Days)",
         "description": "Detects credential exposures older than 30 days that have no corresponding remediation entry in the Conditional Access logs, indicating the compromised credential may still be active and usable by attackers.",
         "severity": "High",
         "enabled": false,
@@ -684,7 +684,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Corporate Email on Consumer Site Breach",
+        "displayName": "SpyCloud -- Corporate Email Found in Consumer Site Breach",
         "description": "Detects when corporate email addresses appear in breaches of consumer services (social media, gaming, dating, shopping). Indicates employees reusing corporate credentials on personal sites, creating lateral attack vectors into the enterprise.",
         "severity": "Medium",
         "enabled": false,
@@ -731,7 +731,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed Credential Followed by Successful Sign-in",
+        "displayName": "SpyCloud -- Compromised Credential Used in Successful Sign-In",
         "description": "Correlates SpyCloud credential exposures with successful Azure AD sign-ins within 24 hours. A successful sign-in after credential exposure strongly suggests an attacker has tested or used the stolen credentials. Immediate session revocation and password reset required.",
         "severity": "High",
         "enabled": false,
@@ -788,7 +788,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User with AAD Risky Sign-in Event",
+        "displayName": "SpyCloud -- Exposed User with Entra ID Risky Sign-In",
         "description": "Correlates SpyCloud exposures with Azure AD Identity Protection risky sign-in events. When a user with known compromised credentials also triggers a risk detection (anomalous IP, leaked credentials, malware-linked IP), this represents high-confidence account compromise.",
         "severity": "High",
         "enabled": false,
@@ -844,7 +844,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User Impossible Travel Sign-in",
+        "displayName": "SpyCloud -- Exposed User Impossible Travel Sign-In Detected",
         "description": "Detects impossible travel patterns for users with SpyCloud credential exposures. When a user's credentials are exposed AND sign-ins originate from geographically impossible locations within short timeframes, this strongly indicates credential theft and active exploitation by a remote attacker.",
         "severity": "High",
         "enabled": false,
@@ -900,7 +900,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User MFA Registration Change",
+        "displayName": "SpyCloud -- Exposed User MFA Registration Change (Account Takeover Risk)",
         "description": "Detects when a user with known SpyCloud credential exposure registers a new MFA method or modifies existing MFA settings. Attackers who gain access via stolen credentials often register their own MFA device to maintain persistent access. Requires immediate verification with the user.",
         "severity": "High",
         "enabled": false,
@@ -947,7 +947,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User Suspicious Mailbox Rule Creation",
+        "displayName": "SpyCloud -- Exposed User Suspicious Mailbox Rule Created",
         "description": "Detects when a user with known SpyCloud credential exposure creates mailbox forwarding or inbox rules in Office 365. Attackers frequently set up mail forwarding to exfiltrate emails or hide evidence of compromise by deleting security notifications.",
         "severity": "High",
         "enabled": false,
@@ -1004,7 +1004,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User OAuth Application Consent",
+        "displayName": "SpyCloud -- Exposed User Granted OAuth Application Consent",
         "description": "Detects when a user with SpyCloud credential exposure consents to a new OAuth application. Attackers with stolen credentials often consent to malicious OAuth apps to establish persistent access that survives password resets, enabling long-term data exfiltration.",
         "severity": "High",
         "enabled": false,
@@ -1051,7 +1051,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User Granted Admin Role",
+        "displayName": "SpyCloud -- Exposed User Granted Administrative Role (Privilege Escalation)",
         "description": "Detects when a user with SpyCloud credential exposure is assigned an administrative role in Azure AD. This could indicate privilege escalation by an attacker who gained access through stolen credentials, or an insider threat where compromised credentials are used to elevate permissions.",
         "severity": "High",
         "enabled": false,
@@ -1098,7 +1098,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User Self-Service Password Change",
+        "displayName": "SpyCloud -- Exposed User Self-Service Password Change",
         "description": "Detects when a user with known SpyCloud credential exposure performs a self-service password change. While this could be legitimate remediation, it could also indicate an attacker using stolen credentials to change the password and lock out the legitimate user.",
         "severity": "Medium",
         "enabled": false,
@@ -1144,7 +1144,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User Initiated eDiscovery or Content Search Export",
+        "displayName": "SpyCloud -- Exposed User Initiated eDiscovery or Content Search Export",
         "description": "Detects when a user with SpyCloud credential exposure initiates eDiscovery searches or content exports in Microsoft 365. This is a high-severity data exfiltration indicator since eDiscovery provides access to all organizational email and documents.",
         "severity": "High",
         "enabled": false,
@@ -1201,7 +1201,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User SharePoint Mass Download",
+        "displayName": "SpyCloud -- Exposed User SharePoint Mass Download (Data Exfiltration Risk)",
         "description": "Detects when a user with SpyCloud credential exposure downloads a large number of SharePoint/OneDrive files within a short window. This pattern indicates potential data exfiltration by an attacker using stolen credentials to bulk-harvest corporate documents.",
         "severity": "High",
         "enabled": false,
@@ -1258,7 +1258,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - UEBA Anomalous Behavior from Exposed User",
+        "displayName": "SpyCloud -- UEBA Anomalous Behavior from Exposed User",
         "description": "Correlates SpyCloud credential exposures with UEBA anomalous behavior detections. When a user with stolen credentials also triggers behavioral anomalies (unusual resource access, atypical sign-in patterns, anomalous data access), this represents high-confidence account compromise.",
         "severity": "High",
         "enabled": false,
@@ -1314,7 +1314,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User First-Time Access to Sensitive Resource",
+        "displayName": "SpyCloud -- Exposed User First-Time Access to Sensitive Resource",
         "description": "Detects when a user with SpyCloud credential exposure accesses a resource for the first time according to UEBA baselines. First-time access to new resources after credential exposure is a strong indicator of lateral movement by an attacker exploring the environment.",
         "severity": "Medium",
         "enabled": false,
@@ -1371,7 +1371,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User UEBA Impossible Travel Detection",
+        "displayName": "SpyCloud -- Exposed User UEBA Impossible Travel Detection",
         "description": "Leverages UEBA impossible travel analytics for users with known SpyCloud credential exposures. UEBA provides ML-based travel analysis that is more accurate than simple geo-distance calculations.",
         "severity": "High",
         "enabled": false,
@@ -1426,7 +1426,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User Anomalous Sign-in Pattern",
+        "displayName": "SpyCloud -- Exposed User Anomalous Sign-In Pattern",
         "description": "Detects when users with SpyCloud credential exposures exhibit anomalous sign-in patterns identified by UEBA, including unusual times, unusual browsers, unusual device types, or unusual applications accessed.",
         "severity": "Medium",
         "enabled": false,
@@ -1482,7 +1482,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User UEBA Investigation Priority Spike",
+        "displayName": "SpyCloud -- Exposed User UEBA Investigation Priority Spike",
         "description": "Detects when a user with SpyCloud credential exposure has their UEBA investigation priority score increase above 7 (high risk). This combines SpyCloud threat intelligence with Microsoft behavioral analytics for high-confidence threat detection.",
         "severity": "High",
         "enabled": false,
@@ -1539,7 +1539,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed Credential IP in Firewall Deny Logs",
+        "displayName": "SpyCloud -- Exposed Credential IP Address in Firewall Deny Logs",
         "description": "Correlates IP addresses from SpyCloud infostealer data with firewall deny events in CommonSecurityLog. Indicates the infected device or attacker IP is actively attempting to access your network and being blocked, confirming active threat exploitation.",
         "severity": "High",
         "enabled": false,
@@ -1596,7 +1596,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Infected Device IP Connecting Through Fortinet",
+        "displayName": "SpyCloud -- Infected Device IP Connecting Through Fortinet Firewall",
         "description": "Detects when an IP address from a SpyCloud-identified infected device connects through Fortinet FortiGate firewalls. Correlates infostealer infection data with Fortinet FSSO authentication events to identify compromised devices accessing the network.",
         "severity": "High",
         "enabled": false,
@@ -1663,7 +1663,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Infected Device IP Connecting Through Palo Alto",
+        "displayName": "SpyCloud -- Infected Device IP Connecting Through Palo Alto Firewall",
         "description": "Detects when an IP address from a SpyCloud-identified infected device connects through Palo Alto Networks firewalls. Correlates infostealer infection data with PAN User-ID events to identify compromised devices with active network access.",
         "severity": "High",
         "enabled": false,
@@ -1730,7 +1730,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Infected Device DNS Query to Malware C2 Domain",
+        "displayName": "SpyCloud -- Infected Device DNS Query to Malware C2 Domain",
         "description": "Detects when devices identified as infected by SpyCloud make DNS queries to known malware command-and-control domains. Correlates SpyCloud target_domain (C2 infrastructure) with DNS analytics to identify active C2 communication from compromised endpoints.",
         "severity": "High",
         "enabled": false,
@@ -1796,7 +1796,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User VPN Connection from New Location",
+        "displayName": "SpyCloud -- Exposed User VPN Connection from New Location",
         "description": "Detects VPN connections from users with SpyCloud credential exposures originating from geographic locations not seen in their 30-day baseline. Attackers using stolen VPN credentials from unusual locations represent a direct network intrusion vector.",
         "severity": "High",
         "enabled": false,
@@ -1852,7 +1852,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Firewall Allow from Exposed IP After Credential Theft",
+        "displayName": "SpyCloud -- Firewall Allowed Traffic from Exposed IP After Credential Theft",
         "description": "Detects allowed firewall connections originating from IPs associated with SpyCloud infostealer infections within 48 hours of exposure. Indicates potential lateral movement where an attacker with stolen credentials is traversing the network perimeter.",
         "severity": "High",
         "enabled": false,
@@ -1909,7 +1909,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Fusion Credential Exposure to Risky Sign-in to Data Exfiltration",
+        "displayName": "SpyCloud -- Multi-Stage Attack: Credential Exposure to Risky Sign-In to Data Exfiltration",
         "description": "Multi-stage attack detection: Stage 1 - SpyCloud detects credential exposure. Stage 2 - Azure AD detects risky sign-in for the same user. Stage 3 - Office 365 detects data exfiltration (mass download, mail forwarding, eDiscovery). This chain represents a complete account takeover with data theft.",
         "severity": "High",
         "enabled": false,
@@ -1968,7 +1968,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Multi-Stage Exposure Then MFA Failure Then Success",
+        "displayName": "SpyCloud -- Multi-Stage Attack: Exposure then MFA Failure then Success",
         "description": "Detects a three-stage attack pattern: credential exposure in SpyCloud, followed by failed MFA attempts (attacker testing stolen creds), followed by a successful authentication (MFA bypass achieved via stolen session cookie, social engineering, or MFA fatigue). High confidence account compromise.",
         "severity": "High",
         "enabled": false,
@@ -2027,7 +2027,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Multi-Stage Device Infection to Lateral Movement to Privilege Escalation",
+        "displayName": "SpyCloud -- Multi-Stage Attack: Device Infection to Lateral Movement to Privilege Escalation",
         "description": "Detects a three-stage attack: SpyCloud identifies device infection (infostealer), followed by lateral movement indicators (new resource access from the infected device IP), followed by privilege escalation (admin role assignment or elevated permission grant). Represents a full kill chain from initial compromise to domain dominance.",
         "severity": "High",
         "enabled": false,
@@ -2086,7 +2086,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Remediation Gap Exposure Without CA Action Over 24 Hours",
+        "displayName": "SpyCloud -- Remediation Gap: Exposure Without Conditional Access Action (24+ Hours)",
         "description": "Detects high-severity SpyCloud exposures (severity >= 20) that have been present for over 24 hours without any corresponding Conditional Access remediation action (password reset, session revocation, CA group assignment). Indicates the automated playbook may have failed or is not configured.",
         "severity": "High",
         "enabled": false,
@@ -2132,7 +2132,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - User Re-Exposed After Password Reset",
+        "displayName": "SpyCloud -- User Re-Exposed After Password Reset",
         "description": "Detects when a user who previously had their password reset through the CA playbook appears in new SpyCloud exposures. Indicates the user may have set a weak password again, the device is still infected and stealing new credentials, or a different device is compromised.",
         "severity": "High",
         "enabled": false,
@@ -2179,7 +2179,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Conditional Access Policy Bypass Attempt by Exposed User",
+        "displayName": "SpyCloud -- Conditional Access Policy Bypass Attempt by Exposed User",
         "description": "Detects when a user with SpyCloud credential exposure attempts to sign in and triggers a Conditional Access policy failure, followed by a successful sign-in. This pattern may indicate an attacker switching to a compliant device or using a legacy authentication protocol to bypass CA controls.",
         "severity": "High",
         "enabled": false,
@@ -2236,7 +2236,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Exposed User Successful Access Despite CA Block Policy",
+        "displayName": "SpyCloud -- Exposed User Successful Access Despite Conditional Access Block",
         "description": "Detects when a user known to be in the SpyCloud CA remediation group (should be blocked by Conditional Access) successfully authenticates. Indicates a CA policy misconfiguration, exclusion, or legacy auth bypass that is allowing compromised users to access resources.",
         "severity": "High",
         "enabled": false,
@@ -2293,7 +2293,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Infected IP Address Found in DNS Query Logs",
+        "displayName": "SpyCloud -- Infected IP Address Found in DNS Query Logs",
         "description": "Correlates IP addresses from SpyCloud infostealer data with DNS query logs to identify infected devices actively resolving domains. Helps identify compromised endpoints that may still be communicating with C2 infrastructure or exfiltrating data via DNS.",
         "severity": "Medium",
         "enabled": false,
@@ -2350,7 +2350,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Infected Host Communicating with Threat Intelligence Matched Domain",
+        "displayName": "SpyCloud -- Infected Host Communicating with Threat Intelligence Matched Domain",
         "description": "Detects when SpyCloud-identified infected devices communicate with domains flagged in Microsoft Sentinel Threat Intelligence feeds. Dual-source correlation (SpyCloud + TI) provides very high confidence that the device is actively compromised and communicating with known malicious infrastructure.",
         "severity": "High",
         "enabled": false,
@@ -2406,7 +2406,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Network Anomaly from Compromised Endpoint",
+        "displayName": "SpyCloud -- Network Anomaly from Compromised Endpoint",
         "description": "Detects anomalous network traffic patterns from endpoints identified as compromised by SpyCloud. Correlates with Azure Firewall logs to identify unusual outbound connections, high data volumes, or connections to suspicious destinations from infected devices.",
         "severity": "Medium",
         "enabled": false,
@@ -2463,7 +2463,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Infected Machine Active in Microsoft Defender for Endpoint",
+        "displayName": "SpyCloud -- Infected Machine Active in Microsoft Defender for Endpoint",
         "description": "Correlates SpyCloud infected machine identifiers and hostnames with active devices in Microsoft Defender for Endpoint DeviceInfo table. Confirms that SpyCloud-identified infected devices are still active on the corporate network and provides MDE device context for investigation.",
         "severity": "High",
         "enabled": false,
@@ -2520,7 +2520,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Credential Theft Tool Execution on Exposed Device",
+        "displayName": "SpyCloud -- Credential Theft Tool Execution on Exposed Device",
         "description": "Detects when credential theft tools (mimikatz, LaZagne, credential dumpers) execute on devices identified as infected by SpyCloud. Confirms active attacker post-exploitation activity on a known compromised endpoint, indicating the threat has progressed beyond initial credential theft.",
         "severity": "High",
         "enabled": false,
@@ -2577,7 +2577,7 @@
     {
       "kind": "Scheduled",
       "properties": {
-        "displayName": "SpyCloud - Lateral Movement from Compromised Device",
+        "displayName": "SpyCloud -- Lateral Movement Detected from Compromised Device",
         "description": "Detects lateral movement activity (remote logons, SMB connections, WMI, PSExec, RDP) originating from devices identified as infected by SpyCloud. Indicates an attacker is using stolen credentials from the infected device to access other systems in the network.",
         "severity": "High",
         "enabled": false,

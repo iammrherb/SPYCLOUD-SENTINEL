@@ -286,15 +286,76 @@
                 }
               },
               {
-                "name": "monitoredDomain",
+                "name": "domainSelectionMode",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Domain Selection Method",
+                "toolTip": "Choose how to specify your monitored domain. You can select from your Azure AD verified domains or enter a custom domain manually.",
+                "defaultValue": "Select from Azure AD verified domains",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Select from Azure AD verified domains",
+                      "value": "lookup"
+                    },
+                    {
+                      "label": "Enter domain manually",
+                      "value": "manual"
+                    }
+                  ],
+                  "required": true
+                },
+                "visible": true
+              },
+              {
+                "name": "verifiedDomainsApi",
+                "type": "Microsoft.Solutions.ArmApiControl",
+                "request": {
+                  "method": "GET",
+                  "path": "[concat(subscription().id, '/providers/Microsoft.AAD/domainServices?api-version=2022-12-01')]"
+                }
+              },
+              {
+                "name": "graphDomainsApi",
+                "type": "Microsoft.Solutions.GraphApiControl",
+                "request": {
+                  "method": "GET",
+                  "path": "/v1.0/domains"
+                }
+              },
+              {
+                "name": "monitoredDomainLookup",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Select Monitored Domain *",
+                "toolTip": "Select your primary corporate domain from the list of Azure AD verified domains. This domain will be monitored across all SpyCloud APIs for credential exposures.",
+                "constraints": {
+                  "allowedValues": "[map(filter(steps('dataConnector').sectionApiConfig.graphDomainsApi.value, (domain) => domain.isVerified), (domain) => parse(concat('{\"label\":\"', domain.id, '\",\"value\":\"', domain.id, '\"}')))]",
+                  "required": true
+                },
+                "visible": "[equals(steps('dataConnector').sectionApiConfig.domainSelectionMode, 'lookup')]"
+              },
+              {
+                "name": "monitoredDomainManual",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Monitored Domain *",
-                "toolTip": "Your primary corporate domain to monitor across all SpyCloud APIs (e.g., example.com). Required for Investigations, IDLINK, Data Partnership, Exposure, CAP, and SIP connectors.",
-                "placeholder": "example.com",
+                "toolTip": "Your primary corporate domain to monitor across all SpyCloud APIs (e.g., contoso.com). Required for Investigations, IDLINK, Data Partnership, Exposure, CAP, and SIP connectors.",
+                "placeholder": "contoso.com",
                 "constraints": {
                   "required": true,
                   "regex": "^[a-zA-Z0-9][a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-                  "validationMessage": "Enter a valid domain name (e.g., example.com)."
+                  "validationMessage": "Enter a valid domain name (e.g., contoso.com)."
+                },
+                "visible": "[equals(steps('dataConnector').sectionApiConfig.domainSelectionMode, 'manual')]"
+              },
+              {
+                "name": "additionalDomains",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Additional Monitored Domains (optional)",
+                "toolTip": "Comma-separated list of additional corporate domains to monitor (e.g., subsidiary.com, brand2.com). Leave empty to monitor only the primary domain.",
+                "placeholder": "subsidiary.com, brand2.com",
+                "constraints": {
+                  "required": false,
+                  "regex": "^$|^[a-zA-Z0-9][a-zA-Z0-9.,-\\s]+$",
+                  "validationMessage": "Enter a comma-separated list of valid domain names."
                 },
                 "visible": true
               },
@@ -2045,7 +2106,8 @@
       "dataPartnershipApiKey": "",
       "exposureApiKey": "",
       "capApiKey": "",
-      "monitoredDomain": "[steps('dataConnector').sectionApiConfig.monitoredDomain]",
+      "monitoredDomain": "[if(equals(steps('dataConnector').sectionApiConfig.domainSelectionMode, 'lookup'), steps('dataConnector').sectionApiConfig.monitoredDomainLookup, steps('dataConnector').sectionApiConfig.monitoredDomainManual)]",
+      "additionalDomains": "[steps('dataConnector').sectionApiConfig.additionalDomains]",
       "pollingInterval": "[steps('dataConnector').sectionApiConfig.pollingInterval]",
       "dataCollectionEndpointName": "[steps('dataConnector').sectionDataCollection.dceName]",
       "dataCollectionRuleName": "[steps('dataConnector').sectionDataCollection.dcrName]",
