@@ -18,6 +18,7 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import express from "express";
 import cors from "cors";
 import { z } from "zod";
+import { registerGraphTools } from "./graph-tools.js";
 
 // ═══════════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -246,6 +247,9 @@ const server = new McpServer({
 });
 
 const client = new SpyCloudClient(CONFIG.spycloud.baseUrl, CONFIG.spycloud.apiKey);
+
+// Register Sentinel Graph + AI tools
+registerGraphTools(server, CONFIG);
 
 // Helper to format API results
 function formatResults(data, maxRecords = 10) {
@@ -797,7 +801,7 @@ app.listen(CONFIG.port, () => {
 ║  Version: 1.0.0                                             ║
 ║  Port: ${String(CONFIG.port).padEnd(53)}║
 ║  API: ${CONFIG.spycloud.apiKey ? "Configured ✅" : "NOT SET ❌ (set SPYCLOUD_API_KEY)".padEnd(50)}       ║
-║  Tools: 20 | Resources: 3 | Prompts: 6                     ║
+║  Tools: 26 | Resources: 3 | Prompts: 6                     ║
 ║                                                             ║
 ║  SSE Endpoint: http://localhost:${CONFIG.port}/sse${" ".repeat(27)}║
 ║  Health Check: http://localhost:${CONFIG.port}/health${" ".repeat(24)}║
