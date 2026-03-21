@@ -426,6 +426,11 @@ def classify_pii_exposure(exposures: list) -> dict:
     elif has_financial or has_sensitive:
         classification["sensitivity_level"] = "Highly Confidential"
         classification["recommended_label"] = "Highly Confidential"
+        classification["regulatory_impact"]["soc2"]["affected"] = True
+        classification["regulatory_impact"]["soc2"]["description"] = (
+            "Critical breach: financial/sensitive PII exposed — "
+            "impacts Security and Confidentiality trust criteria"
+        )
     elif detected_fields:
         classification["sensitivity_level"] = "Confidential"
         classification["recommended_label"] = "Confidential"
@@ -1282,7 +1287,10 @@ def ai_compliance_assessment(req: func.HttpRequest) -> func.HttpResponse:
     else:
         frameworks = ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"]
     include_templates = body.get("includeNotificationTemplates", True)
-    period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
+    try:
+        period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
+    except (ValueError, TypeError):
+        period_days = 30
 
     # Step 1: Query SpyCloud for domain exposures
     encoded_domain = requests.utils.quote(domain, safe="")
@@ -1505,7 +1513,10 @@ def ai_purview_dlp_status(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
         )
 
-    period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
+    try:
+        period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
+    except (ValueError, TypeError):
+        period_days = 30
     safe_domain = _sanitize_kql_string(domain)
 
     # Query DLP events from unified audit log
