@@ -306,14 +306,20 @@ def apply_purview_sensitivity_label(
     }
 
     if entity_type == "incident":
-        endpoint = f"/security/incidents/{entity_id}"
-        # Read existing tags first to avoid overwriting them
-        existing = call_graph(endpoint)
-        existing_tags = existing.get("customTags", []) if "error" not in existing else []
-        new_tags = [f"PurviewLabel:{label_id}", f"SpyCloud:{sensitivity_level}"]
-        merged_tags = list(set(existing_tags + new_tags))
-        update_body = {"customTags": merged_tags}
-        return call_graph(endpoint, method="PATCH", body=update_body)
+        # Return recommended tags for the calling playbook to apply.
+        # Sentinel incidents are tagged via the Sentinel API connection
+        # in the Logic App, not via the Graph Security API, because
+        # Sentinel incidentNumber != M365 Defender incident ID.
+        recommended_tags = [
+            f"PurviewLabel:{label_id}",
+            f"SpyCloud:{sensitivity_level}",
+        ]
+        return {
+            "success": True,
+            "method": "recommendation",
+            "recommendedTags": recommended_tags,
+            "justification": justification,
+        }
 
     if entity_type == "file":
         endpoint = f"/drives/items/{entity_id}/assignSensitivityLabel"
