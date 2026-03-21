@@ -55,25 +55,26 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate ARM templates
         run: |
-          python3 << 'PYEOF'
+          python3 << 'EOF'
           import json, sys, os, glob
           errors = []
+          schema_key = '$' + 'schema'
           for fpath in ['deploy/azuredeploy.json', 'azuredeploy.json']:
               if not os.path.exists(fpath): continue
               with open(fpath) as f: tpl = json.load(f)
-              for key in ['', 'contentVersion', 'parameters', 'resources']:
+              for key in [schema_key, 'contentVersion', 'parameters', 'resources']:
                   if key not in tpl: errors.append(f'{fpath}: Missing {key}')
               print(f'{fpath}: {len(tpl.get("resources", []))} resources')
           for fpath in glob.glob('Solutions/*/Package/mainTemplate.json') + (['mainTemplate.json'] if os.path.exists('mainTemplate.json') else []):
               with open(fpath) as f: tpl = json.load(f)
-              for key in ['', 'contentVersion', 'parameters', 'resources']:
+              for key in [schema_key, 'contentVersion', 'parameters', 'resources']:
                   if key not in tpl: errors.append(f'{fpath}: Missing {key}')
               resources = tpl.get('resources', [])
               ct = sum(1 for r in resources if 'contentTemplates' in r.get('type', ''))
               print(f'{fpath}: {len(resources)} resources, {ct} content templates')
           for fpath in glob.glob('Solutions/*/Package/createUiDefinition.json') + ([p for p in ['createUiDefinition.json', 'deploy/createUiDefinition.json'] if os.path.exists(p)]):
               with open(fpath) as f: ui = json.load(f)
-              if '' not in ui: errors.append(f'{fpath}: Missing ')
+              if schema_key not in ui: errors.append(f'{fpath}: Missing {schema_key}')
           for fpath in glob.glob('Solutions/*/SolutionMetadata.json') + (['solutionMetadata.json'] if os.path.exists('solutionMetadata.json') else []):
               with open(fpath) as f: meta = json.load(f)
               for key in ['publisherId', 'offerId', 'support', 'categories']:
@@ -82,7 +83,7 @@ jobs:
               for e in errors: print(f'ERROR: {e}')
               sys.exit(1)
           print('All ARM template validations passed')
-          PYEOF
+          EOF
 
   solutions-structure:
     name: Solutions Structure Check
@@ -91,7 +92,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Solutions directory structure
         run: |
-          python3 << 'PYEOF'
+          python3 << 'EOF'
           import os, sys, glob
           errors = []
           sol_dirs = glob.glob('Solutions/*/')
@@ -118,7 +119,7 @@ jobs:
               for e in errors: print(f'ERROR: {e}')
               sys.exit(1)
           print('Solutions structure check passed')
-          PYEOF
+          EOF
 
   playbook-validation:
     name: Validate Playbooks
@@ -127,10 +128,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate all playbook JSONs
         run: |
-          python3 << 'PYEOF'
+          python3 << 'EOF'
           import json, os, sys, glob
           errors = []
           checked = 0
+          schema_key = '$' + 'schema'
           for directory in ['playbooks', 'templates/playbooks']:
               if not os.path.isdir(directory): continue
               for fname in sorted(os.listdir(directory)):
@@ -139,7 +141,7 @@ jobs:
                   checked += 1
                   try:
                       with open(fpath) as f: tpl = json.load(f)
-                      if '' not in tpl: errors.append(f'{fpath}: missing ')
+                      if schema_key not in tpl: errors.append(f'{fpath}: missing {schema_key}')
                       print(f'OK: {fpath}')
                   except json.JSONDecodeError as e:
                       errors.append(f'{fpath}: invalid JSON')
@@ -147,7 +149,7 @@ jobs:
               checked += 1
               try:
                   with open(fpath) as f: tpl = json.load(f)
-                  if '' not in tpl: errors.append(f'{fpath}: missing ')
+                  if schema_key not in tpl: errors.append(f'{fpath}: missing {schema_key}')
                   print(f'OK: {fpath}')
               except json.JSONDecodeError as e:
                   errors.append(f'{fpath}: invalid JSON')
@@ -155,7 +157,7 @@ jobs:
           if errors:
               for e in errors: print(f'ERROR: {e}')
               sys.exit(1)
-          PYEOF
+          EOF
 
   python-validation:
     name: Python Code Quality
@@ -168,15 +170,15 @@ jobs:
       - name: Install and validate
         run: |
           for dir in deploy/functions/SpyCloudEnrichment functions/SpyCloudEnrichment; do
-            if [ -f "\/requirements.txt" ]; then pip install -r "\/requirements.txt"; break; fi
+            if [ -f "$dir/requirements.txt" ]; then pip install -r "$dir/requirements.txt"; break; fi
           done
           for dir in deploy/functions functions; do
-            if [ -d "\/SpyCloudEnrichment" ]; then
-              python3 -m py_compile "\/SpyCloudEnrichment/function_app.py" && echo "OK: "
+            if [ -d "$dir/SpyCloudEnrichment" ]; then
+              python3 -m py_compile "$dir/SpyCloudEnrichment/function_app.py" && echo "OK: $dir"
             fi
           done
           for f in scripts/*.py; do
-            if [ -f "" ]; then python3 -m py_compile "" && echo "OK: "; fi
+            if [ -f "$f" ]; then python3 -m py_compile "$f" && echo "OK: $f"; fi
           done
 
   node-validation:
@@ -205,12 +207,12 @@ jobs:
       - name: Terraform validate
         run: |
           for dir in deploy/terraform terraform; do
-            if [ -d "" ]; then
-              cd ""
+            if [ -d "$dir" ]; then
+              cd "$dir"
               terraform fmt -check -recursive
               terraform init -backend=false
               terraform validate
-              cd ""
+              cd "$GITHUB_WORKSPACE"
             fi
           done
 
@@ -222,7 +224,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Generate inventory report
         run: |
-          python3 << 'PYEOF'
+          python3 << 'EOF'
           import json, os, glob
           print('## SpyCloud Sentinel - Resource Inventory')
           for path in ['deploy/azuredeploy.json', 'azuredeploy.json']:
@@ -236,4 +238,4 @@ jobs:
               for subdir in ['Playbooks', 'Analytic Rules', 'Workbooks']:
                   d = os.path.join(sol_dir, subdir)
                   if os.path.isdir(d): print(f'  {subdir}: {len(os.listdir(d))}')
-          PYEOF
+          EOF
