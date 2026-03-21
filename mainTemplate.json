@@ -283,7 +283,7 @@
                   "id": "[variables('_uiConfigId1')]",
                   "title": "SpyCloud Identity Threat Protection",
                   "publisher": "SpyCloud, Inc.",
-                  "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-connector-logo.svg)\n\nSpyCloud Identity Threat Protection ingests recaptured darknet intelligence directly into Microsoft Sentinel \u2014 delivering compromised credentials, stolen session cookies, infostealer malware artifacts, and identity exposure data from the world's largest collection of recaptured breach assets. This connector supports **9 independently configurable data sources** via the SpyCloud API, with automated polling through the Codeless Connector Framework (CCF). Enable only the sources included in your SpyCloud subscription \u2014 each populates dedicated custom log tables optimized for detection, hunting, and automated response.",
+                  "descriptionMarkdown": "![SpyCloud](https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png)\n\nSpyCloud Identity Exposure Intelligence for Sentinel ingests recaptured darknet intelligence directly into Microsoft Sentinel \u2014 delivering compromised credentials, stolen session cookies, infostealer malware artifacts, and identity exposure data from the world's largest collection of recaptured breach assets. This connector supports **9 independently configurable data sources** via the SpyCloud API, with automated polling through the Codeless Connector Framework (CCF). Enable only the sources included in your SpyCloud subscription \u2014 each populates dedicated custom log tables optimized for detection, hunting, and automated response.",
                   "additionalRequirementBanner": "A SpyCloud subscription with API access is required. Visit [portal.spycloud.com](https://portal.spycloud.com) to manage your API keys and subscription tier.",
                   "graphQueries": [
                     {
@@ -898,7 +898,11 @@
         "displayName": "SpyCloud \u2014 Infostealer Exposure Detected",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId1'),'-', variables('analyticRuleVersion1'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId1'),'-', variables('analyticRuleVersion1'))))]",
-        "version": "[variables('analyticRuleVersion1')]"
+        "version": "[variables('analyticRuleVersion1')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1007,7 +1011,11 @@
         "displayName": "SpyCloud \u2014 Infostealer Credential Exposure Detected",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId2'),'-', variables('analyticRuleVersion2'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId2'),'-', variables('analyticRuleVersion2'))))]",
-        "version": "[variables('analyticRuleVersion2')]"
+        "version": "[variables('analyticRuleVersion2')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1105,7 +1113,11 @@
         "displayName": "SpyCloud \u2014 Plaintext Password Exposure (Critical Risk)",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId3'),'-', variables('analyticRuleVersion3'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId3'),'-', variables('analyticRuleVersion3'))))]",
-        "version": "[variables('analyticRuleVersion3')]"
+        "version": "[variables('analyticRuleVersion3')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1203,7 +1215,11 @@
         "displayName": "SpyCloud \u2014 SSN / Financial / Health Data Exposure (Compliance Alert)",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId4'),'-', variables('analyticRuleVersion4'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId4'),'-', variables('analyticRuleVersion4'))))]",
-        "version": "[variables('analyticRuleVersion4')]"
+        "version": "[variables('analyticRuleVersion4')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1312,7 +1328,11 @@
         "displayName": "SpyCloud \u2014 Stolen Session Cookies / Tokens (MFA Bypass Risk)",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId5'),'-', variables('analyticRuleVersion5'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId5'),'-', variables('analyticRuleVersion5'))))]",
-        "version": "[variables('analyticRuleVersion5')]"
+        "version": "[variables('analyticRuleVersion5')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1422,7 +1442,11 @@
         "displayName": "SpyCloud \u2014 Device Re-Infection Detected",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId6'),'-', variables('analyticRuleVersion6'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId6'),'-', variables('analyticRuleVersion6'))))]",
-        "version": "[variables('analyticRuleVersion6')]"
+        "version": "[variables('analyticRuleVersion6')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1521,7 +1545,11 @@
         "displayName": "SpyCloud \u2014 User Credentials Exposed Across Multiple Domains",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId7'),'-', variables('analyticRuleVersion7'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId7'),'-', variables('analyticRuleVersion7'))))]",
-        "version": "[variables('analyticRuleVersion7')]"
+        "version": "[variables('analyticRuleVersion7')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1620,7 +1648,11 @@
         "displayName": "SpyCloud \u2014 Infection from Unusual Geographic Location",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId8'),'-', variables('analyticRuleVersion8'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId8'),'-', variables('analyticRuleVersion8'))))]",
-        "version": "[variables('analyticRuleVersion8')]"
+        "version": "[variables('analyticRuleVersion8')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1718,7 +1750,11 @@
         "displayName": "SpyCloud \u2014 Credential Observed in Multiple Breach Sources",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId9'),'-', variables('analyticRuleVersion9'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId9'),'-', variables('analyticRuleVersion9'))))]",
-        "version": "[variables('analyticRuleVersion9')]"
+        "version": "[variables('analyticRuleVersion9')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1817,7 +1853,11 @@
         "displayName": "SpyCloud \u2014 High-Severity Exposure Without Automated Remediation",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId10'),'-', variables('analyticRuleVersion10'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId10'),'-', variables('analyticRuleVersion10'))))]",
-        "version": "[variables('analyticRuleVersion10')]"
+        "version": "[variables('analyticRuleVersion10')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -1921,7 +1961,11 @@
         "displayName": "SpyCloud \u2014 Antivirus Present But Failed to Prevent Infostealer",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId11'),'-', variables('analyticRuleVersion11'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId11'),'-', variables('analyticRuleVersion11'))))]",
-        "version": "[variables('analyticRuleVersion11')]"
+        "version": "[variables('analyticRuleVersion11')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2005,7 +2049,11 @@
         "displayName": "SpyCloud \u2014 New Malware Family Appeared in Breach Catalog",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId12'),'-', variables('analyticRuleVersion12'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId12'),'-', variables('analyticRuleVersion12'))))]",
-        "version": "[variables('analyticRuleVersion12')]"
+        "version": "[variables('analyticRuleVersion12')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2085,7 +2133,11 @@
         "displayName": "SpyCloud \u2014 Data Ingestion Health Alert",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId13'),'-', variables('analyticRuleVersion13'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId13'),'-', variables('analyticRuleVersion13'))))]",
-        "version": "[variables('analyticRuleVersion13')]"
+        "version": "[variables('analyticRuleVersion13')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2193,7 +2245,11 @@
         "displayName": "SpyCloud \u00d7 Okta \u2014 Compromised Credential Used in Okta Sign-In",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId14'),'-', variables('analyticRuleVersion14'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId14'),'-', variables('analyticRuleVersion14'))))]",
-        "version": "[variables('analyticRuleVersion14')]"
+        "version": "[variables('analyticRuleVersion14')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2301,7 +2357,11 @@
         "displayName": "SpyCloud \u00d7 Duo \u2014 Compromised Credential in Duo Authentication",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId15'),'-', variables('analyticRuleVersion15'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId15'),'-', variables('analyticRuleVersion15'))))]",
-        "version": "[variables('analyticRuleVersion15')]"
+        "version": "[variables('analyticRuleVersion15')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2409,7 +2469,11 @@
         "displayName": "SpyCloud \u00d7 Ping Identity \u2014 Compromised Credential in PingOne Auth",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId16'),'-', variables('analyticRuleVersion16'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId16'),'-', variables('analyticRuleVersion16'))))]",
-        "version": "[variables('analyticRuleVersion16')]"
+        "version": "[variables('analyticRuleVersion16')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2508,7 +2572,11 @@
         "displayName": "SpyCloud \u00d7 Entra ID \u2014 Compromised Credential Sign-In Detected",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId17'),'-', variables('analyticRuleVersion17'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId17'),'-', variables('analyticRuleVersion17'))))]",
-        "version": "[variables('analyticRuleVersion17')]"
+        "version": "[variables('analyticRuleVersion17')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2607,7 +2675,11 @@
         "displayName": "SpyCloud \u2014 Compromised Credential with Recent Entra Sign-In",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId18'),'-', variables('analyticRuleVersion18'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId18'),'-', variables('analyticRuleVersion18'))))]",
-        "version": "[variables('analyticRuleVersion18')]"
+        "version": "[variables('analyticRuleVersion18')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2706,7 +2778,11 @@
         "displayName": "SpyCloud \u2014 New Exposures with Breach Source Context",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId19'),'-', variables('analyticRuleVersion19'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId19'),'-', variables('analyticRuleVersion19'))))]",
-        "version": "[variables('analyticRuleVersion19')]"
+        "version": "[variables('analyticRuleVersion19')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2805,7 +2881,11 @@
         "displayName": "SpyCloud \u2014 Executive / VIP Account Exposure",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId20'),'-', variables('analyticRuleVersion20'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId20'),'-', variables('analyticRuleVersion20'))))]",
-        "version": "[variables('analyticRuleVersion20')]"
+        "version": "[variables('analyticRuleVersion20')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -2905,7 +2985,11 @@
         "displayName": "SpyCloud \u2014 Same Password Reused Across Multiple Target Domains",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId21'),'-', variables('analyticRuleVersion21'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId21'),'-', variables('analyticRuleVersion21'))))]",
-        "version": "[variables('analyticRuleVersion21')]"
+        "version": "[variables('analyticRuleVersion21')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3004,7 +3088,11 @@
         "displayName": "SpyCloud \u2014 Exposure Older Than 7 Days Without Remediation",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId22'),'-', variables('analyticRuleVersion22'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId22'),'-', variables('analyticRuleVersion22'))))]",
-        "version": "[variables('analyticRuleVersion22')]"
+        "version": "[variables('analyticRuleVersion22')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3110,7 +3198,11 @@
         "displayName": "SpyCloud \u00d7 DNS \u2014 Infected User Resolving Malicious Domains",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId23'),'-', variables('analyticRuleVersion23'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId23'),'-', variables('analyticRuleVersion23'))))]",
-        "version": "[variables('analyticRuleVersion23')]"
+        "version": "[variables('analyticRuleVersion23')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3225,7 +3317,11 @@
         "displayName": "SpyCloud \u00d7 Network \u2014 Infected IP in Device Network Events",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId24'),'-', variables('analyticRuleVersion24'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId24'),'-', variables('analyticRuleVersion24'))))]",
-        "version": "[variables('analyticRuleVersion24')]"
+        "version": "[variables('analyticRuleVersion24')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3331,7 +3427,11 @@
         "displayName": "SpyCloud \u00d7 MDE Devices \u2014 Infected Machine in Defender Inventory",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId25'),'-', variables('analyticRuleVersion25'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId25'),'-', variables('analyticRuleVersion25'))))]",
-        "version": "[variables('analyticRuleVersion25')]"
+        "version": "[variables('analyticRuleVersion25')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3428,7 +3528,11 @@
         "displayName": "SpyCloud \u00d7 MDE Alerts \u2014 Exposure Correlated with Defender Alert",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId26'),'-', variables('analyticRuleVersion26'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId26'),'-', variables('analyticRuleVersion26'))))]",
-        "version": "[variables('analyticRuleVersion26')]"
+        "version": "[variables('analyticRuleVersion26')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3525,7 +3629,11 @@
         "displayName": "SpyCloud \u00d7 Cloud Apps \u2014 Compromised User Accessing SaaS",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId27'),'-', variables('analyticRuleVersion27'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId27'),'-', variables('analyticRuleVersion27'))))]",
-        "version": "[variables('analyticRuleVersion27')]"
+        "version": "[variables('analyticRuleVersion27')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3620,7 +3728,11 @@
         "displayName": "SpyCloud \u00d7 Entra Risk \u2014 Exposed User Flagged Risky",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId28'),'-', variables('analyticRuleVersion28'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId28'),'-', variables('analyticRuleVersion28'))))]",
-        "version": "[variables('analyticRuleVersion28')]"
+        "version": "[variables('analyticRuleVersion28')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3717,7 +3829,11 @@
         "displayName": "SpyCloud \u00d7 Office 365 \u2014 Compromised User Mail Forwarding",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId29'),'-', variables('analyticRuleVersion29'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId29'),'-', variables('analyticRuleVersion29'))))]",
-        "version": "[variables('analyticRuleVersion29')]"
+        "version": "[variables('analyticRuleVersion29')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3812,7 +3928,11 @@
         "displayName": "SpyCloud \u00d7 Email \u2014 Phishing Targeting Exposed Users",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId30'),'-', variables('analyticRuleVersion30'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId30'),'-', variables('analyticRuleVersion30'))))]",
-        "version": "[variables('analyticRuleVersion30')]"
+        "version": "[variables('analyticRuleVersion30')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -3916,7 +4036,11 @@
         "displayName": "SpyCloud \u00d7 Identity \u2014 Lateral Movement by Exposed User",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId31'),'-', variables('analyticRuleVersion31'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId31'),'-', variables('analyticRuleVersion31'))))]",
-        "version": "[variables('analyticRuleVersion31')]"
+        "version": "[variables('analyticRuleVersion31')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -4011,7 +4135,11 @@
         "displayName": "SpyCloud \u00d7 TI \u2014 Infection IPs in Threat Intelligence",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId32'),'-', variables('analyticRuleVersion32'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId32'),'-', variables('analyticRuleVersion32'))))]",
-        "version": "[variables('analyticRuleVersion32')]"
+        "version": "[variables('analyticRuleVersion32')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -4106,7 +4234,11 @@
         "displayName": "SpyCloud \u00d7 UEBA \u2014 Anomalous Behavior from Exposed User",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId33'),'-', variables('analyticRuleVersion33'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId33'),'-', variables('analyticRuleVersion33'))))]",
-        "version": "[variables('analyticRuleVersion33')]"
+        "version": "[variables('analyticRuleVersion33')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -4201,7 +4333,11 @@
         "displayName": "SpyCloud \u00d7 Azure \u2014 Exposed User Modifying Cloud Resources",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId34'),'-', variables('analyticRuleVersion34'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId34'),'-', variables('analyticRuleVersion34'))))]",
-        "version": "[variables('analyticRuleVersion34')]"
+        "version": "[variables('analyticRuleVersion34')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -4306,7 +4442,11 @@
         "displayName": "SpyCloud Compass \u2014 Consumer + Corporate Cross-Reference",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId35'),'-', variables('analyticRuleVersion35'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId35'),'-', variables('analyticRuleVersion35'))))]",
-        "version": "[variables('analyticRuleVersion35')]"
+        "version": "[variables('analyticRuleVersion35')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -4401,7 +4541,11 @@
         "displayName": "SpyCloud \u00d7 Firewall \u2014 Infected IP in Security Logs",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId36'),'-', variables('analyticRuleVersion36'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId36'),'-', variables('analyticRuleVersion36'))))]",
-        "version": "[variables('analyticRuleVersion36')]"
+        "version": "[variables('analyticRuleVersion36')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -4505,7 +4649,11 @@
         "displayName": "SpyCloud \u00d7 Impossible Travel \u2014 Sign-In from Unexpected Country",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId37'),'-', variables('analyticRuleVersion37'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId37'),'-', variables('analyticRuleVersion37'))))]",
-        "version": "[variables('analyticRuleVersion37')]"
+        "version": "[variables('analyticRuleVersion37')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -4609,7 +4757,11 @@
         "displayName": "SpyCloud Compass \u2014 Device Reinfection Detected",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId38'),'-', variables('analyticRuleVersion38'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-',variables('_analyticRulecontentId38'),'-', variables('analyticRuleVersion38'))))]",
-        "version": "[variables('analyticRuleVersion38')]"
+        "version": "[variables('analyticRuleVersion38')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -6821,7 +6973,11 @@
         "displayName": "SpyCloud Incident Triage Notebook",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','nb','-', uniqueString(concat(variables('_solutionId'),'-','Notebook','-',variables('_notebookContentId1'),'-', variables('notebookVersion1'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','nb','-', uniqueString(concat(variables('_solutionId'),'-','Notebook','-',variables('_notebookContentId1'),'-', variables('notebookVersion1'))))]",
-        "version": "[variables('notebookVersion1')]"
+        "version": "[variables('notebookVersion1')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -8029,7 +8185,11 @@
         "displayName": "SpyCloud Threat Landscape Analysis",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','nb','-', uniqueString(concat(variables('_solutionId'),'-','Notebook','-',variables('_notebookContentId2'),'-', variables('notebookVersion2'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','nb','-', uniqueString(concat(variables('_solutionId'),'-','Notebook','-',variables('_notebookContentId2'),'-', variables('notebookVersion2'))))]",
-        "version": "[variables('notebookVersion2')]"
+        "version": "[variables('notebookVersion2')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -9085,7 +9245,11 @@
         "displayName": "SpyCloud Threat Hunting Notebook",
         "contentProductId": "[concat(take(variables('_solutionId'),50),'-','nb','-', uniqueString(concat(variables('_solutionId'),'-','Notebook','-',variables('_notebookContentId3'),'-', variables('notebookVersion3'))))]",
         "id": "[concat(take(variables('_solutionId'),50),'-','nb','-', uniqueString(concat(variables('_solutionId'),'-','Notebook','-',variables('_notebookContentId3'),'-', variables('notebookVersion3'))))]",
-        "version": "[variables('notebookVersion3')]"
+        "version": "[variables('notebookVersion3')]",
+        "packageKind": "Solution",
+        "packageVersion": "[variables('solutionVersion')]",
+        "packageName": "SpyCloud",
+        "packageId": "[variables('_solutionId')]"
       }
     },
     {
@@ -9097,13 +9261,13 @@
         "version": "[variables('solutionVersion')]",
         "kind": "Solution",
         "contentSchemaVersion": "3.0.0",
-        "displayName": "SpyCloud Identity Threat Protection",
+        "displayName": "SpyCloud Identity Exposure Intelligence for Sentinel",
         "publisherDisplayName": "SpyCloud, Inc.",
-        "descriptionHtml": "<p><strong>SpyCloud Identity Threat Protection for Microsoft Sentinel</strong> transforms how security teams detect and respond to compromised identities. Powered by the world's largest repository of recaptured darknet data &mdash; over 37 billion breach assets and growing &mdash; this solution delivers automated identity threat detection, investigation, and remediation directly within your Sentinel workspace.</p><h3>Why SpyCloud</h3><p>Compromised credentials remain the #1 initial access vector. SpyCloud's proprietary collection network recovers stolen data from criminal underground markets, botnets, and infostealer malware operations &mdash; often <strong>months before public disclosure</strong>. This early-warning advantage lets your SOC act on credential exposures, stolen session cookies, and infected device intelligence before attackers weaponize them.</p><h3>Solution Components</h3><table><tr><th>Category</th><th>Details</th></tr><tr><td><strong>Data Connector</strong></td><td>Unified connector with 9 independently configurable API data sources &mdash; Breach Watchlist, Breach Catalog, Compass (Infostealer Intelligence), Session Identity Protection, Investigations, IDLink, Exposure, CAP, and Data Partnership &mdash; ingesting into 11 dedicated custom log tables via CCF</td></tr><tr><td><strong>Analytics</strong></td><td>60+ detection rule templates spanning credential compromise, infostealer infections, session hijacking, identity correlation, and cross-platform correlation with Entra ID, Defender for Endpoint, and firewall telemetry</td></tr><tr><td><strong>Automation</strong></td><td>14 response playbooks for password reset, session revocation, MFA enforcement, device isolation, Conditional Access blocking, and multi-channel notifications (Teams, Slack, email, ServiceNow, Jira)</td></tr><tr><td><strong>Workbooks</strong></td><td>14 interactive dashboards including Executive Summary, SOC Operations, Connector Health, and per-data-source deep dives</td></tr><tr><td><strong>Threat Hunting</strong></td><td>28 curated hunting queries mapped to MITRE ATT&amp;CK tactics (T1078, T1110, T1539, T1528, T1550, T1556)</td></tr><tr><td><strong>Security Copilot</strong></td><td>125+ KQL skills, 35+ direct API skills, and a 23-agent autonomous investigation framework with optional GPT-4o analysis</td></tr></table><p><a href='https://spycloud.com'>Learn more about SpyCloud</a> | <a href='https://portal.spycloud.com'>SpyCloud Portal</a> | <a href='mailto:support@spycloud.com'>Contact Support</a></p>",
+        "descriptionHtml": "<p><strong>SpyCloud Identity Exposure Intelligence for Sentinel for Microsoft Sentinel</strong> transforms how security teams detect and respond to compromised identities. Powered by the world's largest repository of recaptured darknet data &mdash; over 37 billion breach assets and growing &mdash; this solution delivers automated identity threat detection, investigation, and remediation directly within your Sentinel workspace.</p><h3>Why SpyCloud</h3><p>Compromised credentials remain the #1 initial access vector. SpyCloud's proprietary collection network recovers stolen data from criminal underground markets, botnets, and infostealer malware operations &mdash; often <strong>months before public disclosure</strong>. This early-warning advantage lets your SOC act on credential exposures, stolen session cookies, and infected device intelligence before attackers weaponize them.</p><h3>Solution Components</h3><table><tr><th>Category</th><th>Details</th></tr><tr><td><strong>Data Connector</strong></td><td>Unified connector with 9 independently configurable API data sources &mdash; Breach Watchlist, Breach Catalog, Compass (Infostealer Intelligence), Session Identity Protection, Investigations, IDLink, Exposure, CAP, and Data Partnership &mdash; ingesting into 11 dedicated custom log tables via CCF</td></tr><tr><td><strong>Analytics</strong></td><td>60+ detection rule templates spanning credential compromise, infostealer infections, session hijacking, identity correlation, and cross-platform correlation with Entra ID, Defender for Endpoint, and firewall telemetry</td></tr><tr><td><strong>Automation</strong></td><td>14 response playbooks for password reset, session revocation, MFA enforcement, device isolation, Conditional Access blocking, and multi-channel notifications (Teams, Slack, email, ServiceNow, Jira)</td></tr><tr><td><strong>Workbooks</strong></td><td>14 interactive dashboards including Executive Summary, SOC Operations, Connector Health, and per-data-source deep dives</td></tr><tr><td><strong>Threat Hunting</strong></td><td>28 curated hunting queries mapped to MITRE ATT&amp;CK tactics (T1078, T1110, T1539, T1528, T1550, T1556)</td></tr><tr><td><strong>Security Copilot</strong></td><td>125+ KQL skills, 35+ direct API skills, and a 23-agent autonomous investigation framework with optional GPT-4o analysis</td></tr></table><p><a href='https://spycloud.com'>Learn more about SpyCloud</a> | <a href='https://portal.spycloud.com'>SpyCloud Portal</a> | <a href='mailto:support@spycloud.com'>Contact Support</a></p>",
         "contentKind": "Solution",
         "contentProductId": "[variables('_solutioncontentProductId')]",
         "id": "[variables('_solutioncontentProductId')]",
-        "icon": "<img src='https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.svg' width='75px' height='75px'>",
+        "icon": "<img src='https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png' width='75px' height='75px'>",
         "contentId": "[variables('_solutionId')]",
         "parentId": "[variables('_solutionId')]",
         "source": {
@@ -9144,6 +9308,11 @@
               "version": "[variables('workbookVersion3')]"
             },
             {
+              "kind": "HuntingQuery",
+              "contentId": "[variables('_huntingQuerycontentId1')]",
+              "version": "[variables('huntingQueryVersion1')]"
+            },
+            {
               "kind": "AnalyticsRule",
               "contentId": "[variables('_analyticRulecontentId1')]",
               "version": "[variables('analyticRuleVersion1')]"
@@ -9174,9 +9343,179 @@
               "version": "[variables('analyticRuleVersion6')]"
             },
             {
-              "kind": "HuntingQuery",
-              "contentId": "[variables('_huntingQuerycontentId1')]",
-              "version": "[variables('huntingQueryVersion1')]"
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId7')]",
+              "version": "[variables('analyticRuleVersion7')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId8')]",
+              "version": "[variables('analyticRuleVersion8')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId9')]",
+              "version": "[variables('analyticRuleVersion9')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId10')]",
+              "version": "[variables('analyticRuleVersion10')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId11')]",
+              "version": "[variables('analyticRuleVersion11')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId12')]",
+              "version": "[variables('analyticRuleVersion12')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId13')]",
+              "version": "[variables('analyticRuleVersion13')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId14')]",
+              "version": "[variables('analyticRuleVersion14')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId15')]",
+              "version": "[variables('analyticRuleVersion15')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId16')]",
+              "version": "[variables('analyticRuleVersion16')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId17')]",
+              "version": "[variables('analyticRuleVersion17')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId18')]",
+              "version": "[variables('analyticRuleVersion18')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId19')]",
+              "version": "[variables('analyticRuleVersion19')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId20')]",
+              "version": "[variables('analyticRuleVersion20')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId21')]",
+              "version": "[variables('analyticRuleVersion21')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId22')]",
+              "version": "[variables('analyticRuleVersion22')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId23')]",
+              "version": "[variables('analyticRuleVersion23')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId24')]",
+              "version": "[variables('analyticRuleVersion24')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId25')]",
+              "version": "[variables('analyticRuleVersion25')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId26')]",
+              "version": "[variables('analyticRuleVersion26')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId27')]",
+              "version": "[variables('analyticRuleVersion27')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId28')]",
+              "version": "[variables('analyticRuleVersion28')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId29')]",
+              "version": "[variables('analyticRuleVersion29')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId30')]",
+              "version": "[variables('analyticRuleVersion30')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId31')]",
+              "version": "[variables('analyticRuleVersion31')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId32')]",
+              "version": "[variables('analyticRuleVersion32')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId33')]",
+              "version": "[variables('analyticRuleVersion33')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId34')]",
+              "version": "[variables('analyticRuleVersion34')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId35')]",
+              "version": "[variables('analyticRuleVersion35')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId36')]",
+              "version": "[variables('analyticRuleVersion36')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId37')]",
+              "version": "[variables('analyticRuleVersion37')]"
+            },
+            {
+              "kind": "AnalyticsRule",
+              "contentId": "[variables('_analyticRulecontentId38')]",
+              "version": "[variables('analyticRuleVersion38')]"
+            },
+            {
+              "kind": "Notebook",
+              "contentId": "[variables('_notebookContentId1')]",
+              "version": "[variables('notebookVersion1')]"
+            },
+            {
+              "kind": "Notebook",
+              "contentId": "[variables('_notebookContentId2')]",
+              "version": "[variables('notebookVersion2')]"
+            },
+            {
+              "kind": "Notebook",
+              "contentId": "[variables('_notebookContentId3')]",
+              "version": "[variables('notebookVersion3')]"
             }
           ]
         },

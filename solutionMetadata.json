@@ -29,9 +29,9 @@
     "name": "SpyCloud, Inc.",
     "email": "integrations@spycloud.com"
   },
-  "description": "The SpyCloud Identity Threat Protection solution for Microsoft Sentinel delivers comprehensive darknet intelligence integration with 13 API data pollers across 9 endpoint families, 15 custom tables, 38 embedded analytic rules, 19 automated playbooks, 4 workbooks, 13 workbook templates, 3 investigation notebooks, 4 automation rule templates, and Security Copilot integration with 26 sub-agents and 93 investigation skills.",
+  "description": "The SpyCloud Identity Exposure Intelligence for Sentinel delivers comprehensive darknet intelligence integration with 13 API data pollers across 9 endpoint families, 15 custom tables, 38 embedded analytic rules, 19 automated playbooks, 4 workbooks, 13 workbook templates, 3 investigation notebooks, 4 automation rule templates, and Security Copilot integration with 26 sub-agents and 93 investigation skills.",
   "title": "SpyCloud Identity Exposure Intelligence for Sentinel",
-  "icon": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.svg",
+  "icon": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png",
   "preview": false,
   "dependencies": {
     "operator": "AND",
