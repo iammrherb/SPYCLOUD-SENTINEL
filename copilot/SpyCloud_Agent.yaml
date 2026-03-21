@@ -68,6 +68,31 @@ Descriptor:
     HintText: "Paste your OpenAI API key (starts with 'sk-...') from platform.openai.com"
     SettingType: SecretString
     Required: false
+  - Name: AzureOpenAIEndpoint
+    Description: "OPTIONAL — Azure OpenAI endpoint URL (e.g., 'https://your-resource.openai.azure.com/'). Use this instead of OpenAIApiKey if you prefer Azure-hosted AI. Requires AzureOpenAIKey and AzureOpenAIDeployment settings."
+    HintText: "https://your-resource.openai.azure.com/"
+    SettingType: string
+    Required: false
+  - Name: AzureOpenAIKey
+    Description: "OPTIONAL — Azure OpenAI API key. Required when using AzureOpenAIEndpoint. Find it in Azure Portal > Your OpenAI Resource > Keys and Endpoint."
+    HintText: "Paste your Azure OpenAI key"
+    SettingType: SecretString
+    Required: false
+  - Name: AzureOpenAIDeployment
+    Description: "OPTIONAL — Azure OpenAI model deployment name (e.g., 'gpt-4o'). Required when using AzureOpenAIEndpoint."
+    HintText: "gpt-4o"
+    SettingType: string
+    Required: false
+  - Name: AIEngineUrl
+    Description: "OPTIONAL — URL of the SpyCloud AI Investigation Engine Azure Function App (e.g., 'https://func-spycloud-ai-engine.azurewebsites.net'). Enables deep AI-powered investigation, threat research, executive reporting, and remediation planning via the dedicated AI Engine. Deploy the engine from functions/SpyCloudAIEngine/."
+    HintText: "https://func-spycloud-ai-engine.azurewebsites.net"
+    SettingType: string
+    Required: false
+  - Name: MCPServerUrl
+    Description: "OPTIONAL — URL of the SpyCloud MCP server (e.g., 'http://localhost:3001' or deployed URL). Enables Sentinel Graph tools including blast radius analysis, attack path discovery, and exposure perimeter mapping."
+    HintText: "http://localhost:3001"
+    SettingType: string
+    Required: false
   SupportedAuthTypes:
   - None
 SkillGroups:
@@ -1510,6 +1535,14 @@ SkillGroups:
     - GenerateExecutiveBriefing
     - CorrelateExternalThreatIntel
     - DesignResponsePlaybook
+    - AIEngineInvestigation
+    - AIEngineThreatResearch
+    - AIEngineExecutiveReport
+    - AIEngineRemediationPlan
+    - AIEngineIncidentReport
+    - SentinelGraphBlastRadius
+    - SentinelGraphAttackPaths
+    - SentinelGraphExposurePerimeter
   - Name: UEBABehavioralAnalysisAgent
     DisplayName: UEBA & Behavioral Analysis Agent
     Description: Investigates anomalous user behavior for accounts with SpyCloud credential exposure. Queries UEBA BehaviorAnalytics for anomalous activities by exposed users, correlates with SpyCloud
@@ -6172,10 +6205,198 @@ SkillGroups:
           by breach_category
         | extend IsInvestigationsOnly = iff(breach_category in ("phishing", "paste_site", "combo_list", "forum_dump"), "✅ UNIQUE to Investigations API", "Also in Enterprise")
         | order by Records desc'
+  # === AI Engine Integration Skills ===
+  # These skills call the SpyCloud AI Investigation Engine (Azure Function App)
+  # for deep AI-powered analysis using OpenAI or Azure OpenAI.
+  # Requires AIEngineUrl setting to be configured.
+
+  - Name: AIEngineInvestigation
+    DisplayName: AI Engine — Deep Investigation
+    Description: "Triggers the SpyCloud AI Investigation Engine to perform a comprehensive AI-powered investigation of an exposed identity. The engine queries SpyCloud APIs, Sentinel logs, and Microsoft Graph, then uses GPT-4o to synthesize findings into a detailed analyst report with MITRE ATT&CK mapping, severity assessment, and remediation recommendations."
+    Inputs:
+    - Name: email
+      Description: "Email address or UPN to investigate"
+      Required: true
+    - Name: depth
+      Description: "Investigation depth: quick, standard, or deep"
+      Required: false
+      DefaultValue: "standard"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEngineInvestigation
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/investigate"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"email": "{{email}}", "depth": "{{depth}}"}'
+
+  - Name: AIEngineThreatResearch
+    DisplayName: AI Engine — Threat Research
+    Description: "Deep threat research using AI across dark web forums, blogs, social media, whitepapers, threat intelligence platforms, IOC databases, and APT tracking. Researches malware families, threat actors, CVEs, TTPs, and attack campaigns relevant to the organization's exposure data."
+    Inputs:
+    - Name: query
+      Description: "Threat research query — malware family, APT group, CVE, IOC, or threat topic"
+      Required: true
+    - Name: context
+      Description: "Additional context such as incident ID, affected systems, or timeframe"
+      Required: false
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEngineThreatResearch
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/threat-research"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"query": "{{query}}", "context": "{{context}}"}'
+
+  - Name: AIEngineExecutiveReport
+    DisplayName: AI Engine — Executive Report
+    Description: "Generates a board-ready executive summary of the organization's dark web exposure posture. Includes risk metrics, trend analysis, severity distribution, top exposures, remediation status, and strategic recommendations formatted for C-suite and board presentations."
+    Inputs:
+    - Name: period
+      Description: "Reporting period: 7d, 30d, 90d"
+      Required: false
+      DefaultValue: "30d"
+    - Name: format
+      Description: "Report format: summary, detailed, board-presentation"
+      Required: false
+      DefaultValue: "detailed"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEngineExecutiveReport
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/executive-report"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"period": "{{period}}", "format": "{{format}}"}'
+
+  - Name: AIEngineRemediationPlan
+    DisplayName: AI Engine — Remediation Plan
+    Description: "Creates a prioritized, step-by-step remediation plan for a Sentinel incident. Includes password resets, session revocation, device isolation, Conditional Access updates, user notification templates, and timeline with responsible parties."
+    Inputs:
+    - Name: incident_id
+      Description: "Sentinel incident ID"
+      Required: true
+    - Name: auto_execute
+      Description: "Whether to suggest automatic playbook execution"
+      Required: false
+      DefaultValue: "false"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEngineRemediationPlan
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/remediation-plan"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"incident_id": "{{incident_id}}", "auto_execute": {{auto_execute}}}'
+
+  - Name: AIEngineIncidentReport
+    DisplayName: AI Engine — Incident Report
+    Description: "Generates a detailed incident report for a Sentinel incident including timeline reconstruction, affected entities, evidence chain, MITRE ATT&CK mapping, blast radius assessment, and remediation steps. Suitable for compliance documentation and post-incident review."
+    Inputs:
+    - Name: incident_id
+      Description: "Sentinel incident ID"
+      Required: true
+    - Name: include_remediation
+      Description: "Include detailed remediation plan in report"
+      Required: false
+      DefaultValue: "true"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: AIEngineIncidentReport
+        Type: WebRequest
+        Url: "{{AIEngineUrl}}/api/ai/incident-report"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"incident_id": "{{incident_id}}", "include_remediation": {{include_remediation}}}'
+
+  # === Sentinel Graph MCP Skills ===
+  # These skills use the MCP server's Sentinel Graph tools for
+  # blast radius, attack path, and exposure perimeter analysis.
+
+  - Name: SentinelGraphBlastRadius
+    DisplayName: Sentinel Graph — Blast Radius Analysis
+    Description: "Analyzes the blast radius of a compromised entity using Microsoft Sentinel Graph (GA since Dec 2025). Maps all reachable assets, downstream dependencies, and lateral movement possibilities from the compromised account or device. Uses GQL (Graph Query Language) with KQL fallback."
+    Inputs:
+    - Name: entity_id
+      Description: "Entity identifier — email, hostname, or IP address"
+      Required: true
+    - Name: entity_type
+      Description: "Entity type: account, host, ip"
+      Required: false
+      DefaultValue: "account"
+    - Name: max_depth
+      Description: "Maximum traversal depth for graph walk (1-5)"
+      Required: false
+      DefaultValue: "3"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: SentinelGraphBlastRadius
+        Type: WebRequest
+        Url: "{{MCPServerUrl}}/api/tools/find_blast_radius"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"entity_id": "{{entity_id}}", "entity_type": "{{entity_type}}", "max_depth": {{max_depth}}}'
+
+  - Name: SentinelGraphAttackPaths
+    DisplayName: Sentinel Graph — Attack Path Discovery
+    Description: "Discovers walkable attack paths between two entities in the Sentinel Graph. Identifies how an attacker could move from a compromised account to a target asset through relationships like sign-ins, group memberships, device usage, and application access."
+    Inputs:
+    - Name: source_entity
+      Description: "Source entity (compromised account or device)"
+      Required: true
+    - Name: target_entity
+      Description: "Target entity (high-value asset to protect)"
+      Required: true
+    - Name: max_hops
+      Description: "Maximum hops between source and target (1-10)"
+      Required: false
+      DefaultValue: "5"
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: SentinelGraphAttackPaths
+        Type: WebRequest
+        Url: "{{MCPServerUrl}}/api/tools/find_walkable_paths"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"source_entity": "{{source_entity}}", "target_entity": "{{target_entity}}", "max_hops": {{max_hops}}}'
+
+  - Name: SentinelGraphExposurePerimeter
+    DisplayName: Sentinel Graph — Exposure Perimeter
+    Description: "Maps the external-facing attack surface and entry points related to SpyCloud exposure data. Identifies internet-facing assets, externally accessible applications, VPN endpoints, and other entry points that could be exploited using compromised credentials."
+    Inputs:
+    - Name: domain
+      Description: "Domain to map exposure perimeter for"
+      Required: true
+    Settings:
+      OpenApiAuthType: None
+      Definition:
+        Name: SentinelGraphExposurePerimeter
+        Type: WebRequest
+        Url: "{{MCPServerUrl}}/api/tools/exposure_perimeter"
+        Method: POST
+        Headers:
+          Content-Type: application/json
+        Body: '{"domain": "{{domain}}"}'
+
 AgentDefinitions:
 - Name: SpyCloudThreatIntelAgent
   DisplayName: SpyCloud Darknet & Identity Threat Exposure Intelligence Agent
-  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence across 9 SpyCloud APIs and 14 Sentinel tables with 26 specialized sub-agents and 18 GPT-4o AI analysis skills."
+  Description: "Interactive investigation agent for SpyCloud darknet & identity threat exposure intelligence across 9 SpyCloud APIs and 15 Sentinel tables with 29 specialized sub-agents, 18 GPT-4o AI analysis skills, 5 AI Engine endpoints, and 3 Sentinel Graph tools."
   Publisher: SpyCloud
   Product: ThreatIntelligence
   Category: Other

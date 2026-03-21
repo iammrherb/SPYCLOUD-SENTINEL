@@ -1,0 +1,263 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2024-01-01-preview/securityCopilotCustomAgent.json",
+  "name": "SpyCloudSCORCH",
+  "displayName": "SCORCH — SpyCloud Identity Exposure Intelligence Agent",
+  "description": "AI-powered Security Copilot agent that investigates dark web credential exposures, infostealer infections, and identity threats using SpyCloud intelligence integrated with Microsoft Sentinel.",
+  "version": "13.12.0",
+  "publisher": "SpyCloud",
+  "category": "Threat Intelligence",
+  "icon": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.png",
+  "capabilities": [
+    "Investigation",
+    "ThreatIntelligence",
+    "IncidentResponse",
+    "Reporting"
+  ],
+  "authentication": {
+    "type": "ManagedIdentity",
+    "permissions": [
+      "SecurityEvents.Read.All",
+      "SecurityIncident.ReadWrite.All",
+      "User.Read.All",
+      "AuditLog.Read.All"
+    ]
+  },
+  "skills": [
+    {
+      "name": "InvestigateExposure",
+      "displayName": "Investigate Identity Exposure",
+      "description": "Deep investigation of a compromised identity including breach context, credential analysis, sign-in correlation, device forensics, and blast radius assessment.",
+      "inputs": [
+        {
+          "name": "email",
+          "type": "string",
+          "description": "Email address or UPN of the exposed identity",
+          "required": true
+        },
+        {
+          "name": "depth",
+          "type": "string",
+          "description": "Investigation depth: quick (summary only), standard (full analysis), deep (includes threat research)",
+          "required": false,
+          "default": "standard"
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/investigate",
+        "method": "POST",
+        "body": {
+          "email": "{email}",
+          "depth": "{depth}"
+        }
+      }
+    },
+    {
+      "name": "GenerateExecutiveReport",
+      "displayName": "Generate Executive Report",
+      "description": "Create a board-ready executive summary of the organization's dark web exposure posture with risk metrics, trend analysis, and strategic recommendations.",
+      "inputs": [
+        {
+          "name": "period",
+          "type": "string",
+          "description": "Reporting period: 7d, 30d, 90d",
+          "required": false,
+          "default": "30d"
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "description": "Report format: summary, detailed, board-presentation",
+          "required": false,
+          "default": "detailed"
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/executive-report",
+        "method": "POST",
+        "body": {
+          "period": "{period}",
+          "format": "{format}"
+        }
+      }
+    },
+    {
+      "name": "ThreatResearch",
+      "displayName": "Deep Threat Research",
+      "description": "Research threat actors, malware families, APT groups, and attack techniques across dark web forums, blogs, social media, whitepapers, and threat intelligence platforms.",
+      "inputs": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "Threat research query — can be a malware family, APT group, CVE, IOC, or general threat topic",
+          "required": true
+        },
+        {
+          "name": "context",
+          "type": "string",
+          "description": "Additional context such as incident ID, affected systems, or timeframe",
+          "required": false
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/threat-research",
+        "method": "POST",
+        "body": {
+          "query": "{query}",
+          "context": "{context}"
+        }
+      }
+    },
+    {
+      "name": "IncidentReport",
+      "displayName": "Generate Incident Report",
+      "description": "Create a detailed incident report for a Sentinel incident including timeline, affected entities, MITRE ATT&CK mapping, and remediation steps.",
+      "inputs": [
+        {
+          "name": "incident_id",
+          "type": "string",
+          "description": "Sentinel incident ID",
+          "required": true
+        },
+        {
+          "name": "include_remediation",
+          "type": "boolean",
+          "description": "Include detailed remediation plan",
+          "required": false,
+          "default": true
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/incident-report",
+        "method": "POST",
+        "body": {
+          "incident_id": "{incident_id}",
+          "include_remediation": "{include_remediation}"
+        }
+      }
+    },
+    {
+      "name": "RemediationPlan",
+      "displayName": "Generate Remediation Plan",
+      "description": "Create a prioritized remediation plan with step-by-step actions for password resets, session revocation, device isolation, Conditional Access updates, and user notification.",
+      "inputs": [
+        {
+          "name": "incident_id",
+          "type": "string",
+          "description": "Sentinel incident ID to create remediation plan for",
+          "required": true
+        },
+        {
+          "name": "auto_execute",
+          "type": "boolean",
+          "description": "Whether to suggest automatic execution of remediation playbooks",
+          "required": false,
+          "default": false
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/remediation-plan",
+        "method": "POST",
+        "body": {
+          "incident_id": "{incident_id}",
+          "auto_execute": "{auto_execute}"
+        }
+      }
+    },
+    {
+      "name": "QuerySpyCloudData",
+      "displayName": "Query SpyCloud Data",
+      "description": "Execute KQL queries against SpyCloud custom log tables in Sentinel. Supports all 14 SpyCloud tables including breach watchlist, compass data, SIP cookies, and IDLink.",
+      "inputs": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "KQL query to execute against SpyCloud tables",
+          "required": true
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/investigate",
+        "method": "POST",
+        "body": {
+          "email": "kql-query",
+          "context": "{query}"
+        }
+      }
+    },
+    {
+      "name": "BlastRadiusAnalysis",
+      "displayName": "Blast Radius Analysis",
+      "description": "Analyze the blast radius of a compromised entity using Sentinel Graph to map all reachable assets, lateral movement paths, and exposure perimeter.",
+      "inputs": [
+        {
+          "name": "entity",
+          "type": "string",
+          "description": "Entity identifier (email, hostname, or IP address)",
+          "required": true
+        },
+        {
+          "name": "entity_type",
+          "type": "string",
+          "description": "Entity type: account, host, ip",
+          "required": false,
+          "default": "account"
+        }
+      ],
+      "endpoint": {
+        "uri": "{AI_ENGINE_URL}/api/ai/investigate",
+        "method": "POST",
+        "body": {
+          "email": "{entity}",
+          "context": "Perform blast radius analysis for this {entity_type} entity. Use Sentinel Graph to map all reachable assets, identify lateral movement paths, and calculate the exposure perimeter."
+        }
+      }
+    }
+  ],
+  "promptExamples": [
+    "Investigate the exposure for user john.doe@contoso.com",
+    "Generate an executive report for the last 30 days",
+    "Research the RedLine Stealer malware family",
+    "What is the blast radius if admin@contoso.com is compromised?",
+    "Create a remediation plan for Sentinel incident INC-2026-0412",
+    "Show me all severity 25 exposures from the last week",
+    "How many users have plaintext passwords exposed on the dark web?",
+    "What are the top malware families targeting our organization?"
+  ],
+  "systemPrompt": "You are SCORCH (SpyCloud Orchestrated Response & Cyber Hunt), an expert identity threat intelligence analyst. You specialize in investigating dark web credential exposures, infostealer infections, and identity-based attacks. You have access to SpyCloud's recaptured darknet data integrated with Microsoft Sentinel, including breach watchlists, infostealer telemetry, session cookies, and identity correlation data across 14 custom log tables. You provide actionable analysis with MITRE ATT&CK mapping, severity-based prioritization (2=breach credential, 5=breach+PII, 20=infostealer credential, 25=infostealer+app data), and concrete remediation steps. You are thorough, precise, and security-focused.",
+  "copilotStudioIntegration": {
+    "description": "This agent can be published to Microsoft Copilot Studio for broader distribution. Follow these steps to integrate:",
+    "steps": [
+      "1. Navigate to https://copilotstudio.microsoft.com",
+      "2. Create a new custom copilot or extend an existing one",
+      "3. Add this agent as a plugin via 'Add a plugin' > 'Custom connector'",
+      "4. Configure the AI Engine URL endpoint as the base URL",
+      "5. Map each skill to a Copilot Studio topic",
+      "6. Configure authentication using Managed Identity or API key",
+      "7. Test the integration using the built-in test panel",
+      "8. Publish to your organization's channels (Teams, Slack, Web)"
+    ],
+    "connectorConfig": {
+      "type": "CustomConnector",
+      "baseUrl": "{AI_ENGINE_URL}",
+      "authentication": "ManagedIdentity",
+      "operationIds": [
+        "InvestigateExposure",
+        "GenerateExecutiveReport",
+        "ThreatResearch",
+        "IncidentReport",
+        "RemediationPlan"
+      ]
+    }
+  },
+  "defenderPortalIntegration": {
+    "description": "To make this agent available in the Microsoft Defender portal:",
+    "steps": [
+      "1. Ensure Security Copilot is enabled in your tenant",
+      "2. Go to Security Copilot > Settings > Custom plugins",
+      "3. Upload this agent configuration file",
+      "4. Configure the AI Engine URL in the plugin settings",
+      "5. Assign appropriate RBAC roles to the agent",
+      "6. The agent will appear in the Copilot sidebar within Defender portal"
+    ]
+  }
+}

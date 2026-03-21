@@ -1,0 +1,21 @@
+{
+  "jupyter.jupyterServerType": "local",
+  "jupyter.notebookFileRoot": "${workspaceFolder}/notebooks",
+  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+  "notebook.output.textLineLimit": 500,
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  }
+}
