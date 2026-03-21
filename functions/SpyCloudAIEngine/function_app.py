@@ -350,17 +350,17 @@ def classify_pii_exposure(exposures: list) -> dict:
     """
     pii_fields = {
         "email": {"category": "Contact Info", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
-        "password": {"category": "Credential", "gdpr": True, "ccpa": True, "hipaa": True, "pci": True},
-        "password_plaintext": {"category": "Plaintext Credential", "gdpr": True, "ccpa": True, "hipaa": True, "pci": True},
-        "full_name": {"category": "Personal Identity", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
-        "phone": {"category": "Contact Info", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
-        "dob": {"category": "Sensitive PII", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
-        "ssn": {"category": "Government ID", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
+        "password": {"category": "Credential", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "password_plaintext": {"category": "Plaintext Credential", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
+        "full_name": {"category": "Personal Identity", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "phone": {"category": "Contact Info", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "dob": {"category": "Sensitive PII", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "ssn": {"category": "Government ID", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
         "cc_number": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
         "cc_expiration": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
         "bank_number": {"category": "Financial", "gdpr": True, "ccpa": True, "hipaa": False, "pci": True},
-        "ip_addresses": {"category": "Network Identity", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
-        "infected_machine_id": {"category": "Device Identity", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
+        "ip_addresses": {"category": "Network Identity", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
+        "infected_machine_id": {"category": "Device Identity", "gdpr": True, "ccpa": True, "hipaa": True, "pci": False},
         "target_url": {"category": "Behavioral", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
         "user_browser": {"category": "Device Fingerprint", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
         "user_os": {"category": "Device Fingerprint", "gdpr": True, "ccpa": True, "hipaa": False, "pci": False},
@@ -406,9 +406,8 @@ def classify_pii_exposure(exposures: list) -> dict:
     has_sensitive = any(
         f in detected_fields for f in ("ssn", "dob", "password_plaintext")
     )
-    has_health = "hipaa" in [
-        r for r in ("hipaa",) if classification["regulatory_impact"]["hipaa"]["affected"]
-    ]
+    health_fields = {"ip_addresses", "infected_machine_id"}
+    has_health = bool(detected_fields & health_fields) and classification["regulatory_impact"]["hipaa"]["affected"]
 
     if has_financial or has_sensitive:
         classification["sensitivity_level"] = "Highly Confidential"
@@ -1277,7 +1276,7 @@ def ai_compliance_assessment(req: func.HttpRequest) -> func.HttpResponse:
     else:
         frameworks = ["gdpr", "ccpa", "hipaa", "pci_dss", "soc2"]
     include_templates = body.get("includeNotificationTemplates", True)
-    period_days = min(int(body.get("periodDays", 30)), 365)
+    period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
 
     # Step 1: Query SpyCloud for domain exposures
     encoded_domain = requests.utils.quote(domain, safe="")
@@ -1498,7 +1497,7 @@ def ai_purview_dlp_status(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
         )
 
-    period_days = min(int(body.get("periodDays", 30)), 365)
+    period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
     safe_domain = _sanitize_kql_string(domain)
 
     # Query DLP events from unified audit log
