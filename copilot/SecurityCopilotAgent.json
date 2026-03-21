@@ -3,7 +3,7 @@
   "name": "SpyCloudSCORCH",
   "displayName": "SCORCH — SpyCloud Identity Exposure Intelligence Agent",
   "description": "AI-powered Security Copilot agent that investigates dark web credential exposures, infostealer infections, and identity threats using SpyCloud intelligence integrated with Microsoft Sentinel.",
-  "version": "13.12.0",
+  "version": "2.0.0",
   "publisher": "SpyCloud",
   "category": "Threat Intelligence",
   "icon": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.png",

@@ -19,10 +19,10 @@
     "tier": "Partner",
     "link": "https://spycloud.com/support"
   },
-    "version": "13.12.0",
-    "source": {
+  "version": "2.0.0",
+  "source": {
     "kind": "Solution",
-    "name": "SpyCloud Identity Threat Protection"
+    "name": "SpyCloud Identity Exposure Intelligence for Sentinel"
   },
   "contentSchemaVersion": "3.0.0",
   "author": {
@@ -30,7 +30,7 @@
     "email": "integrations@spycloud.com"
   },
   "description": "The SpyCloud Identity Threat Protection solution for Microsoft Sentinel delivers comprehensive darknet intelligence integration with 13 API data pollers across 9 endpoint families, 15 custom tables, 38 embedded analytic rules, 19 automated playbooks, 4 workbooks, 13 workbook templates, 3 investigation notebooks, 4 automation rule templates, and Security Copilot integration with 26 sub-agents and 93 investigation skills.",
-  "title": "SpyCloud Identity Threat Protection",
+  "title": "SpyCloud Identity Exposure Intelligence for Sentinel",
   "icon": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-icon.svg",
   "preview": false,
   "dependencies": {
@@ -39,72 +39,72 @@
       {
         "kind": "DataConnector",
         "contentId": "SpyCloudDataConnector",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "Workbook",
         "contentId": "SpyCloudExecutiveDashboard",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "Workbook",
         "contentId": "SpyCloudSOCOperations",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "Workbook",
         "contentId": "SpyCloudThreatIntelDashboard",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "AnalyticsRule",
         "contentId": "spycloud-ar-afea3581841e",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "AnalyticsRule",
         "contentId": "spycloud-ar-3f81b645043c",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "AnalyticsRule",
         "contentId": "spycloud-ar-91e7033da569",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "AnalyticsRule",
         "contentId": "spycloud-ar-aa7b9165b0a2",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "AnalyticsRule",
         "contentId": "spycloud-ar-91fd8db10531",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "AnalyticsRule",
         "contentId": "spycloud-ar-1a5c78847c8c",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "HuntingQuery",
         "contentId": "spycloud-hunting-queries",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "Notebook",
         "contentId": "SpyCloud-Incident-Triage",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "Notebook",
         "contentId": "SpyCloud-Threat-Landscape",
-        "version": "13.12.0"
+        "version": "2.0.0"
       },
       {
         "kind": "Notebook",
         "contentId": "SpyCloud-ThreatHunting",
-        "version": "13.12.0"
+        "version": "2.0.0"
       }
     ]
   },

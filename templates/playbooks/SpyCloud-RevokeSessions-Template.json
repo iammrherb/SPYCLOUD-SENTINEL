@@ -258,7 +258,7 @@
       },
       "tags": {
         "hidden-SentinelTemplateName": "SpyCloud-RevokeSessions-Template",
-        "hidden-SentinelTemplateVersion": "13.12.0"
+        "hidden-SentinelTemplateVersion": "2.0.0"
       }
     }
   ],

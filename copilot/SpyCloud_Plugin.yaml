@@ -4,7 +4,7 @@ Descriptor:
   Description: "KQL plugin querying 14 SpyCloud Sentinel tables for credential exposure, breach catalog, device forensics, identity correlation, remediation audit, and Investigations API deep-dive with breach category analysis."
   Category: Other
   DescriptionDisplay: default
-  Version: 13.12.0
+  Version: 2.0.0
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId

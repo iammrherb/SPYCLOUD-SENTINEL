@@ -2,11 +2,11 @@
 
 <img src="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/spycloud-wordmark-white.png" alt="SpyCloud" width="400">
 
-# SpyCloud Identity Exposure Intelligence for Sentinel v13.12.0
+# SpyCloud Identity Exposure Intelligence for Sentinel v2.0.0
 
 ### The Most Powerful Darknet Identity Threat Intelligence Platform for Microsoft Sentinel
 
-[![Version](https://img.shields.io/badge/version-13.12.0-00D4AA?style=for-the-badge)](#) [![ARM Resources](https://img.shields.io/badge/ARM_Resources-144-0097A7?style=for-the-badge)](#) [![Analytics Rules](https://img.shields.io/badge/Analytics_Rules-38+-E91E63?style=for-the-badge)](#) [![Playbooks](https://img.shields.io/badge/Playbooks-19-9C27B0?style=for-the-badge)](#) [![AI Skills](https://img.shields.io/badge/Copilot_Skills-28+-FF9800?style=for-the-badge)](#) [![Terraform](https://img.shields.io/badge/Terraform-Ready-844FBA?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/version-2.0.0-00D4AA?style=for-the-badge)](#) [![ARM Resources](https://img.shields.io/badge/ARM_Resources-144-0097A7?style=for-the-badge)](#) [![Analytics Rules](https://img.shields.io/badge/Analytics_Rules-38+-E91E63?style=for-the-badge)](#) [![Playbooks](https://img.shields.io/badge/Playbooks-19-9C27B0?style=for-the-badge)](#) [![AI Skills](https://img.shields.io/badge/Copilot_Skills-28+-FF9800?style=for-the-badge)](#) [![Terraform](https://img.shields.io/badge/Terraform-Ready-844FBA?style=for-the-badge)](#)
 
 **19 playbooks** | **4 workbooks + 13 templates** | **38 analytics rules** | **3 notebooks** | **12 scripts** | **5 promptbooks** | **MCP server** | **Terraform module** | **13 test data sets**
 
@@ -797,6 +797,6 @@ This repository is licensed under the **MIT License**. See [LICENSE](LICENSE) fo
 
 *Protecting identities. Preventing breaches. Powering SOCs.*
 
-v13.12.0
+v2.0.0
 
 </div>

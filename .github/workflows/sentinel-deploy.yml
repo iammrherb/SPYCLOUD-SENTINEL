@@ -41,8 +41,8 @@ permissions:
   contents: read
 
 env:
-  SOLUTION_VERSION: '13.12.0'
-  SOLUTION_NAME: 'SpyCloud Identity Threat Protection'
+  SOLUTION_VERSION: '2.0.0'
+  SOLUTION_NAME: 'SpyCloud Identity Exposure Intelligence for Sentinel'
 
 jobs:
   validate-templates:
