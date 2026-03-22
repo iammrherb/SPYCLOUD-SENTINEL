@@ -13,37 +13,43 @@
       "type": "string",
       "metadata": {
         "description": "Azure Subscription ID"
-      }
+      },
+      "defaultValue": "[subscription().subscriptionId]"
     },
     "resourceGroupName": {
       "type": "string",
       "metadata": {
         "description": "Resource group for this deployment"
-      }
+      },
+      "defaultValue": "[resourceGroup().name]"
     },
     "workspaceName": {
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     },
     "BlockedGroupId": {
       "type": "string",
       "metadata": {
         "description": "Azure AD group ID for fully blocked users (severity 25)"
-      }
+      },
+      "defaultValue": ""
     },
     "RestrictedGroupId": {
       "type": "string",
       "metadata": {
         "description": "Azure AD group ID for restricted users (severity 20)"
-      }
+      },
+      "defaultValue": ""
     },
     "MonitoredGroupId": {
       "type": "string",
       "metadata": {
         "description": "Azure AD group ID for monitored users (severity 5+)"
-      }
+      },
+      "defaultValue": ""
     }
   },
   "variables": {

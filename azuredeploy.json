@@ -511,13 +511,6 @@
         "description": "RECOMMENDED: ON \u2014 Deploys advanced threat detection rules (sc-040 to sc-049). Detects multi-stage attack chains, CA bypass attempts, credential re-exposure after reset, TI indicator matches, and geographic mismatches. Uses multiple data sources with graceful fallback."
       }
     },
-    "enableMsicRules": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "Deploy 5 Microsoft Security Incident Creation (MSIC) rules that auto-create Sentinel incidents from Defender XDR, Entra ID Protection, Defender for Cloud, Microsoft Cloud App Security, and Azure Active Directory Identity Protection alerts."
-      }
-    },
     "enableFusionDetection": {
       "type": "bool",
       "defaultValue": true,
@@ -1339,7 +1332,7 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Enable Microsoft Security Incident Creation rules"
+        "description": "Deploy 5 Microsoft Security Incident Creation (MSIC) rules that auto-create Sentinel incidents from Defender XDR, Entra ID Protection, Defender for Cloud, Microsoft Cloud App Security, and Azure Active Directory Identity Protection alerts."
       }
     },
     "enableAnomalyDetection": {

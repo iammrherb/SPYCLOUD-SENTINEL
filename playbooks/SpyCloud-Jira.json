@@ -20,25 +20,29 @@
       "type": "string",
       "metadata": {
         "description": "Jira instance URL (e.g., https://yourorg.atlassian.net)"
-      }
+      },
+      "defaultValue": ""
     },
     "jiraEmail": {
       "type": "string",
       "metadata": {
         "description": "Jira account email for API authentication"
-      }
+      },
+      "defaultValue": ""
     },
     "jiraApiToken": {
       "type": "securestring",
       "metadata": {
         "description": "Jira API token"
-      }
+      },
+      "defaultValue": ""
     },
     "jiraProjectKey": {
       "type": "string",
       "metadata": {
         "description": "Jira project key (e.g., SEC)"
-      }
+      },
+      "defaultValue": ""
     },
     "jiraIssueType": {
       "type": "string",
@@ -51,7 +55,8 @@
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     }
   },
   "variables": {

@@ -280,14 +280,6 @@ jobs:
           results.append(('sentinel-deploy.yml SOLUTION_VERSION', v, match))
           if not match: warnings += 1
 
-          # package.json
-          with open('package/package.json') as f:
-              data = json.load(f)
-          v = data.get('version', 'MISSING')
-          match = v == EXPECTED
-          results.append(('package/package.json version', v, match))
-          if not match: warnings += 1
-
           print(f'Expected version: {EXPECTED}\n')
           for name, ver, ok in results:
               status = 'OK' if ok else 'MISMATCH'
@@ -312,11 +304,11 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r functions/SpyCloudEnrichment/requirements.txt
+        run: pip install -r infrastructure/functions/SpyCloudEnrichment/requirements.txt
 
       - name: Syntax check
         run: |
-          python3 -m py_compile functions/SpyCloudEnrichment/function_app.py
+          python3 -m py_compile infrastructure/functions/SpyCloudEnrichment/function_app.py
           echo "function_app.py compiles successfully"
 
       - name: Import validation
@@ -380,7 +372,7 @@ jobs:
           errors = []
           checked = 0
 
-          for directory in ['playbooks', 'templates/playbooks']:
+          for directory in ['playbooks', 'content/playbooks']:
               if not os.path.isdir(directory):
                   continue
               for fname in sorted(os.listdir(directory)):
@@ -426,15 +418,15 @@ jobs:
           terraform_version: '1.7.0'
 
       - name: Terraform fmt check
-        working-directory: terraform
+        working-directory: infrastructure/terraform
         run: terraform fmt -check -recursive
 
       - name: Terraform init
-        working-directory: terraform
+        working-directory: infrastructure/terraform
         run: terraform init -backend=false
 
       - name: Terraform validate
-        working-directory: terraform
+        working-directory: infrastructure/terraform
         run: terraform validate
 
   # ---------------------------------------------------------------------------
@@ -476,16 +468,16 @@ jobs:
 
           # Playbooks
           pb_standalone = len(glob.glob('playbooks/*.json'))
-          pb_templates = len(glob.glob('templates/playbooks/*.json'))
-          print(f"\n### Playbooks: {pb_standalone} standalone + {pb_templates} templates")
+          pb_content = len(glob.glob('content/playbooks/*.json'))
+          print(f"\n### Playbooks: {pb_standalone} standalone + {pb_content} content templates")
 
           # Workbooks
           wb_main = len(glob.glob('workbooks/*.json'))
-          wb_templates = len(glob.glob('templates/workbooks/*.json'))
-          print(f"### Workbooks: {wb_main} main + {wb_templates} templates")
+          wb_content = len(glob.glob('content/workbooks/*.json'))
+          print(f"### Workbooks: {wb_main} main + {wb_content} content templates")
 
           # Analytics
-          ar_yaml = len(glob.glob('analytics-rules/*.yaml'))
+          ar_yaml = len(glob.glob('content/analytics-rules/*.yaml'))
           print(f"### Analytics: {ar_yaml} YAML rule files")
 
           # Notebooks

@@ -29,13 +29,15 @@
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     },
     "notificationEmail": {
       "type": "string",
       "metadata": {
         "description": "Email address for SOC alert notifications"
-      }
+      },
+      "defaultValue": ""
     }
   },
   "variables": {

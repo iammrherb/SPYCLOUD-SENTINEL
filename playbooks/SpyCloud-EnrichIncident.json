@@ -20,13 +20,15 @@
       "type": "securestring",
       "metadata": {
         "description": "SpyCloud API key for breach data lookups"
-      }
+      },
+      "defaultValue": ""
     },
     "workspaceName": {
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     }
   },
   "variables": {
