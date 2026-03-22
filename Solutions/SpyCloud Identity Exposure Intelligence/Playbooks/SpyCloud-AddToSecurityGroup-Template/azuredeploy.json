@@ -75,6 +75,10 @@
       }
     }
   },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
   "resources": [
     {
       "type": "Microsoft.Web/connections",

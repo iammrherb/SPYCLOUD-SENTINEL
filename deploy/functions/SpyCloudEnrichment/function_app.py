@@ -195,11 +195,13 @@ def call_spycloud(endpoint: str, product: str = "enterprise",
     if not key:
         return {"error": f"No API key configured for {product}", "hits": 0, "results": []}
 
-    # Rate limiting (thread-safe)
+    # Rate limiting (thread-safe) — atomic check-and-reserve to prevent TOCTOU race
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     with _rate_limit_lock:
         if _get_call_count(today) >= DAILY_LIMIT:
             return {"error": "Daily API call limit reached", "hits": 0, "results": []}
+        # Reserve a slot immediately to prevent concurrent over-use
+        _increment_call_count(today)
 
     base = SPYCLOUD_INVESTIGATIONS_URL if "investigations" in endpoint else SPYCLOUD_BASE_URL
     url = f"{base}{endpoint}"
@@ -212,8 +214,6 @@ def call_spycloud(endpoint: str, product: str = "enterprise",
             duration_ms = int((time.time() - start) * 1000)
 
             if resp.status_code == 200:
-                with _rate_limit_lock:
-                    _increment_call_count(today)
                 data = resp.json()
                 data["_meta"] = {
                     "statusCode": 200,
