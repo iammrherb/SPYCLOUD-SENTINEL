@@ -1,6 +1,6 @@
 Descriptor:
   Name: SpyCloudKQLPlugin
-  DisplayName: SpyCloud Sentinel KQL Plugin
+  DisplayName: "SpyCloud Sentinel KQL Plugin"
   Description: "KQL plugin querying 14 SpyCloud Sentinel tables for credential exposure, breach catalog, device forensics, identity correlation, remediation audit, and Investigations API deep-dive with breach category analysis."
   Category: Other
   DescriptionDisplay: default
@@ -8,23 +8,23 @@ Descriptor:
   Icon: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/docs/images/SpyCloud-icon-SC_2.png
   Settings:
     - Name: TenantId
-      Description: Azure Tenant ID in GUID format (e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Must be a valid GUID — do NOT enter a domain name or URL.
-      HintText: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)'
+      Description: "Azure Tenant ID in GUID format (e.g. 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'). Find it in Azure Portal > Microsoft Entra ID > Overview > Tenant ID. Must be a valid GUID — do NOT enter a domain name or URL."
+      HintText: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID from Entra ID > Overview)"
       SettingType: string
       Required: true
     - Name: SubscriptionId
-      Description: Your Azure Subscription ID where the Sentinel workspace is provisioned.
-      HintText: Enter your Azure Subscription ID
+      Description: "Your Azure Subscription ID where the Sentinel workspace is provisioned."
+      HintText: "Enter your Azure Subscription ID"
       SettingType: string
       Required: true
     - Name: ResourceGroupName
-      Description: The Resource Group where the Sentinel workspace is provisioned.
-      HintText: Enter the Resource Group name
+      Description: "The Resource Group where the Sentinel workspace is provisioned."
+      HintText: "Enter the Resource Group name"
       SettingType: string
       Required: true
     - Name: WorkspaceName
-      Description: The name of the Sentinel Log Analytics workspace containing SpyCloud tables.
-      HintText: Enter your Sentinel workspace name
+      Description: "The name of the Sentinel Log Analytics workspace containing SpyCloud tables."
+      HintText: "Enter your Sentinel workspace name"
       SettingType: string
       Required: true
   SupportedAuthTypes:
@@ -39,7 +39,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetUserExposures
-        DisplayName: Search SpyCloud exposures for a user
+        DisplayName: "Search SpyCloud exposures for a user"
         Description: |
           Finds all compromised credentials and infostealer infections for a specific email including severity, target domains, password types, infection details, sighting counts, and device context. This is the primary user investigation skill.
         ExamplePrompts:
@@ -50,7 +50,7 @@ SkillGroups:
           - What SpyCloud exposures exist for this email address
         Inputs:
           - Name: targetEmail
-            Description: The email address of the user to investigate for SpyCloud exposures.
+            Description: "The email address of the user to investigate for SpyCloud exposures."
             Required: true
         Settings:
           Target: Sentinel
@@ -65,7 +65,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetUserFullPIIProfile
-        DisplayName: Get full PII and identity profile for a user
+        DisplayName: "Get full PII and identity profile for a user"
         Description: |
           Returns the complete identity profile for a compromised user including personal details such as name, date of birth, phone, address, employment information, Social Security numbers, bank account numbers, tax IDs, health insurance IDs, social media accounts, and all other PII fields found across SpyCloud breach records. Critical for assessing identity theft risk and compliance notification requirements.
         ExamplePrompts:
@@ -77,7 +77,7 @@ SkillGroups:
           - Check for identity theft risk from SpyCloud for this user
         Inputs:
           - Name: targetEmail
-            Description: The email address to retrieve the full PII identity profile for.
+            Description: "The email address to retrieve the full PII identity profile for."
             Required: true
         Settings:
           Target: Sentinel
@@ -92,7 +92,7 @@ SkillGroups:
             | top 20 by TimeGenerated desc
 
       - Name: GetUserAccountActivity
-        DisplayName: Get account activity timeline for a user
+        DisplayName: "Get account activity timeline for a user"
         Description: |
           Returns account activity metadata for a compromised user including signup dates, last login times, last activity, account modification timestamps, account status, account type, and account notes. Useful for determining how active the compromised account was and when it was last used.
         ExamplePrompts:
@@ -102,7 +102,7 @@ SkillGroups:
           - Show account signup and modification dates from SpyCloud
         Inputs:
           - Name: targetEmail
-            Description: The email address to check for account activity metadata.
+            Description: "The email address to check for account activity metadata."
             Required: true
         Settings:
           Target: Sentinel
@@ -122,7 +122,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetExposedPasswords
-        DisplayName: Show exposed passwords and credential details for a user
+        DisplayName: "Show exposed passwords and credential details for a user"
         Description: |
           Returns all password data for a specific email including password hashes, plaintext passwords when available, password types such as plaintext, bcrypt, MD5, SHA1, SHA256, salts, and sighting counts showing how many times the credential pair has been observed. Use this to assess password reuse risk and determine if cleartext credentials are in criminal hands.
         ExamplePrompts:
@@ -134,7 +134,7 @@ SkillGroups:
           - Show password hashes and salts from SpyCloud
         Inputs:
           - Name: targetEmail
-            Description: The email address to check for exposed password data.
+            Description: "The email address to check for exposed password data."
             Required: true
         Settings:
           Target: Sentinel
@@ -150,7 +150,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetPlaintextPasswordExposures
-        DisplayName: List all plaintext password exposures organization-wide
+        DisplayName: "List all plaintext password exposures organization-wide"
         Description: |
           Finds all SpyCloud exposure records where cleartext plaintext passwords are available, representing the absolute highest credential risk. These are passwords criminals can use directly without cracking. Includes the target domain and sighting count.
         ExamplePrompts:
@@ -172,7 +172,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetPasswordTypeBreakdown
-        DisplayName: Analyze password types across all SpyCloud exposures
+        DisplayName: "Analyze password types across all SpyCloud exposures"
         Description: |
           Breaks down all exposed credentials by password type including plaintext, MD5, SHA1, SHA256, bcrypt, scrypt, NTLM, and others. Shows the volume and crackability of each type. Plaintext and weak hashes like MD5 represent the highest immediate risk.
         ExamplePrompts:
@@ -198,7 +198,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetHighSeverityExposures
-        DisplayName: Get recent high-severity infostealer exposures
+        DisplayName: "Get recent high-severity infostealer exposures"
         Description: |
           Returns the most recent high-severity infostealer exposures with severity 20 or 25 indicating active malware infections that stole credentials, cookies, session tokens, and autofill data from devices. Includes infection path, AV software present, and device details.
         ExamplePrompts:
@@ -220,7 +220,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetExposureSummaryBySeverity
-        DisplayName: Summarize exposures by severity level
+        DisplayName: "Summarize exposures by severity level"
         Description: |
           Breaks down all SpyCloud exposures by severity level. Severity 2 is breach credential with email and password. Severity 5 is breach plus PII including name, phone, and address. Severity 20 is infostealer credential stolen by malware from a device. Severity 25 is infostealer plus application data including stolen cookies, sessions, and autofill.
         ExamplePrompts:
@@ -242,7 +242,7 @@ SkillGroups:
             | sort by severity asc
 
       - Name: GetExposureSummaryByDomain
-        DisplayName: Summarize exposures by email domain
+        DisplayName: "Summarize exposures by email domain"
         Description: |
           Aggregates SpyCloud exposures by corporate email domain showing total exposure count, unique affected users, average severity, infostealer count, and plaintext password exposure count.
         ExamplePrompts:
@@ -263,7 +263,7 @@ SkillGroups:
             | top 15 by ExposureCount desc
 
       - Name: GetTargetedDomains
-        DisplayName: Show most targeted websites and applications
+        DisplayName: "Show most targeted websites and applications"
         Description: |
           Lists the most frequently targeted websites and applications where corporate credentials were stolen, ranked by exposure volume. Shows unique affected users, full URLs, and subdomains. Critical for understanding which applications are most at risk from credential stuffing and session hijacking.
         ExamplePrompts:
@@ -288,7 +288,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetSensitivePIIExposures
-        DisplayName: Find exposures with SSN, financial, and health data
+        DisplayName: "Find exposures with SSN, financial, and health data"
         Description: |
           Identifies SpyCloud exposure records containing highly sensitive personally identifiable information including Social Security numbers (full and last four), bank account numbers, tax IDs, health insurance IDs, and dates of birth. These represent the highest identity theft risk and may trigger HIPAA, PCI DSS, or state breach notification requirements.
         ExamplePrompts:
@@ -311,7 +311,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetSocialMediaExposures
-        DisplayName: Find exposed social media and online profiles
+        DisplayName: "Find exposed social media and online profiles"
         Description: |
           Returns social media accounts, LinkedIn profiles, Twitter handles, Crunchbase profiles, homepages, and other online identity data exposed in SpyCloud breach records. Useful for executive protection, VIP monitoring, and social engineering risk assessment.
         ExamplePrompts:
@@ -321,7 +321,7 @@ SkillGroups:
           - Check for executive social media exposure
         Inputs:
           - Name: targetEmail
-            Description: The email address to check for social media exposure.
+            Description: "The email address to check for social media exposure."
             Required: true
         Settings:
           Target: Sentinel
@@ -341,7 +341,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetInfectedDevices
-        DisplayName: List all infected devices from SpyCloud
+        DisplayName: "List all infected devices from SpyCloud"
         Description: |
           Groups SpyCloud infostealer exposures by infected machine ID and hostname showing credential counts, target domain spread, affected user count, and latest exposure time. Essential for identifying devices that need immediate remediation.
         ExamplePrompts:
@@ -363,7 +363,7 @@ SkillGroups:
             | top 20 by ExposureCount desc
 
       - Name: GetDeviceForensics
-        DisplayName: Get full forensic details for an infected device
+        DisplayName: "Get full forensic details for an infected device"
         Description: |
           Returns complete device forensic data for a specific infected machine ID including the malware file path, installed antivirus software that failed to prevent infection, operating system, IP addresses, keyboard language layouts, country code, display resolution, timezone, registered system owner, and the log ID linking to the original infostealer log. Essential for post-infection remediation scoping and understanding AV coverage gaps.
         ExamplePrompts:
@@ -374,7 +374,7 @@ SkillGroups:
           - What IP addresses were on this infected device
         Inputs:
           - Name: machineId
-            Description: The SpyCloud infected_machine_id to retrieve forensic details for.
+            Description: "The SpyCloud infected_machine_id to retrieve forensic details for."
             Required: true
         Settings:
           Target: Sentinel
@@ -389,7 +389,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetDeviceToUserCorrelation
-        DisplayName: Show all users affected by a single infected device
+        DisplayName: "Show all users affected by a single infected device"
         Description: |
           Takes an infected machine ID and finds every user whose credentials were stolen from that device, showing the complete blast radius of a single infostealer infection including all target domains, credential types, and severity levels per user.
         ExamplePrompts:
@@ -399,7 +399,7 @@ SkillGroups:
           - What is the blast radius of this infected device
         Inputs:
           - Name: machineId
-            Description: The SpyCloud infected_machine_id to look up for user correlation.
+            Description: "The SpyCloud infected_machine_id to look up for user correlation."
             Required: true
         Settings:
           Target: Sentinel
@@ -414,7 +414,7 @@ SkillGroups:
             | top 20 by ExposureCount desc
 
       - Name: GetAVCoverageGaps
-        DisplayName: Analyze antivirus coverage gaps on infected devices
+        DisplayName: "Analyze antivirus coverage gaps on infected devices"
         Description: |
           Examines the antivirus and security software installed on infected devices at the time of compromise to identify endpoint protection gaps. Shows which AV products were present but failed to prevent the infostealer infection, helping assess endpoint security effectiveness.
         ExamplePrompts:
@@ -441,7 +441,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetMalwareInfo
-        DisplayName: Look up breach or malware details in catalog
+        DisplayName: "Look up breach or malware details in catalog"
         Description: |
           Searches the SpyCloud Breach Catalog for information about a specific malware family or breach source. Returns the breach title, description, status (verified or pending), breach type (public or private), number of records, acquisition date, affected site, site description, confidence score, and UUID.
         ExamplePrompts:
@@ -452,7 +452,7 @@ SkillGroups:
           - Get SpyCloud breach details for RisePro
         Inputs:
           - Name: threatName
-            Description: The name of the malware family or breach to search for (e.g. Redline, LummaC2, Vidar, RisePro, stealc, Rhadamanthys, MacSync, Brado).
+            Description: "The name of the malware family or breach to search for (e.g. Redline, LummaC2, Vidar, RisePro, stealc, Rhadamanthys, MacSync, Brado)."
             Required: true
         Settings:
           Target: Sentinel
@@ -467,7 +467,7 @@ SkillGroups:
             | top 15 by TimeGenerated desc
 
       - Name: GetRecentBreaches
-        DisplayName: Show recently added breach catalog entries
+        DisplayName: "Show recently added breach catalog entries"
         Description: |
           Lists the most recently ingested breach and malware sources from the SpyCloud Breach Catalog including new infostealers, combo lists, phished data, exfiltrated databases, and scraped records. Shows breach type, record count, confidence, and verification status.
         ExamplePrompts:
@@ -488,7 +488,7 @@ SkillGroups:
             | top 20 by TimeGenerated desc
 
       - Name: GetEnrichedExposures
-        DisplayName: Enrich exposures with breach catalog malware names
+        DisplayName: "Enrich exposures with breach catalog malware names"
         Description: |
           Joins SpyCloud watchlist exposures with the Breach Catalog to show compromised credentials alongside the specific malware family or breach source name, type, confidence level, and number of records in the source. Essential for understanding whether exposures came from infostealers, combo lists, phishing, or database exfiltration.
         ExamplePrompts:
@@ -513,7 +513,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetMDERemediationActions
-        DisplayName: Show SpyCloud MDE remediation actions
+        DisplayName: "Show SpyCloud MDE remediation actions"
         Description: |
           Returns all Microsoft Defender for Endpoint remediation actions triggered by SpyCloud infostealer detections including device isolation requests and their success status, machine tag additions, IOC submissions to Defender, the playbook that executed, the breach title that triggered it, device risk score, and exposure level.
         ExamplePrompts:
@@ -535,7 +535,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetMDERemediationForDevice
-        DisplayName: Look up MDE actions for a specific device
+        DisplayName: "Look up MDE actions for a specific device"
         Description: |
           Searches the SpyCloud MDE remediation logs for all automated actions taken against a specific hostname including isolation request and result, tagging, IOC submission, the breach that triggered it, and the device risk and exposure scores from Defender.
         ExamplePrompts:
@@ -545,7 +545,7 @@ SkillGroups:
           - Show SpyCloud Defender actions for this machine
         Inputs:
           - Name: hostName
-            Description: The hostname of the device to look up in SpyCloud MDE remediation logs.
+            Description: "The hostname of the device to look up in SpyCloud MDE remediation logs."
             Required: true
         Settings:
           Target: Sentinel
@@ -561,7 +561,7 @@ SkillGroups:
             | top 20 by TimeGenerated desc
 
       - Name: GetMDERemediationStats
-        DisplayName: Summarize MDE remediation effectiveness
+        DisplayName: "Summarize MDE remediation effectiveness"
         Description: |
           Provides aggregate statistics on all MDE remediation actions including total actions, isolation requests versus successes, tags added, IOCs submitted, unique devices affected, and the isolation success rate percentage. Use this to measure playbook effectiveness.
         ExamplePrompts:
@@ -586,7 +586,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetConditionalAccessActions
-        DisplayName: Show SpyCloud Conditional Access remediation actions
+        DisplayName: "Show SpyCloud Conditional Access remediation actions"
         Description: |
           Returns all Entra ID and Azure AD identity protection actions triggered by SpyCloud including forced password resets with MFA, session and refresh token revocations, Conditional Access security group additions, and account disablements. Shows the user email, username, breach that triggered the action, and the playbook name.
         ExamplePrompts:
@@ -607,7 +607,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetConditionalAccessForUser
-        DisplayName: Look up identity actions for a specific user
+        DisplayName: "Look up identity actions for a specific user"
         Description: |
           Searches the SpyCloud Conditional Access remediation logs for all identity protection actions taken against a specific user including password resets, session revocations, CA group additions, and account disablements along with the breach and incident that triggered each action.
         ExamplePrompts:
@@ -618,7 +618,7 @@ SkillGroups:
           - Show SpyCloud Entra ID remediation history for this user
         Inputs:
           - Name: userEmail
-            Description: The email address or UPN of the user to look up.
+            Description: "The email address or UPN of the user to look up."
             Required: true
         Settings:
           Target: Sentinel
@@ -633,7 +633,7 @@ SkillGroups:
             | top 20 by TimeGenerated desc
 
       - Name: GetConditionalAccessStats
-        DisplayName: Summarize identity remediation effectiveness
+        DisplayName: "Summarize identity remediation effectiveness"
         Description: |
           Provides aggregate statistics on all Conditional Access remediation actions including total actions, password resets forced, sessions revoked, users added to CA security groups, accounts disabled, unique users affected, and unique incidents. Use this to measure identity playbook effectiveness and remediation coverage.
         ExamplePrompts:
@@ -656,7 +656,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetFullUserInvestigation
-        DisplayName: Full cross-table investigation for a user
+        DisplayName: "Full cross-table investigation for a user"
         Description: |
           Performs a comprehensive investigation for a specific user across all SpyCloud tables simultaneously. Returns exposure counts and max severity from the watchlist, plaintext password count, SSN exposure flag, MDE device actions taken, and Conditional Access identity actions including password resets and session revocations. This is the single query that gives you the complete picture.
         ExamplePrompts:
@@ -667,7 +667,7 @@ SkillGroups:
           - Full cross-table SpyCloud lookup for this user
         Inputs:
           - Name: investigateEmail
-            Description: The email address of the user to investigate across all SpyCloud tables.
+            Description: "The email address of the user to investigate across all SpyCloud tables."
             Required: true
         Settings:
           Target: Sentinel
@@ -692,7 +692,7 @@ SkillGroups:
               | extend DataSource = "Conditional Access")
 
       - Name: GetGeographicAnalysis
-        DisplayName: Analyze geographic distribution of infections
+        DisplayName: "Analyze geographic distribution of infections"
         Description: |
           Shows the geographic distribution of infostealer infections by country code, including device counts, affected users, and exposure volumes per country. Useful for identifying geographic hotspots of malware activity and correlating with employee travel or remote work locations.
         ExamplePrompts:
@@ -718,7 +718,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetSpyCloudHealthStatus
-        DisplayName: Check SpyCloud data ingestion health (all 14 tables)
+        DisplayName: "Check SpyCloud data ingestion health (all 14 tables)"
         Description: |
           Comprehensive health check across ALL 14 SpyCloud custom tables in Sentinel. Verifies data ingestion is flowing for every table, shows record counts, latest ingestion timestamps, hours since last update, and ingestion status (Healthy/Stale/Empty/Not Deployed). Use this to confirm the CCF connector pollers, MDE playbook, CA playbook, and all optional API data sources are operational. Tables with zero records or no data in 48+ hours are flagged. This is the primary diagnostic skill for troubleshooting data flow issues.
         ExamplePrompts:
@@ -764,15 +764,15 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetCompassExposures
-        DisplayName: Search Compass consumer exposures
-        Description: Finds all consumer identity exposures from SpyCloud Compass for a specific email or domain.
+        DisplayName: "Search Compass consumer exposures"
+        Description: "Finds all consumer identity exposures from SpyCloud Compass for a specific email or domain."
         ExamplePrompts:
           - Search Compass for consumer exposures for this email
           - Show Compass consumer identity data for this domain
           - Check SpyCloud Compass exposures for this user
         Inputs:
           - Name: SearchTerm
-            Description: Email address or email domain to search
+            Description: "Email address or email domain to search"
             Required: true
         Settings:
           Target: Sentinel
@@ -788,8 +788,8 @@ SkillGroups:
             | order by MaxSev desc, Exposures desc
 
       - Name: GetCompassDevices
-        DisplayName: List Compass infected devices
-        Description: Shows all infected devices tracked by SpyCloud Compass including OS, application count, and infection timeline.
+        DisplayName: "List Compass infected devices"
+        Description: "Shows all infected devices tracked by SpyCloud Compass including OS, application count, and infection timeline."
         ExamplePrompts:
           - List Compass infected devices
           - Show SpyCloud Compass device infections
@@ -808,8 +808,8 @@ SkillGroups:
             | take 50
 
       - Name: GetCompassCorporateOverlap
-        DisplayName: Find Compass + Corporate credential overlap
-        Description: Identifies users whose consumer identity exposures in Compass also appear in corporate breach watchlist — indicating personal credential reuse risk.
+        DisplayName: "Find Compass + Corporate credential overlap"
+        Description: "Identifies users whose consumer identity exposures in Compass also appear in corporate breach watchlist — indicating personal credential reuse risk."
         ExamplePrompts:
           - Find overlap between Compass and corporate breaches
           - Show users with both consumer and corporate credential exposure
@@ -828,8 +828,8 @@ SkillGroups:
             | order by CorporateMaxSev desc
 
       - Name: GetDeviceReinfections
-        DisplayName: Detect device reinfections via Compass
-        Description: Identifies devices that appear in Compass multiple times across different time periods, indicating failed remediation or persistent compromise.
+        DisplayName: "Detect device reinfections via Compass"
+        Description: "Identifies devices that appear in Compass multiple times across different time periods, indicating failed remediation or persistent compromise."
         ExamplePrompts:
           - Detect device reinfections from Compass data
           - Which devices were infected multiple times
@@ -853,15 +853,15 @@ SkillGroups:
       # =====================================================================
 
       - Name: HuntExposedUserSignIns
-        DisplayName: Hunt sign-in activity for exposed users
-        Description: Correlates SpyCloud exposed credentials with Entra ID sign-in logs to identify potential account takeover. Shows successful sign-ins from exposed users with location and app context.
+        DisplayName: "Hunt sign-in activity for exposed users"
+        Description: "Correlates SpyCloud exposed credentials with Entra ID sign-in logs to identify potential account takeover. Shows successful sign-ins from exposed users with location and app context."
         ExamplePrompts:
           - Hunt sign-in activity for exposed users
           - Check Entra logins for SpyCloud compromised users
           - Correlate SpyCloud exposures with sign-in logs
         Inputs:
           - Name: DaysBack
-            Description: Number of days to look back (default 7)
+            Description: "Number of days to look back (default 7)"
             Required: false
             DefaultValue: '7'
         Settings:
@@ -881,8 +881,8 @@ SkillGroups:
             | order by severity desc, SignIns desc
 
       - Name: HuntExposedUserEmailActivity
-        DisplayName: Hunt email activity for exposed users
-        Description: Checks Office 365 for suspicious email activity by users with exposed credentials — forwarding rules, delegation changes, and mass sends.
+        DisplayName: "Hunt email activity for exposed users"
+        Description: "Checks Office 365 for suspicious email activity by users with exposed credentials — forwarding rules, delegation changes, and mass sends."
         ExamplePrompts:
           - Hunt email activity for exposed users
           - Check Office 365 activity for compromised users
@@ -903,8 +903,8 @@ SkillGroups:
             | order by Actions desc
 
       - Name: HuntExposedUserAzureActivity
-        DisplayName: Hunt Azure resource changes by exposed users
-        Description: Shows Azure subscription activity (creates, deletes, role assignments) by users whose credentials were exposed in SpyCloud.
+        DisplayName: "Hunt Azure resource changes by exposed users"
+        Description: "Shows Azure subscription activity (creates, deletes, role assignments) by users whose credentials were exposed in SpyCloud."
         ExamplePrompts:
           - Hunt Azure activity by exposed users
           - Show Azure resource changes from compromised accounts
@@ -925,8 +925,8 @@ SkillGroups:
             | order by Ops desc
 
       - Name: HuntInfectedIPsInNetwork
-        DisplayName: Hunt infected IPs across all network logs
-        Description: Searches for SpyCloud infection source IPs in device network events, DNS, firewall (CEF), and threat intelligence — comprehensive network sweep.
+        DisplayName: "Hunt infected IPs across all network logs"
+        Description: "Searches for SpyCloud infection source IPs in device network events, DNS, firewall (CEF), and threat intelligence — comprehensive network sweep."
         ExamplePrompts:
           - Hunt infected IPs across network logs
           - Search for SpyCloud IPs in firewall and DNS logs
@@ -951,15 +951,15 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetUserRiskScore
-        DisplayName: Calculate SpyCloud risk score for a user
-        Description: Calculates a composite risk score for a user based on exposure severity, number of breaches, plaintext passwords, device infections, password reuse, and recency.
+        DisplayName: "Calculate SpyCloud risk score for a user"
+        Description: "Calculates a composite risk score for a user based on exposure severity, number of breaches, plaintext passwords, device infections, password reuse, and recency."
         ExamplePrompts:
           - Calculate risk score for this user
           - What is the SpyCloud risk score for this email
           - Score this user based on SpyCloud exposure data
         Inputs:
           - Name: UserEmail
-            Description: User email to score
+            Description: "User email to score"
             Required: true
         Settings:
           Target: Sentinel
@@ -990,8 +990,8 @@ SkillGroups:
             | project email="{{UserEmail}}", RiskScore, RiskLevel, TotalExposures, MaxSeverity, PlaintextPWs, DeviceInfections, TargetDomains, BreachSources, DaysSinceLatest
 
       - Name: GetOrgRiskDashboard
-        DisplayName: Organization-wide risk summary
-        Description: Provides an executive-level risk summary of the entire organization — total exposures, critical users, unresolved infections, password hygiene, and breach source diversity.
+        DisplayName: "Organization-wide risk summary"
+        Description: "Provides an executive-level risk summary of the entire organization — total exposures, critical users, unresolved infections, password hygiene, and breach source diversity."
         ExamplePrompts:
           - Show organization risk dashboard
           - Give me an org-wide SpyCloud risk summary
@@ -1019,8 +1019,8 @@ SkillGroups:
             | project Metric, Value=v
 
       - Name: GetTopPriorityActions
-        DisplayName: Priority action items for SOC
-        Description: Lists the highest-priority remediation actions needed right now — unremediated critical exposures, exposed executives, reinfected devices, and stale incidents.
+        DisplayName: "Priority action items for SOC"
+        Description: "Lists the highest-priority remediation actions needed right now — unremediated critical exposures, exposed executives, reinfected devices, and stale incidents."
         ExamplePrompts:
           - Show top priority actions for the SOC
           - What are the most urgent SpyCloud remediation items
@@ -1047,7 +1047,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetUEBAAnomaliesForExposedUsers
-        DisplayName: Correlate SpyCloud exposures with UEBA anomalies
+        DisplayName: "Correlate SpyCloud exposures with UEBA anomalies"
         Description: |
           Cross-references SpyCloud exposed users with UEBA anomaly data to find users showing both credential exposure and anomalous behavior. Identifies users with both compromised credentials and suspicious behavioral patterns detected by Sentinel UEBA, enabling prioritized investigation of the highest-risk accounts.
         ExamplePrompts:
@@ -1058,11 +1058,11 @@ SkillGroups:
           - Correlate SpyCloud breaches with behavioral analytics
         Inputs:
           - Name: Lookback
-            Description: Time range to look back for exposures (e.g., 7d, 14d, 30d). Default is 14d.
+            Description: "Time range to look back for exposures (e.g., 7d, 14d, 30d). Default is 14d."
             Required: false
             DefaultValue: '14d'
           - Name: MinSeverity
-            Description: Minimum SpyCloud severity level to include (e.g., 5, 20, 25). Default is 5.
+            Description: "Minimum SpyCloud severity level to include (e.g., 5, 20, 25). Default is 5."
             Required: false
             DefaultValue: '5'
         Settings:
@@ -1079,7 +1079,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetFusionMultistageIncidents
-        DisplayName: Get Fusion-detected multistage attack incidents
+        DisplayName: "Get Fusion-detected multistage attack incidents"
         Description: |
           Retrieves Fusion-detected multistage attack incidents that may involve SpyCloud-exposed credentials. Fusion uses ML to correlate low-fidelity alerts across multiple data sources into high-confidence incidents, detecting attacks that span initial access through lateral movement and exfiltration.
         ExamplePrompts:
@@ -1090,7 +1090,7 @@ SkillGroups:
           - What Fusion incidents involve exposed credentials
         Inputs:
           - Name: Lookback
-            Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
+            Description: "Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d."
             Required: false
             DefaultValue: '14d'
         Settings:
@@ -1107,7 +1107,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetTIEnrichmentResults
-        DisplayName: Show TI enrichment results for SpyCloud incidents
+        DisplayName: "Show TI enrichment results for SpyCloud incidents"
         Description: |
           Shows threat intelligence enrichment results from the TI Enrichment playbook, including VirusTotal and AbuseIPDB scores for IPs associated with SpyCloud incidents. Provides external threat context for indicators found in SpyCloud exposure data.
         ExamplePrompts:
@@ -1118,7 +1118,7 @@ SkillGroups:
           - What external threat intel enriched SpyCloud incidents
         Inputs:
           - Name: Lookback
-            Description: Time range to look back for TI enrichment results (e.g., 7d, 14d, 30d). Default is 14d.
+            Description: "Time range to look back for TI enrichment results (e.g., 7d, 14d, 30d). Default is 14d."
             Required: false
             DefaultValue: '14d'
         Settings:
@@ -1135,7 +1135,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetAutomationRuleMetrics
-        DisplayName: Analyze SpyCloud automation rule effectiveness
+        DisplayName: "Analyze SpyCloud automation rule effectiveness"
         Description: |
           Analyzes the effectiveness of SpyCloud automation rules including auto-escalation, auto-triage, and auto-close actions. Shows execution counts, success rates, and failure rates for each automation rule to ensure automated response workflows are functioning correctly.
         ExamplePrompts:
@@ -1146,7 +1146,7 @@ SkillGroups:
           - Are SpyCloud automation rules working correctly
         Inputs:
           - Name: Lookback
-            Description: Time range to look back for automation rule metrics (e.g., 7d, 14d, 30d). Default is 30d.
+            Description: "Time range to look back for automation rule metrics (e.g., 7d, 14d, 30d). Default is 30d."
             Required: false
             DefaultValue: '30d'
         Settings:
@@ -1163,7 +1163,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: HuntStolenSessionCookies
-        DisplayName: Hunt stolen session cookies bypassing MFA
+        DisplayName: "Hunt stolen session cookies bypassing MFA"
         Description: |
           Identifies users with stolen session cookies from SpyCloud who have recent sign-ins potentially bypassing MFA via token replay. Detects post-authentication attacks where stolen cookies or session tokens allow attackers to impersonate users without triggering MFA challenges.
         ExamplePrompts:
@@ -1186,7 +1186,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: HuntLateralMovementFromExposedAccounts
-        DisplayName: Detect lateral movement from exposed accounts
+        DisplayName: "Detect lateral movement from exposed accounts"
         Description: |
           Detects lateral movement patterns from accounts with SpyCloud credential exposure, focusing on remote interactive and network logon types. Identifies compromised accounts accessing multiple targets via RDP, SMB, or network logons indicating potential lateral movement activity.
         ExamplePrompts:
@@ -1209,7 +1209,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: HuntDataExfiltrationFromExposedUsers
-        DisplayName: Detect data exfiltration from exposed users
+        DisplayName: "Detect data exfiltration from exposed users"
         Description: |
           Detects mass file downloads and data exfiltration from cloud apps by users whose credentials were exposed in SpyCloud data. Identifies potential data theft by monitoring for unusual download volumes from compromised accounts across Microsoft 365, SharePoint, OneDrive, and other cloud applications.
         ExamplePrompts:
@@ -1232,7 +1232,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: TrackMalwareFamilyTrends
-        DisplayName: Track infostealer malware family trends
+        DisplayName: "Track infostealer malware family trends"
         Description: |
           Tracks infostealer malware family trends from SpyCloud data showing which malware families target your organization. Identifies RedLine, Raccoon, Vidar, LummaC2, StealC, and other infostealer families by analyzing infection paths and provides victim and device counts per family.
         ExamplePrompts:
@@ -1243,7 +1243,7 @@ SkillGroups:
           - Which malware families have the most victims
         Inputs:
           - Name: Lookback
-            Description: Time range to look back for malware trends (e.g., 30d, 60d, 90d). Default is 30d.
+            Description: "Time range to look back for malware trends (e.g., 30d, 60d, 90d). Default is 30d."
             Required: false
             DefaultValue: '30d'
         Settings:
@@ -1260,7 +1260,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetIOCBlocklistEntries
-        DisplayName: Get IOC Blocklist watchlist entries
+        DisplayName: "Get IOC Blocklist watchlist entries"
         Description: |
           Retrieves current entries from the SpyCloud IOC Blocklist watchlist for malicious IPs, domains, and URLs. Shows all indicators that have been flagged for blocking based on SpyCloud threat intelligence data including severity, source, and date added.
         ExamplePrompts:
@@ -1279,7 +1279,7 @@ SkillGroups:
             _GetWatchlist('SpyCloud-IOC-Blocklist') | project Indicator, Type, Severity, Source, DateAdded, Notes
 
       - Name: GetHighValueAssets
-        DisplayName: Get high-value assets for elevated monitoring
+        DisplayName: "Get high-value assets for elevated monitoring"
         Description: |
           Retrieves the list of high-value assets (critical servers, DCs, VPN gateways) that require elevated monitoring when accessed by SpyCloud-exposed users. Used by analytics rules to trigger higher severity alerts when compromised credentials are used against critical infrastructure.
         ExamplePrompts:
@@ -1298,7 +1298,7 @@ SkillGroups:
             _GetWatchlist('SpyCloud-HighValue-Assets') | project AssetName, AssetType, Criticality, Owner, Notes
 
       - Name: GetApprovedDomains
-        DisplayName: Show approved corporate email domains
+        DisplayName: "Show approved corporate email domains"
         Description: |
           Shows corporate email domains configured for SpyCloud monitoring scope. These are the domains used by analytics rules to determine which email exposures are in scope for alerting and automated remediation.
         ExamplePrompts:
@@ -1321,7 +1321,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetMSICIncidentCorrelation
-        DisplayName: Correlate MSIC incidents with SpyCloud exposure
+        DisplayName: "Correlate MSIC incidents with SpyCloud exposure"
         Description: |
           Shows Microsoft Security Incident Creation rule incidents and their correlation with SpyCloud exposure data. Correlates incidents from Azure AD Identity Protection, Azure Security Center, Microsoft 365 Defender, Microsoft Cloud App Security, and Azure ATP with SpyCloud exposure records to identify attacks that may have originated from stolen credentials.
         ExamplePrompts:
@@ -1332,7 +1332,7 @@ SkillGroups:
           - Cross-reference Microsoft Defender incidents with SpyCloud
         Inputs:
           - Name: Lookback
-            Description: Time range to look back for MSIC incidents (e.g., 7d, 14d, 30d). Default is 14d.
+            Description: "Time range to look back for MSIC incidents (e.g., 7d, 14d, 30d). Default is 14d."
             Required: false
             DefaultValue: '14d'
         Settings:
@@ -1349,7 +1349,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GenerateExecutiveSummary
-        DisplayName: Generate SpyCloud executive summary report
+        DisplayName: "Generate SpyCloud executive summary report"
         Description: |
           Generates an executive summary report of SpyCloud threat intelligence including total exposures, active infostealers, remediation rates, and top risks. Provides a consolidated view of the organization's exposure posture, remediation progress, and incident response metrics for leadership briefings.
         ExamplePrompts:
@@ -1372,7 +1372,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetMalwareCampaignSummary
-        DisplayName: Summarize a malware campaign's impact
+        DisplayName: "Summarize a malware campaign's impact"
         Description: |
           Summarizes the impact of a specific malware campaign or malware family by joining SpyCloud exposure data with the breach catalog. Returns total records stolen, unique victims, affected domains, device count, geographic spread, severity breakdown, and timeline of activity. Use this to understand the full scope of a specific infostealer or breach campaign targeting your organization.
         ExamplePrompts:
@@ -1381,7 +1381,7 @@ SkillGroups:
           - Show SpyCloud campaign summary for Vidar stealer
         Inputs:
           - Name: malwareFamily
-            Description: The malware family or campaign name to summarize (e.g., Redline, LummaC2, Vidar, RisePro, StealC, Raccoon).
+            Description: "The malware family or campaign name to summarize (e.g., Redline, LummaC2, Vidar, RisePro, StealC, Raccoon)."
             Required: true
         Settings:
           Target: Sentinel
@@ -1413,7 +1413,7 @@ SkillGroups:
             | extend CampaignName = "{{malwareFamily}}", DurationDays = datetime_diff('day', LastSeen, FirstSeen)
 
       - Name: GetBreachCampaignTimeline
-        DisplayName: Timeline of breaches from a campaign or threat actor
+        DisplayName: "Timeline of breaches from a campaign or threat actor"
         Description: |
           Builds a chronological timeline of all breach catalog entries associated with a specific campaign, threat actor, or malware family. Shows when each breach was published, its record count, status, and the volume of exposures affecting your organization over time. Useful for tracking the evolution of a campaign.
         ExamplePrompts:
@@ -1422,7 +1422,7 @@ SkillGroups:
           - When did each breach from this threat actor appear in SpyCloud
         Inputs:
           - Name: campaignName
-            Description: The campaign, threat actor, or malware family name to build a timeline for.
+            Description: "The campaign, threat actor, or malware family name to build a timeline for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1441,7 +1441,7 @@ SkillGroups:
             | sort by TimeGenerated asc
 
       - Name: GetRelatedBreaches
-        DisplayName: Find breaches related to a given breach
+        DisplayName: "Find breaches related to a given breach"
         Description: |
           Finds breaches related to a given breach source ID by identifying other breaches that share the same malware family, overlap in time window, or have overlapping victim IP addresses. Useful for connecting disparate breach events that may be part of the same campaign.
         ExamplePrompts:
@@ -1450,7 +1450,7 @@ SkillGroups:
           - Show related campaigns for this breach
         Inputs:
           - Name: sourceId
-            Description: The SpyCloud source_id of the breach to find related breaches for.
+            Description: "The SpyCloud source_id of the breach to find related breaches for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1475,7 +1475,7 @@ SkillGroups:
             | sort by OverlappingUsers desc
 
       - Name: GetThreatActorProfile
-        DisplayName: Profile activity from a specific source or campaign
+        DisplayName: "Profile activity from a specific source or campaign"
         Description: |
           Builds a comprehensive profile of a threat actor or campaign based on SpyCloud data. Shows total breach count, record volume, malware families used, unique victims, targeted domains, geographic distribution, severity breakdown, and infection timeline. Provides a complete intelligence picture of the adversary's activity against your organization.
         ExamplePrompts:
@@ -1484,7 +1484,7 @@ SkillGroups:
           - Show comprehensive campaign intelligence for this threat
         Inputs:
           - Name: actorName
-            Description: The threat actor, campaign, or malware family name to profile.
+            Description: "The threat actor, campaign, or malware family name to profile."
             Required: true
         Settings:
           Target: Sentinel
@@ -1512,7 +1512,7 @@ SkillGroups:
             sources | extend TotalRecords = toscalar(exposures | project TotalRecords), UniqueVictims = toscalar(exposures | project UniqueVictims), UniqueTargets = toscalar(exposures | project UniqueTargets), TopTargets = toscalar(exposures | project TopTargets), UniqueDevices = toscalar(exposures | project UniqueDevices), Countries = toscalar(exposures | project Countries), PlaintextCreds = toscalar(exposures | project PlaintextCreds), FirstSeen = toscalar(exposures | project FirstSeen), LastSeen = toscalar(exposures | project LastSeen)
 
       - Name: GetCampaignTTPs
-        DisplayName: Enumerate TTPs associated with a malware campaign
+        DisplayName: "Enumerate TTPs associated with a malware campaign"
         Description: |
           Enumerates MITRE ATT&CK TTPs associated with a malware campaign by analyzing SpyCloud detection data cross-referenced with Sentinel analytics rule alerts. Shows which detection rules fired for the campaign, the associated MITRE techniques, and alert volumes. Helps map campaign activity to the ATT&CK framework.
         ExamplePrompts:
@@ -1521,7 +1521,7 @@ SkillGroups:
           - Map this campaign to MITRE framework
         Inputs:
           - Name: campaignName
-            Description: The malware campaign or family name to enumerate TTPs for.
+            Description: "The malware campaign or family name to enumerate TTPs for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1547,7 +1547,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetUserAttackTimeline
-        DisplayName: Complete attack timeline for a user
+        DisplayName: "Complete attack timeline for a user"
         Description: |
           Builds a complete attack timeline for a specific user from initial SpyCloud exposure through sign-in activity, mailbox rule changes, and data access events. Combines SpyCloud exposure data with Entra ID sign-in logs, Office 365 activity, and cloud app events to show the full attack chain from credential theft to potential data exfiltration.
         ExamplePrompts:
@@ -1556,7 +1556,7 @@ SkillGroups:
           - Trace the attack progression for this email from SpyCloud exposure
         Inputs:
           - Name: targetEmail
-            Description: The email address to build an attack timeline for.
+            Description: "The email address to build an attack timeline for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1584,7 +1584,7 @@ SkillGroups:
             | take 100
 
       - Name: GetUserPasswordHistory
-        DisplayName: Track password exposure patterns over time
+        DisplayName: "Track password exposure patterns over time"
         Description: |
           Tracks password exposure patterns for a specific user over time, showing how many times their credentials were exposed, which password types were seen, sighting growth across breach sources, and temporal distribution. Helps identify password reuse habits and persistent exposure risk.
         ExamplePrompts:
@@ -1593,7 +1593,7 @@ SkillGroups:
           - What is the password exposure trend for this email
         Inputs:
           - Name: targetEmail
-            Description: The email address to track password exposure history for.
+            Description: "The email address to track password exposure history for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1620,7 +1620,7 @@ SkillGroups:
             | sort by TimeGenerated asc
 
       - Name: GetUserDeviceAssociations
-        DisplayName: All devices a user signed in from with infection status
+        DisplayName: "All devices a user signed in from with infection status"
         Description: |
           Shows all devices a specific user has signed in from along with their SpyCloud infection status. Joins sign-in device data with SpyCloud infected machine records to identify which devices the user accesses are known to be compromised by infostealers.
         ExamplePrompts:
@@ -1629,7 +1629,7 @@ SkillGroups:
           - Correlate user sign-in devices with SpyCloud infections
         Inputs:
           - Name: targetEmail
-            Description: The email address to look up device associations for.
+            Description: "The email address to look up device associations for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1652,7 +1652,7 @@ SkillGroups:
             | project DeviceName, DeviceOS, DeviceTrust, LastSignIn, SignInCount, IPs, IsInfected, InfectionCount = coalesce(InfectionCount, 0), MalwarePaths, LastInfection
 
       - Name: GetUserRemediationHistory
-        DisplayName: Full remediation trail for a user
+        DisplayName: "Full remediation trail for a user"
         Description: |
           Shows the complete remediation trail for a specific user including password resets, session revocations, MFA re-registrations, Conditional Access group changes, and MDE device actions. Combines data from Conditional Access logs, MDE logs, and Entra ID audit logs to provide a single view of all remediation actions taken.
         ExamplePrompts:
@@ -1661,7 +1661,7 @@ SkillGroups:
           - Track all password resets and session revocations for this user
         Inputs:
           - Name: targetEmail
-            Description: The email address to retrieve remediation history for.
+            Description: "The email address to retrieve remediation history for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1698,7 +1698,7 @@ SkillGroups:
             | take 50
 
       - Name: GetUserRiskScoreBreakdown
-        DisplayName: Composite risk score with factor breakdown for a user
+        DisplayName: "Composite risk score with factor breakdown for a user"
         Description: |
           Calculates a detailed composite risk score for a user with a full breakdown by contributing factor. Scores exposure count, severity, password exposure, device infections, remediation gap, sign-in recency, target domain spread, and breach source diversity. Each factor is weighted and the total produces a 0-100 normalized score with risk level classification.
         ExamplePrompts:
@@ -1707,7 +1707,7 @@ SkillGroups:
           - What is the risk score and breakdown for this user
         Inputs:
           - Name: targetEmail
-            Description: The email address to calculate a detailed risk score breakdown for.
+            Description: "The email address to calculate a detailed risk score breakdown for."
             Required: true
         Settings:
           Target: Sentinel
@@ -1752,7 +1752,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetInfectedIPFirewallActivity
-        DisplayName: Firewall events for SpyCloud infection IPs
+        DisplayName: "Firewall events for SpyCloud infection IPs"
         Description: |
           Queries all firewall events (allow and deny) for IP addresses associated with SpyCloud infostealer infections. Shows whether infected device IPs are communicating outbound through the firewall, which could indicate active C2 or data exfiltration. Uses CommonSecurityLog (CEF) data from firewall appliances.
         ExamplePrompts:
@@ -1779,7 +1779,7 @@ SkillGroups:
             | sort by AllowCount desc
 
       - Name: GetDNSQueriesFromInfectedHosts
-        DisplayName: DNS queries from infected device IPs for C2 detection
+        DisplayName: "DNS queries from infected device IPs for C2 detection"
         Description: |
           Retrieves DNS queries originating from IP addresses associated with SpyCloud-infected devices. Looks for suspicious DNS patterns that may indicate C2 beacon activity such as high-entropy domain names, DGA patterns, or connections to known malicious infrastructure.
         ExamplePrompts:
@@ -1807,7 +1807,7 @@ SkillGroups:
             | take 50
 
       - Name: GetVPNConnectionsFromExposedUsers
-        DisplayName: VPN and remote access from exposed users
+        DisplayName: "VPN and remote access from exposed users"
         Description: |
           Identifies VPN and remote access connections from users with active SpyCloud credential exposures. Queries sign-in logs for VPN client applications and conditional access policies associated with remote access to detect potentially compromised remote sessions.
         ExamplePrompts:
@@ -1834,7 +1834,7 @@ SkillGroups:
             | sort by Connections desc
 
       - Name: GetNetworkLateralMovement
-        DisplayName: Track lateral movement from initially compromised accounts
+        DisplayName: "Track lateral movement from initially compromised accounts"
         Description: |
           Tracks lateral movement patterns from accounts initially compromised via SpyCloud-detected credential theft. Maps the progression from initial access through network logon events showing source devices, destination devices, and logon types to visualize the attack path through the network.
         ExamplePrompts:
@@ -1873,7 +1873,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetExposureComplianceReport
-        DisplayName: Exposure metrics for compliance audits
+        DisplayName: "Exposure metrics for compliance audits"
         Description: |
           Generates exposure metrics formatted for compliance audit requirements including SOC2, PCI DSS, and HIPAA. Shows total exposure counts, PII categories affected, remediation rates, mean time to remediate, sensitive data types exposed, and audit-ready counts for regulatory notification assessment.
         ExamplePrompts:
@@ -1904,7 +1904,7 @@ SkillGroups:
             | project Category, Metric, Value = v
 
       - Name: GetRemediationSLAReport
-        DisplayName: Remediation SLA compliance metrics
+        DisplayName: "Remediation SLA compliance metrics"
         Description: |
           Measures remediation SLA compliance by calculating what percentage of SpyCloud exposures were remediated within 24 hours, 48 hours, and 72 hours. Shows mean time to remediate and identifies exposures that exceeded SLA targets. Essential for measuring SOC response effectiveness.
         ExamplePrompts:
@@ -1942,7 +1942,7 @@ SkillGroups:
                 RemediationRate_Pct = round(100.0 * Remediated / TotalExposures, 1)
 
       - Name: GetPIIExposureInventory
-        DisplayName: Count exposed PII elements for regulatory notification
+        DisplayName: "Count exposed PII elements for regulatory notification"
         Description: |
           Counts and categorizes all exposed PII elements across SpyCloud data for regulatory breach notification assessment. Shows counts of SSNs, dates of birth, phone numbers, addresses, financial data, health data, and other sensitive categories with unique affected user counts per category.
         ExamplePrompts:
@@ -1978,7 +1978,7 @@ SkillGroups:
                 FullName_Users = dcountif(email, isnotempty(full_name))
 
       - Name: GetDataRetentionReport
-        DisplayName: Table sizes and record counts per SpyCloud table
+        DisplayName: "Table sizes and record counts per SpyCloud table"
         Description: |
           Reports table sizes, record counts, and date ranges for all SpyCloud custom tables in the workspace. Shows oldest and newest records per table, total volume, and data retention span. Useful for capacity planning, compliance documentation, and verifying data lifecycle management.
         ExamplePrompts:
@@ -2004,7 +2004,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetIncidentCorrelation
-        DisplayName: Find all correlated SpyCloud data for a Sentinel incident
+        DisplayName: "Find all correlated SpyCloud data for a Sentinel incident"
         Description: |
           For a given Sentinel incident ID, finds ALL correlated SpyCloud data including matching exposures, MDE remediation actions, Conditional Access actions, and breach catalog entries. Provides a single-query complete SpyCloud context for any incident under investigation.
         ExamplePrompts:
@@ -2013,7 +2013,7 @@ SkillGroups:
           - What SpyCloud context exists for this incident
         Inputs:
           - Name: incidentId
-            Description: The Sentinel incident ID to correlate with SpyCloud data.
+            Description: "The Sentinel incident ID to correlate with SpyCloud data."
             Required: true
         Settings:
           Target: Sentinel
@@ -2034,7 +2034,7 @@ SkillGroups:
               (ca_data | extend DataSource = "Conditional Access")
 
       - Name: GetFusionIncidentContext
-        DisplayName: Fusion multistage incident details with SpyCloud alerts
+        DisplayName: "Fusion multistage incident details with SpyCloud alerts"
         Description: |
           Retrieves Fusion-detected multistage incident details enriched with SpyCloud source alert context. Shows the attack stages detected by Fusion ML correlation and identifies which stages involve SpyCloud-detected credential theft as the initial access vector.
         ExamplePrompts:
@@ -2043,7 +2043,7 @@ SkillGroups:
           - Which Fusion incidents started from SpyCloud exposures
         Inputs:
           - Name: Lookback
-            Description: Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d.
+            Description: "Time range to look back for Fusion incidents (e.g., 7d, 14d, 30d). Default is 14d."
             Required: false
             DefaultValue: '14d'
         Settings:
@@ -2066,7 +2066,7 @@ SkillGroups:
             | sort by TimeGenerated desc
 
       - Name: GetAlertsByAnalyticsRule
-        DisplayName: Show which SpyCloud analytics rules generate the most alerts
+        DisplayName: "Show which SpyCloud analytics rules generate the most alerts"
         Description: |
           Ranks SpyCloud analytics rules by alert volume showing which detection rules are generating the most alerts, their severity distribution, and false positive indicators. Useful for tuning detection rules and understanding which threat categories are most active.
         ExamplePrompts:
@@ -2075,7 +2075,7 @@ SkillGroups:
           - Rank SpyCloud rules by alert count
         Inputs:
           - Name: Lookback
-            Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 30d.
+            Description: "Time range to look back (e.g., 7d, 14d, 30d). Default is 30d."
             Required: false
             DefaultValue: '30d'
         Settings:
@@ -2100,7 +2100,7 @@ SkillGroups:
             | sort by AlertCount desc
 
       - Name: GetIncidentRemediationStatus
-        DisplayName: Remediation action status for each incident
+        DisplayName: "Remediation action status for each incident"
         Description: |
           For each SpyCloud-related Sentinel incident, shows what remediation actions have been taken including password resets, session revocations, device isolations, and IOC submissions. Identifies incidents with incomplete or no remediation for follow-up.
         ExamplePrompts:
@@ -2109,7 +2109,7 @@ SkillGroups:
           - Check if all SpyCloud incidents were remediated
         Inputs:
           - Name: Lookback
-            Description: Time range to look back (e.g., 7d, 14d, 30d). Default is 14d.
+            Description: "Time range to look back (e.g., 7d, 14d, 30d). Default is 14d."
             Required: false
             DefaultValue: '14d'
         Settings:
@@ -2140,7 +2140,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetExposureForecast
-        DisplayName: Trend analysis predicting exposure growth
+        DisplayName: "Trend analysis predicting exposure growth"
         Description: |
           Performs trend analysis on SpyCloud exposure data to forecast future exposure growth based on historical weekly patterns. Shows week-over-week growth rate, cumulative trend, and projected exposure volume. Useful for capacity planning and demonstrating risk trajectory to leadership.
         ExamplePrompts:
@@ -2163,7 +2163,7 @@ SkillGroups:
             | extend CumulativeExposures = row_cumsum(WeeklyExposures)
 
       - Name: GetHighRiskUserCohort
-        DisplayName: Users with highest composite risk
+        DisplayName: "Users with highest composite risk"
         Description: |
           Identifies the cohort of users with the highest composite risk based on multiple exposures, active sign-ins, and no remediation actions taken. These are users with stolen credentials who are still actively signing in and have not had passwords reset or sessions revoked — the highest priority for immediate remediation.
         ExamplePrompts:
@@ -2194,7 +2194,7 @@ SkillGroups:
             | top 25 by CompositeRisk desc
 
       - Name: GetStaleCredentialRisk
-        DisplayName: Credentials exposed 30+ days with no password change
+        DisplayName: "Credentials exposed 30+ days with no password change"
         Description: |
           Finds credentials that were exposed more than 30 days ago where the user has not had a password reset via SpyCloud remediation. These represent long-standing credential compromise with no corrective action — attackers have had extended time to exploit these credentials.
         ExamplePrompts:
@@ -2223,7 +2223,7 @@ SkillGroups:
             | take 25
 
       - Name: GetPasswordReuseRisk
-        DisplayName: Users with password hash reuse across multiple domains
+        DisplayName: "Users with password hash reuse across multiple domains"
         Description: |
           Identifies users whose exposed password hash appears across multiple target domains in SpyCloud data, indicating password reuse. If the same password hash is used on corporate SSO, email, VPN, and SaaS applications, a single credential compromise enables access to all those services.
         ExamplePrompts:
@@ -2246,7 +2246,7 @@ SkillGroups:
             | take 25
 
       - Name: GetNewExposuresLastNHours
-        DisplayName: Real-time feed of new exposures in the last N hours
+        DisplayName: "Real-time feed of new exposures in the last N hours"
         Description: |
           Returns a real-time feed of all new SpyCloud exposures ingested in the last N hours. Provides a live view of incoming threat intelligence including severity, target domains, password types, and infection details for immediate triage.
         ExamplePrompts:
@@ -2255,7 +2255,7 @@ SkillGroups:
           - Get real-time SpyCloud exposure feed
         Inputs:
           - Name: hours
-            Description: Number of hours to look back for new exposures (e.g., 1, 4, 8, 24).
+            Description: "Number of hours to look back for new exposures (e.g., 1, 4, 8, 24)."
             Required: true
         Settings:
           Target: Sentinel
@@ -2274,7 +2274,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetDeviceForensicProfile
-        DisplayName: Complete forensic profile of an infected device
+        DisplayName: "Complete forensic profile of an infected device"
         Description: |
           Builds a complete forensic profile for a specific infected device combining SpyCloud infostealer data with MDE device information. Shows OS details, all IP addresses, all users who logged in, all malware detected, infection timeline, AV software present, keyboard languages, display resolution, and timezone. Provides the complete picture needed for incident response.
         ExamplePrompts:
@@ -2283,7 +2283,7 @@ SkillGroups:
           - Get comprehensive device intelligence for this infection
         Inputs:
           - Name: machineId
-            Description: The SpyCloud infected_machine_id to build a forensic profile for.
+            Description: "The SpyCloud infected_machine_id to build a forensic profile for."
             Required: true
         Settings:
           Target: Sentinel
@@ -2321,7 +2321,7 @@ SkillGroups:
             | extend MDEActions = toscalar(mde_data | project MDEActions), WasIsolated = toscalar(mde_data | project WasIsolated), IsolationSuccess = toscalar(mde_data | project IsolationSuccess)
 
       - Name: GetDeviceReinfectionHistory
-        DisplayName: Track reinfection patterns for a specific device
+        DisplayName: "Track reinfection patterns for a specific device"
         Description: |
           Tracks reinfection patterns for a specific device by analyzing SpyCloud exposure records over time. Identifies whether a device has been infected multiple times, the time between infections, different malware families involved, and whether remediation actions between infections were effective.
         ExamplePrompts:
@@ -2330,7 +2330,7 @@ SkillGroups:
           - Track infection patterns over time for this device
         Inputs:
           - Name: machineId
-            Description: The SpyCloud infected_machine_id to check for reinfection history.
+            Description: "The SpyCloud infected_machine_id to check for reinfection history."
             Required: true
         Settings:
           Target: Sentinel
@@ -2357,7 +2357,7 @@ SkillGroups:
             | project TimeGenerated, user_hostname, user_os, ExposureCount, UniqueUsers, UniqueSources, MalwarePaths, TargetDomains, GapDays
 
       - Name: GetCompassDeviceInventory
-        DisplayName: Full Compass device inventory with infection status
+        DisplayName: "Full Compass device inventory with infection status"
         Description: |
           Returns the complete SpyCloud Compass device inventory showing all tracked devices, their operating systems, application counts, infection timeline, and current status. Provides a comprehensive view of all consumer-side devices being monitored for infostealer activity.
         ExamplePrompts:
@@ -2386,7 +2386,7 @@ SkillGroups:
             | take 50
 
       - Name: GetMDEIsolationAudit
-        DisplayName: Audit trail of MDE isolation and release actions
+        DisplayName: "Audit trail of MDE isolation and release actions"
         Description: |
           Provides a detailed audit trail of all MDE device isolation and release actions triggered by SpyCloud detections. Shows when each device was isolated, whether isolation succeeded, the breach that triggered it, how long the device was isolated, and whether it was subsequently released. Essential for compliance documentation and incident response review.
         ExamplePrompts:
@@ -2412,7 +2412,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetExecutiveRiskGauge
-        DisplayName: Organization risk score with breakdown by factor
+        DisplayName: "Organization risk score with breakdown by factor"
         Description: |
           Calculates an organization-wide risk score from 0 to 100 with a breakdown by contributing factor. Factors include total exposure volume, infostealer ratio, plaintext credential percentage, remediation coverage gap, active sign-in risk, device infection density, and breach source diversity. Designed for executive dashboard display.
         ExamplePrompts:
@@ -2449,7 +2449,7 @@ SkillGroups:
             | extend RiskLevel = case(NormalizedScore >= 80, "CRITICAL", NormalizedScore >= 50, "HIGH", NormalizedScore >= 25, "MEDIUM", "LOW")
 
       - Name: GetExposureTrendComparison
-        DisplayName: Compare exposure metrics this period vs last period
+        DisplayName: "Compare exposure metrics this period vs last period"
         Description: |
           Compares key SpyCloud exposure metrics between the current period and the previous period (default 30 days each). Shows total exposures, unique users, infostealer percentage, plaintext credentials, device infections, and remediation actions with period-over-period change percentages. Ideal for executive trend reporting.
         ExamplePrompts:
@@ -2477,7 +2477,7 @@ SkillGroups:
             | sort by Period asc
 
       - Name: GetTopRecommendations
-        DisplayName: Top security recommendations based on current data
+        DisplayName: "Top security recommendations based on current data"
         Description: |
           Generates the top security recommendations based on analysis of current SpyCloud data, remediation gaps, and risk indicators. Evaluates unremediated critical exposures, plaintext credential volume, device infection rates, stale credentials, password reuse patterns, and remediation SLA gaps to produce prioritized actionable recommendations.
         ExamplePrompts:
@@ -2531,7 +2531,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetConnectorHealthAssessment
-        DisplayName: Assess all data connector health and coverage gaps
+        DisplayName: "Assess all data connector health and coverage gaps"
         Description: |
           Performs a comprehensive health check across ALL expected Sentinel data sources — SpyCloud custom tables, Microsoft Entra ID, Defender for Endpoint, Defender for Identity, Defender for Office 365, CASB, Intune, UEBA, and TI feeds. Identifies which connectors are active, which are missing, and recommends connectors to enable for better detection coverage. This is your single-pane connector health view.
         ExamplePrompts:
@@ -2581,7 +2581,7 @@ SkillGroups:
             | sort by Priority asc, Status asc
 
       - Name: GetMissingConnectorRecommendations
-        DisplayName: Generate missing connector recommendations for admin
+        DisplayName: "Generate missing connector recommendations for admin"
         Description: |
           Analyzes which Sentinel data connectors have no data and generates a prioritized recommendation report that can be forwarded to an Azure admin. Includes connector name, what it enables, the impact of not having it, and step-by-step enablement instructions. Designed to be copy-pasted into an email or ticket for your admin team.
         ExamplePrompts:
@@ -2612,7 +2612,7 @@ SkillGroups:
             | sort by Priority asc
 
       - Name: GetPlaybookPermissionGaps
-        DisplayName: Detect playbook permission gaps preventing automation
+        DisplayName: "Detect playbook permission gaps preventing automation"
         Description: |
           Checks whether the SpyCloud automated playbooks are functioning by comparing exposure volume against remediation action volume. If exposures exist but no remediation actions are logged, identifies which playbooks likely have permission issues and what permissions need to be granted.
         ExamplePrompts:
@@ -2647,7 +2647,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetCapabilityMatrix
-        DisplayName: Show full SpyCloud capability matrix and coverage map
+        DisplayName: "Show full SpyCloud capability matrix and coverage map"
         Description: |
           Displays the complete SpyCloud Sentinel capability matrix including all deployed resources, skill counts, sub-agent inventory, connector coverage, playbook status, analytics rule counts, and feature availability by subscription tier. Use this for onboarding new team members or assessing solution completeness.
         ExamplePrompts:
@@ -2680,7 +2680,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetIdLinkByEmail
-        DisplayName: Find all identity links for an email
+        DisplayName: "Find all identity links for an email"
         Description: |
           Searches the SpyCloud Identity Link table for all identity graph connections associated with a specific email address. Returns linked emails, usernames, IPs, devices, link strength, breach sources, and risk scoring. Use this to understand the full identity footprint of a compromised user.
         ExamplePrompts:
@@ -2691,7 +2691,7 @@ SkillGroups:
           - What accounts are linked to this email address
         Inputs:
           - Name: targetEmail
-            Description: The email address to search for identity link connections.
+            Description: "The email address to search for identity link connections."
             Required: true
         Settings:
           Target: Sentinel
@@ -2706,7 +2706,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetIdLinkGraph
-        DisplayName: Show the full identity graph for an email
+        DisplayName: "Show the full identity graph for an email"
         Description: |
           Displays the complete identity graph for a given email showing all linked emails, usernames, IP addresses, and devices expanded from dynamic arrays. Provides a comprehensive view of how an identity connects across different accounts, networks, and devices in the SpyCloud identity intelligence graph.
         ExamplePrompts:
@@ -2717,7 +2717,7 @@ SkillGroups:
           - Show all connected identities for this email
         Inputs:
           - Name: targetEmail
-            Description: The email address to expand the full identity graph for.
+            Description: "The email address to expand the full identity graph for."
             Required: true
         Settings:
           Target: Sentinel
@@ -2736,7 +2736,7 @@ SkillGroups:
             | top 50 by link_strength desc
 
       - Name: GetIdLinkHighRisk
-        DisplayName: Find high-risk identity links
+        DisplayName: "Find high-risk identity links"
         Description: |
           Returns all identity links with a risk score greater than 70, indicating strong connections between compromised identities that represent elevated threat. High-risk links often indicate credential reuse across accounts, shared infected devices, or coordinated compromise patterns.
         ExamplePrompts:
@@ -2759,7 +2759,7 @@ SkillGroups:
             | take 25
 
       - Name: GetIdLinkCrossOrgCorrelation
-        DisplayName: Find identities linked across different email domains
+        DisplayName: "Find identities linked across different email domains"
         Description: |
           Identifies identity links that span across different email domains, revealing users who have accounts at multiple organizations that are connected through shared credentials, devices, or IP addresses. Critical for detecting credential reuse across corporate boundaries and shadow IT exposure.
         ExamplePrompts:
@@ -2785,7 +2785,7 @@ SkillGroups:
             | take 25
 
       - Name: GetIdLinkSharedDevices
-        DisplayName: Find devices shared across multiple identities
+        DisplayName: "Find devices shared across multiple identities"
         Description: |
           Identifies devices that appear in identity links for multiple different users, indicating shared infected machines or compromised corporate endpoints used by multiple employees. Shared devices often represent infostealer infections that captured credentials for multiple accounts.
         ExamplePrompts:
@@ -2811,7 +2811,7 @@ SkillGroups:
             | take 25
 
       - Name: GetIdLinkBreachOverlap
-        DisplayName: Find identities appearing in the same breach sources
+        DisplayName: "Find identities appearing in the same breach sources"
         Description: |
           Analyzes breach source overlap across identity links to find groups of users who were compromised in the same breaches. This reveals coordinated exposure patterns and helps prioritize remediation for breaches that affected multiple linked identities in your organization.
         ExamplePrompts:
@@ -2837,7 +2837,7 @@ SkillGroups:
             | take 25
 
       - Name: GetIdLinkTimeline
-        DisplayName: Show timeline of identity link discoveries
+        DisplayName: "Show timeline of identity link discoveries"
         Description: |
           Displays a chronological timeline of identity link discoveries showing when new connections between identities were first observed and last updated. Useful for tracking the evolution of identity compromise and understanding the velocity of new identity connections appearing.
         ExamplePrompts:
@@ -2859,7 +2859,7 @@ SkillGroups:
             | take 30
 
       - Name: GetIdLinkSummary
-        DisplayName: Summary statistics for identity links
+        DisplayName: "Summary statistics for identity links"
         Description: |
           Provides executive summary statistics for all SpyCloud identity links including total link count, unique identities, average risk score, link type distribution, average link strength, and graph depth metrics. Use this for a quick overview of the identity graph intelligence available.
         ExamplePrompts:
@@ -2885,7 +2885,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetDataPartnershipByEmail
-        DisplayName: Get partner-sourced records for an email
+        DisplayName: "Get partner-sourced records for an email"
         Description: |
           Retrieves all data partnership records associated with a specific email address. Shows partner source details, exposed credentials, severity levels, data classes, and breach context from SpyCloud data partnership feeds. Use this to see what partner intelligence is available for a compromised user.
         ExamplePrompts:
@@ -2896,7 +2896,7 @@ SkillGroups:
           - Find partner breach data for this user
         Inputs:
           - Name: targetEmail
-            Description: The email address to search in data partnership records.
+            Description: "The email address to search in data partnership records."
             Required: true
         Settings:
           Target: Sentinel
@@ -2911,7 +2911,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetDataPartnershipByDomain
-        DisplayName: Get all partner data for a domain
+        DisplayName: "Get all partner data for a domain"
         Description: |
           Returns all data partnership records for a specific email domain, providing a comprehensive view of partner-sourced intelligence across the organization. Aggregates exposure data from all contributing partners for the given domain.
         ExamplePrompts:
@@ -2922,7 +2922,7 @@ SkillGroups:
           - Find all partner breach records for this domain
         Inputs:
           - Name: targetDomain
-            Description: The email domain to search in data partnership records.
+            Description: "The email domain to search in data partnership records."
             Required: true
         Settings:
           Target: Sentinel
@@ -2937,7 +2937,7 @@ SkillGroups:
             | top 25 by TimeGenerated desc
 
       - Name: GetDataPartnershipSources
-        DisplayName: Summary of data partnership sources
+        DisplayName: "Summary of data partnership sources"
         Description: |
           Provides a summary breakdown of all data partnership contributions grouped by partner name and source type. Shows record volume, unique affected users, severity distribution, and data freshness for each contributing partner. Use this to understand which partners are providing the most valuable intelligence.
         ExamplePrompts:
@@ -2958,7 +2958,7 @@ SkillGroups:
             | sort by Records desc
 
       - Name: GetDataPartnershipHighSeverity
-        DisplayName: High-severity partner data records
+        DisplayName: "High-severity partner data records"
         Description: |
           Returns all data partnership records with severity 20 or higher, representing the most critical partner-sourced intelligence including infostealer-grade credential exposure and high-risk data classes. These records require immediate attention and remediation.
         ExamplePrompts:
@@ -2981,7 +2981,7 @@ SkillGroups:
             | take 25
 
       - Name: GetDataPartnershipDataClasses
-        DisplayName: Breakdown of exposed data classes from partners
+        DisplayName: "Breakdown of exposed data classes from partners"
         Description: |
           Analyzes the data classes exposed across all data partnership records by expanding the dynamic data_classes array. Shows which types of data such as credentials, PII, financial information, and session tokens are most commonly found in partner intelligence feeds.
         ExamplePrompts:
@@ -3006,7 +3006,7 @@ SkillGroups:
             | take 25
 
       - Name: GetDataPartnershipTrend
-        DisplayName: Weekly trend of partner data ingestion
+        DisplayName: "Weekly trend of partner data ingestion"
         Description: |
           Shows the weekly trend of data partnership record ingestion over time, broken down by partner name. Useful for monitoring data feed health, detecting drops in partner data delivery, and understanding the velocity of new partner intelligence arriving in Sentinel.
         ExamplePrompts:
@@ -3031,7 +3031,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetExposureProfileByEmail
-        DisplayName: Full risk exposure profile for an email
+        DisplayName: "Full risk exposure profile for an email"
         Description: |
           Returns the complete SpyCloud exposure risk profile for a specific email including risk score, risk level, total breaches, infostealer infections, credential counts, plaintext and hashed password exposure, stolen cookies, infected devices, remediation status, exposed data classes, and breach source timeline. This is the comprehensive exposure assessment for a single identity.
         ExamplePrompts:
@@ -3042,7 +3042,7 @@ SkillGroups:
           - What is the exposure risk level for this email
         Inputs:
           - Name: targetEmail
-            Description: The email address to retrieve the full exposure risk profile for.
+            Description: "The email address to retrieve the full exposure risk profile for."
             Required: true
         Settings:
           Target: Sentinel
@@ -3057,7 +3057,7 @@ SkillGroups:
             | top 10 by TimeGenerated desc
 
       - Name: GetExposureProfileByDomain
-        DisplayName: Domain-level exposure aggregation
+        DisplayName: "Domain-level exposure aggregation"
         Description: |
           Aggregates exposure risk profiles across an entire email domain, providing organization-level metrics including total at-risk users, average risk score, risk level distribution, total credential exposure, infostealer infection count, plaintext password exposure, and remediation coverage. Essential for executive reporting and organizational risk assessment.
         ExamplePrompts:
@@ -3068,7 +3068,7 @@ SkillGroups:
           - Get domain-wide risk assessment
         Inputs:
           - Name: targetDomain
-            Description: The email domain to aggregate exposure profiles for.
+            Description: "The email domain to aggregate exposure profiles for."
             Required: true
         Settings:
           Target: Sentinel
@@ -3083,7 +3083,7 @@ SkillGroups:
             | extend RemediationCoverage = iff(TotalUsers > 0, round(toreal(Remediated) / toreal(TotalUsers) * 100, 1), 0.0)
 
       - Name: GetExposureCriticalRisk
-        DisplayName: Find critical risk exposure profiles
+        DisplayName: "Find critical risk exposure profiles"
         Description: |
           Returns all exposure profiles where the risk level is Critical or the risk score exceeds 80, representing identities with the most severe and comprehensive exposure across multiple breach types. These users are at highest risk for account takeover and identity theft and require immediate remediation.
         ExamplePrompts:
@@ -3106,7 +3106,7 @@ SkillGroups:
             | take 25
 
       - Name: GetExposureRemediationStatus
-        DisplayName: Exposure remediation status breakdown
+        DisplayName: "Exposure remediation status breakdown"
         Description: |
           Provides a breakdown of remediation status across all exposure profiles showing how many identities have been fully remediated, are pending remediation, or are in progress. Includes average risk scores per status category and the remediation actions taken. Use this to track remediation progress and identify gaps.
         ExamplePrompts:
@@ -3127,7 +3127,7 @@ SkillGroups:
             | sort by Count desc
 
       - Name: GetExposureRemediationGaps
-        DisplayName: Find exposed identities without remediation
+        DisplayName: "Find exposed identities without remediation"
         Description: |
           Identifies exposure profiles where remediation has not been completed despite having active exposure, focusing on identities with high risk scores, plaintext passwords, or infostealer infections that remain unremediated. These represent the most urgent gaps in your security posture.
         ExamplePrompts:
@@ -3151,7 +3151,7 @@ SkillGroups:
             | take 25
 
       - Name: GetExposureTimeline
-        DisplayName: Exposure timeline with breach source context
+        DisplayName: "Exposure timeline with breach source context"
         Description: |
           Displays a chronological timeline of exposure assessments showing how risk scores, breach counts, and credential exposure have evolved over time. Includes breach source context to correlate risk changes with specific breach events. Use this for trend analysis and incident response timelines.
         ExamplePrompts:
@@ -3173,7 +3173,7 @@ SkillGroups:
             | take 30
 
       - Name: GetExposureDataClasses
-        DisplayName: Most commonly exposed data class types
+        DisplayName: "Most commonly exposed data class types"
         Description: |
           Analyzes the data_classes_exposed field across all exposure profiles to identify which types of data are most frequently compromised. Shows the prevalence of credential exposure, PII leakage, financial data, session tokens, and other data categories across your monitored identities.
         ExamplePrompts:
@@ -3198,7 +3198,7 @@ SkillGroups:
             | take 25
 
       - Name: GetExposureSummaryDashboard
-        DisplayName: Executive summary dashboard for all exposures
+        DisplayName: "Executive summary dashboard for all exposures"
         Description: |
           Provides an executive-level summary dashboard across all SpyCloud exposure profiles including total monitored identities, risk distribution, total credential and breach counts, infostealer infection metrics, plaintext password exposure, remediation coverage percentage, and overall risk posture assessment. Designed for CISO and security leadership reporting.
         ExamplePrompts:
@@ -3224,7 +3224,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetCAPActionsByEmail
-        DisplayName: Get all CAP actions for a specific email
+        DisplayName: "Get all CAP actions for a specific email"
         Description: |
           Retrieves all Compliance Automation Policy actions taken for a specific email address including policy details, action type, completion status, trigger severity, credential type, notification status, affected applications, and compliance tags. Use this to review the full compliance action history for a user.
         ExamplePrompts:
@@ -3235,7 +3235,7 @@ SkillGroups:
           - Show compliance automation actions for this email
         Inputs:
           - Name: targetEmail
-            Description: The email address to look up CAP actions for.
+            Description: "The email address to look up CAP actions for."
             Required: true
         Settings:
           Target: Sentinel
@@ -3251,7 +3251,7 @@ SkillGroups:
             | take 25
 
       - Name: GetCAPActionsByPolicy
-        DisplayName: CAP actions grouped by policy
+        DisplayName: "CAP actions grouped by policy"
         Description: |
           Groups and summarizes all Compliance Automation Policy actions by policy name, showing the total actions, completion rate, average trigger severity, affected user count, and action type distribution for each policy. Use this to evaluate policy effectiveness and coverage.
         ExamplePrompts:
@@ -3273,7 +3273,7 @@ SkillGroups:
             | sort by TotalActions desc
 
       - Name: GetCAPPendingActions
-        DisplayName: Pending CAP actions awaiting completion
+        DisplayName: "Pending CAP actions awaiting completion"
         Description: |
           Returns all Compliance Automation Policy actions that have not been completed, including those in pending, in-progress, or other non-completed states. These represent compliance gaps that need attention and may indicate automation failures or manual intervention requirements.
         ExamplePrompts:
@@ -3296,7 +3296,7 @@ SkillGroups:
             | take 25
 
       - Name: GetCAPCompletedActions
-        DisplayName: Successfully completed CAP actions
+        DisplayName: "Successfully completed CAP actions"
         Description: |
           Returns all Compliance Automation Policy actions that have been successfully completed, showing the full lifecycle from creation to completion including time to resolution. Use this to verify compliance enforcement and audit completed remediation actions.
         ExamplePrompts:
@@ -3320,7 +3320,7 @@ SkillGroups:
             | take 25
 
       - Name: GetCAPFailedActions
-        DisplayName: Failed or timed-out CAP actions
+        DisplayName: "Failed or timed-out CAP actions"
         Description: |
           Identifies Compliance Automation Policy actions that have failed, timed out, or are stuck in an error state. These represent compliance enforcement failures that require manual investigation and intervention. Includes the policy context, trigger severity, and last update timestamp for troubleshooting.
         ExamplePrompts:
@@ -3343,7 +3343,7 @@ SkillGroups:
             | take 25
 
       - Name: GetCAPComplianceStatus
-        DisplayName: Compliance tag breakdown for CAP actions
+        DisplayName: "Compliance tag breakdown for CAP actions"
         Description: |
           Analyzes compliance tags across all CAP actions to provide a breakdown of compliance framework coverage. Shows which compliance requirements such as SOC2, NIST, PCI-DSS, GDPR, and HIPAA are being addressed by automated policy actions, along with completion rates per compliance category.
         ExamplePrompts:
@@ -3368,7 +3368,7 @@ SkillGroups:
             | sort by TotalActions desc
 
       - Name: GetCAPActionTimeline
-        DisplayName: Timeline of CAP actions over time
+        DisplayName: "Timeline of CAP actions over time"
         Description: |
           Displays a daily timeline of Compliance Automation Policy actions showing the volume, completion rate, and average trigger severity over time. Useful for monitoring compliance automation health, detecting spikes in policy triggers, and tracking remediation velocity trends.
         ExamplePrompts:
@@ -3391,7 +3391,7 @@ SkillGroups:
             | take 30
 
       - Name: GetCAPSummaryDashboard
-        DisplayName: CAP summary dashboard with key metrics
+        DisplayName: "CAP summary dashboard with key metrics"
         Description: |
           Provides an executive summary dashboard for all Compliance Automation Policy activity including total actions, unique policies, success rate, failure rate, average completion time in hours, average trigger severity, notification coverage, unique affected users, and compliance tag coverage. Designed for compliance officers and security leadership.
         ExamplePrompts:
@@ -3419,8 +3419,8 @@ SkillGroups:
       # ============================================================
 
       - Name: GetCompassApplications
-        DisplayName: List stolen application credentials from Compass
-        Description: Shows all stolen application credentials captured by SpyCloud Compass infostealer analysis, including target URLs, domains, credential counts, and associated malware families.
+        DisplayName: "List stolen application credentials from Compass"
+        Description: "Shows all stolen application credentials captured by SpyCloud Compass infostealer analysis, including target URLs, domains, credential counts, and associated malware families."
         ExamplePrompts:
           - Show stolen application credentials from Compass
           - What apps had credentials stolen by infostealers
@@ -3440,15 +3440,15 @@ SkillGroups:
             | take 50
 
       - Name: GetCompassApplicationsForUser
-        DisplayName: Find stolen app credentials for a specific user
-        Description: Searches Compass application credential data for a specific email or domain, showing which applications had credentials stolen by infostealers.
+        DisplayName: "Find stolen app credentials for a specific user"
+        Description: "Searches Compass application credential data for a specific email or domain, showing which applications had credentials stolen by infostealers."
         ExamplePrompts:
           - What app credentials were stolen for this user
           - Show Compass stolen apps for this email
           - Which applications were compromised for this domain
         Inputs:
           - Name: SearchTerm
-            Description: Email address or email domain to search
+            Description: "Email address or email domain to search"
             Required: true
         Settings:
           Target: Sentinel
@@ -3465,8 +3465,8 @@ SkillGroups:
             | take 100
 
       - Name: GetCompassApplicationStats
-        DisplayName: Compass application credential theft statistics
-        Description: Provides aggregate statistics on stolen application credentials from Compass including top targeted domains, total credentials and cookies stolen, unique infected devices, and malware family breakdown.
+        DisplayName: "Compass application credential theft statistics"
+        Description: "Provides aggregate statistics on stolen application credentials from Compass including top targeted domains, total credentials and cookies stolen, unique infected devices, and malware family breakdown."
         ExamplePrompts:
           - Show Compass app credential statistics
           - Give me application theft metrics
@@ -3487,8 +3487,8 @@ SkillGroups:
       # ============================================================
 
       - Name: GetSipStolenCookies
-        DisplayName: List stolen session cookies from SIP
-        Description: Shows stolen browser session cookies captured by SpyCloud Session Identity Protection (SIP) including cookie domains, names, expiration, security flags, and associated malware.
+        DisplayName: "List stolen session cookies from SIP"
+        Description: "Shows stolen browser session cookies captured by SpyCloud Session Identity Protection (SIP) including cookie domains, names, expiration, security flags, and associated malware."
         ExamplePrompts:
           - Show stolen session cookies
           - List SIP cookie data
@@ -3508,15 +3508,15 @@ SkillGroups:
             | take 50
 
       - Name: GetSipCookiesForUser
-        DisplayName: Find stolen cookies for a specific user
-        Description: Searches SIP cookie data for a specific email, showing all stolen session cookies including cookie names, domains, values, security flags, and the infecting malware.
+        DisplayName: "Find stolen cookies for a specific user"
+        Description: "Searches SIP cookie data for a specific email, showing all stolen session cookies including cookie names, domains, values, security flags, and the infecting malware."
         ExamplePrompts:
           - Show stolen cookies for this user
           - What session cookies were stolen for this email
           - Find SIP data for this user
         Inputs:
           - Name: UserEmail
-            Description: Email address to search for stolen cookies
+            Description: "Email address to search for stolen cookies"
             Required: true
         Settings:
           Target: Sentinel
@@ -3533,8 +3533,8 @@ SkillGroups:
             | take 100
 
       - Name: GetSipCookieStats
-        DisplayName: SIP stolen cookie statistics
-        Description: Provides aggregate statistics on stolen session cookies from SIP including total cookies, unique users affected, top targeted cookie domains, devices compromised, and malware family breakdown.
+        DisplayName: "SIP stolen cookie statistics"
+        Description: "Provides aggregate statistics on stolen session cookies from SIP including total cookies, unique users affected, top targeted cookie domains, devices compromised, and malware family breakdown."
         ExamplePrompts:
           - Show SIP cookie statistics
           - Give me session cookie theft metrics
@@ -3551,8 +3551,8 @@ SkillGroups:
             | summarize TotalCookies = count(), UniqueUsers = dcount(email), UniqueCookieDomains = dcount(cookie_domain), UniqueDevices = dcount(infected_machine_id), UniqueMalware = dcount(malware_family), SecureCookies = countif(cookie_secure == true), HttpOnlyCookies = countif(cookie_http_only == true), MaxSeverity = max(severity)
 
       - Name: GetSipHighRiskSessions
-        DisplayName: Find high-risk stolen sessions with MFA bypass potential
-        Description: Identifies high-severity stolen session cookies that target authentication and SSO domains, representing potential MFA bypass risk through session hijacking.
+        DisplayName: "Find high-risk stolen sessions with MFA bypass potential"
+        Description: "Identifies high-severity stolen session cookies that target authentication and SSO domains, representing potential MFA bypass risk through session hijacking."
         ExamplePrompts:
           - Show high risk stolen sessions
           - Find MFA bypass risk from stolen cookies
@@ -3578,8 +3578,8 @@ SkillGroups:
       # ============================================================
 
       - Name: GetIdentityExposures
-        DisplayName: List identity exposures
-        Description: Shows identity-level exposure records from SpyCloud including email, password type, breach category, severity, and associated malware families.
+        DisplayName: "List identity exposures"
+        Description: "Shows identity-level exposure records from SpyCloud including email, password type, breach category, severity, and associated malware families."
         ExamplePrompts:
           - Show identity exposure records
           - List identity-level exposures
@@ -3598,15 +3598,15 @@ SkillGroups:
             | take 50
 
       - Name: GetIdentityExposuresForUser
-        DisplayName: Find identity exposures for a specific user
-        Description: Searches identity exposure data for a specific email address showing all exposure records including password types, breach categories, target domains, and infection details.
+        DisplayName: "Find identity exposures for a specific user"
+        Description: "Searches identity exposure data for a specific email address showing all exposure records including password types, breach categories, target domains, and infection details."
         ExamplePrompts:
           - Show identity exposures for this user
           - Find identity-level exposure data for this email
           - Check identity exposure records for this user
         Inputs:
           - Name: UserEmail
-            Description: Email address to search
+            Description: "Email address to search"
             Required: true
         Settings:
           Target: Sentinel
@@ -3623,8 +3623,8 @@ SkillGroups:
             | take 100
 
       - Name: GetIdentityExposureStats
-        DisplayName: Identity exposure statistics
-        Description: Provides aggregate statistics on identity exposures including total records, unique users, breach categories, password type breakdown, severity distribution, and top targeted domains.
+        DisplayName: "Identity exposure statistics"
+        Description: "Provides aggregate statistics on identity exposures including total records, unique users, breach categories, password type breakdown, severity distribution, and top targeted domains."
         ExamplePrompts:
           - Show identity exposure statistics
           - Give me identity exposure metrics
@@ -3645,8 +3645,8 @@ SkillGroups:
       # ============================================================
 
       - Name: GetInvestigationRecords
-        DisplayName: List SpyCloud investigation records
-        Description: Shows investigation records from SpyCloud Investigations API including email, password type, breach categories, target domains, and infection details for deep-dive research.
+        DisplayName: "List SpyCloud investigation records"
+        Description: "Shows investigation records from SpyCloud Investigations API including email, password type, breach categories, target domains, and infection details for deep-dive research."
         ExamplePrompts:
           - Show investigation records
           - List SpyCloud investigations data
@@ -3665,15 +3665,15 @@ SkillGroups:
             | take 50
 
       - Name: GetInvestigationRecordsForUser
-        DisplayName: Find investigation records for a specific user
-        Description: Searches SpyCloud investigation data for a specific email address, showing all investigation records including passwords, breach details, target domains, and malware families.
+        DisplayName: "Find investigation records for a specific user"
+        Description: "Searches SpyCloud investigation data for a specific email address, showing all investigation records including passwords, breach details, target domains, and malware families."
         ExamplePrompts:
           - Show investigation records for this user
           - Find investigation data for this email
           - Look up this user in SpyCloud investigations
         Inputs:
           - Name: UserEmail
-            Description: Email address to search
+            Description: "Email address to search"
             Required: true
         Settings:
           Target: Sentinel
@@ -3690,8 +3690,8 @@ SkillGroups:
             | take 100
 
       - Name: GetInvestigationStats
-        DisplayName: Investigation data statistics
-        Description: Provides aggregate statistics on investigation records including total records, unique users, breach categories, password type breakdown, severity distribution, and top malware families.
+        DisplayName: "Investigation data statistics"
+        Description: "Provides aggregate statistics on investigation records including total records, unique users, breach categories, password type breakdown, severity distribution, and top malware families."
         ExamplePrompts:
           - Show investigation data statistics
           - Give me investigation metrics
@@ -3710,7 +3710,7 @@ SkillGroups:
       # === Investigations API Enriched Queries (DISTINCT from Enterprise/Compass) ===
 
       - Name: GetInvestigationsBreachCategoryBreakdown
-        DisplayName: Investigations API data by breach category
+        DisplayName: "Investigations API data by breach category"
         Description: "Breaks down SpyCloud Investigations API data by breach category showing the UNIQUE source types (phishing, paste sites, combo lists, forum dumps) that are NOT available in standard Enterprise data. Highlights the additional coverage Investigations provides."
         ExamplePrompts:
           - Show investigation data by breach category
@@ -3730,7 +3730,7 @@ SkillGroups:
             | order by Records desc
 
       - Name: GetInvestigationsVsEnterpriseComparison
-        DisplayName: Compare Investigations vs Enterprise coverage
+        DisplayName: "Compare Investigations vs Enterprise coverage"
         Description: "Side-by-side comparison of Investigations API vs Enterprise data for the organization, showing total records, unique categories, and the coverage gap — what percentage of total exposure is ONLY visible through the Investigations API."
         ExamplePrompts:
           - Compare Investigations API vs Enterprise data
@@ -3750,7 +3750,7 @@ SkillGroups:
             | extend InvestigationsOnlyRecords = Inv_Records - Ent_Records, CoverageGapPct = iff(Inv_Records > 0, round(100.0 * (Inv_Records - Ent_Records) / Inv_Records, 1), 0.0), Summary = "Investigations API provides the broadest SpyCloud dataset including phishing, paste sites, combo lists, and forum dumps NOT in Enterprise"
 
       - Name: GetInvestigationsPhishingExposures
-        DisplayName: Find phishing-sourced credential exposures (Investigations only)
+        DisplayName: "Find phishing-sourced credential exposures (Investigations only)"
         Description: "Finds credentials harvested from phishing kits and credential harvesting sites — a source type UNIQUE to the SpyCloud Investigations API not available in Enterprise or Compass."
         ExamplePrompts:
           - Show phishing-sourced credential exposures
@@ -3772,7 +3772,7 @@ SkillGroups:
             | take 50
 
       - Name: GetInvestigationsComboListExposures
-        DisplayName: Find combo list credential exposures (Investigations only)
+        DisplayName: "Find combo list credential exposures (Investigations only)"
         Description: "Finds credentials from aggregated combo lists traded on dark web forums — a source type UNIQUE to the SpyCloud Investigations API not available in Enterprise or Compass."
         ExamplePrompts:
           - Show combo list exposures
@@ -3794,11 +3794,11 @@ SkillGroups:
             | take 50
 
       - Name: GetInvestigationsSuperEnriched
-        DisplayName: Super-enriched investigation combining all tables
+        DisplayName: "Super-enriched investigation combining all tables"
         Description: "Creates a super-enriched investigation view by combining Investigations API data with Enterprise breach data, Compass forensics, IDLINK correlations, and remediation logs for a specific user. This is the most comprehensive single query across all SpyCloud data sources."
         Inputs:
           - Name: UserEmail
-            Description: Email address to investigate across ALL SpyCloud data sources
+            Description: "Email address to investigate across ALL SpyCloud data sources"
             Required: true
         ExamplePrompts:
           - Run a super-enriched investigation on this user

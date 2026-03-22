@@ -1,6 +1,6 @@
 Descriptor:
   Name: SpyCloudAPIPlugin
-  DisplayName: SpyCloud API Plugin
+  DisplayName: "SpyCloud API Plugin"
   Description: "REST API access to 9 SpyCloud APIs for real-time darknet intelligence: Enterprise, Compass, Identity, SIP, Investigations (broadest dataset — phishing/paste sites/combo lists), IDLINK, Data Partnership, Exposure, and CAP. Investigations API is DISTINCT from Enterprise/Compass and requires a separate API key."
   DescriptionDisplay: default
   Category: Other
@@ -15,7 +15,7 @@ Descriptor:
   Settings:
     - Name: ApiBaseUrl
       Description: "Base URL of the SpyCloud API. Override only if directed by SpyCloud support for regional or on-premises deployments."
-      HintText: https://api.spycloud.io
+      HintText: "https://api.spycloud.io"
       SettingType: string
       Required: false
       DefaultValue: https://api.spycloud.io
@@ -68,7 +68,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetBreachDataByEmail
-        DisplayName: Look up breach records by email
+        DisplayName: "Look up breach records by email"
         Description: "Queries the SpyCloud Enterprise API for all breach and infostealer records associated with a specific email address. Returns exposed credentials, target applications, password types, severity scores, infection metadata, device context, and PII fields. This is the primary skill for investigating a compromised user identity."
         ExamplePrompts:
           - Look up SpyCloud breach data for this email
@@ -79,7 +79,7 @@ SkillGroups:
           - Find infostealer records for this email in SpyCloud
         Inputs:
           - Name: email
-            Description: The email address to search for in breach records.
+            Description: "The email address to search for in breach records."
             Required: true
           - Name: since
             Description: "Return records published on or after this date (YYYY-MM-DD). Defaults to all time if omitted."
@@ -97,7 +97,7 @@ SkillGroups:
             Description: "Record category filter: corporate or infected."
             Required: false
           - Name: limit
-            Description: Maximum records per page (1-10000, default 100).
+            Description: "Maximum records per page (1-10000, default 100)."
             Required: false
         Settings:
           OpenApiOperationId: getBreachDataByEmail
@@ -107,7 +107,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetBreachDataByDomain
-        DisplayName: Look up breach records by domain
+        DisplayName: "Look up breach records by domain"
         Description: "Queries the SpyCloud Enterprise API for all breach and infostealer records where the compromised email belongs to the specified corporate domain. Returns aggregated exposure data across all employees and service accounts under that domain. Use this for organization-wide credential exposure assessments and to prioritize bulk password resets."
         ExamplePrompts:
           - Search SpyCloud for breaches affecting this domain
@@ -118,25 +118,25 @@ SkillGroups:
           - Get breach records for this organization from SpyCloud
         Inputs:
           - Name: domain
-            Description: The domain to search (e.g., example.com).
+            Description: "The domain to search (e.g., example.com)."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: password_type
-            Description: Filter by password type.
+            Description: "Filter by password type."
             Required: false
           - Name: type
-            Description: Record category filter.
+            Description: "Record category filter."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: getBreachDataByDomain
@@ -146,7 +146,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetBreachDataByIp
-        DisplayName: Look up breach records by IP address
+        DisplayName: "Look up breach records by IP address"
         Description: "Queries the SpyCloud Enterprise API for breach and infostealer records associated with a specific IP address. The IP may represent an infected device's external address or a login IP captured in stolen credentials. Use this to correlate network-layer observables with credential theft events during incident response."
         ExamplePrompts:
           - Search SpyCloud for breach data linked to this IP
@@ -156,22 +156,22 @@ SkillGroups:
           - Look up dark web data for this IP in SpyCloud
         Inputs:
           - Name: ip
-            Description: The IPv4 or IPv6 address to search.
+            Description: "The IPv4 or IPv6 address to search."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: type
-            Description: Record category filter.
+            Description: "Record category filter."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: getBreachDataByIp
@@ -181,7 +181,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: CheckPasswordExposure
-        DisplayName: Check if a password is exposed in breaches
+        DisplayName: "Check if a password is exposed in breaches"
         Description: "Checks whether a specific password has appeared in any breach or infostealer dataset tracked by SpyCloud. Returns matching records with associated accounts, severity, and breach context. Use this to validate that passwords in active use have not been previously compromised, or to assess the risk of a password found during forensic analysis."
         ExamplePrompts:
           - Has this password appeared in any SpyCloud breaches
@@ -191,16 +191,16 @@ SkillGroups:
           - Validate this password against dark web data
         Inputs:
           - Name: password
-            Description: The plaintext password to check for exposure.
+            Description: "The plaintext password to check for exposure."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: checkPasswordExposure
@@ -210,7 +210,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetBreachDataByUsername
-        DisplayName: Look up breach records by username
+        DisplayName: "Look up breach records by username"
         Description: "Queries the SpyCloud Enterprise API for breach records where the compromised identity used a non-email username. Useful for investigating service accounts, legacy systems, gaming platforms, and applications that use usernames rather than email addresses for authentication."
         ExamplePrompts:
           - Search SpyCloud for breaches with this username
@@ -220,25 +220,25 @@ SkillGroups:
           - Find breach records for this service account username
         Inputs:
           - Name: username
-            Description: The username to search for in breach records.
+            Description: "The username to search for in breach records."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: password_type
-            Description: Filter by password type.
+            Description: "Filter by password type."
             Required: false
           - Name: type
-            Description: Record category filter.
+            Description: "Record category filter."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: getBreachDataByUsername
@@ -248,7 +248,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: ListBreachCatalog
-        DisplayName: Browse the SpyCloud breach catalog
+        DisplayName: "Browse the SpyCloud breach catalog"
         Description: "Returns the full SpyCloud breach catalog with metadata for every tracked breach including title, description, affected site, acquisition date, record count, data classes exposed, confidence rating, and breach category. Use this for situational awareness, trend analysis, identifying specific breaches by keyword, or cross-referencing source IDs found in breach records."
         ExamplePrompts:
           - Show me the SpyCloud breach catalog
@@ -268,13 +268,13 @@ SkillGroups:
             Description: "Filter to breaches acquired on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum entries per page.
+            Description: "Maximum entries per page."
             Required: false
         Settings:
           OpenApiOperationId: listBreachCatalog
 
       - Name: GetBreachCatalogEntry
-        DisplayName: Get details for a specific breach
+        DisplayName: "Get details for a specific breach"
         Description: "Returns complete metadata for a single breach catalog entry identified by its numeric SpyCloud source ID. Includes the breach title, description, affected site, acquisition and breach dates, total record count, confidence rating, and the full list of data classes exposed. Use this after finding a source_id in breach records to understand the breach context."
         ExamplePrompts:
           - Show me details for this SpyCloud breach ID
@@ -284,7 +284,7 @@ SkillGroups:
           - What data was exposed in this specific breach
         Inputs:
           - Name: id
-            Description: The numeric SpyCloud source ID for the breach.
+            Description: "The numeric SpyCloud source ID for the breach."
             Required: true
         Settings:
           OpenApiOperationId: getBreachCatalogEntry
@@ -294,7 +294,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: CompassInvestigateEmail
-        DisplayName: Deep Compass investigation by email
+        DisplayName: "Deep Compass investigation by email"
         Description: "Performs a comprehensive SpyCloud Compass investigation of an email address across underground marketplaces, paste sites, botnet logs, and infostealer datasets. Returns enriched records with malware family attribution, infection timelines, device fingerprints, stolen session cookies, browser autofill data, cryptocurrency wallets, installed software, and command-and-control infrastructure. Provides significantly deeper context than the standard Enterprise endpoint for incident response and advanced threat hunting."
         ExamplePrompts:
           - Run a deep SpyCloud Compass investigation on this email
@@ -305,25 +305,25 @@ SkillGroups:
           - Check Compass for malware infections tied to this email
         Inputs:
           - Name: email
-            Description: The email address to investigate.
+            Description: "The email address to investigate."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: compassInvestigateEmail
 
       - Name: CompassInvestigateDomain
-        DisplayName: Deep Compass investigation by domain
+        DisplayName: "Deep Compass investigation by domain"
         Description: "Performs a comprehensive SpyCloud Compass investigation of all identities under a corporate domain across underground marketplaces, paste sites, botnet logs, and infostealer datasets. Returns enriched records with malware attribution, stolen cookies, device forensics, and session hijack risk across the entire organization. Use this for enterprise-wide threat exposure assessments and proactive hunting."
         ExamplePrompts:
           - Run a Compass investigation on this domain
@@ -333,25 +333,25 @@ SkillGroups:
           - Compass deep dive on corporate domain exposure
         Inputs:
           - Name: domain
-            Description: The domain to investigate.
+            Description: "The domain to investigate."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: compassInvestigateDomain
 
       - Name: CompassInvestigateIp
-        DisplayName: Deep Compass investigation by IP
+        DisplayName: "Deep Compass investigation by IP"
         Description: "Performs a comprehensive SpyCloud Compass investigation of an IP address across underground sources. Returns enriched records tying the IP to infected machines, botnet membership, credential theft events, malware command-and-control infrastructure, and associated identities. Use this to determine whether a network observable is linked to active infostealer operations and to identify all compromised identities connected to the IP."
         ExamplePrompts:
           - Run a Compass investigation on this IP address
@@ -361,19 +361,19 @@ SkillGroups:
           - Compass deep dive on this network address
         Inputs:
           - Name: ip
-            Description: The IPv4 or IPv6 address to investigate.
+            Description: "The IPv4 or IPv6 address to investigate."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: compassInvestigateIp
@@ -383,7 +383,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetIdentityExposure
-        DisplayName: Get identity exposure profile for an email
+        DisplayName: "Get identity exposure profile for an email"
         Description: "Queries the SpyCloud Identity API for the aggregated exposure profile of an email address. Unlike the Enterprise endpoint which returns individual breach records, this endpoint deduplicates credentials and provides a unified view of the identity's current risk posture including total exposure count, distinct breach sources, highest severity score, infected device count, exposed data classes, and whether the current password is compromised. Use this for rapid risk assessment and identity-centric triage."
         ExamplePrompts:
           - What is the identity exposure profile for this email
@@ -394,19 +394,19 @@ SkillGroups:
           - Summarize identity risk for this email address
         Inputs:
           - Name: email
-            Description: The email address to retrieve identity exposure for.
+            Description: "The email address to retrieve identity exposure for."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: getIdentityExposure
@@ -420,7 +420,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: SipGetCookiesByDomain
-        DisplayName: Get stolen cookies for a domain (SIP)
+        DisplayName: "Get stolen cookies for a domain (SIP)"
         Description: "Queries the SpyCloud Session Identity Protection (SIP) API for stolen session cookies associated with a cookie domain. Returns cookies exfiltrated by infostealer malware including cookie names, values, expiration dates, associated user identities, and malware attribution. Use this to identify active session hijacking risks and determine which sessions need invalidation. Requires SIP API entitlement."
         ExamplePrompts:
           - Get stolen cookies for this domain from SpyCloud SIP
@@ -431,34 +431,34 @@ SkillGroups:
           - Are there any stolen cookies for our domain
         Inputs:
           - Name: cookie_domain
-            Description: The cookie domain to search (e.g., example.com). Includes all subdomains.
+            Description: "The cookie domain to search (e.g., example.com). Includes all subdomains."
             Required: true
           - Name: since
-            Description: Return records published on or after this date (YYYY-MM-DD).
+            Description: "Return records published on or after this date (YYYY-MM-DD)."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: cookie_name
-            Description: Case-sensitive filter for a specific cookie name (e.g., session_id, JSESSIONID).
+            Description: "Case-sensitive filter for a specific cookie name (e.g., session_id, JSESSIONID)."
             Required: false
           - Name: since_cookie_expiration
-            Description: Filter to cookies expiring on or after this date (finds still-valid cookies).
+            Description: "Filter to cookies expiring on or after this date (finds still-valid cookies)."
             Required: false
           - Name: until_cookie_expiration
-            Description: Filter to cookies expiring on or before this date.
+            Description: "Filter to cookies expiring on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: sipGetCookiesByDomain
 
       - Name: SipListBreachCatalog
-        DisplayName: List SIP breach catalog entries
+        DisplayName: "List SIP breach catalog entries"
         Description: "Returns the SpyCloud SIP breach catalog containing metadata for breaches that include stolen session cookies. Use this to identify which infostealer campaigns have captured session data and assess the timeline and scale of cookie theft operations."
         ExamplePrompts:
           - Show the SpyCloud SIP breach catalog
@@ -467,19 +467,19 @@ SkillGroups:
           - Browse SIP breach catalog entries
         Inputs:
           - Name: since
-            Description: Filter to breaches acquired on or after this date.
+            Description: "Filter to breaches acquired on or after this date."
             Required: false
           - Name: until
-            Description: Filter to breaches acquired on or before this date.
+            Description: "Filter to breaches acquired on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum entries per page.
+            Description: "Maximum entries per page."
             Required: false
         Settings:
           OpenApiOperationId: sipListBreachCatalog
 
       - Name: SipGetBreachCatalogEntry
-        DisplayName: Get SIP breach catalog entry by ID
+        DisplayName: "Get SIP breach catalog entry by ID"
         Description: "Returns metadata for a specific breach in the SIP catalog. Includes breach title, description, acquisition date, and data classes. Use this to understand the context of a breach source found in stolen cookie records."
         ExamplePrompts:
           - Show details for this SIP breach ID
@@ -487,7 +487,7 @@ SkillGroups:
           - Get SIP breach catalog entry details
         Inputs:
           - Name: id
-            Description: Numeric source ID or UUID of the breach.
+            Description: "Numeric source ID or UUID of the breach."
             Required: true
         Settings:
           OpenApiOperationId: sipGetBreachCatalogEntry
@@ -510,19 +510,19 @@ SkillGroups:
           - What does SpyCloud Investigations know about this email
         Inputs:
           - Name: email
-            Description: The email address to investigate.
+            Description: "The email address to investigate."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: investigateByEmail
@@ -537,19 +537,19 @@ SkillGroups:
           - Search entire SpyCloud database for this organization
         Inputs:
           - Name: domain
-            Description: The domain to investigate.
+            Description: "The domain to investigate."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: investigateByDomain
@@ -564,19 +564,19 @@ SkillGroups:
           - Search SpyCloud Investigations for this IP
         Inputs:
           - Name: ip
-            Description: The IPv4 or IPv6 address to investigate.
+            Description: "The IPv4 or IPv6 address to investigate."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: investigateByIp
@@ -591,19 +591,19 @@ SkillGroups:
           - Find all records linked to this handle in SpyCloud
         Inputs:
           - Name: username
-            Description: The username to investigate.
+            Description: "The username to investigate."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: investigateByUsername
@@ -618,16 +618,16 @@ SkillGroups:
           - Investigate password reuse across SpyCloud data
         Inputs:
           - Name: password
-            Description: The password to search for.
+            Description: "The password to search for."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: investigateByPassword
@@ -637,7 +637,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: GetIdentityWatchlist
-        DisplayName: List monitored identities on the watchlist
+        DisplayName: "List monitored identities on the watchlist"
         Description: "Returns all identities currently on the organization's SpyCloud watchlist including monitored email addresses, domains, and IP ranges with their monitoring state, alert history, and cumulative exposure counts. The watchlist drives automated alerting when new dark web exposures are detected. Use this to audit monitoring coverage, verify critical identities are tracked, and review recent alert activity."
         ExamplePrompts:
           - Show the SpyCloud identity watchlist
@@ -654,7 +654,7 @@ SkillGroups:
             Description: "Filter by monitoring state: active or inactive."
             Required: false
           - Name: limit
-            Description: Maximum entries per page.
+            Description: "Maximum entries per page."
             Required: false
         Settings:
           OpenApiOperationId: getIdentityWatchlist
@@ -664,7 +664,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: IdLinkLookupByEmail
-        DisplayName: Look up identity links for an email
+        DisplayName: "Look up identity links for an email"
         Description: "Queries the SpyCloud IDLINK API to resolve all identity fragments linked to an email address across the SpyCloud dataset. Returns associated usernames, phone numbers, addresses, social media handles, alternative emails, and other PII that have been observed alongside the queried email in breach and infostealer records. Use this to map the full digital footprint of an identity and discover linked accounts that may also be compromised. Requires IDLINK API entitlement."
         ExamplePrompts:
           - Look up identity links for this email in SpyCloud IDLINK
@@ -675,22 +675,22 @@ SkillGroups:
           - What other identities are associated with this email
         Inputs:
           - Name: email
-            Description: The email address to look up identity links for.
+            Description: "The email address to look up identity links for."
             Required: true
           - Name: since
-            Description: Return records published on or after this date (YYYY-MM-DD).
+            Description: "Return records published on or after this date (YYYY-MM-DD)."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: idLinkLookupByEmail
 
       - Name: IdLinkLookupByDomain
-        DisplayName: Look up identity links for a domain
+        DisplayName: "Look up identity links for a domain"
         Description: "Queries the SpyCloud IDLINK API to resolve all identity fragments linked to a corporate domain. Returns aggregated identity linkages for all users under the domain including associated personal emails, phone numbers, social profiles, and alternative credentials discovered in breach and infostealer data. Use this for organization-wide identity mapping and to discover shadow IT or personal account usage by employees. Requires IDLINK API entitlement."
         ExamplePrompts:
           - Look up identity links for this domain in SpyCloud IDLINK
@@ -701,22 +701,22 @@ SkillGroups:
           - IDLINK domain-wide identity resolution for this organization
         Inputs:
           - Name: domain
-            Description: The domain to look up identity links for (e.g., example.com).
+            Description: "The domain to look up identity links for (e.g., example.com)."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: idLinkLookupByDomain
 
       - Name: IdLinkGetIdentity
-        DisplayName: Get unified identity profile
+        DisplayName: "Get unified identity profile"
         Description: "Retrieves a unified identity profile from the SpyCloud IDLINK API that consolidates all known attributes and credentials for a resolved identity. Returns a deduplicated view of the identity including all associated emails, usernames, passwords, phone numbers, addresses, and device fingerprints observed across multiple breaches and infostealer infections. Use this after an IDLINK lookup to get the full composite picture of a compromised identity. Requires IDLINK API entitlement."
         ExamplePrompts:
           - Get the unified identity profile from SpyCloud IDLINK
@@ -727,16 +727,16 @@ SkillGroups:
           - Pull the full IDLINK identity composite
         Inputs:
           - Name: identity_id
-            Description: The SpyCloud IDLINK identity identifier to retrieve the unified profile for.
+            Description: "The SpyCloud IDLINK identity identifier to retrieve the unified profile for."
             Required: true
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: idLinkGetIdentity
 
       - Name: IdLinkGetIdentityGraph
-        DisplayName: Get identity relationship graph
+        DisplayName: "Get identity relationship graph"
         Description: "Retrieves the identity relationship graph from the SpyCloud IDLINK API showing how identities, credentials, devices, and accounts are interconnected. Returns nodes representing identity elements (emails, usernames, devices, IPs) and edges representing observed relationships between them across breach and infostealer datasets. Use this for visual link analysis, lateral movement path discovery, and understanding the full blast radius of a compromised credential. Requires IDLINK API entitlement."
         ExamplePrompts:
           - Get the identity relationship graph from SpyCloud IDLINK
@@ -747,13 +747,13 @@ SkillGroups:
           - Show lateral movement paths using the IDLINK identity graph
         Inputs:
           - Name: identity_id
-            Description: The SpyCloud IDLINK identity identifier to retrieve the relationship graph for.
+            Description: "The SpyCloud IDLINK identity identifier to retrieve the relationship graph for."
             Required: true
           - Name: depth
             Description: "Maximum relationship depth to traverse (default 1). Higher values return more distant connections."
             Required: false
           - Name: limit
-            Description: Maximum nodes per page.
+            Description: "Maximum nodes per page."
             Required: false
         Settings:
           OpenApiOperationId: idLinkGetIdentityGraph
@@ -763,7 +763,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: DataPartnershipLookupByEmail
-        DisplayName: Search partner data by email
+        DisplayName: "Search partner data by email"
         Description: "Queries the SpyCloud Data Partnership API for partner-sourced intelligence records associated with an email address. Returns data from SpyCloud's network of trusted data partners including additional breach sources, underground forum activity, paste site appearances, and supplementary threat intelligence not available through the standard Enterprise API. Use this to enrich investigations with partner-exclusive data and expand coverage beyond SpyCloud's primary collection. Requires Data Partnership API entitlement."
         ExamplePrompts:
           - Search SpyCloud partner data for this email address
@@ -774,22 +774,22 @@ SkillGroups:
           - Enrich this email investigation with SpyCloud partner data
         Inputs:
           - Name: email
-            Description: The email address to search in partner datasets.
+            Description: "The email address to search in partner datasets."
             Required: true
           - Name: since
-            Description: Return records published on or after this date (YYYY-MM-DD).
+            Description: "Return records published on or after this date (YYYY-MM-DD)."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: dataPartnershipLookupByEmail
 
       - Name: DataPartnershipLookupByDomain
-        DisplayName: Search partner data by domain
+        DisplayName: "Search partner data by domain"
         Description: "Queries the SpyCloud Data Partnership API for partner-sourced intelligence records associated with a corporate domain. Returns aggregated partner data for all identities under the domain including supplementary breach records, underground marketplace listings, and additional threat context from SpyCloud's partner network. Use this for comprehensive domain-wide exposure assessments that include partner-exclusive sources. Requires Data Partnership API entitlement."
         ExamplePrompts:
           - Search SpyCloud partner data for this domain
@@ -800,22 +800,22 @@ SkillGroups:
           - Get additional partner data for this corporate domain
         Inputs:
           - Name: domain
-            Description: The domain to search in partner datasets (e.g., example.com).
+            Description: "The domain to search in partner datasets (e.g., example.com)."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: dataPartnershipLookupByDomain
 
       - Name: DataPartnershipListCatalog
-        DisplayName: Browse partner data catalog
+        DisplayName: "Browse partner data catalog"
         Description: "Returns the SpyCloud Data Partnership catalog listing all available partner data sources, their descriptions, data types, coverage areas, record counts, and freshness indicators. Use this to understand what partner-sourced intelligence is available, evaluate coverage gaps, and identify relevant partner datasets for specific investigation needs. Requires Data Partnership API entitlement."
         ExamplePrompts:
           - Show the SpyCloud Data Partnership catalog
@@ -826,16 +826,16 @@ SkillGroups:
           - Show available partner data sources and their coverage
         Inputs:
           - Name: query
-            Description: Free-text search to filter partner catalog entries by name or description.
+            Description: "Free-text search to filter partner catalog entries by name or description."
             Required: false
           - Name: since
-            Description: Filter to partner sources updated on or after this date.
+            Description: "Filter to partner sources updated on or after this date."
             Required: false
           - Name: until
-            Description: Filter to partner sources updated on or before this date.
+            Description: "Filter to partner sources updated on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum entries per page.
+            Description: "Maximum entries per page."
             Required: false
         Settings:
           OpenApiOperationId: dataPartnershipListCatalog
@@ -845,7 +845,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: ExposureLookupByEmail
-        DisplayName: Get exposure assessment for email
+        DisplayName: "Get exposure assessment for email"
         Description: "Queries the SpyCloud Exposure API for a risk-scored exposure assessment of an email address. Returns a comprehensive exposure report including breach count, infostealer infection count, credential exposure timeline, data class breakdown, severity distribution, and an overall exposure risk score. Unlike the Identity API which focuses on identity deduplication, this endpoint provides a quantitative risk assessment optimized for security operations and compliance reporting. Requires Exposure API entitlement."
         ExamplePrompts:
           - Get the exposure assessment for this email from SpyCloud
@@ -856,25 +856,25 @@ SkillGroups:
           - Check SpyCloud Exposure data for this email address
         Inputs:
           - Name: email
-            Description: The email address to assess exposure for.
+            Description: "The email address to assess exposure for."
             Required: true
           - Name: since
-            Description: Return records published on or after this date (YYYY-MM-DD).
+            Description: "Return records published on or after this date (YYYY-MM-DD)."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: exposureLookupByEmail
 
       - Name: ExposureLookupByDomain
-        DisplayName: Get exposure assessment for domain
+        DisplayName: "Get exposure assessment for domain"
         Description: "Queries the SpyCloud Exposure API for a risk-scored exposure assessment of all identities under a corporate domain. Returns an aggregated exposure report with total breach count, infected employee count, credential exposure trends, severity distribution across the organization, and a domain-level exposure risk score. Use this for executive-level reporting on organizational darknet exposure and to benchmark security posture over time. Requires Exposure API entitlement."
         ExamplePrompts:
           - Get the exposure assessment for this domain from SpyCloud
@@ -885,25 +885,25 @@ SkillGroups:
           - Check SpyCloud Exposure data for all users at this domain
         Inputs:
           - Name: domain
-            Description: The domain to assess exposure for (e.g., example.com).
+            Description: "The domain to assess exposure for (e.g., example.com)."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: exposureLookupByDomain
 
       - Name: ExposureLookupByIp
-        DisplayName: Get exposure assessment for IP
+        DisplayName: "Get exposure assessment for IP"
         Description: "Queries the SpyCloud Exposure API for a risk-scored exposure assessment of an IP address. Returns an exposure report showing how many breaches and infostealer infections are associated with the IP, what identities have been compromised from that address, and the overall risk level. Use this to assess whether a network address is associated with significant credential theft activity and to prioritize network-based remediation. Requires Exposure API entitlement."
         ExamplePrompts:
           - Get the exposure assessment for this IP from SpyCloud
@@ -914,25 +914,25 @@ SkillGroups:
           - Check SpyCloud Exposure data for this IP address
         Inputs:
           - Name: ip
-            Description: The IPv4 or IPv6 address to assess exposure for.
+            Description: "The IPv4 or IPv6 address to assess exposure for."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: exposureLookupByIp
 
       - Name: ExposureGetSummary
-        DisplayName: Get comprehensive exposure summary with risk score
+        DisplayName: "Get comprehensive exposure summary with risk score"
         Description: "Retrieves a comprehensive exposure summary from the SpyCloud Exposure API that aggregates all exposure data into a single risk-scored dashboard view. Returns total exposure counts, breach timelines, severity trends, data class heatmaps, top compromised credentials, most-targeted applications, infection source breakdown, and an overall composite risk score with contributing factors. Use this for executive dashboards, board-level reporting, and holistic organizational risk assessment. Requires Exposure API entitlement."
         ExamplePrompts:
           - Get the comprehensive exposure summary from SpyCloud
@@ -943,16 +943,16 @@ SkillGroups:
           - Show the exposure trend and risk score summary
         Inputs:
           - Name: domain
-            Description: The domain to generate the exposure summary for.
+            Description: "The domain to generate the exposure summary for."
             Required: true
           - Name: since
-            Description: Return data from on or after this date (YYYY-MM-DD).
+            Description: "Return data from on or after this date (YYYY-MM-DD)."
             Required: false
           - Name: until
-            Description: Return data from on or before this date.
+            Description: "Return data from on or before this date."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: exposureGetSummary
@@ -962,7 +962,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: CAPLookupByEmail
-        DisplayName: Look up CAP data for email
+        DisplayName: "Look up CAP data for email"
         Description: "Queries the SpyCloud Credential Automated Protection (CAP) API for policy-driven exposure data associated with an email address. Returns CAP-specific records indicating whether the email has triggered any active credential reset policies, the current remediation state, policy match details, and automated action history. Use this to check if a specific user has been flagged for automated credential reset and to review their remediation status. Requires CAP API entitlement."
         ExamplePrompts:
           - Look up CAP data for this email in SpyCloud
@@ -973,25 +973,25 @@ SkillGroups:
           - Check credential automated protection status for this email
         Inputs:
           - Name: email
-            Description: The email address to look up in CAP.
+            Description: "The email address to look up in CAP."
             Required: true
           - Name: since
-            Description: Return records published on or after this date (YYYY-MM-DD).
+            Description: "Return records published on or after this date (YYYY-MM-DD)."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: capLookupByEmail
 
       - Name: CAPLookupByDomain
-        DisplayName: Look up CAP data for domain
+        DisplayName: "Look up CAP data for domain"
         Description: "Queries the SpyCloud Credential Automated Protection (CAP) API for policy-driven exposure data across all identities under a corporate domain. Returns aggregated CAP records showing which employees have triggered credential reset policies, their remediation states, policy match counts, and automated action summaries. Use this for organization-wide visibility into CAP-driven remediation and to identify users with outstanding credential resets. Requires CAP API entitlement."
         ExamplePrompts:
           - Look up CAP data for this domain in SpyCloud
@@ -1002,25 +1002,25 @@ SkillGroups:
           - How many users at this domain need credential resets via CAP
         Inputs:
           - Name: domain
-            Description: The domain to look up in CAP (e.g., example.com).
+            Description: "The domain to look up in CAP (e.g., example.com)."
             Required: true
           - Name: since
-            Description: Return records published on or after this date.
+            Description: "Return records published on or after this date."
             Required: false
           - Name: until
-            Description: Return records published on or before this date.
+            Description: "Return records published on or before this date."
             Required: false
           - Name: severity
-            Description: Minimum severity threshold (1-25).
+            Description: "Minimum severity threshold (1-25)."
             Required: false
           - Name: limit
-            Description: Maximum records per page.
+            Description: "Maximum records per page."
             Required: false
         Settings:
           OpenApiOperationId: capLookupByDomain
 
       - Name: CAPListPolicies
-        DisplayName: List active CAP policies
+        DisplayName: "List active CAP policies"
         Description: "Returns all active Credential Automated Protection (CAP) policies configured for the organization. Each policy defines the criteria (severity thresholds, data classes, breach types, infection types) that trigger automated credential resets, the target identity populations, notification settings, and integration configurations. Use this to audit the current CAP policy configuration, verify coverage, and ensure policies align with the organization's security requirements. Requires CAP API entitlement."
         ExamplePrompts:
           - List all active CAP policies in SpyCloud
@@ -1034,13 +1034,13 @@ SkillGroups:
             Description: "Filter by policy state: active or inactive."
             Required: false
           - Name: limit
-            Description: Maximum entries per page.
+            Description: "Maximum entries per page."
             Required: false
         Settings:
           OpenApiOperationId: capListPolicies
 
       - Name: CAPTriggerReset
-        DisplayName: Trigger automated credential reset
+        DisplayName: "Trigger automated credential reset"
         Description: "Triggers an automated credential reset action through the SpyCloud Credential Automated Protection (CAP) API for a specific identity. This initiates the configured remediation workflow which may include password reset enforcement via integrated identity providers (Azure AD, Okta, etc.), user notification, helpdesk ticket creation, and SIEM alert generation. Use this when manual intervention is needed to force a credential reset for a compromised identity outside of normal policy-driven automation. Requires CAP API entitlement and appropriate permissions."
         ExamplePrompts:
           - Trigger a CAP credential reset for this email
@@ -1051,13 +1051,13 @@ SkillGroups:
           - Force credential reset via CAP for this identity
         Inputs:
           - Name: email
-            Description: The email address of the identity to trigger the credential reset for.
+            Description: "The email address of the identity to trigger the credential reset for."
             Required: true
           - Name: policy_id
-            Description: The CAP policy ID to use for the reset action. If omitted, the default policy is applied.
+            Description: "The CAP policy ID to use for the reset action. If omitted, the default policy is applied."
             Required: false
           - Name: reason
-            Description: Reason or justification for triggering the manual reset.
+            Description: "Reason or justification for triggering the manual reset."
             Required: false
         Settings:
           OpenApiOperationId: capTriggerReset
@@ -1067,7 +1067,7 @@ SkillGroups:
       # =====================================================================
 
       - Name: HealthCheckEnterprise
-        DisplayName: Test SpyCloud Enterprise API connectivity
+        DisplayName: "Test SpyCloud Enterprise API connectivity"
         Description: "Validates that the SpyCloud Enterprise/Compass API key is working by fetching the first page of the breach catalog with a limit of 1. A successful response confirms the API key is valid, the network path is open, and the Enterprise API is reachable. Use this to diagnose authentication failures, expired keys, or network issues before running other Enterprise or Compass skills."
         ExamplePrompts:
           - Test my SpyCloud Enterprise API key
@@ -1087,7 +1087,7 @@ SkillGroups:
           OpenApiOperationId: listBreachCatalog
 
       - Name: HealthCheckSIP
-        DisplayName: Test SpyCloud SIP API connectivity
+        DisplayName: "Test SpyCloud SIP API connectivity"
         Description: "Validates that the SpyCloud SIP API key and entitlement are working by fetching the SIP breach catalog with a limit of 1. A successful response confirms SIP access. A 401/403 error means the API key lacks SIP entitlement — contact SpyCloud support. Use this before running SIP cookie lookup skills."
         ExamplePrompts:
           - Test my SpyCloud SIP API access
@@ -1105,7 +1105,7 @@ SkillGroups:
           OpenApiOperationId: sipListBreachCatalog
 
       - Name: HealthCheckAllAPIs
-        DisplayName: Run full SpyCloud API health check across all 9 APIs
+        DisplayName: "Run full SpyCloud API health check across all 9 APIs"
         Description: "Comprehensive connectivity and authentication validation across all 9 SpyCloud API endpoints. Tests Enterprise (breach catalog), Compass (domain lookup), SIP (catalog), Investigations (domain lookup), IDLINK (domain lookup), Data Partnership (catalog), Exposure (summary), and CAP (policies). For each API, reports whether the endpoint is reachable, the API key is valid, and the entitlement is active. This is the primary diagnostic skill — run this FIRST when troubleshooting any API issues. Results show which APIs are accessible with your current key(s) and which require additional entitlements or separate API keys."
         ExamplePrompts:
           - Run a full SpyCloud API health check
