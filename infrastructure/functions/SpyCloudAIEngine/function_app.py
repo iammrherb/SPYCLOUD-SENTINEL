@@ -732,7 +732,10 @@ def ai_executive_report(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     domain = body.get("domain", "").strip()
-    period_days = min(max(body.get("periodDays", 30), 1), 365)
+    try:
+        period_days = min(max(int(body.get("periodDays", 30)), 1), 365)
+    except (ValueError, TypeError):
+        period_days = 30
 
     if not domain:
         return func.HttpResponse(
