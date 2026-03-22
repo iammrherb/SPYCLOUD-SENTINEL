@@ -13,13 +13,9 @@ on:
   push:
     branches: [ main ]
     paths:
-    # Only trigger on Sentinel content directories
-    - 'content/**'
-    - 'playbooks/**'
-    - 'workbooks/**'
-    - 'sentinel-deployment.config'
+    - '**'
+    - '!.github/workflows/**'  # this filter prevents other workflow changes from triggering this workflow
     - '.github/workflows/sentinel-deploy-03a1d12c-90ae-4f21-87fd-f401dd2e4bbb.yml'
-    - '.github/workflows/azure-sentinel-deploy-03a1d12c-90ae-4f21-87fd-f401dd2e4bbb.ps1'
 
 jobs:
   deploy-content:
@@ -30,7 +26,7 @@ jobs:
       workspaceId: '335c9559-c665-432c-9ce7-c7e16440040f'
       directory: '${{ github.workspace }}'
       cloudEnv: 'AzureCloud'
-      contentTypes: 'AnalyticsRule,AutomationRule,HuntingQuery,Parser,Playbook,Workbook'
+      contentTypes: 'AnalyticsRule,AutomationRule,HuntingQuery,Playbook,Workbook'
       branch: 'main'
       sourceControlId: '03a1d12c-90ae-4f21-87fd-f401dd2e4bbb'
       rootDirectory: '${{ github.workspace }}'
