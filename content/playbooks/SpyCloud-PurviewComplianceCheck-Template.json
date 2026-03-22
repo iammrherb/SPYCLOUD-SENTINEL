@@ -65,6 +65,7 @@
       "kind": "V1",
       "properties": {
         "displayName": "[variables('office365ConnectionName')]",
+        "parameterValueType": "Alternative",
         "api": {
           "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/office365')]"
         }

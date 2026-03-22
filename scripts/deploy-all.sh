@@ -124,7 +124,7 @@ if [[ -z "$TEMPLATE_URL" ]]; then
         TEMPLATE_URL="../azuredeploy.json"
         debug "Using local template: ../azuredeploy.json"
     else
-        TEMPLATE_URL="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/azuredeploy.json"
+        TEMPLATE_URL="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/deploy/azuredeploy.json"
         debug "Using remote template from GitHub"
     fi
 fi

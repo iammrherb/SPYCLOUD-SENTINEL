@@ -609,8 +609,8 @@
     ]
   },
   "deployment": {
-    "arm_template": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/azuredeploy.json",
-    "ui_definition": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/createUiDefinition.json",
+    "arm_template": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/deploy/azuredeploy.json",
+    "ui_definition": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/deploy/createUiDefinition.json",
     "deploy_to_azure_url": "https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fiammrherb%2FSPYCLOUD-SENTINEL%2Fmain%2FcreateUiDefinition.json",
     "terraform_module": "https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/terraform/",
     "total_resources": 155
