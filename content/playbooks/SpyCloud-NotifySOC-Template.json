@@ -1,24 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "templateMetadata": {
-    "templateVersion": "1.0.0",
-    "templateId": "spycloud-notify-soc",
-    "category": "Notification",
-    "requiredPermissions": [
-      "Microsoft.OperationalInsights/workspaces/read",
-      "Microsoft.Logic/workflows/write",
-      "Microsoft.Web/connections/write"
-    ],
-    "requiredLicenses": [
-      "Microsoft Sentinel"
-    ],
-    "connectorAssociation": [
-      "azuresentinel",
-      "teams"
-    ],
-    "deployAsTemplate": true
-  },
   "metadata": {
     "_generator": {
       "name": "SpyCloud Sentinel Integration",
