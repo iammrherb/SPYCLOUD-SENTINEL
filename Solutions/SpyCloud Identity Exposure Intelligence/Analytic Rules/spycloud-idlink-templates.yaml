@@ -1,0 +1,285 @@
+# SpyCloud IDLINK API Rule Templates
+# These templates detect threats using SpyCloud IDLINK API data, which resolves
+# identity relationships and linkages across exposed credentials and devices.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
+
+templateVersion: "1.0.0"
+templateId: spycloud-idlink-templates
+category: SpyCloud IDLINK Identity Resolution
+deployAsTemplate: true
+requiredDataSources:
+  - SpyCloud IDLINK
+  - Microsoft Entra ID Sign-in Logs
+  - Microsoft Entra ID Audit Logs
+  - Microsoft Sentinel UEBA
+requiredTables:
+  - SpyCloudIdLink_CL
+  - SigninLogs
+  - AuditLogs
+  - BehaviorAnalytics
+  - OfficeActivity
+connectorAssociation:
+  - SpyCloud IDLINK API
+
+---
+id: sc-060-idlink-identity-cluster
+name: SpyCloud IDLINK — Identity Cluster with Corporate Exposure
+description: |
+  Detects identity clusters resolved by IDLINK that include corporate email addresses.
+  When personal and corporate identities are linked through shared devices or credentials,
+  compromise of any identity in the cluster puts the corporate account at risk.
+severity: High
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1078
+  - T1589.001
+query: |
+  let corporateDomains = _GetWatchlist('SpyCloud-Approved-Domains') | project SearchKey;
+  SpyCloudIdLink_CL
+  | where TimeGenerated > ago(24h)
+  | where isnotempty(linked_email_s) and isnotempty(identity_cluster_id_s)
+  | extend LinkedDomain = tostring(split(linked_email_s, "@")[1])
+  | where LinkedDomain in (corporateDomains) or email_domain_s in (corporateDomains)
+  | summarize LinkedEmails = make_set(linked_email_s), PrimaryEmails = make_set(email_s), SharedDevices = make_set(shared_machine_id_s), ClusterSize = dcount(linked_email_s) by identity_cluster_id_s
+  | where ClusterSize >= 2
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: identity_cluster_id_s
+
+---
+id: sc-061-idlink-personal-corporate-link
+name: SpyCloud IDLINK — Personal to Corporate Identity Link
+description: |
+  Detects when IDLINK reveals a personal email address linked to a corporate identity
+  through shared credentials, devices, or cookies. Personal account compromise becomes
+  a corporate attack vector through credential reuse.
+severity: Medium
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - InitialAccess
+techniques:
+  - T1078
+  - T1110.004
+query: |
+  let corporateDomains = _GetWatchlist('SpyCloud-Approved-Domains') | project SearchKey;
+  let personalDomains = dynamic(["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com", "protonmail.com", "icloud.com", "mail.com"]);
+  SpyCloudIdLink_CL
+  | where TimeGenerated > ago(24h)
+  | where isnotempty(linked_email_s) and isnotempty(email_s)
+  | where (email_domain_s in (corporateDomains) and tostring(split(linked_email_s, "@")[1]) in (personalDomains))
+       or (tostring(split(linked_email_s, "@")[1]) in (corporateDomains) and email_domain_s in (personalDomains))
+  | extend CorporateEmail = iff(email_domain_s in (corporateDomains), email_s, linked_email_s)
+  | extend PersonalEmail = iff(email_domain_s in (corporateDomains), linked_email_s, email_s)
+  | summarize LinkageTypes = make_set(link_type_s), SharedDevices = make_set(shared_machine_id_s) by CorporateEmail, PersonalEmail
+  | extend AccountName = tostring(split(CorporateEmail, "@")[0]), AccountDomain = tostring(split(CorporateEmail, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-062-idlink-shared-device-multi-org
+name: SpyCloud IDLINK — Shared Device Across Multiple Organizations
+description: |
+  Detects devices identified by IDLINK as shared across multiple organizational domains.
+  A single infected device used by employees from different organizations indicates
+  BYOD risk or shared infrastructure compromise.
+severity: High
+enabled: false
+queryFrequency: 12h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - LateralMovement
+techniques:
+  - T1078
+  - T1021
+query: |
+  SpyCloudIdLink_CL
+  | where TimeGenerated > ago(24h)
+  | where isnotempty(shared_machine_id_s) and isnotempty(email_s)
+  | summarize OrgDomains = make_set(email_domain_s), DomainCount = dcount(email_domain_s), Users = make_set(email_s), UserCount = dcount(email_s) by shared_machine_id_s
+  | where DomainCount >= 2
+  | extend DeviceId = shared_machine_id_s
+entityMappings:
+  - entityType: Host
+    fieldMappings:
+      - identifier: HostName
+        columnName: DeviceId
+
+---
+id: sc-063-idlink-linked-user-signin
+name: SpyCloud IDLINK + Entra ID — Linked Identity Sign-in After Exposure
+description: |
+  Correlates IDLINK identity linkages with Entra ID sign-ins. When a linked identity
+  (personal or alternate) is compromised, monitors the corporate identity for suspicious sign-ins
+  that could indicate credential reuse exploitation.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - CredentialAccess
+techniques:
+  - T1078
+  - T1078.004
+query: |
+  let linkedCorporateUsers = SpyCloudIdLink_CL
+  | where TimeGenerated > ago(7d)
+  | where isnotempty(linked_email_s) and severity_d >= 20
+  | extend CorporateEmail = iff(email_domain_s !in (dynamic(["gmail.com","yahoo.com","hotmail.com","outlook.com"])), email_s, linked_email_s)
+  | where CorporateEmail !has_any ("gmail.com", "yahoo.com", "hotmail.com", "outlook.com")
+  | summarize LinkTime = min(TimeGenerated), MaxSeverity = max(severity_d) by CorporateEmail;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where ResultType == 0
+  | join kind=inner linkedCorporateUsers on $left.UserPrincipalName == $right.CorporateEmail
+  | where TimeGenerated > LinkTime
+  | project TimeGenerated, UserPrincipalName, IPAddress, AppDisplayName, MaxSeverity, LinkTime, Location
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-064-idlink-cookie-session-overlap
+name: SpyCloud IDLINK — Cookie/Session Overlap Across Identities
+description: |
+  Detects when IDLINK identifies shared session cookies or authentication tokens across
+  multiple identities. Shared cookies indicate same-device usage and potential session
+  hijacking risk across linked accounts.
+severity: High
+enabled: false
+queryFrequency: 6h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - DefenseEvasion
+techniques:
+  - T1539
+  - T1550.004
+query: |
+  SpyCloudIdLink_CL
+  | where TimeGenerated > ago(24h)
+  | where link_type_s in ("shared_cookie", "shared_session", "shared_token")
+  | where isnotempty(email_s) and isnotempty(linked_email_s)
+  | summarize LinkedAccounts = make_set(linked_email_s), SharedApps = make_set(target_domain_s), OverlapCount = count() by email_s, link_type_s
+  | where OverlapCount >= 2
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-065-idlink-password-reuse-chain
+name: SpyCloud IDLINK — Password Reuse Chain Detection
+description: |
+  Detects chains of password reuse identified by IDLINK across linked identities.
+  When the same or similar passwords are used across multiple linked accounts,
+  a single breach can cascade across the entire identity chain.
+severity: Medium
+enabled: false
+queryFrequency: 12h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+techniques:
+  - T1110.004
+  - T1078
+query: |
+  SpyCloudIdLink_CL
+  | where TimeGenerated > ago(24h)
+  | where link_type_s in ("shared_password", "similar_password", "password_reuse")
+  | where isnotempty(email_s)
+  | summarize ReuseChain = make_set(linked_email_s), ChainLength = dcount(linked_email_s), AffectedDomains = make_set(target_domain_s) by email_s, email_domain_s
+  | where ChainLength >= 2
+  | extend AccountName = tostring(split(email_s, "@")[0]), AccountDomain = tostring(split(email_s, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-066-idlink-ueba-linked-anomaly
+name: SpyCloud IDLINK + UEBA — Anomalous Behavior from Linked Identity
+description: |
+  Correlates IDLINK identity linkages with UEBA anomalies. When a user whose identity is linked
+  to compromised accounts exhibits anomalous behavior, it elevates the likelihood of active exploitation
+  through the identity chain.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+  - T1036
+query: |
+  let linkedUsers = SpyCloudIdLink_CL
+  | where TimeGenerated > ago(7d)
+  | where severity_d >= 20
+  | extend CorporateEmail = iff(email_domain_s !in (dynamic(["gmail.com","yahoo.com","hotmail.com","outlook.com"])), email_s, linked_email_s)
+  | where CorporateEmail !has_any ("gmail.com", "yahoo.com", "hotmail.com", "outlook.com")
+  | distinct CorporateEmail;
+  BehaviorAnalytics
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (linkedUsers)
+  | where ActivityInsights has_any ("FirstTimeUser", "AnomalousActivity", "InvestigationPriorityScore", "UncommonResourceAccess")
+  | project TimeGenerated, UserPrincipalName, ActivityType, ActivityInsights, SourceIPAddress, InvestigationPriority
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: SourceIPAddress

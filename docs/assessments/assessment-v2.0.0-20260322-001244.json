@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "timestamp": "2026-03-22T00:12:44Z",
+  "score": 54,
+  "total": 56,
+  "percentage": 96.4,
+  "grade": "A+",
+  "categories": {
+    "Structure": {
+      "passed": 14,
+      "total": 14
+    },
+    "Content Hub": {
+      "passed": 11,
+      "total": 11
+    },
+    "Playbooks": {
+      "passed": 6,
+      "total": 7
+    },
+    "Custom Connector": {
+      "passed": 3,
+      "total": 3
+    },
+    "Analytic Rules": {
+      "passed": 2,
+      "total": 2
+    },
+    "Deploy to Azure": {
+      "passed": 8,
+      "total": 9
+    },
+    "Workbooks": {
+      "passed": 1,
+      "total": 1
+    },
+    "CI/CD": {
+      "passed": 3,
+      "total": 3
+    },
+    "Documentation": {
+      "passed": 5,
+      "total": 5
+    },
+    "JSON Validation": {
+      "passed": 1,
+      "total": 1
+    }
+  },
+  "inventory": {
+    "analytic_rules": 12,
+    "playbooks": 54,
+    "workbooks": 18,
+    "content_templates": 69,
+    "deploy_resources": 161,
+    "json_files": 186
+  },
+  "failures": [
+    {
+      "category": "Playbooks",
+      "name": "Playbooks with readme.md (9/54)",
+      "detail": ""
+    },
+    {
+      "category": "Deploy to Azure",
+      "name": "No parameter case mismatch",
+      "detail": "enableMsicRules vs enableMSICRules"
+    }
+  ]
+}

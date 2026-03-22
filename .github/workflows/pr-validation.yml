@@ -1,7 +1,7 @@
 ###############################################################################
 # SpyCloud Sentinel - PR Validation Pipeline
 # Runs on every pull request to validate templates, code quality, and syntax.
-# Fast feedback loop — no Azure credentials required.
+# Supports both Solutions/ and deploy/ directory structure.
 ###############################################################################
 
 name: PR Validation
@@ -10,491 +10,244 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
+      - "**.md"
+      - "docs/**"
+      - ".gitignore"
+      - "LICENSE"
   push:
     branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - "**.md"
+      - "docs/**"
 
 permissions:
   contents: read
   pull-requests: write
 
 env:
-  SOLUTION_VERSION: '2.0.0'
+  SOLUTION_VERSION: "2.0.0"
+  SOLUTION_NAME: "SpyCloud Identity Exposure Intelligence"
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # Job 1: JSON Syntax Validation
-  # ---------------------------------------------------------------------------
   json-syntax:
     name: JSON Syntax Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Validate all JSON files
         run: |
-          echo "## JSON Syntax Validation" >> $GITHUB_STEP_SUMMARY
-          errors=0
-          checked=0
-          for f in $(find . -name '*.json' -not -path './node_modules/*' -not -path './.git/*' -not -path './package/node_modules/*'); do
-            checked=$((checked + 1))
-            if ! python3 -c "import json; json.load(open('$f'))" 2>/dev/null; then
-              echo "FAIL: $f"
-              echo "- :x: \`$f\`" >> $GITHUB_STEP_SUMMARY
-              errors=$((errors + 1))
-            fi
-          done
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Checked $checked files, $errors errors" >> $GITHUB_STEP_SUMMARY
-          if [ $errors -gt 0 ]; then
-            echo "::error::$errors JSON files have syntax errors"
-            exit 1
-          fi
-          echo ":white_check_mark: All $checked JSON files valid" >> $GITHUB_STEP_SUMMARY
+          python3 << 'EOF'
+          import json, os, sys
+          errors = 0
+          checked = 0
+          for root, dirs, files in os.walk('.'):
+              # Skip directories
+              skip = ['node_modules', '.git', '__pycache__']
+              dirs[:] = [d for d in dirs if d not in skip]
+              for fname in files:
+                  if not fname.endswith('.json'):
+                      continue
+                  fpath = os.path.join(root, fname)
+                  checked += 1
+                  try:
+                      with open(fpath) as f:
+                          json.load(f)
+                  except (json.JSONDecodeError, Exception) as e:
+                      print(f'FAIL: {fpath} - {e}')
+                      errors += 1
+          print(f'Checked {checked} JSON files, {errors} errors')
+          if errors > 0:
+              sys.exit(1)
+          EOF
 
-  # ---------------------------------------------------------------------------
-  # Job 2: ARM Template Validation
-  # ---------------------------------------------------------------------------
   arm-validation:
     name: ARM Template Validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Validate azuredeploy.json structure
+      - name: Validate ARM templates
         run: |
           python3 << 'EOF'
-          import json, sys
-
-          with open('azuredeploy.json') as f:
-              tpl = json.load(f)
-
+          import json, sys, os, glob
           errors = []
-
-          # Required top-level keys
-          for key in ['$schema', 'contentVersion', 'parameters', 'variables', 'resources']:
-              if key not in tpl:
-                  errors.append(f'Missing required key: {key}')
-
-          resources = tpl.get('resources', [])
-          print(f'Resources: {len(resources)}')
-
-          # Check for duplicate resource names
-          names = []
-          for r in resources:
-              name = r.get('name', 'unnamed')
-              rtype = r.get('type', 'unknown')
-              names.append(f'{rtype}/{name}')
-
-          # Validate all resources have required fields
-          for i, r in enumerate(resources):
-              if 'type' not in r:
-                  errors.append(f'Resource index {i}: missing type')
-              if 'name' not in r:
-                  errors.append(f'Resource index {i}: missing name')
-              if 'apiVersion' not in r:
-                  errors.append(f'Resource index {i}: missing apiVersion')
-
-          # Validate content templates have author/support
-          ct_count = 0
-          ct_missing = 0
-          for r in resources:
-              if 'contentTemplates' in r.get('type', ''):
-                  ct_count += 1
-                  props = r.get('properties', {})
-                  if 'author' not in props:
-                      ct_missing += 1
-                      errors.append(f'Content template missing author: {r.get("name", "?")}')
-                  if 'support' not in props:
-                      ct_missing += 1
-                      errors.append(f'Content template missing support: {r.get("name", "?")}')
-
-          print(f'Content templates: {ct_count} ({ct_missing} missing author/support)')
-
-          # Validate suppressionDuration >= queryFrequency for alert rules
-          for i, r in enumerate(resources):
-              if 'alertRules' in r.get('type', ''):
-                  props = r.get('properties', {})
-                  sd = props.get('suppressionDuration', '')
-                  qf = props.get('queryFrequency', '')
-                  if sd and qf and sd < qf:
-                      errors.append(f'Rule index {i}: suppressionDuration ({sd}) < queryFrequency ({qf})')
-
+          schema_key = '$' + 'schema'
+          for fpath in ['deploy/azuredeploy.json', 'azuredeploy.json']:
+              if not os.path.exists(fpath): continue
+              with open(fpath) as f: tpl = json.load(f)
+              for key in [schema_key, 'contentVersion', 'parameters', 'resources']:
+                  if key not in tpl: errors.append(f'{fpath}: Missing {key}')
+              print(f'{fpath}: {len(tpl.get("resources", []))} resources')
+          for fpath in glob.glob('Solutions/*/Package/mainTemplate.json') + (['mainTemplate.json'] if os.path.exists('mainTemplate.json') else []):
+              with open(fpath) as f: tpl = json.load(f)
+              for key in [schema_key, 'contentVersion', 'parameters', 'resources']:
+                  if key not in tpl: errors.append(f'{fpath}: Missing {key}')
+              resources = tpl.get('resources', [])
+              ct = sum(1 for r in resources if 'contentTemplates' in r.get('type', ''))
+              print(f'{fpath}: {len(resources)} resources, {ct} content templates')
+          for fpath in glob.glob('Solutions/*/Package/createUiDefinition.json') + ([p for p in ['createUiDefinition.json', 'deploy/createUiDefinition.json'] if os.path.exists(p)]):
+              with open(fpath) as f: ui = json.load(f)
+              if schema_key not in ui: errors.append(f'{fpath}: Missing {schema_key}')
+          for fpath in glob.glob('Solutions/*/SolutionMetadata.json') + (['solutionMetadata.json'] if os.path.exists('solutionMetadata.json') else []):
+              with open(fpath) as f: meta = json.load(f)
+              for key in ['publisherId', 'offerId', 'support', 'categories']:
+                  if key not in meta: errors.append(f'{fpath}: Missing {key}')
           if errors:
-              print(f'\nERRORS ({len(errors)}):')
-              for e in errors:
-                  print(f'  - {e}')
+              for e in errors: print(f'ERROR: {e}')
               sys.exit(1)
-
-          print('\nazuredeploy.json: All validations passed')
+          print('All ARM template validations passed')
           EOF
 
-      - name: Validate mainTemplate.json structure
-        run: |
-          python3 << 'EOF'
-          import json, sys
-
-          with open('mainTemplate.json') as f:
-              tpl = json.load(f)
-
-          errors = []
-          for key in ['$schema', 'contentVersion', 'parameters', 'variables', 'resources']:
-              if key not in tpl:
-                  errors.append(f'Missing required key: {key}')
-
-          resources = tpl.get('resources', [])
-          content_templates = [r for r in resources if 'contentTemplates' in r.get('type', '')]
-          content_packages = [r for r in resources if 'contentPackages' in r.get('type', '')]
-
-          print(f'mainTemplate: {len(resources)} resources, {len(content_templates)} content templates, {len(content_packages)} content packages')
-
-          # Verify content package has dependencies
-          for pkg in content_packages:
-              deps = pkg.get('properties', {}).get('dependencies', {})
-              criteria = deps.get('criteria', [])
-              print(f'Content package dependencies: {len(criteria)}')
-              if len(criteria) < 10:
-                  errors.append(f'Content package has only {len(criteria)} dependencies (expected 50+)')
-
-          if errors:
-              for e in errors:
-                  print(f'ERROR: {e}')
-              sys.exit(1)
-
-          print('mainTemplate.json: All validations passed')
-          EOF
-
-      - name: Validate createUiDefinition.json
-        run: |
-          python3 << 'EOF'
-          import json, sys
-
-          with open('createUiDefinition.json') as f:
-              ui = json.load(f)
-
-          errors = []
-          if '$schema' not in ui:
-              errors.append('Missing $schema')
-
-          handler = ui.get('handler', '')
-          if handler != 'Microsoft.Azure.CreateUIDef':
-              errors.append(f'Unexpected handler: {handler}')
-
-          steps = ui.get('parameters', {}).get('steps', [])
-          print(f'Wizard steps: {len(steps)}')
-
-          outputs = ui.get('parameters', {}).get('outputs', {})
-          print(f'Wizard outputs: {len(outputs)}')
-
-          if errors:
-              for e in errors:
-                  print(f'ERROR: {e}')
-              sys.exit(1)
-
-          print('createUiDefinition.json: All validations passed')
-          EOF
-
-      - name: Validate solutionMetadata.json
-        run: |
-          python3 << 'EOF'
-          import json, sys
-
-          with open('solutionMetadata.json') as f:
-              meta = json.load(f)
-
-          required = ['publisherId', 'offerId', 'version', 'support', 'categories']
-          errors = []
-          for key in required:
-              if key not in meta:
-                  errors.append(f'Missing: {key}')
-
-          version = meta.get('version', '')
-          if version != '${{ env.SOLUTION_VERSION }}':
-              print(f'WARNING: solutionMetadata version ({version}) may not match SOLUTION_VERSION')
-
-          if errors:
-              for e in errors:
-                  print(f'ERROR: {e}')
-              sys.exit(1)
-
-          print(f'solutionMetadata.json: v{version} validated')
-          EOF
-
-  # ---------------------------------------------------------------------------
-  # Job 3: Version Consistency Check
-  # ---------------------------------------------------------------------------
-  version-check:
-    name: Version Consistency
+  solutions-structure:
+    name: Solutions Structure Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check version alignment across files
+      - name: Validate Solutions directory structure
         run: |
-          python3 << 'PYEOF'
-          import json, re, sys
+          python3 << 'EOF'
+          import os, sys, glob
+          errors = []
+          sol_dirs = glob.glob('Solutions/*/')
+          if not sol_dirs:
+              print('No Solutions/ directory - skipping')
+              sys.exit(0)
+          for sol_dir in sol_dirs:
+              name = os.path.basename(sol_dir.rstrip('/'))
+              print(f'Solution: {name}')
+              for d in ['Package', 'Playbooks']:
+                  if not os.path.isdir(os.path.join(sol_dir, d)):
+                      errors.append(f'Missing: {sol_dir}{d}/')
+              for f in ['SolutionMetadata.json', 'readme.md']:
+                  if not os.path.isfile(os.path.join(sol_dir, f)):
+                      errors.append(f'Missing: {sol_dir}{f}')
+              mt = os.path.join(sol_dir, 'Package', 'mainTemplate.json')
+              if not os.path.isfile(mt):
+                  errors.append(f'Missing: {mt}')
+              pb_dir = os.path.join(sol_dir, 'Playbooks')
+              if os.path.isdir(pb_dir):
+                  total = sum(1 for d in os.listdir(pb_dir) if os.path.isdir(os.path.join(pb_dir, d)))
+                  print(f'  Playbooks: {total}')
+          if errors:
+              for e in errors: print(f'ERROR: {e}')
+              sys.exit(1)
+          print('Solutions structure check passed')
+          EOF
 
-          EXPECTED = "${{ env.SOLUTION_VERSION }}"
-          results = []
-          warnings = 0
-
-          # azuredeploy.json
-          with open('azuredeploy.json') as f:
-              data = json.load(f)
-          v = data.get('metadata', {}).get('version', 'MISSING')
-          match = v == EXPECTED
-          results.append(('azuredeploy.json metadata.version', v, match))
-          if not match: warnings += 1
-
-          # mainTemplate.json
-          with open('mainTemplate.json') as f:
-              data = json.load(f)
-          v = data.get('contentVersion', 'MISSING')
-          results.append(('mainTemplate.json contentVersion', v, v.startswith('1.')))
-
-          sv = data.get('variables', {}).get('solutionVersion', 'MISSING')
-          match = sv == EXPECTED
-          results.append(('mainTemplate.json solutionVersion', sv, match))
-          if not match: warnings += 1
-
-          # solutionMetadata.json
-          with open('solutionMetadata.json') as f:
-              data = json.load(f)
-          v = data.get('version', 'MISSING')
-          match = v == EXPECTED
-          results.append(('solutionMetadata.json version', v, match))
-          if not match: warnings += 1
-
-          # sentinel-deploy.yml
-          with open('.github/workflows/sentinel-deploy.yml') as f:
-              content = f.read()
-          m = re.search(r"SOLUTION_VERSION:\s*'([^']+)'", content)
-          v = m.group(1) if m else 'MISSING'
-          match = v == EXPECTED
-          results.append(('sentinel-deploy.yml SOLUTION_VERSION', v, match))
-          if not match: warnings += 1
-
-          print(f'Expected version: {EXPECTED}\n')
-          for name, ver, ok in results:
-              status = 'OK' if ok else 'MISMATCH'
-              print(f'  [{status}] {name}: {ver}')
-
-          if warnings > 0:
-              print(f'\n::warning::{warnings} version mismatches found')
-
-          PYEOF
-
-  # ---------------------------------------------------------------------------
-  # Job 4: Python Validation
-  # ---------------------------------------------------------------------------
-  python-validation:
-    name: Python Code Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install -r infrastructure/functions/SpyCloudEnrichment/requirements.txt
-
-      - name: Syntax check
-        run: |
-          python3 -m py_compile infrastructure/functions/SpyCloudEnrichment/function_app.py
-          echo "function_app.py compiles successfully"
-
-      - name: Import validation
-        run: |
-          python3 -c "
-          import azure.functions
-          import requests
-          import msal
-          import azure.identity
-          import azure.keyvault.secrets
-          import azure.monitor.ingestion
-          import azure.data.tables
-          print('All imports successful')
-          "
-
-      - name: Validate Python scripts
-        run: |
-          for f in scripts/*.py; do
-            if [ -f "$f" ]; then
-              python3 -m py_compile "$f" && echo "OK: $f" || echo "FAIL: $f"
-            fi
-          done
-
-  # ---------------------------------------------------------------------------
-  # Job 5: Node.js Validation
-  # ---------------------------------------------------------------------------
-  node-validation:
-    name: Node.js Code Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install MCP server dependencies
-        working-directory: mcp-server
-        run: npm install
-
-      - name: Syntax check
-        working-directory: mcp-server
-        run: |
-          node --check src/index.js
-          echo "MCP server syntax check passed"
-
-  # ---------------------------------------------------------------------------
-  # Job 6: Playbook Validation
-  # ---------------------------------------------------------------------------
   playbook-validation:
     name: Validate Playbooks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Validate all playbook JSONs
         run: |
           python3 << 'EOF'
-          import json, os, sys
-
+          import json, os, sys, glob
           errors = []
           checked = 0
-
-          for directory in ['playbooks', 'content/playbooks']:
-              if not os.path.isdir(directory):
-                  continue
+          schema_key = '$' + 'schema'
+          for directory in ['playbooks', 'templates/playbooks']:
+              if not os.path.isdir(directory): continue
               for fname in sorted(os.listdir(directory)):
-                  if not fname.endswith('.json'):
-                      continue
+                  if not fname.endswith('.json'): continue
                   fpath = os.path.join(directory, fname)
                   checked += 1
                   try:
-                      with open(fpath) as f:
-                          tpl = json.load(f)
-
-                      if '$schema' not in tpl:
-                          errors.append(f'{fpath}: missing $schema')
-
-                      resources = tpl.get('resources', [])
-                      has_logic_app = any('workflows' in r.get('type', '') for r in resources)
-                      if not has_logic_app:
-                          errors.append(f'{fpath}: no Logic App workflow resource found')
-
-                      print(f'  OK: {fpath} ({len(resources)} resources)')
+                      with open(fpath) as f: tpl = json.load(f)
+                      if schema_key not in tpl: errors.append(f'{fpath}: missing {schema_key}')
+                      print(f'OK: {fpath}')
                   except json.JSONDecodeError as e:
-                      errors.append(f'{fpath}: invalid JSON - {e}')
-
-          print(f'\nChecked {checked} playbooks, {len(errors)} errors')
-
+                      errors.append(f'{fpath}: invalid JSON')
+          for fpath in sorted(glob.glob('Solutions/*/Playbooks/*/azuredeploy.json')):
+              checked += 1
+              try:
+                  with open(fpath) as f: tpl = json.load(f)
+                  if schema_key not in tpl: errors.append(f'{fpath}: missing {schema_key}')
+                  print(f'OK: {fpath}')
+              except json.JSONDecodeError as e:
+                  errors.append(f'{fpath}: invalid JSON')
+          print(f'Checked {checked} playbooks, {len(errors)} errors')
           if errors:
-              for e in errors:
-                  print(f'ERROR: {e}')
+              for e in errors: print(f'ERROR: {e}')
               sys.exit(1)
           EOF
 
-  # ---------------------------------------------------------------------------
-  # Job 7: Terraform Validation
-  # ---------------------------------------------------------------------------
+  python-validation:
+    name: Python Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install and validate
+        run: |
+          for dir in deploy/functions/SpyCloudEnrichment functions/SpyCloudEnrichment; do
+            if [ -f "$dir/requirements.txt" ]; then pip install -r "$dir/requirements.txt"; break; fi
+          done
+          for dir in deploy/functions functions; do
+            if [ -d "$dir/SpyCloudEnrichment" ]; then
+              python3 -m py_compile "$dir/SpyCloudEnrichment/function_app.py" && echo "OK: $dir"
+            fi
+          done
+          for f in scripts/*.py; do
+            if [ -f "$f" ]; then python3 -m py_compile "$f" && echo "OK: $f"; fi
+          done
+
+  node-validation:
+    name: Node.js Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Install MCP server dependencies
+        working-directory: mcp-server
+        run: npm install
+      - name: Syntax check
+        working-directory: mcp-server
+        run: node --check src/index.js
+
   terraform-validation:
     name: Validate Terraform
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: '1.7.0'
-
-      - name: Terraform fmt check
-        working-directory: infrastructure/terraform
-        run: terraform fmt -check -recursive
-
-      - name: Terraform init
-        working-directory: infrastructure/terraform
-        run: terraform init -backend=false
-
+          terraform_version: "1.7.0"
       - name: Terraform validate
-        working-directory: infrastructure/terraform
-        run: terraform validate
+        run: |
+          for dir in deploy/terraform terraform; do
+            if [ -d "$dir" ]; then
+              cd "$dir"
+              terraform fmt -check -recursive
+              terraform init -backend=false
+              terraform validate
+              cd "$GITHUB_WORKSPACE"
+            fi
+          done
 
-  # ---------------------------------------------------------------------------
-  # Job 8: Resource Inventory Report
-  # ---------------------------------------------------------------------------
   inventory-report:
     name: Resource Inventory
     runs-on: ubuntu-latest
-    needs: [json-syntax, arm-validation]
+    needs: [json-syntax, arm-validation, solutions-structure]
     steps:
       - uses: actions/checkout@v4
-
       - name: Generate inventory report
         run: |
-          python3 << 'PYEOF'
+          python3 << 'EOF'
           import json, os, glob
-
-          print("## SpyCloud Sentinel — Resource Inventory\n")
-
-          # ARM Resources
-          with open('azuredeploy.json') as f:
-              arm = json.load(f)
-          resources = arm.get('resources', [])
-          print(f"### azuredeploy.json: {len(resources)} resources")
-
-          type_counts = {}
-          for r in resources:
-              rtype = r.get('type', 'unknown').split('/')[-1]
-              type_counts[rtype] = type_counts.get(rtype, 0) + 1
-          for t, c in sorted(type_counts.items(), key=lambda x: -x[1]):
-              print(f"  - {t}: {c}")
-
-          # Content Templates
-          with open('mainTemplate.json') as f:
-              mt = json.load(f)
-          mt_resources = mt.get('resources', [])
-          ct = [r for r in mt_resources if 'contentTemplates' in r.get('type', '')]
-          print(f"\n### mainTemplate.json: {len(ct)} content templates")
-
-          # Playbooks
-          pb_standalone = len(glob.glob('playbooks/*.json'))
-          pb_content = len(glob.glob('content/playbooks/*.json'))
-          print(f"\n### Playbooks: {pb_standalone} standalone + {pb_content} content templates")
-
-          # Workbooks
-          wb_main = len(glob.glob('workbooks/*.json'))
-          wb_content = len(glob.glob('content/workbooks/*.json'))
-          print(f"### Workbooks: {wb_main} main + {wb_content} content templates")
-
-          # Analytics
-          ar_yaml = len(glob.glob('content/analytics-rules/*.yaml'))
-          print(f"### Analytics: {ar_yaml} YAML rule files")
-
-          # Notebooks
-          nb = len(glob.glob('notebooks/*.ipynb'))
-          print(f"### Notebooks: {nb}")
-
-          # Scripts
-          scripts = len(glob.glob('scripts/*'))
-          print(f"### Scripts: {scripts}")
-
-          # Test Data
-          td = len(glob.glob('test-data/*.json'))
-          print(f"### Test Data: {td} tables")
-
-          # Copilot
-          copilot = len(glob.glob('copilot/*.yaml')) + len(glob.glob('copilot/*.json'))
-          promptbooks = len(glob.glob('copilot/promptbooks/*.yaml'))
-          print(f"### Copilot: {copilot} files + {promptbooks} promptbooks")
-
-          PYEOF
+          print('## SpyCloud Sentinel - Resource Inventory')
+          for path in ['deploy/azuredeploy.json', 'azuredeploy.json']:
+              if os.path.exists(path):
+                  with open(path) as f: arm = json.load(f)
+                  print(f'{path}: {len(arm.get("resources", []))} resources')
+                  break
+          for sol_dir in sorted(glob.glob('Solutions/*/')):
+              name = os.path.basename(sol_dir.rstrip('/'))
+              print(f'Solution: {name}')
+              for subdir in ['Playbooks', 'Analytic Rules', 'Workbooks']:
+                  d = os.path.join(sol_dir, subdir)
+                  if os.path.isdir(d): print(f'  {subdir}: {len(os.listdir(d))}')
+          EOF

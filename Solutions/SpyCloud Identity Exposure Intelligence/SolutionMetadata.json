@@ -1,0 +1,22 @@
+{
+    "publisherId": "spycloudinc1680448518850",
+    "offerId": "azure-sentinel-solution-spycloud-identity-exposure",
+    "firstPublishDate": "2023-09-09",
+    "lastPublishDate": "2026-03-21",
+    "providers": [
+        "SpyCloud, Inc"
+    ],
+    "categories": {
+        "domains": [
+            "Security - Automation (SOAR)",
+            "Security - Threat Intelligence",
+            "Security - Threat Protection"
+        ]
+    },
+    "support": {
+        "name": "SpyCloud",
+        "email": "integrations@spycloud.com",
+        "tier": "Partner",
+        "link": "https://portal.spycloud.com"
+    }
+}

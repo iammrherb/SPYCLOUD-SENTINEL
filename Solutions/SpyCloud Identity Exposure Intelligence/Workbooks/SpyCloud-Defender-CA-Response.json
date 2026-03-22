@@ -1,0 +1,486 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# SpyCloud — Defender, Conditional Access & Response Operations\n\nComprehensive visibility into SpyCloud exposure correlations with Microsoft Defender, Conditional Access events, and automated remediation actions. Track password resets, session revocations, security group assignments, account disables, and all response actions in one place."
+      },
+      "name": "header"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "timerange",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": { "durationMs": 604800000 },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000, "displayText": "Last 1 hour" },
+                { "durationMs": 14400000, "displayText": "Last 4 hours" },
+                { "durationMs": 86400000, "displayText": "Last 24 hours" },
+                { "durationMs": 604800000, "displayText": "Last 7 days" },
+                { "durationMs": 2592000000, "displayText": "Last 30 days" }
+              ]
+            }
+          }
+        ]
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          { "id": "tab-overview", "cellValue": "tab", "linkTarget": "parameter", "linkLabel": "Response Overview", "subTarget": "overview" },
+          { "id": "tab-defender", "cellValue": "tab", "linkTarget": "parameter", "linkLabel": "Defender Alerts", "subTarget": "defender" },
+          { "id": "tab-ca", "cellValue": "tab", "linkTarget": "parameter", "linkLabel": "Conditional Access", "subTarget": "ca" },
+          { "id": "tab-o365", "cellValue": "tab", "linkTarget": "parameter", "linkLabel": "O365 & Exchange", "subTarget": "o365" },
+          { "id": "tab-firewall", "cellValue": "tab", "linkTarget": "parameter", "linkLabel": "Firewall & DNS", "subTarget": "firewall" },
+          { "id": "tab-remediation", "cellValue": "tab", "linkTarget": "parameter", "linkLabel": "Remediation Actions", "subTarget": "remediation" },
+          { "id": "tab-audit", "cellValue": "tab", "linkTarget": "parameter", "linkLabel": "Action Audit Trail", "subTarget": "audit" }
+        ]
+      },
+      "name": "tabs"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let passwordResets = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName has_any (\"Reset user password\", \"Change user password\")\n| summarize PasswordResets = count();\nlet sessionRevocations = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName == \"Revoke sign in sessions\"\n| summarize SessionRevocations = count();\nlet groupAdditions = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName == \"Add member to group\"\n| where TargetResources[0].displayName has_any (\"SpyCloud\", \"Blocked\", \"Restricted\", \"Compromised\", \"HighRisk\", \"MediumRisk\")\n| summarize GroupAdditions = count();\nlet accountDisables = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName == \"Disable account\"\n| summarize AccountsDisabled = count();\nlet mfaEnforcements = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName has_any (\"Admin registered security info\", \"Require re-register MFA\")\n| summarize MFAEnforcements = count();\nlet defenderAlerts = SecurityAlert\n| where TimeGenerated {TimeRange}\n| where ProviderName has_any (\"MCAS\", \"MDATP\", \"Azure Advanced Threat Protection\", \"Microsoft Defender\")\n| summarize DefenderAlerts = count();\npasswordResets | join sessionRevocations on 1==1 | join groupAdditions on 1==1 | join accountDisables on 1==1 | join mfaEnforcements on 1==1 | join defenderAlerts on 1==1\n| project PasswordResets, SessionRevocations, GroupAdditions, AccountsDisabled, MFAEnforcements, DefenderAlerts",
+              "size": 3,
+              "title": "Response Actions Summary",
+              "queryType": 0,
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": { "columnMatch": "Column1", "formatter": 1 },
+                "leftContent": { "columnMatch": "PasswordResets", "formatter": 12 }
+              }
+            },
+            "name": "response-summary-tiles"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nlet defenderAlerts = SecurityAlert\n| where TimeGenerated {TimeRange}\n| where ProviderName has_any (\"MCAS\", \"MDATP\", \"Azure Advanced Threat Protection\", \"Microsoft Defender for Identity\")\n| extend UserPrincipalName = tostring(parse_json(ExtendedProperties).[\"User Principal Name\"])\n| where UserPrincipalName in (exposedUsers)\n| summarize DefenderAlerts = count() by UserPrincipalName;\nlet caEvents = SigninLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers)\n| where ConditionalAccessStatus != \"notApplied\"\n| summarize CAEvents = count() by UserPrincipalName;\nlet remediationActions = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName has_any (\"Reset user password\", \"Revoke sign in sessions\", \"Add member to group\", \"Disable account\")\n| extend UPN = tostring(TargetResources[0].userPrincipalName)\n| where UPN in (exposedUsers)\n| summarize RemediationActions = count() by UPN;\nSpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| summarize MaxSeverity = max(severity), ExposureCount = count() by email\n| join kind=leftouter defenderAlerts on $left.email == $right.UserPrincipalName\n| join kind=leftouter caEvents on $left.email == $right.UserPrincipalName\n| join kind=leftouter remediationActions on $left.email == $right.UPN\n| project User = email, MaxSeverity, ExposureCount, DefenderAlerts = coalesce(DefenderAlerts, 0), CAEvents = coalesce(CAEvents, 0), RemediationActions = coalesce(RemediationActions, 0)\n| sort by MaxSeverity desc, DefenderAlerts desc",
+              "size": 0,
+              "title": "Exposed Users — Cross-Platform Correlation Matrix",
+              "queryType": 0,
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "MaxSeverity", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": ">=", "thresholdValue": "25", "representation": "redBright" }, { "operator": ">=", "thresholdValue": "20", "representation": "orange" }, { "operator": "Default", "representation": "yellow" }] } },
+                  { "columnMatch": "DefenderAlerts", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": ">", "thresholdValue": "0", "representation": "redBright" }, { "operator": "Default", "representation": "green" }] } },
+                  { "columnMatch": "RemediationActions", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": ">", "thresholdValue": "0", "representation": "green" }, { "operator": "Default", "representation": "orange" }] } }
+                ]
+              }
+            },
+            "name": "correlation-matrix"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName has_any (\"Reset user password\", \"Change user password\") | extend ActionType = \"Password Reset\", ActionTime = TimeGenerated | summarize Count = count() by ActionType, bin(ActionTime, 1h)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName == \"Revoke sign in sessions\" | extend ActionType = \"Session Revocation\", ActionTime = TimeGenerated | summarize Count = count() by ActionType, bin(ActionTime, 1h)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName == \"Add member to group\" | where TargetResources[0].displayName has_any (\"SpyCloud\", \"Blocked\", \"Restricted\", \"Compromised\") | extend ActionType = \"Security Group Add\", ActionTime = TimeGenerated | summarize Count = count() by ActionType, bin(ActionTime, 1h)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName == \"Disable account\" | extend ActionType = \"Account Disable\", ActionTime = TimeGenerated | summarize Count = count() by ActionType, bin(ActionTime, 1h)),\n(SecurityAlert | where TimeGenerated {TimeRange} | where ProviderName has_any (\"MCAS\", \"MDATP\", \"Microsoft Defender\") | extend ActionType = \"Defender Alert\", ActionTime = TimeGenerated | summarize Count = count() by ActionType, bin(ActionTime, 1h))\n| project ActionTime, ActionType, Count",
+              "size": 0,
+              "title": "Response Actions & Defender Alerts Over Time",
+              "queryType": 0,
+              "visualization": "areachart",
+              "chartSettings": {
+                "xAxis": "ActionTime",
+                "yAxis": ["Count"],
+                "group": "ActionType"
+              }
+            },
+            "name": "actions-timeline"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "overview"
+      },
+      "name": "overview-group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nSecurityAlert\n| where TimeGenerated {TimeRange}\n| where ProviderName has_any (\"MCAS\", \"MDATP\", \"Azure Advanced Threat Protection\", \"Microsoft Defender for Identity\", \"Microsoft Cloud App Security\")\n| extend UserPrincipalName = tostring(parse_json(ExtendedProperties).[\"User Principal Name\"])\n| where UserPrincipalName in (exposedUsers)\n| project TimeGenerated, AlertName, AlertSeverity, UserPrincipalName, ProviderName, Description, Tactics, Techniques\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "Defender Alerts for SpyCloud-Exposed Users",
+              "queryType": 0,
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "AlertSeverity", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "High", "representation": "redBright" }, { "operator": "==", "thresholdValue": "Medium", "representation": "orange" }, { "operator": "Default", "representation": "yellow" }] } }
+                ]
+              }
+            },
+            "name": "defender-alerts-table"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "SecurityAlert\n| where TimeGenerated {TimeRange}\n| where ProviderName has_any (\"MCAS\", \"MDATP\", \"Azure Advanced Threat Protection\", \"Microsoft Defender\")\n| summarize AlertCount = count() by ProviderName\n| sort by AlertCount desc",
+              "size": 2,
+              "title": "Defender Alert Distribution by Provider",
+              "queryType": 0,
+              "visualization": "piechart"
+            },
+            "name": "defender-distribution"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nSecurityIncident\n| where TimeGenerated {TimeRange}\n| mv-expand AlertIds\n| join kind=inner (\n  SecurityAlert\n  | extend UserPrincipalName = tostring(parse_json(ExtendedProperties).[\"User Principal Name\"])\n  | where UserPrincipalName in (exposedUsers)\n) on $left.AlertIds == $right.SystemAlertId\n| summarize AlertCount = dcount(AlertName), Alerts = make_set(AlertName, 5) by IncidentNumber, Title, Severity, UserPrincipalName, Status\n| sort by AlertCount desc",
+              "size": 0,
+              "title": "Defender XDR Multi-Alert Incidents with Exposed Users",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "defender-xdr-incidents"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let infectedHosts = SpyCloudCompassDevices_CL\n| where TimeGenerated {TimeRange}\n| distinct user_hostname;\nDeviceInfo\n| where TimeGenerated > ago(24h)\n| where DeviceName in (infectedHosts)\n| project TimeGenerated, DeviceName, OSPlatform, PublicIP, DeviceId, MachineGroup\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "Infected Devices Still Active in MDE Inventory",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "mde-active-devices"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "defender"
+      },
+      "name": "defender-group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nSigninLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers)\n| mv-expand ConditionalAccessPolicies\n| extend PolicyName = tostring(ConditionalAccessPolicies.displayName),\n         PolicyResult = tostring(ConditionalAccessPolicies.result)\n| summarize Count = count() by PolicyResult\n| sort by Count desc",
+              "size": 2,
+              "title": "Conditional Access Policy Results for Exposed Users",
+              "queryType": 0,
+              "visualization": "piechart"
+            },
+            "name": "ca-results-pie"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nSigninLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers)\n| where ResultType == 0\n| where ConditionalAccessStatus == \"notApplied\" or ConditionalAccessStatus == \"success\"\n| where ClientAppUsed in (\"Exchange ActiveSync\", \"IMAP4\", \"POP3\", \"SMTP\", \"Authenticated SMTP\", \"Other clients\")\n| project TimeGenerated, UserPrincipalName, ClientAppUsed, IPAddress, AppDisplayName, ConditionalAccessStatus\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "Legacy Authentication Bypassing CA for Exposed Users",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "ca-legacy-auth"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nSigninLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers)\n| where ResultType == 0\n| extend IsCompliant = tostring(DeviceDetail.isCompliant), IsManaged = tostring(DeviceDetail.isManaged)\n| summarize SuccessfulSignIns = count() by UserPrincipalName, IsCompliant, IsManaged, ConditionalAccessStatus\n| sort by SuccessfulSignIns desc",
+              "size": 0,
+              "title": "Device Compliance Status for Exposed User Sign-ins",
+              "queryType": 0,
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "IsCompliant", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "true", "representation": "green" }, { "operator": "Default", "representation": "redBright" }] } },
+                  { "columnMatch": "IsManaged", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "true", "representation": "green" }, { "operator": "Default", "representation": "redBright" }] } }
+                ]
+              }
+            },
+            "name": "ca-device-compliance"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 25\n| distinct email;\nAADNonInteractiveUserSignInLogs\n| where TimeGenerated {TimeRange}\n| where UserPrincipalName in (exposedUsers)\n| where ResultType == 0\n| summarize IPCount = dcount(IPAddress), IPs = make_set(IPAddress, 5), TokenUseCount = count() by UserPrincipalName, AppDisplayName, bin(TimeGenerated, 1h)\n| where IPCount >= 2\n| sort by IPCount desc",
+              "size": 0,
+              "title": "Token Replay Detection — Multi-IP Non-Interactive Sign-ins",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "ca-token-replay"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "ca"
+      },
+      "name": "ca-group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nOfficeActivity\n| where TimeGenerated {TimeRange}\n| where UserId in (exposedUsers)\n| summarize ActivityCount = count() by Operation\n| sort by ActivityCount desc\n| take 20",
+              "size": 2,
+              "title": "Top O365 Operations by Exposed Users",
+              "queryType": 0,
+              "visualization": "barchart"
+            },
+            "name": "o365-operations"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nOfficeActivity\n| where TimeGenerated {TimeRange}\n| where UserId in (exposedUsers)\n| where Operation in (\"New-InboxRule\", \"Set-InboxRule\", \"New-TransportRule\", \"Set-TransportRule\", \"Set-Mailbox\", \"Enable-TransportRule\")\n| project TimeGenerated, UserId, Operation, Parameters = tostring(Parameters), ClientIP\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "Mailbox Rule Changes by Exposed Users",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "o365-mailbox-rules"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nOfficeActivity\n| where TimeGenerated {TimeRange}\n| where UserId in (exposedUsers)\n| where Operation in (\"SharingSet\", \"AnonymousLinkCreated\", \"SharingInvitationCreated\", \"MemberAdded\", \"AddedToSecureLink\")\n| project TimeGenerated, UserId, Operation, OfficeObjectId, ClientIP, OfficeWorkload\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "External Sharing Activity by Exposed Users",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "o365-external-sharing"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nOfficeActivity\n| where TimeGenerated {TimeRange}\n| where UserId in (exposedUsers)\n| where Operation in (\"FileDownloaded\", \"FileSyncDownloadedFull\")\n| summarize DownloadCount = count(), UniqueFiles = dcount(OfficeObjectId) by UserId, ClientIP\n| where DownloadCount >= 20\n| sort by DownloadCount desc",
+              "size": 0,
+              "title": "Bulk Download Activity by Exposed Users",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "o365-bulk-downloads"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "o365"
+      },
+      "name": "o365-group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedIPs = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| mv-expand ip = ip_addresses\n| project ExposedIP = tostring(ip), email, severity;\nCommonSecurityLog\n| where TimeGenerated {TimeRange}\n| where SourceIP in (toscalar(exposedIPs | summarize make_set(ExposedIP)))\n| summarize Connections = count(), Actions = make_set(DeviceAction) by DeviceVendor, DeviceProduct, SourceIP\n| sort by Connections desc",
+              "size": 0,
+              "title": "Firewall Activity from Exposed IPs",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "firewall-exposed-ips"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "CommonSecurityLog\n| where TimeGenerated {TimeRange}\n| where DeviceAction has_any (\"Deny\", \"Drop\", \"Block\", \"Reject\")\n| summarize BlockedConnections = count() by DeviceVendor, bin(TimeGenerated, 1h)\n| sort by TimeGenerated asc",
+              "size": 0,
+              "title": "Firewall Blocked Connections Over Time",
+              "queryType": 0,
+              "visualization": "linechart"
+            },
+            "name": "firewall-blocks-timeline"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let infectedHosts = SpyCloudCompassDevices_CL\n| where TimeGenerated {TimeRange}\n| distinct user_hostname;\nDnsEvents\n| where TimeGenerated {TimeRange}\n| where Computer in (infectedHosts)\n| where Name has_any (\".duckdns.org\", \".no-ip.com\", \".ddns.net\", \".hopto.org\", \".zapto.org\", \".serveftp.com\", \".sytes.net\")\n   or Name matches regex @\"^[a-z0-9]{20,}\\.\"\n| project TimeGenerated, Computer, Name, IPAddresses, QueryType\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "Suspicious DNS Queries from Infected Devices",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "dns-suspicious-queries"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| distinct email;\nAzureActivity\n| where TimeGenerated {TimeRange}\n| where Caller in (exposedUsers)\n| where OperationNameValue has_any (\"Microsoft.Network/networkSecurityGroups\", \"Microsoft.Network/azureFirewalls\", \"Microsoft.Network/firewallPolicies\")\n| project TimeGenerated, Caller, OperationNameValue, ResourceGroup, ActivityStatusValue\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "Azure Firewall & NSG Changes by Exposed Users",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "azure-firewall-changes"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "firewall"
+      },
+      "name": "firewall-group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let exposedUsers = SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| summarize MaxSev = max(severity), ExposureTime = min(TimeGenerated) by email;\nlet pwdResets = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName has_any (\"Reset user password\", \"Change user password\")\n| extend UPN = tostring(TargetResources[0].userPrincipalName)\n| summarize PasswordReset = true, ResetTime = min(TimeGenerated) by UPN;\nlet sessionRevokes = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName == \"Revoke sign in sessions\"\n| extend UPN = tostring(TargetResources[0].userPrincipalName)\n| summarize SessionRevoked = true, RevokeTime = min(TimeGenerated) by UPN;\nlet groupAdds = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName == \"Add member to group\"\n| extend UPN = tostring(TargetResources[0].userPrincipalName), GroupName = tostring(TargetResources[0].displayName)\n| where GroupName has_any (\"SpyCloud\", \"Blocked\", \"Restricted\", \"Compromised\", \"HighRisk\", \"MediumRisk\")\n| summarize AddedToGroup = true, GroupNames = make_set(GroupName) by UPN;\nlet mfaEnforced = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName has_any (\"Admin registered security info\", \"Require re-register MFA\")\n| extend UPN = tostring(TargetResources[0].userPrincipalName)\n| summarize MFAEnforced = true by UPN;\nlet accountDisabled = AuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName == \"Disable account\"\n| extend UPN = tostring(TargetResources[0].userPrincipalName)\n| summarize AccountDisabled = true by UPN;\nexposedUsers\n| join kind=leftouter pwdResets on $left.email == $right.UPN\n| join kind=leftouter sessionRevokes on $left.email == $right.UPN\n| join kind=leftouter groupAdds on $left.email == $right.UPN\n| join kind=leftouter mfaEnforced on $left.email == $right.UPN\n| join kind=leftouter accountDisabled on $left.email == $right.UPN\n| project User = email, Severity = MaxSev, ExposureTime,\n         PasswordReset = coalesce(PasswordReset, false),\n         SessionRevoked = coalesce(SessionRevoked, false),\n         AddedToGroup = coalesce(AddedToGroup, false),\n         MFAEnforced = coalesce(MFAEnforced, false),\n         AccountDisabled = coalesce(AccountDisabled, false),\n         GroupNames = coalesce(GroupNames, dynamic([]))\n| extend RemediationScore = toint(PasswordReset) + toint(SessionRevoked) + toint(AddedToGroup) + toint(MFAEnforced) + toint(AccountDisabled)\n| sort by Severity desc, RemediationScore asc",
+              "size": 0,
+              "title": "Remediation Status Per User — Password Reset, Session Revoke, Group Add, MFA, Account Disable",
+              "queryType": 0,
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "PasswordReset", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "true", "representation": "green" }, { "operator": "Default", "representation": "redBright" }] } },
+                  { "columnMatch": "SessionRevoked", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "true", "representation": "green" }, { "operator": "Default", "representation": "redBright" }] } },
+                  { "columnMatch": "AddedToGroup", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "true", "representation": "green" }, { "operator": "Default", "representation": "orange" }] } },
+                  { "columnMatch": "MFAEnforced", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "true", "representation": "green" }, { "operator": "Default", "representation": "orange" }] } },
+                  { "columnMatch": "AccountDisabled", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "true", "representation": "green" }, { "operator": "Default", "representation": "orange" }] } },
+                  { "columnMatch": "RemediationScore", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": ">=", "thresholdValue": "4", "representation": "green" }, { "operator": ">=", "thresholdValue": "2", "representation": "yellow" }, { "operator": "Default", "representation": "redBright" }] } }
+                ]
+              }
+            },
+            "name": "remediation-status-matrix"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| summarize ExposureTime = min(TimeGenerated) by email;\nAuditLogs\n| where TimeGenerated {TimeRange}\n| where OperationName has_any (\"Reset user password\", \"Revoke sign in sessions\", \"Disable account\")\n| extend UPN = tostring(TargetResources[0].userPrincipalName)\n| join kind=inner (SpyCloudBreachWatchlist_CL | where TimeGenerated {TimeRange} and severity >= 20 | summarize ExposureTime = min(TimeGenerated) by email) on $left.UPN == $right.email\n| extend ResponseTimeMinutes = datetime_diff('minute', TimeGenerated, ExposureTime)\n| where ResponseTimeMinutes > 0\n| summarize AvgResponseMinutes = avg(ResponseTimeMinutes), MedianResponseMinutes = percentile(ResponseTimeMinutes, 50), P95ResponseMinutes = percentile(ResponseTimeMinutes, 95) by OperationName\n| project Action = OperationName, AvgResponseMinutes = round(AvgResponseMinutes, 1), MedianResponseMinutes = round(MedianResponseMinutes, 1), P95ResponseMinutes = round(P95ResponseMinutes, 1)",
+              "size": 0,
+              "title": "Mean Time to Remediate (MTTR) by Action Type",
+              "queryType": 0,
+              "visualization": "table"
+            },
+            "name": "mttr-analysis"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "remediation"
+      },
+      "name": "remediation-group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "union\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName has_any (\"Reset user password\", \"Change user password\") | extend ActionType = \"Password Reset\", UPN = tostring(TargetResources[0].userPrincipalName), Initiator = tostring(InitiatedBy.user.userPrincipalName)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName == \"Revoke sign in sessions\" | extend ActionType = \"Session Revocation\", UPN = tostring(TargetResources[0].userPrincipalName), Initiator = tostring(InitiatedBy.user.userPrincipalName)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName == \"Add member to group\" | where TargetResources[0].displayName has_any (\"SpyCloud\", \"Blocked\", \"Restricted\", \"Compromised\", \"HighRisk\", \"MediumRisk\") | extend ActionType = \"Security Group Add\", UPN = tostring(TargetResources[0].userPrincipalName), Initiator = tostring(InitiatedBy.user.userPrincipalName)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName == \"Disable account\" | extend ActionType = \"Account Disable\", UPN = tostring(TargetResources[0].userPrincipalName), Initiator = tostring(InitiatedBy.user.userPrincipalName)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName has_any (\"Admin registered security info\", \"Require re-register MFA\") | extend ActionType = \"MFA Enforcement\", UPN = tostring(TargetResources[0].userPrincipalName), Initiator = tostring(InitiatedBy.user.userPrincipalName)),\n(AuditLogs | where TimeGenerated {TimeRange} | where OperationName == \"Consent to application\" | extend ActionType = \"OAuth Consent Revoke\", UPN = tostring(TargetResources[0].userPrincipalName), Initiator = tostring(InitiatedBy.user.userPrincipalName))\n| project TimeGenerated, ActionType, UPN, OperationName, Initiator, Result\n| sort by TimeGenerated desc",
+              "size": 0,
+              "title": "Complete Remediation Action Audit Trail",
+              "queryType": 0,
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "ActionType", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "==", "thresholdValue": "Password Reset", "representation": "blue" }, { "operator": "==", "thresholdValue": "Session Revocation", "representation": "purple" }, { "operator": "==", "thresholdValue": "Account Disable", "representation": "redBright" }, { "operator": "==", "thresholdValue": "Security Group Add", "representation": "orange" }, { "operator": "==", "thresholdValue": "MFA Enforcement", "representation": "green" }, { "operator": "Default", "representation": "yellow" }] } }
+                ]
+              }
+            },
+            "name": "audit-trail-table"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "SpyCloudBreachWatchlist_CL\n| where TimeGenerated {TimeRange} and severity >= 20\n| summarize ExposureCount = count(), MaxSev = max(severity) by email\n| join kind=leftanti (\n  AuditLogs\n  | where TimeGenerated {TimeRange}\n  | where OperationName has_any (\"Reset user password\", \"Revoke sign in sessions\", \"Disable account\", \"Add member to group\")\n  | extend UPN = tostring(TargetResources[0].userPrincipalName)\n  | distinct UPN\n) on $left.email == $right.UPN\n| project User = email, MaxSeverity = MaxSev, ExposureCount, RemediationStatus = \"NO REMEDIATION TAKEN\"\n| sort by MaxSeverity desc",
+              "size": 0,
+              "title": "Exposed Users WITHOUT Any Remediation Action",
+              "queryType": 0,
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "RemediationStatus", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": "Default", "representation": "redBright" }] } },
+                  { "columnMatch": "MaxSeverity", "formatter": 18, "formatOptions": { "thresholdsOptions": "colors", "thresholdsGrid": [{ "operator": ">=", "thresholdValue": "25", "representation": "redBright" }, { "operator": ">=", "thresholdValue": "20", "representation": "orange" }, { "operator": "Default", "representation": "yellow" }] } }
+                ]
+              }
+            },
+            "name": "unremediated-users"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "tab",
+        "comparison": "isEqualTo",
+        "value": "audit"
+      },
+      "name": "audit-group"
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "sentinel-SpyCloudDefenderCAResponse"
+}

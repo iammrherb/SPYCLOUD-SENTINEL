@@ -1,0 +1,409 @@
+# SpyCloud O365/Entra ID Correlation Rule Templates
+# These templates correlate SpyCloud exposure data with Microsoft Entra ID and O365 signals.
+# All rules deploy as templates (disabled). Enable selectively in Sentinel > Analytics after reviewing each rule.
+
+templateVersion: "1.0.0"
+templateId: spycloud-o365-entra-templates
+category: SpyCloud O365 and Entra ID Correlation
+deployAsTemplate: true
+requiredDataSources:
+  - SpyCloud Breach Watchlist
+  - Microsoft Entra ID Sign-in Logs
+  - Microsoft Entra ID Audit Logs
+  - Microsoft Entra ID Identity Protection
+  - Office 365 Activity Logs
+requiredTables:
+  - SpyCloudBreachWatchlist_CL
+  - SigninLogs
+  - AuditLogs
+  - AADUserRiskEvents
+  - OfficeActivity
+connectorAssociation:
+  - SpyCloud Enterprise Protection API
+  - Microsoft Entra ID
+  - Office 365
+
+---
+id: sc-020-exposed-credential-successful-signin
+name: SpyCloud + Entra ID — Exposed Credential Followed by Successful Sign-in
+description: |
+  Correlates SpyCloud credential exposure with successful Entra ID sign-ins within 7 days.
+  Indicates potential use of stolen credentials. High-confidence indicator of account compromise.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - CredentialAccess
+techniques:
+  - T1078
+  - T1078.004
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d)
+  | where severity >= 20
+  | summarize ExposureTime = min(TimeGenerated), MaxSeverity = max(severity) by email;
+  SigninLogs
+  | where TimeGenerated > ago(1h)
+  | where ResultType == 0
+  | join kind=inner exposedUsers on $left.UserPrincipalName == $right.email
+  | where TimeGenerated > ExposureTime
+  | project TimeGenerated, UserPrincipalName, IPAddress, Location, AppDisplayName, MaxSeverity, ExposureTime, DeviceDetail, ConditionalAccessStatus
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-021-exposed-user-risky-signin
+name: SpyCloud + Entra ID — Exposed User with Risky Sign-in
+description: |
+  Correlates SpyCloud exposure with Entra ID Identity Protection risky sign-in events.
+  Combines external threat intelligence (SpyCloud) with behavioral risk signals (Identity Protection).
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+  - T1078.004
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AADUserRiskEvents
+  | where TimeGenerated > ago(1h)
+  | where UserPrincipalName in (exposedUsers)
+  | project TimeGenerated, UserPrincipalName, RiskLevel, RiskDetail, RiskEventType, IPAddress, Location
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: IPAddress
+
+---
+id: sc-022-exposed-user-impossible-travel
+name: SpyCloud + Entra ID — Exposed User with Impossible Travel
+description: |
+  Detects sign-ins from geographically impossible locations for users with SpyCloud credential exposure.
+  Strong indicator of credential compromise and active exploitation.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - DefenseEvasion
+techniques:
+  - T1078
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  SigninLogs
+  | where TimeGenerated > ago(24h)
+  | where UserPrincipalName in (exposedUsers)
+  | where ResultType == 0
+  | extend City = tostring(LocationDetails.city), Country = tostring(LocationDetails.countryOrRegion)
+  | summarize SignInLocations = make_set(pack("time", TimeGenerated, "city", City, "country", Country, "ip", IPAddress)), LocationCount = dcount(Country) by UserPrincipalName
+  | where LocationCount >= 2
+  | extend AccountName = tostring(split(UserPrincipalName, "@")[0]), AccountDomain = tostring(split(UserPrincipalName, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-023-exposed-user-mfa-change
+name: SpyCloud + Entra ID — Exposed User MFA Registration Change
+description: |
+  Detects MFA method registration changes for users with recent SpyCloud credential exposure.
+  Attackers may register their own MFA device to maintain persistent access.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - CredentialAccess
+techniques:
+  - T1556.006
+  - T1098
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AuditLogs
+  | where TimeGenerated > ago(1h)
+  | where OperationName has_any ("Register security info", "Update security info", "User registered security info", "User started security info registration")
+  | extend UPN = tostring(TargetResources[0].userPrincipalName)
+  | where UPN in (exposedUsers)
+  | project TimeGenerated, UPN, OperationName, InitiatedBy = tostring(InitiatedBy.user.userPrincipalName), IPAddress = tostring(InitiatedBy.user.ipAddress)
+  | extend AccountName = tostring(split(UPN, "@")[0]), AccountDomain = tostring(split(UPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-024-exposed-user-mailbox-rule
+name: SpyCloud + O365 — Exposed User Mailbox Rule Creation
+description: |
+  Detects mail forwarding rule creation by users with SpyCloud credential exposure.
+  Common BEC technique — attackers forward copies of emails to external addresses.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Collection
+  - Exfiltration
+techniques:
+  - T1114.003
+  - T1020
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where Operation in ("New-InboxRule", "Set-InboxRule", "New-TransportRule", "Set-Mailbox")
+  | where UserId in (exposedUsers)
+  | extend Parameters = tostring(Parameters)
+  | project TimeGenerated, UserId, Operation, Parameters, ClientIP
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: ClientIP
+
+---
+id: sc-025-exposed-user-oauth-consent
+name: SpyCloud + Entra ID — Exposed User OAuth App Consent
+description: |
+  Detects OAuth application consent grants by users with SpyCloud credential exposure.
+  Attackers may grant malicious apps access to mail, files, and other resources.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - CredentialAccess
+techniques:
+  - T1550.001
+  - T1098.003
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AuditLogs
+  | where TimeGenerated > ago(1h)
+  | where OperationName == "Consent to application"
+  | extend UPN = tostring(InitiatedBy.user.userPrincipalName)
+  | where UPN in (exposedUsers)
+  | extend AppName = tostring(TargetResources[0].displayName), AppId = tostring(TargetResources[0].id)
+  | project TimeGenerated, UPN, AppName, AppId, OperationName
+  | extend AccountName = tostring(split(UPN, "@")[0]), AccountDomain = tostring(split(UPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-026-exposed-user-admin-role
+name: SpyCloud + Entra ID — Exposed User Admin Role Assignment
+description: |
+  Detects admin role assignments for or by users with SpyCloud credential exposure.
+  Privilege escalation using stolen credentials is a critical threat.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - PrivilegeEscalation
+  - Persistence
+techniques:
+  - T1078.004
+  - T1098.003
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AuditLogs
+  | where TimeGenerated > ago(1h)
+  | where OperationName has_any ("Add member to role", "Add eligible member to role")
+  | extend TargetUPN = tostring(TargetResources[0].userPrincipalName), InitiatorUPN = tostring(InitiatedBy.user.userPrincipalName)
+  | where TargetUPN in (exposedUsers) or InitiatorUPN in (exposedUsers)
+  | extend RoleName = tostring(TargetResources[0].modifiedProperties[1].newValue)
+  | project TimeGenerated, InitiatorUPN, TargetUPN, RoleName, OperationName
+  | extend AccountName = tostring(split(TargetUPN, "@")[0]), AccountDomain = tostring(split(TargetUPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-027-exposed-user-password-change
+name: SpyCloud + Entra ID — Exposed User Self-Service Password Change
+description: |
+  Detects self-service password changes by users with SpyCloud exposure.
+  Could indicate user responding to breach notification, or attacker changing password to lock out legitimate user.
+severity: Medium
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - CredentialAccess
+techniques:
+  - T1098
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  AuditLogs
+  | where TimeGenerated > ago(1h)
+  | where OperationName has_any ("Change user password", "Reset user password", "Change password (self-service)")
+  | extend UPN = tostring(TargetResources[0].userPrincipalName)
+  | where UPN in (exposedUsers)
+  | project TimeGenerated, UPN, OperationName, InitiatedBy = tostring(InitiatedBy.user.userPrincipalName)
+  | extend AccountName = tostring(split(UPN, "@")[0]), AccountDomain = tostring(split(UPN, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-028-exposed-user-ediscovery
+name: SpyCloud + O365 — Exposed User eDiscovery Export
+description: |
+  Detects eDiscovery or compliance search export activity by users with SpyCloud credential exposure.
+  Attackers with compromised admin credentials may use eDiscovery to exfiltrate mailbox content.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Collection
+  - Exfiltration
+techniques:
+  - T1114
+  - T1048
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where Operation has_any ("SearchStarted", "SearchExported", "New-ComplianceSearch", "Start-ComplianceSearch")
+  | where UserId in (exposedUsers)
+  | project TimeGenerated, UserId, Operation, ClientIP
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+
+---
+id: sc-029-exposed-user-sharepoint-mass-download
+name: SpyCloud + O365 — Exposed User SharePoint Mass Download
+description: |
+  Detects bulk file downloads from SharePoint/OneDrive by users with SpyCloud credential exposure.
+  May indicate data exfiltration using compromised credentials.
+severity: High
+enabled: false
+queryFrequency: 1h
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Exfiltration
+  - Collection
+techniques:
+  - T1530
+  - T1213.002
+query: |
+  let exposedUsers = SpyCloudBreachWatchlist_CL
+  | where TimeGenerated > ago(7d) and severity >= 20
+  | distinct email;
+  OfficeActivity
+  | where TimeGenerated > ago(1h)
+  | where Operation in ("FileDownloaded", "FileSyncDownloadedFull")
+  | where UserId in (exposedUsers)
+  | summarize DownloadCount = count(), Files = make_set(OfficeObjectId, 10) by UserId, ClientIP
+  | where DownloadCount >= 50
+  | extend AccountName = tostring(split(UserId, "@")[0]), AccountDomain = tostring(split(UserId, "@")[1])
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: Name
+        columnName: AccountName
+      - identifier: UPNSuffix
+        columnName: AccountDomain
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: ClientIP

@@ -1,0 +1,428 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "PlaybookName": {
+      "type": "string",
+      "defaultValue": "SpyCloud-BlockConditionalAccess",
+      "metadata": {
+        "description": "Name of the Logic App playbook"
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure Subscription ID"
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group for this deployment"
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Microsoft Sentinel workspace name"
+      }
+    },
+    "BlockedGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure AD group ID for fully blocked users (severity 25)"
+      }
+    },
+    "RestrictedGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure AD group ID for restricted users (severity 20)"
+      }
+    },
+    "MonitoredGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure AD group ID for monitored users (severity 5+)"
+      }
+    }
+  },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('azureSentinelConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "V1",
+      "properties": {
+        "displayName": "[variables('azureSentinelConnectionName')]",
+        "api": {
+          "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]"
+        },
+        "parameterValueType": "Alternative"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('PlaybookName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[variables('sentinelConnectionId')]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "body": {
+                  "callback_url": "@listCallbackUrl()"
+                },
+                "path": "/incident-creation"
+              }
+            }
+          },
+          "actions": {
+            "Entities_-_Get_Accounts": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/entities/account",
+                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']"
+              },
+              "runAfter": {}
+            },
+            "Parse_SpyCloud_Severity": {
+              "type": "Compose",
+              "inputs": "@coalesce(triggerBody()?['object']?['properties']?['additionalData']?['SpyCloudSeverity'], '5')",
+              "runAfter": {
+                "Entities_-_Get_Accounts": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Determine_Target_Group": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "greaterOrEquals": [
+                      "@int(outputs('Parse_SpyCloud_Severity'))",
+                      25
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Set_Blocked_Group": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "TargetGroupId",
+                    "value": "@parameters('BlockedGroupId')"
+                  },
+                  "runAfter": {}
+                },
+                "Set_Blocked_Tier": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "TierName",
+                    "value": "Blocked"
+                  },
+                  "runAfter": {
+                    "Set_Blocked_Group": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {
+                  "Check_Restricted_Tier": {
+                    "type": "If",
+                    "expression": {
+                      "and": [
+                        {
+                          "greaterOrEquals": [
+                            "@int(outputs('Parse_SpyCloud_Severity'))",
+                            20
+                          ]
+                        }
+                      ]
+                    },
+                    "actions": {
+                      "Set_Restricted_Group": {
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "TargetGroupId",
+                          "value": "@parameters('RestrictedGroupId')"
+                        },
+                        "runAfter": {}
+                      },
+                      "Set_Restricted_Tier": {
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "TierName",
+                          "value": "Restricted"
+                        },
+                        "runAfter": {
+                          "Set_Restricted_Group": [
+                            "Succeeded"
+                          ]
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {
+                        "Set_Monitored_Group": {
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "TargetGroupId",
+                            "value": "@parameters('MonitoredGroupId')"
+                          },
+                          "runAfter": {}
+                        },
+                        "Set_Monitored_Tier": {
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "TierName",
+                            "value": "Monitored"
+                          },
+                          "runAfter": {
+                            "Set_Monitored_Group": [
+                              "Succeeded"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "runAfter": {}
+                  }
+                }
+              },
+              "runAfter": {
+                "Initialize_TierName": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Initialize_TargetGroupId": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "TargetGroupId",
+                    "type": "string",
+                    "value": ""
+                  }
+                ]
+              },
+              "runAfter": {
+                "Parse_SpyCloud_Severity": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Initialize_TierName": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "TierName",
+                    "type": "string",
+                    "value": ""
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_TargetGroupId": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Process_Each_Account": {
+              "type": "Foreach",
+              "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
+              "actions": {
+                "CA_Group_Scope": {
+                  "type": "Scope",
+                  "actions": {
+                    "Resolve_User": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "GET",
+                        "uri": "https://graph.microsoft.com/v1.0/users/@{concat(items('Process_Each_Account')?['Name'], if(not(empty(items('Process_Each_Account')?['UPNSuffix'])), concat('@', items('Process_Each_Account')?['UPNSuffix']), ''))}?$select=id,userPrincipalName",
+                        "authentication": {
+                          "type": "ManagedServiceIdentity",
+                          "audience": "https://graph.microsoft.com"
+                        }
+                      },
+                      "runAfter": {}
+                    },
+                    "Add_User_To_CA_Group": {
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "https://graph.microsoft.com/v1.0/groups/@{variables('TargetGroupId')}/members/$ref",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "body": {
+                          "@@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/@{body('Resolve_User')?['id']}"
+                        },
+                        "authentication": {
+                          "type": "ManagedServiceIdentity",
+                          "audience": "https://graph.microsoft.com"
+                        }
+                      },
+                      "runAfter": {
+                        "Resolve_User": [
+                          "Succeeded"
+                        ]
+                      }
+                    },
+                    "Comment_CA_Success": {
+                      "type": "ApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/incident-comments",
+                        "body": {
+                          "incidentArmId": "@triggerBody()?['object']?['id']",
+                          "message": "<p><strong>SpyCloud-BlockConditionalAccess:</strong> User <strong>@{body('Resolve_User')?['userPrincipalName']}</strong> added to <strong>@{variables('TierName')}</strong> Conditional Access group (severity: @{outputs('Parse_SpyCloud_Severity')}).</p>"
+                        }
+                      },
+                      "runAfter": {
+                        "Add_User_To_CA_Group": [
+                          "Succeeded"
+                        ]
+                      }
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Catch_CA_Errors": {
+                  "type": "Scope",
+                  "actions": {
+                    "Comment_CA_Failure": {
+                      "type": "ApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connection": {
+                            "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                          }
+                        },
+                        "method": "post",
+                        "path": "/incident-comments",
+                        "body": {
+                          "incidentArmId": "@triggerBody()?['object']?['id']",
+                          "message": "<p><strong>SpyCloud-BlockConditionalAccess:</strong> Failed to add <strong>@{items('Process_Each_Account')?['Name']}</strong> to CA group. Manual review required.</p>"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "CA_Group_Scope": [
+                      "Failed",
+                      "TimedOut"
+                    ]
+                  }
+                }
+              },
+              "runAfter": {
+                "Determine_Target_Group": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            },
+            "BlockedGroupId": {
+              "type": "String",
+              "defaultValue": "[parameters('BlockedGroupId')]"
+            },
+            "RestrictedGroupId": {
+              "type": "String",
+              "defaultValue": "[parameters('RestrictedGroupId')]"
+            },
+            "MonitoredGroupId": {
+              "type": "String",
+              "defaultValue": "[parameters('MonitoredGroupId')]"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuresentinel": {
+                "connectionId": "[variables('sentinelConnectionId')]",
+                "connectionName": "[variables('azureSentinelConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azuresentinel')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "tags": {
+        "hidden-SentinelTemplateName": "SpyCloud-BlockConditionalAccess",
+        "hidden-SentinelTemplateVersion": "2.0.0"
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Logic/workflows', parameters('PlaybookName'))]"
+    },
+    "logicAppPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('PlaybookName')), '2019-05-01', 'full').identity.principalId]"
+    }
+  },
+  "metadata": {
+    "author": {
+      "name": "SpyCloud"
+    },
+    "support": {
+      "tier": "Community"
+    },
+    "categories": {
+      "domains": [
+        "Security - Automation (SOAR)"
+      ]
+    }
+  }
+}
