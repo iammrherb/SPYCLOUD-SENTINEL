@@ -186,7 +186,7 @@
         "enableAdvancedThreatRules": {
             "value": true
         },
-        "enableMsicRules": {
+        "enableMSICRules": {
             "value": true
         },
         "enableFusionDetection": {
