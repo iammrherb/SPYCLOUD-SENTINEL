@@ -1,27 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "templateMetadata": {
-    "templateVersion": "1.0.0",
-    "templateId": "spycloud-full-remediation",
-    "category": "Remediation",
-    "requiredPermissions": [
-      "Microsoft.OperationalInsights/workspaces/read",
-      "Microsoft.Logic/workflows/write",
-      "Microsoft.Web/connections/write"
-    ],
-    "requiredLicenses": [
-      "Microsoft Sentinel",
-      "Azure Active Directory P1",
-      "Microsoft Defender for Endpoint P2"
-    ],
-    "connectorAssociation": [
-      "azuresentinel",
-      "microsoftgraphsecurity",
-      "microsoftdefenderatp"
-    ],
-    "deployAsTemplate": true
-  },
   "metadata": {
     "_generator": {
       "name": "SpyCloud Sentinel Integration",

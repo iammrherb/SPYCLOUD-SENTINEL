@@ -1,25 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "templateMetadata": {
-    "templateVersion": "1.0.0",
-    "templateId": "spycloud-revoke-sessions",
-    "category": "Remediation",
-    "requiredPermissions": [
-      "Microsoft.OperationalInsights/workspaces/read",
-      "Microsoft.Logic/workflows/write",
-      "Microsoft.Web/connections/write"
-    ],
-    "requiredLicenses": [
-      "Microsoft Sentinel",
-      "Azure Active Directory P1"
-    ],
-    "connectorAssociation": [
-      "azuresentinel",
-      "microsoftgraphsecurity"
-    ],
-    "deployAsTemplate": true
-  },
   "metadata": {
     "_generator": {
       "name": "SpyCloud Sentinel Integration",

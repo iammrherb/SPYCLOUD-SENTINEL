@@ -842,7 +842,7 @@ execute_deployment() {
         if [[ -f "${PROJECT_DIR}/azuredeploy.json" ]]; then
             TEMPLATE_URL="${PROJECT_DIR}/azuredeploy.json"
         else
-            TEMPLATE_URL="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/azuredeploy.json"
+            TEMPLATE_URL="https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/deploy/azuredeploy.json"
         fi
     fi
 

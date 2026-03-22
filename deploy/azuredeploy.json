@@ -511,7 +511,7 @@
         "description": "RECOMMENDED: ON \u2014 Deploys advanced threat detection rules (sc-040 to sc-049). Detects multi-stage attack chains, CA bypass attempts, credential re-exposure after reset, TI indicator matches, and geographic mismatches. Uses multiple data sources with graceful fallback."
       }
     },
-    "enableMsicRules": {
+    "enableMSICRules": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {

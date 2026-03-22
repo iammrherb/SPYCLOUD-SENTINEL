@@ -60,6 +60,12 @@
       "defaultValue": ""
     }
   },
+  "variables": {
+    "azureSentinelConnectionName": "[concat('azuresentinel-', parameters('PlaybookName'))]",
+    "office365ConnectionName": "[concat('office365-', parameters('PlaybookName'))]",
+    "sentinelConnectionId": "[resourceId('Microsoft.Web/connections', variables('azureSentinelConnectionName'))]",
+    "office365ConnectionId": "[resourceId('Microsoft.Web/connections', variables('office365ConnectionName'))]"
+  },
   "resources": [
     {
       "type": "Microsoft.Web/connections",
