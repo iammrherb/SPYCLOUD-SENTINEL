@@ -398,6 +398,7 @@ query: |
   | where TimeGenerated > ago(6h)
   | summarize CurrentCount = count();
   baseline
-  | join current on $left.DailyAvg == $left.DailyAvg
+  | extend _placeholder = 1
+  | join (current | extend _placeholder = 1) on _placeholder
   | where CurrentCount > DailyAvg * 3
   | project CurrentCount, DailyAvg, SpikeRatio = CurrentCount / DailyAvg
