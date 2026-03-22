@@ -36,5 +36,5 @@ Descriptor:
 SkillGroups:
   - Format: API
     Settings:
-      OpenApiSpecUrl: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/spycloud-full-openapi-spec.yaml
+      OpenApiSpecUrl: https://raw.githubusercontent.com/iammrherb/SPYCLOUD-SENTINEL/main/copilot/spycloud-full-openapi.yaml
       EndpointUrl: https://api.spycloud.io
