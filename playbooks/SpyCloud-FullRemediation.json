@@ -20,19 +20,22 @@
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     },
     "blockedGroupId": {
       "type": "string",
       "metadata": {
         "description": "Azure AD group ID for blocked users (Conditional Access)"
-      }
+      },
+      "defaultValue": ""
     },
     "restrictedGroupId": {
       "type": "string",
       "metadata": {
         "description": "Azure AD group ID for restricted users (Conditional Access)"
-      }
+      },
+      "defaultValue": ""
     }
   },
   "variables": {

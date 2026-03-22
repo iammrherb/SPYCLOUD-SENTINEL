@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspace": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Sentinel workspace"
+      }
+    },
+    "workbookDisplayName": {
+      "type": "string",
+      "defaultValue": "SpyCloud Compass",
+      "metadata": {
+        "description": "Display name for the workbook"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/workbooks",
+      "apiVersion": "2022-04-01",
+      "name": "[guid('SpyCloud-Compass-Workbook', resourceGroup().id)]",
+      "location": "[resourceGroup().location]",
+      "kind": "shared",
+      "properties": {
+        "displayName": "[parameters('workbookDisplayName')]",
+        "serializedData": "{\"version\": \"Notebook/1.0\", \"items\": [{\"type\": 1, \"content\": {\"json\": \"# SpyCloud Compass Dashboard\\n**Infostealer & Device Intelligence** - Monitor infected devices, compromised applications, and malware-exfiltrated data from SpyCloud Compass.\\n\\n> This workbook covers SpyCloudCompassData_CL, SpyCloudCompassDevices_CL, and SpyCloudCompassApplications_CL tables.\\n\\n---\"}, \"name\": \"title\"}, {\"type\": 9, \"content\": {\"version\": \"KqlParameterItem/1.0\", \"parameters\": [{\"id\": \"compass_time_range\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"TimeRange\", \"type\": 4, \"isRequired\": true, \"value\": {\"durationMs\": 2592000000}, \"typeSettings\": {\"selectableValues\": [{\"durationMs\": 86400000}, {\"durationMs\": 604800000}, {\"durationMs\": 2592000000}, {\"durationMs\": 7776000000}], \"allowCustom\": true}, \"label\": \"Time Range\"}, {\"id\": \"compass_sev_filter\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"SeverityFilter\", \"type\": 2, \"isRequired\": false, \"multiSelect\": true, \"quote\": \"\", \"delimiter\": \",\", \"query\": \"SpyCloudCompassData_CL | distinct severity | order by severity desc\", \"typeSettings\": {\"additionalResourceOptions\": [\"value::all\"]}, \"defaultValue\": \"value::all\", \"label\": \"Severity\"}]}, \"name\": \"parameters\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(Label:string, Value:long, Order:int)[\\\"Compass Records\\\", 0, 1, \\\"Infected Devices\\\", 0, 2, \\\"Compromised Apps\\\", 0, 3, \\\"Affected Users\\\", 0, 4]),\\n(SpyCloudCompassData_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\\\"Compass Records\\\", Order=1 | project Label, Value=v, Order),\\n(SpyCloudCompassDevices_CL | where TimeGenerated {TimeRange} | summarize v=dcount(infected_machine_id) | extend Label=\\\"Infected Devices\\\", Order=2 | project Label, Value=v, Order),\\n(SpyCloudCompassApplications_CL | where TimeGenerated {TimeRange} | summarize v=dcount(target_domain) | extend Label=\\\"Compromised Apps\\\", Order=3 | project Label, Value=v, Order),\\n(SpyCloudCompassData_CL | where TimeGenerated {TimeRange} | summarize v=dcount(email) | extend Label=\\\"Affected Users\\\", Order=4 | project Label, Value=v, Order)\\n| summarize Value=max(Value) by Label, Order\\n| order by Order asc\", \"size\": 4, \"title\": \"Compass Overview\", \"queryType\": 0, \"visualization\": \"tiles\", \"tileSettings\": {\"titleContent\": {\"columnMatch\": \"Label\", \"formatter\": 1}, \"leftContent\": {\"columnMatch\": \"Value\", \"formatter\": 12, \"formatOptions\": {\"palette\": \"auto\"}}}}, \"name\": \"compassTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudCompassDevices_CL\\n| where TimeGenerated {TimeRange} and isnotempty(infected_machine_id)\\n| summarize Users=dcount(email), Domains=dcount(target_domain), MaxSeverity=max(severity), LatestSeen=max(TimeGenerated) by tostring(infected_machine_id), tostring(user_hostname)\\n| extend RiskLevel = case(MaxSeverity == 25, \\\"CRITICAL\\\", MaxSeverity == 20, \\\"HIGH\\\", MaxSeverity == 5, \\\"MEDIUM\\\", \\\"LOW\\\")\\n| top 25 by MaxSeverity desc, Users desc\\n| project DeviceID=infected_machine_id, Hostname=user_hostname, RiskLevel, AffectedUsers=Users, CompromisedDomains=Domains, LatestSeen)\", \"size\": 0, \"title\": \"Top 25 Infected Devices\", \"queryType\": 0, \"visualization\": \"table\", \"gridSettings\": {\"sortBy\": [{\"itemKey\": \"AffectedUsers\", \"sortOrder\": 2}]}}, \"name\": \"topInfectedDevices\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudCompassApplications_CL\\n| where TimeGenerated {TimeRange} and isnotempty(target_domain)\\n| summarize StolenCredentials=count(), UniqueUsers=dcount(email), UniqueDevices=dcount(infected_machine_id) by tostring(target_domain)\\n| order by StolenCredentials desc\\n| take 20)\", \"size\": 1, \"title\": \"Top 20 Compromised Applications by Stolen Credentials\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"topCompromisedApps\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudCompassData_CL\\n| where TimeGenerated {TimeRange}\\n| summarize InfectedDevices=dcount(infected_machine_id), AffectedUsers=dcount(email) by bin(TimeGenerated, 1d)\\n| order by TimeGenerated asc)\", \"size\": 0, \"title\": \"Compass Infection Trend (Daily)\", \"queryType\": 0, \"visualization\": \"linechart\", \"chartSettings\": {\"seriesLabelSettings\": [{\"seriesName\": \"InfectedDevices\", \"color\": \"redBright\"}, {\"seriesName\": \"AffectedUsers\", \"color\": \"orange\"}]}}, \"name\": \"infectionTrend\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudCompassData_CL\\n| where TimeGenerated {TimeRange} and isnotempty(user_os)\\n| summarize DeviceCount=dcount(infected_machine_id) by tostring(user_os))\", \"size\": 3, \"title\": \"Infected Device OS Distribution\", \"queryType\": 0, \"visualization\": \"piechart\"}, \"name\": \"osDistribution\"}], \"templateMetadata\": {\"version\": \"1.0\", \"connectorAssociation\": [{\"connectorId\": \"SpyCloudCompass\", \"dataTypes\": [\"SpyCloudCompassData_CL\", \"SpyCloudCompassDevices_CL\", \"SpyCloudCompassApplications_CL\"]}]}}",
+        "version": "1.0",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "category": "sentinel"
+      }
+    }
+  ]
+}

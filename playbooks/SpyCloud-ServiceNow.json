@@ -20,19 +20,22 @@
       "type": "string",
       "metadata": {
         "description": "ServiceNow instance URL (e.g., https://instance.service-now.com)"
-      }
+      },
+      "defaultValue": ""
     },
     "serviceNowUsername": {
       "type": "string",
       "metadata": {
         "description": "ServiceNow API username"
-      }
+      },
+      "defaultValue": ""
     },
     "serviceNowPassword": {
       "type": "securestring",
       "metadata": {
         "description": "ServiceNow API password"
-      }
+      },
+      "defaultValue": ""
     },
     "serviceNowTable": {
       "type": "string",
@@ -52,7 +55,8 @@
       "type": "string",
       "metadata": {
         "description": "Microsoft Sentinel workspace name"
-      }
+      },
+      "defaultValue": ""
     }
   },
   "variables": {

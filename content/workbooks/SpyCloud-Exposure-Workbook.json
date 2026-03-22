@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspace": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Sentinel workspace"
+      }
+    },
+    "workbookDisplayName": {
+      "type": "string",
+      "defaultValue": "SpyCloud Exposure Overview",
+      "metadata": {
+        "description": "Display name for the workbook"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/workbooks",
+      "apiVersion": "2022-04-01",
+      "name": "[guid('SpyCloud-Exposure-Workbook', resourceGroup().id)]",
+      "location": "[resourceGroup().location]",
+      "kind": "shared",
+      "properties": {
+        "displayName": "[parameters('workbookDisplayName')]",
+        "serializedData": "{\"version\": \"Notebook/1.0\", \"items\": [{\"type\": 1, \"content\": {\"json\": \"# SpyCloud Exposure Dashboard\\n**Enterprise Exposure Monitoring** - Comprehensive view of credential and identity exposures detected across darknet sources.\\n\\n> This workbook focuses exclusively on SpyCloudExposure_CL data for tracking organizational exposure to data breaches and leaks.\\n\\n---\"}, \"name\": \"title\"}, {\"type\": 9, \"content\": {\"version\": \"KqlParameterItem/1.0\", \"parameters\": [{\"id\": \"exp_time_range\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"TimeRange\", \"type\": 4, \"isRequired\": true, \"value\": {\"durationMs\": 2592000000}, \"typeSettings\": {\"selectableValues\": [{\"durationMs\": 86400000}, {\"durationMs\": 604800000}, {\"durationMs\": 2592000000}, {\"durationMs\": 7776000000}], \"allowCustom\": true}, \"label\": \"Time Range\"}, {\"id\": \"exp_sev_filter\", \"version\": \"KqlParameterItem/1.0\", \"name\": \"SeverityFilter\", \"type\": 2, \"isRequired\": false, \"multiSelect\": true, \"quote\": \"\", \"delimiter\": \",\", \"query\": \"SpyCloudExposure_CL | distinct severity | order by severity desc\", \"typeSettings\": {\"additionalResourceOptions\": [\"value::all\"]}, \"defaultValue\": \"value::all\", \"label\": \"Severity\"}]}, \"name\": \"parameters\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(Label:string, Value:long, Order:int)[\\\"Total Exposures\\\", 0, 1, \\\"Unique Emails\\\", 0, 2, \\\"Unique Domains\\\", 0, 3, \\\"Critical Exposures\\\", 0, 4, \\\"Plaintext Passwords\\\", 0, 5]),\\n(SpyCloudExposure_CL | where TimeGenerated {TimeRange} | summarize v=count() | extend Label=\\\"Total Exposures\\\", Order=1 | project Label, Value=v, Order),\\n(SpyCloudExposure_CL | where TimeGenerated {TimeRange} | summarize v=dcount(email) | extend Label=\\\"Unique Emails\\\", Order=2 | project Label, Value=v, Order),\\n(SpyCloudExposure_CL | where TimeGenerated {TimeRange} | summarize v=dcount(email_domain) | extend Label=\\\"Unique Domains\\\", Order=3 | project Label, Value=v, Order),\\n(SpyCloudExposure_CL | where TimeGenerated {TimeRange} | where severity == 25 | summarize v=count() | extend Label=\\\"Critical Exposures\\\", Order=4 | project Label, Value=v, Order),\\n(SpyCloudExposure_CL | where TimeGenerated {TimeRange} | where isnotempty(password_plaintext) | summarize v=count() | extend Label=\\\"Plaintext Passwords\\\", Order=5 | project Label, Value=v, Order)\\n| summarize Value=max(Value) by Label, Order\\n| order by Order asc\", \"size\": 4, \"title\": \"Exposure Overview\", \"queryType\": 0, \"visualization\": \"tiles\", \"tileSettings\": {\"titleContent\": {\"columnMatch\": \"Label\", \"formatter\": 1}, \"leftContent\": {\"columnMatch\": \"Value\", \"formatter\": 12, \"formatOptions\": {\"palette\": \"auto\"}}}}, \"name\": \"exposureTiles\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudExposure_CL\\n| where TimeGenerated {TimeRange}\\n| extend SeverityLabel = case(severity == 25, \\\"Critical\\\", severity == 20, \\\"High\\\", severity == 5, \\\"Medium\\\", severity == 2, \\\"Low\\\", \\\"Other\\\")\\n| summarize Count=count() by bin(TimeGenerated, 1d), SeverityLabel\\n| order by TimeGenerated asc)\", \"size\": 0, \"title\": \"Exposure Trend by Severity (Daily)\", \"queryType\": 0, \"visualization\": \"areachart\", \"chartSettings\": {\"seriesLabelSettings\": [{\"seriesName\": \"Critical\", \"color\": \"redBright\"}, {\"seriesName\": \"High\", \"color\": \"orange\"}, {\"seriesName\": \"Medium\", \"color\": \"yellow\"}, {\"seriesName\": \"Low\", \"color\": \"blue\"}]}}, \"name\": \"exposureTrend\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudExposure_CL\\n| where TimeGenerated {TimeRange} and isnotempty(email)\\n| summarize Exposures=count(), MaxSeverity=max(severity), PlaintextPWs=countif(isnotempty(password_plaintext)), DistinctSources=dcount(source_id), LatestExposure=max(TimeGenerated) by email\\n| extend RiskLevel = case(MaxSeverity == 25, \\\"CRITICAL\\\", MaxSeverity == 20, \\\"HIGH\\\", MaxSeverity == 5, \\\"MEDIUM\\\", \\\"LOW\\\")\\n| top 25 by MaxSeverity desc, Exposures desc\\n| project User=email, RiskLevel, Exposures, PlaintextPWs, DistinctSources, LatestExposure)\", \"size\": 0, \"title\": \"Top 25 Exposed Users\", \"queryType\": 0, \"visualization\": \"table\", \"gridSettings\": {\"sortBy\": [{\"itemKey\": \"Exposures\", \"sortOrder\": 2}]}}, \"name\": \"topExposedUsers\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudExposure_CL\\n| where TimeGenerated {TimeRange} and isnotempty(email_domain)\\n| summarize ExposureCount=count(), UniqueUsers=dcount(email), CriticalCount=countif(severity == 25) by tostring(email_domain)\\n| order by ExposureCount desc\\n| take 20)\", \"size\": 1, \"title\": \"Exposures by Email Domain\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"exposuresByDomain\"}, {\"type\": 3, \"content\": {\"version\": \"KqlItem/1.0\", \"query\": \"union isfuzzy=true\\n(datatable(d:string)[]),\\n(SpyCloudExposure_CL\\n| where TimeGenerated {TimeRange} and isnotempty(source_id)\\n| summarize Records=count(), UniqueUsers=dcount(email) by tostring(source_id)\\n| order by Records desc\\n| take 15)\", \"size\": 1, \"title\": \"Top Exposure Sources by Record Count\", \"queryType\": 0, \"visualization\": \"barchart\"}, \"name\": \"topSources\"}], \"templateMetadata\": {\"version\": \"1.0\", \"connectorAssociation\": [{\"connectorId\": \"SpyCloudExposure\", \"dataTypes\": [\"SpyCloudExposure_CL\"]}]}}",
+        "version": "1.0",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "category": "sentinel"
+      }
+    }
+  ]
+}
